@@ -173,6 +173,30 @@ class CSSBundle(Bundle):
     mime_type = 'text/css'
     bundle_type = 'css'
 
+    def include_paths(self):
+        seen = set()
+        rv = []
+        def add_paths(paths):
+            for path in paths:
+                if path not in seen:
+                    rv.append(path)
+                    seen.add(path)
+
+        add_paths(os.path.join(path, 'css') for path in media_directories())
+        add_paths(os.path.dirname(path) for path in self.paths())
+        if 'include_paths' in self.config:
+            add_paths(self.path(p) for p in self.config['include_paths'])
+        return rv
+
+    def modified_since(self, since):
+        # Update modified_since to check all files in our paths.  This is
+        # needed to handle the SASS include directive.
+        for path in self.include_paths():
+            for child in os.listdir(path):
+                if os.path.getmtime(os.path.join(path, child)) > since:
+                    return True
+        return False
+
     def build_contents(self):
         source_css = self.concatinate_files()
         if settings.STATIC_MEDIA_COMPRESSED:
@@ -182,19 +206,8 @@ class CSSBundle(Bundle):
         cmdline = [
             'sass', '-t', sass_type, '-E', 'utf-8', 
         ]
-        load_paths = [
-            os.path.join(path, 'css')
-            for path in media_directories()
-        ]
-        load_paths.extend(os.path.dirname(path) for path in self.paths())
-        if 'include_paths' in self.config:
-            load_paths.extend(self.path(p)
-                              for p in self.config['include_paths'])
-        seen_paths = set()
-        for path in load_paths:
-            if path not in seen_paths:
-                cmdline.extend(['--load-path', path])
-                seen_paths.add(path)
+        for path in self.include_paths():
+            cmdline.extend(['--load-path', path])
         cmdline.extend(['--scss', '--stdin'])
         return utils.run_command(cmdline, stdin=source_css)
 
