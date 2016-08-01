@@ -1,0 +1,18 @@
+<h2>{{ title }}</h2>
+{{ description|safe }}
+{% if examples %}
+<div class="styleGuide-exampleBox">
+  <h3 class="styleGuide-exampleBoxHeader">{% if examples|length == 1 %}Example{% else %}Examples{% endif %}</h3>
+  <pre class="styleGuide-exampleSource">{{ example_source }}</pre>
+  <div class="styleGuide-examples">
+    {% for example in examples %}
+    <div class="styleGuide-example">
+      {% if example.name %}
+      <h3>{{ example.name }}{% if example.description %}<span class="styleGuide-exampleDescription">{{ example.description }}</span>{% endif %}</h3>
+      {% endif %}
+      {{ example.markup|safe }}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

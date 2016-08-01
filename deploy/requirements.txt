@@ -49,6 +49,7 @@ rauth==0.4.12
 markdown==2.6.5
 -e git+https://github.com/pculture/babelsubs.git#egg=babelsubs
 -e git+https://github.com/pculture/unilangs.git#egg=unilangs
+-e git+https://github.com/pculture/pykss.git#egg=pykss
 pytz==2012f
 PyJWT==1.4.0
 pygal==2.0.11

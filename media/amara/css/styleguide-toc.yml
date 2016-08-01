@@ -1,0 +1,7 @@
+# Table of contents for our style guide
+#
+# This file is formatted as a YAML list.  Each item is one of the following:
+#  - Reference to a style guide section
+#  - Nested list containing a header, followed by more items
+- buttons
+- dropdownFilter

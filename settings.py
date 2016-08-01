@@ -205,6 +205,7 @@ INSTALLED_APPS = (
     'search',
     'staff',
     'staticmedia',
+    'styleguide',
     'teams',
     'testhelpers',
     'thirdpartyaccounts',
@@ -423,6 +424,7 @@ MEDIA_BUNDLES = {
             'amara/js/dropdownFilter.js',
             'amara/js/videoPage.js',
             'amara/js/main.js',
+            'amara/js/styleGuide.js',
         ],
     },
     "base.css": {
