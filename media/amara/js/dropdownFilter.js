@@ -20,17 +20,21 @@
 
 (function($) {
 
-$.behaviors('select.dropdown', dropdown);
+$.behaviors('.dropdownFilter', dropdownFilter);
 
-function dropdown(select) {
+function dropdownFilter(select) {
     select = $(select);
-    var options = { theme: "bootstrap" };
+    var options = {
+        theme: "bootstrap",
+    };
 
     if(select.data('languageOptions')) {
         options.data = languageChoiceData(select);
     }
-    if(select.hasClass('nosearchbox')) {
+    if(select.data('nosearchbox')) {
         options.minimumResultsForSearch = Infinity;
+    } else {
+        options.minimumResultsForSearch = 8;
     }
     select.select2(options);
 }

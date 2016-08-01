@@ -420,7 +420,7 @@ MEDIA_BUNDLES = {
             'src/js/third-party/behaviors.js',
             'amara/js/_plugins.js',
             'amara/js/ajaxForm.js',
-            'amara/js/dropdown.js',
+            'amara/js/dropdownFilter.js',
             'amara/js/videoPage.js',
             'amara/js/main.js',
         ],
