@@ -3,17 +3,26 @@
 // Used to provide a clickable action to the user.  These should typically be used for things that change state in some way.  Use `<a>` tags for
 // simple navigation.
 //
-// .btn-default  - Use for a call-to-action button.  Displayed with a plum color.
-// .btn-primary  - Use for other buttons.  Displayed with the primary link color
-// .btn-lg       - Large button
-// .btn-md       - Medium button
-// .btn-sm       - Small button
-// .btn-xs       - Extra-small button
-// .btn-block    - Size the button to take all the available width
+//
+// .small - Small sized button
+// .cta  - Call-to-action button.  Displayed with a plum color and full-width.  A typical use for this is the buttons to create subtitles
 //
 // Example:
 // <button class="button $modifier_class">Click me</button>
 //
 // Styleguide buttons
 
-// Note: we actually use bootstrap to implement these.  This file only exists to provide a KSS comment for the styleguide.
+// We leverage bootstrap to handle the button CSS
+.button {
+  @extend .btn;
+  @extend .btn-primary;
+
+  &.small {
+    @extend .btn-xs;
+  }
+
+  &.cta {
+    @extend .btn-block;
+    @extend .btn-default;
+  }
+}
