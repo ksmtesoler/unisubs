@@ -5,10 +5,10 @@
 // dropdownFilters are often used to select a language.  Use the `data-language-options` attribute to populate the list with language data.  The possibilities
 // are:
 //
-//   - `any` -- "Any language" option
-//   - `my` -- "My languages" section
-//   - `popular` -- "Popular languages" section
-//   - `all` -- "All languages" section
+//   - `any` -- Any language option
+//   - `my` -- My languages section
+//   - `popular` -- Popular languages section
+//   - `all` -- All languages section
 //
 // By default, we display a searchbox if there are more than 8 options.  Use the nosearchbox if you want to force it to always be disabled.
 //
@@ -21,6 +21,7 @@
 //   <option>Bar</option>
 // </select>
 //
+// Example:
 // <select class="dropdownFilter" data-language-options="my all" style="width: 100%"></select>
 //
 // Styleguide dropdownFilter

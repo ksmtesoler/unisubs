@@ -29,7 +29,7 @@ CSS_ROOT = os.path.join(settings.STATIC_ROOT, 'amara/css')
 TOC_PATH = os.path.join(CSS_ROOT, 'styleguide-toc.yml')
 
 # Single example in a section
-StyleGuideExample = namedtuple('StyleGuideExample', 'name description markup')
+StyleGuideExample = namedtuple('StyleGuideExample', 'source styles')
 # TOC item that refers to a single section
 StyleGuideTOCItem = namedtuple('StyleGuideTOCItem', 'title section_id')
 # TOC item that refers to a list of subitems
@@ -60,26 +60,15 @@ class StyleGuideSection(object):
         self.description = markdown(description.strip())
 
     def setup_examples(self, pykss_section):
-        self.example_source = pykss_section.example_source
-        self.examples = []
-        if not pykss_section.example:
-            return
-        multiple_examples = len(pykss_section.modifiers) > 0
-
-        name = 'Default styling' if multiple_examples else ''
-        self.examples.append(
-            StyleGuideExample(name, '', pykss_section.example))
-
-        for modifier in pykss_section.modifiers:
-            self.examples.append(
-                StyleGuideExample(modifier.name, modifier.description,
-                                  modifier.example))
+        self.examples = [
+            StyleGuideExample(example.template, example.styles)
+            for example in pykss_section.examples
+        ]
 
     def render_content(self):
         self.content = render_to_string('styleguide/section.html', {
             'title': self.title,
             'description': self.description,
-            'example_source': self.example_source,
             'examples': self.examples,
         })
 
