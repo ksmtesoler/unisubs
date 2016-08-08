@@ -308,8 +308,9 @@ def video_comment_form(request, video):
         # reset the comment form to a fresh state
         comment_form = CommentForm(video)
 
-    response_renderer = AJAXResponseRenderer(request,
-                                             clear_form=comment_form.is_valid())
+    response_renderer = AJAXResponseRenderer(request)
+    if comment_form.is_valid():
+        response_renderer.clear_form()
     response_renderer.replace(
         '#video_comments', 'future/videos/tabs/comments.html', {
             'video': video,
