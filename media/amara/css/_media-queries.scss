@@ -33,4 +33,13 @@
       z-index: 10;
     }    
   }
+  #footernav {
+    ul {
+      float: none;
+      display: inline-block;
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+  }
 }

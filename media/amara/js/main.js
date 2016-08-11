@@ -20,4 +20,11 @@ $(document).on('ready', function(){
   $('.constrain').on('click', function() {
     $(this).addClass('opened');
   });
+
+  $('[data-href]').on('click', function(e) {
+    e.preventDefault();
+    var href = $(this).attr('data-href');
+    window.location.href = href;
+  });
+  $('[data-toggle="popover"]').popover();
 });

@@ -1,10 +1,20 @@
 .ct-label {
   color: $text-color;
+  fill: $text-color;
 }
 
 .ct-chart-line {
   .ct-label {
     font-size: 13px;
+    &.ct-horizontal {
+      text-anchor: middle;
+      &:first-child {
+        text-anchor: start;
+      }
+      &:nth-child(9) {
+        text-anchor: end;
+      }
+    }
   }
 }
 

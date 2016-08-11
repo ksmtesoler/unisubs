@@ -11,6 +11,11 @@
 @import '_dropdownFilter';
 @import '_video_details';
 @import '_styleGuide';
+@import '_video_overview';
+@import '_subtitle_management';
+@import '_video_subtitles';
+
+
 
 
 /* -----------------------------------------
@@ -105,7 +110,36 @@ DOM
 
 #page-content {}
 
-#page-footer {}
+#page-footer {
+  padding: 40px 0;
+  background-color: $gray-lighter;
+  ul {
+    list-style-type: none;
+  }
+}
+
+#footernav {
+  ul {
+    float: left;
+    line-height: 25px;
+    padding-left: 25px;
+    font-weight: 300;
+  }
+}
+
+#footer-terms {
+  ul {
+    padding-left: 0;
+    li {
+      font-weight: 300;
+      padding: 14px;
+      float: left;
+      a {
+        color: $lime-dark;
+      }
+    }
+  }
+}
 
 #messages {
   padding-top: 20px;
@@ -240,11 +274,20 @@ Utility Classes
     position: relative;
     width: auto;
     height: auto;
-    margin: 0 auto 10px 0;
+    margin: 0 20px 10px 0;
     overflow: hidden;
     box-sizing: border-box;
     img {
       @extend .img-responsive;
+    }
+    footer {
+      height: 50px;
+      display: table;
+      p {
+        display: table-cell;
+        vertical-align: middle;
+        padding: 0 10px;
+      }
     }
     .caption {
       position: absolute;
@@ -307,17 +350,17 @@ Utility Classes
         min-height: 145px;
       }
     }
+    .btn {
+      margin-bottom: 8px;
+    }
   }
 }
-
 .total {
   font-family: $font-family-sans-serif;
 }
-
 .avatar {
   width: 30px;
 }
-
 .inprogress {
   display: inline-block;
   opacity: 0.5;
@@ -325,6 +368,14 @@ Utility Classes
 .completed {
   display: inline-block;
   opacity: 1;
+}
+.actions {
+  position: absolute;
+  top: -30px;
+  right: 0;
+}
+.gray-light {
+  background-color: $gray-light;
 }
 
 /* -----------------------------------------
@@ -360,9 +411,13 @@ Lists
           width: 40px;
         }
         i {
-          font-size: 22px;
+          font-size: 1.5em;
           margin-right: 10px;
+          color: $link-color;
         }
+      }
+      a {
+        color: #222626;
       }
     }
   }
@@ -511,6 +566,10 @@ Bootstrap Override
   thead {
     display: none;
   }
+  th {
+    border-top: 1px solid $gray-light;
+    border-bottom: 1px solid $gray-light;
+  }
   tbody {
     tr {
       td {
@@ -533,6 +592,16 @@ Bootstrap Override
       }
     }
   }
+
+  &.table-condensed {
+    tbody {
+      tr {
+        td {
+          padding: 3px;
+        }
+      }
+    }
+  }
 }
 
 
@@ -546,7 +615,6 @@ ul.nav-table {
   li {
     display: table-row;
     &:hover {
-      background-color: rgba(0,0,0,.05);
       cursor: pointer;
     }
     .td {
@@ -623,6 +691,44 @@ ul.nav-tabs {
   padding: 20px 0;
 }
 
+.tab-content {
+  position: relative;
+}
+
+.checkbox {
+  label {
+    padding-left: 0;
+  }
+  input[type="checkbox"] {
+    display:none;
+    margin-left: 0;
+  }
+  input[type="checkbox"] + label span {
+      display:inline-block;
+      width:16px;
+      height:16px;
+      margin:-1px 4px 0 0;
+      vertical-align:middle;
+      background: transparent;
+      border: 1px solid $gray-light;
+      border-radius: 2px;
+      cursor:pointer;
+  }
+  input[type="checkbox"]:checked + label span {
+    background: $gray-light;
+    &:after {
+      font-family: 'amara';
+      content: "\ea10";
+      display: block;
+      position: absolute;
+      top: 7px;
+      left: 4px;
+      z-index: 10;
+      color: #fff;
+      font-size: 9px;
+    }
+  }
+}
 
 /* -----------------------------------------
 Media Queries

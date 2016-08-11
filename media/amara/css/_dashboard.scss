@@ -176,12 +176,29 @@ body.dashboard {
         align-items: center;
         justify-content: flex-start;
         flex-wrap: nowrap;
+        &:nth-child(odd) {
+          border-right: 1px solid $gray-light;
+          span {
+            &:last-child {
+              margin: auto;
+              margin-right: 5px;
+            }
+          }
+        }
+        &:nth-child(even) {
+          span {
+            &:last-child {
+              margin: auto;
+              margin-right: 5px;
+            }
+            &:first-child {
+              margin: 0;
+              margin-left: 5px;
+            }
+          }
+        }
         span {
           display: inline-block;
-          &:last-child {
-            margin: auto;
-            margin-right: 15px;
-          }
         }
       }
     }
@@ -192,7 +209,6 @@ body.dashboard {
   .grid {
     .card {
       width: 260px;
-      margin: 0 20px 10px 0;
       background-color: $gray-base;
       color: #ffffff;
       &:after {
@@ -328,6 +344,14 @@ Responsive
       }
     }
   }
+  #big-picture {
+    .ct-chart, .stat {
+      width: 100%;
+    }
+    .stat {
+      height: 150px;
+    }    
+  }
 
   #recently_added {
     .grid {
@@ -341,16 +365,5 @@ Responsive
         }
       }
     }
-  }
-}
-
-@media (max-width: 550px) {
-  #big-picture {
-    .ct-chart, .stat {
-      width: 100%;
-    }
-    .stat {
-      height: 150px;
-    }    
   }
 }

@@ -1,0 +1,262 @@
+#subtitle_management {
+  .filters {
+    h1 {
+      &:first-child {
+        margin-bottom: 20px;
+      }
+    }
+    .form-group {
+      margin-bottom: 0;
+      position: relative;
+      i {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: $gray-light;
+        font-size: 21px;
+      }
+    }
+    h3 {
+      background: $gray-light;
+      padding: 10px;
+      font-weight: 300;
+    }
+  }
+
+  .filter-list {
+    padding-left: 10px;
+    list-style-type: none;
+    li {
+      padding: 2px 0;
+    }
+    .checkbox {
+      margin: 0;
+    }
+  }
+
+  .table.subtitle-table {
+    margin: 20px 0;
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    .checkbox-td {
+      margin-top: 0;
+      margin-bottom: 0;
+      width: 25px;
+      display:table-cell;
+      vertical-align: top;
+      .checkbox {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+    }
+    tr {
+      padding: 10px 0;
+      th {
+        &.checkbox {
+          input[type="checkbox"] {
+            margin: 4px 0 4px 0;
+          }
+        }
+      }
+      td {
+        vertical-align: top;
+        padding: 12px 8px;
+        &.checkbox {
+          input[type="checkbox"] {
+            margin: 0;
+          }
+        }
+        &.thumb {
+          width:30%;
+        }
+      }
+    }
+  }
+
+  .subtitle-actions {
+    padding: 5px 0;
+    a {
+      padding-right:20px;
+      i {
+        font-size: 20px;
+        color: $gray;
+      }
+    }
+  }
+
+  .select-border {
+    position:relative;
+    width: 150px;
+    select {
+      &.form-control {
+        position: relative;
+        height: 25px;
+        padding: 0 12px;
+      }
+    }
+    .arrow-down {
+      position: absolute;
+      right: 7px;
+      top: 10px;
+      z-index: 6;
+    }
+    &:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 25px;
+      height: 25px;
+      background: $gray-light;
+      z-index: 5;
+      border-radius: $border-radius-base $border-radius-base 0 0;
+    }
+  }
+  .arrow-down {
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fff;
+  }
+  .action-bar {
+    padding: 30px 0;
+    text-align: center;
+    background: $gray-light;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    .btn, a {
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+  }
+  .btn-transparent {
+    background: transparent;
+    border: 1px solid $plum;
+    color: $plum;
+  }
+  .btn-no-border {
+    background: transparent;
+    border: none;
+    color: $text-color;
+  }
+  .pagination {
+    li {
+      a {
+        color: $text-color;
+        padding: 5px 12px;
+      }
+      &.active {
+        a {
+          color: #fff;
+        }
+      }
+    }
+  }
+  .sub-edit-modal {
+    .modal-dialog {
+      width: 400px;
+      color: $gray;
+    }
+    .modal-header {
+      border-bottom: 0;
+      text-align: left;
+      padding: 10px;
+      h4 {
+        text-align: left;
+        font-weight: bold;
+        font-size: 15px;
+      }
+      .close {
+        font-weight: 300;
+        position: absolute;
+        top: 5px;
+        right: 7px;
+        font-size: 23px;
+      }
+    }
+    .modal-title {}
+    .modal-body {
+      padding: 10px;
+    }
+    .modal-content {
+      background: $gray-lighter;
+      padding: 10px;
+    }
+    .modal-footer {
+      border-top: 0;
+    }
+    .searchbar {
+      &:after {
+        display: none;
+      }
+      .add, .remove {
+        @extend .close;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 10;
+        font-weight: normal;
+        display: none;
+      }
+      .add, .remove {
+        &.active {
+          display: block;
+        }
+      }
+    }
+    p {
+      margin-bottom: 0;
+    }
+    .btn {
+      padding: 7px 12px;
+    }
+    .btn-no-border {
+      color: $plum;
+    }
+    input, .easy-autocomplete-input {
+      margin: 7px 0;
+    }
+    ::-webkit-input-placeholder {
+       color: $gray-light;
+    }
+    :-moz-placeholder { /* Firefox 18- */
+       color: $gray-light;  
+    }
+    ::-moz-placeholder {  /* Firefox 19+ */
+       color: $gray-light;  
+    }
+    :-ms-input-placeholder {  
+       color: $gray-light;  
+    }
+  }
+}
+
+.popover.top {
+  background-color: $gray;
+  .popover-title, .popover-content {
+    background: $gray;
+    border: none;
+    border-radius: 2px;
+    color: #fff;
+  }
+  .popover-title {
+    padding: 3px 3px 0 3px; 
+  }
+  .popover-content {
+    padding: 0 3px 3px 3px;
+  }
+  .arrow {
+    &:after {
+      border-top-color: $gray;
+    }
+  }
+}
+
+

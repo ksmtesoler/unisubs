@@ -42,7 +42,8 @@
   }
   .select2-search--dropdown {
     .select2-search__field {
-      border-radius: none;
+      border-radius: 0;
+      box-shadow: none;
       border: none;
       border-bottom: 1px solid $gray-light;
     }

@@ -25,7 +25,9 @@ i {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
+.icon-checkmark:before {
+    content: "\ea10";
+}
 .icon-approve:before {
     content: "\e900";
 }

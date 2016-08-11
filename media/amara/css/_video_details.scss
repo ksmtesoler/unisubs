@@ -13,11 +13,6 @@
   .player {
     min-height: 350px;
   }
-  .actions {
-    position: absolute;
-    top: -30px;
-    right: 0;
-  }
   #video_info {
     position: relative;
     padding-top: 30px;
@@ -72,6 +67,11 @@
       font-weight: bold;
     }
   }
+}
+.videoDetails-assignments {
+  // Temp fix for responsive embedded players
+  background-color: #ffffff;
+  min-height: 500px;
 }
 
 
