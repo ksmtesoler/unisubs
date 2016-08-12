@@ -8,15 +8,15 @@
   <dd class="constrain">{{ video.description|linebreaks }}</dd>
   {% endif %}
 
-  {% if video.primary_audio_language_code %}
-  <dt>{% trans "Language:" %}</dt>
-  <dd>{{ video.get_primary_audio_language_code_display }}</dd>
-  {% endif %}
-
   {% for entry in metadata %}
   <dt>{{ entry.label }}</dt>
   <dd>{{ entry.content }}</dd>
   {% endfor %}
+
+  {% if video.primary_audio_language_code %}
+  <dt>{% trans "Language:" %}</dt>
+  <dd>{{ video.get_primary_audio_language_code_display }}</dd>
+  {% endif %}
 
   {% if team_video %}
   <dt>{% trans "Team:" %}</dt>
