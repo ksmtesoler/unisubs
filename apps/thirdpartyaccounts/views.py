@@ -18,7 +18,6 @@
 import base64
 from urllib2 import URLError
 
-import facebook.djangofb as facebook
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login
@@ -145,8 +144,9 @@ def twitter_login_done(request, confirmed=True):
 
 def _facebook():
     '''Return a pyfacebook Facebook object with our current API information.'''
-    return facebook.Facebook(settings.FACEBOOK_API_KEY, settings.FACEBOOK_SECRET_KEY,
-                             app_id=settings.FACEBOOK_APP_ID, oauth2=True)
+    #return facebook.Facebook(settings.FACEBOOK_API_KEY, settings.FACEBOOK_SECRET_KEY,
+    #                         app_id=settings.FACEBOOK_APP_ID, oauth2=True)
+    return None                         
 
 
 def _fb64_encode(s):

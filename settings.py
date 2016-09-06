@@ -203,6 +203,7 @@ INSTALLED_APPS = (
     'mysqltweaks',
     'profiles',
     'search',
+    'social.apps.django_app.default',
     'staff',
     'staticmedia',
     'teams',
@@ -302,7 +303,8 @@ AUTHENTICATION_BACKENDS = (
    'auth.backends.CustomUserBackend',
    'externalsites.auth_backends.OpenIDConnectBackend',
    'thirdpartyaccounts.auth_backends.TwitterAuthBackend',
-   'thirdpartyaccounts.auth_backends.FacebookAuthBackend',
+   # 'thirdpartyaccounts.auth_backends.FacebookAuthBackend',
+   'social.backends.facebook.FacebookOAuth2',
    'auth.backends.OpenIdBackend',
    'django.contrib.auth.backends.ModelBackend',
 )
@@ -705,6 +707,7 @@ TMP_FOLDER = "/tmp/"
 
 SOUTH_MIGRATION_MODULES = {
     'captcha': 'captcha.south_migrations',
+    'default': 'social.apps.django_app.default.south_migrations',
 }
 
 from task_settings import *

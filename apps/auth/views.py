@@ -18,7 +18,6 @@
 import base64
 from urllib2 import URLError
 
-import facebook.djangofb as facebook
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import (
