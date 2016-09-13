@@ -1,0 +1,28 @@
+// Tables
+.table {
+  thead {
+
+  }
+  tbody {
+    tr {
+      td {
+        border: none;
+        vertical-align: middle;
+      }      
+    }
+  }
+
+  &.table-striped {
+    tr {
+      &:nth-of-type(odd) {
+        background: #f0f1f2;
+      }
+      &:nth-of-type(even) {
+        background: #fff;
+      }
+      td {
+
+      }
+    }
+  }
+}

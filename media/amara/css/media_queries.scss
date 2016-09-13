@@ -15,14 +15,14 @@
 
 @media(max-width: 768px) {
 
-  #topnav {
+  .topNav {
     .dropdown {
       .dropdown-toggle {
         padding: 0 0 0 10px;
       }
     }
   }
-  #mainnav {
+  .mainNav {
     .container {
       padding: 0;
     }
@@ -33,7 +33,7 @@
       z-index: 10;
     }    
   }
-  #footernav {
+  .footerNav {
     ul {
       float: none;
       display: inline-block;

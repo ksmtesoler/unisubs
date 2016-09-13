@@ -1,0 +1,76 @@
+// Buttons
+//
+// Used to provide a clickable action to the user.  These should typically be used for things that change state in some way.  Use `<a>` tags for
+// simple navigation.
+//
+//
+// .small - Small sized button
+// .cta  - Call-to-action button.  Displayed with a plum color and full-width.  A typical use for this is the buttons to create subtitles
+//
+// Example:
+// <button class="button $modifier_class">Click me</button>
+//
+// Styleguide buttons
+
+// We leverage bootstrap to handle the button CSS
+
+
+.btn {
+  border: none;
+  font-family: $font-family-sans-serif;
+  font-size: 15px;
+  &.btn-xs {
+    font-size: 13px;
+    font-weight: 300;
+  }
+  i {
+    margin-right: 9px;
+  }
+  &:hover {
+    color: inherit;
+  }
+  &.btn-primary, &.btn-default {
+    &:hover {
+      color: #ffffff;
+    }
+  }
+}
+
+
+
+.button {
+  display: inline-block;
+  margin-bottom: 0;
+  padding: 7px 30px;
+  font-family: "Open Sans",sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+  background-image: none;
+  border: none;
+  white-space: nowrap;
+  line-height: 1.42857;
+  border-radius: 4px;
+  user-select: none;
+  touch-action: manipulation;
+  cursor: pointer;
+  color: #fff;
+  background-color: $teal;
+  &:hover {
+    color: #fff;
+    background-color: darken($teal, 10%);
+  }
+  &.small {
+    @extend .btn-xs;
+  }
+
+  &.cta {
+    color: #fff;
+    background-color: $brand-primary;
+    &:hover {
+      color: #fff;
+      background-color: darken($teal, 10%);
+    }
+  }
+}

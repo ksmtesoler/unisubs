@@ -1,0 +1,79 @@
+// Navigation
+.topNav {
+  background-color: $gray-lighter;
+  height: 30px;
+  margin-bottom: 10px;
+  .dropdown {
+    .dropdown-toggle {
+      padding: 0 10px 0 0;
+      line-height: 30px;
+      color: $text-color;
+    }
+  }
+  .dropdown-menu {
+    right: 10px;
+    left: -75px;
+  }
+  
+  .topNav-nav {
+    margin-right: 0;
+    float: right;
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style: none;
+    >.topNav-nav-item {
+      display: inline-block; 
+      .topNav-nav-brand {
+        padding: 5px 10px;
+      }
+    }
+    img {
+      display: inline-block;
+      width:20px;
+      height:20px;
+      margin-right: 10px;
+    }
+  }
+}
+
+.mainNav {
+  background-color: $gray-lighter;
+  height: 50px;
+  .navbar {
+    border: none;
+  }
+  .navbar-nav,
+  .mainNav-nav {
+    li {
+      a {
+        color: $text-color;
+        padding: 0 15px;
+        line-height: 50px;
+        font-weight: 300;
+      }
+      &.active {
+        a {
+          font-weight: bold;
+        }
+      }
+    }
+  }
+  .navbar-brand {
+    padding: 0 15px 0 0;
+    line-height: 50px;
+    font-size: 14px;
+    color: $text-color;
+    font-weight: 600;
+    >img {
+      display: inline-block;
+      width:40px;
+      margin-right: 10px;
+      border: 1px solid $gray-light;
+    }
+  }
+  .navbar-toggle {
+    .icon-bar {
+      background-color: $gray-dark;
+    }
+  }
+}

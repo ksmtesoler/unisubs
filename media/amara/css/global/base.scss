@@ -1,0 +1,46 @@
+html {}
+
+body {}
+
+main {}
+
+section {
+  padding: 30px 0px 30px 0px;
+}
+
+a {
+  color: $brand-primary;
+  text-decoration: none;
+  &:hover,
+  &:focus,
+  &:active {
+    outline: none;
+    text-decoration: none;
+  }
+}
+
+hr {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+
+// Content Spacing
+.content {
+  position: relative;
+  padding: 10px 0;
+  margin: 0;
+  &.content-right {
+    padding-right: 0px;
+    padding-left: 10px;
+  }
+  &.content-left {
+    padding-left: 0px;
+    padding-right: 10px;
+  }
+}
+
+.sectionHeader {
+  height: 60px;
+}

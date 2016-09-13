@@ -1,0 +1,32 @@
+// pageFooter
+
+.pageFooter {
+  padding: 40px 0;
+  background-color: $gray-lighter;
+  ul {
+    list-style-type: none;
+  }
+}
+
+.footerNav {
+  ul {
+    float: left;
+    line-height: 25px;
+    padding-left: 25px;
+    font-weight: 300;
+  }
+}
+
+.footerTerms {
+  ul {
+    padding-left: 0;
+    li {
+      font-weight: 300;
+      padding: 14px;
+      float: left;
+      a {
+        color: $lime-dark;
+      }
+    }
+  }
+}

@@ -1,0 +1,89 @@
+// Navigation
+ul.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  li {
+    min-height: 1.75em;
+    line-height: 1.75em;
+    a {
+      color: $text-color;
+      &:hover, &:focus, &:active {
+        color: $teal;
+      }
+    }
+  }
+  &.horizontal {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    li {
+      display: inline-block;
+      margin: 0 8px;
+    }
+  }
+}
+
+
+ul.nav-table {
+  display: table;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 35px;
+  width: 100%;
+  li {
+    display: table-row;
+    &:hover {
+      background-color: rgba(0,0,0,.05);
+      cursor: pointer;
+    }
+    .td {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 8px;
+    }
+    a {
+      color: $gray-base;
+      padding: 0;
+    }
+  }
+}
+
+ul.nav-stacked {
+  padding-left: 10px;
+  li {
+    position: relative;
+    &:after {
+      position: absolute;
+      display: block;
+      right: 30px;
+      top: 0;
+      content: "\e901";
+      font-family: 'amara';
+      font-size: 17px;
+      color: $turquoise;
+    }
+  }
+  h1,h2,h3,h4,h5,h6 {
+    a {
+      color: $text-color;
+      &:hover, &:focus, &:active {
+        color: $turquoise;
+      }
+    }
+  }
+}
+
+.pagination {
+  li {
+    a {
+      color: $text-color;
+      padding: 5px 12px;
+    }
+    &.active {
+      a {
+        color: #fff;
+      }
+    }
+  }
+}

@@ -1,8 +1,8 @@
 /* -----------------------------------------
 Dashboard Sections
 ----------------------------------------- */
-body.dashboard {
-  section {
+#dashboard {
+  .pageSection {
     &:nth-of-type(even) {
       background: #f8f8f8;
       border-top: 1px solid $gray-light;
@@ -12,24 +12,8 @@ body.dashboard {
 }
 
 #my_assignments {
-  .card {
-    width: 260px;
-    &:last-child {
-      margin-right: 0;
-    }
-    footer {
-      height: 50px;
-      display: table;
-      p {
-        display: table-cell;
-        vertical-align: middle;
-        padding: 0 10px;
-        font-size: 12px;
-      }
-    }
-    .btn {
-      margin-bottom: 8px;
-    }
+  .assignmentCard {
+    margin-bottom: 10px;
   }
 }
 
@@ -206,8 +190,8 @@ body.dashboard {
 }
 
 #recently_added {
-  .grid {
-    .card {
+  .cardGrid {
+    .cardGrid-videoCard {
       width: 260px;
       background-color: $gray-base;
       color: #ffffff;
@@ -249,7 +233,7 @@ Responsive
 ----------------------------------------- */
 @media (max-width: 1200px) {
   #my_assignments {
-    .card {
+    .assignmentCard {
       width: 47%;
       margin: 0;
       &:nth-of-type(1) {
@@ -289,16 +273,14 @@ Responsive
   }
 
   #recently_added {
-    .grid {
-      .card {
-        width: 30%;
-        /* check browser support for nth-child */
-        &:nth-child(n+6) {
-          display: none;
-        }
-        &:last-child {
-          display: flex;
-        }
+    .videoCard {
+      width: 30%;
+      /* check browser support for nth-child */
+      &:nth-child(n+6) {
+        display: none;
+      }
+      &:last-child {
+        display: flex;
       }
     }
   }
@@ -306,8 +288,8 @@ Responsive
 @media(max-width: 900px){
   #newest_members {
     .users {
-      ul {
-        li {
+      .userList {
+        .userList-user {
           width: 100%;
         }
       }
@@ -315,8 +297,8 @@ Responsive
   }
 }
 @media(max-width: 768px){
-  body.dashboard {
-    section {
+  #dashboard {
+    .pageSection {
       // Switch background color variation at smaller screen sizes
       padding-top: 30px;
       padding-bottom: 30px;
@@ -336,7 +318,7 @@ Responsive
     }
   }
   #my_assignments {
-    .card {
+    .assignmentCard {
       width: 90%;
       margin: 50px auto;
       &:nth-of-type(1) {
@@ -354,15 +336,13 @@ Responsive
   }
 
   #recently_added {
-    .grid {
-      .card {
-        width: 100%;
-        &:nth-child(n+4) {
-          display: none;
-        }
-        &:last-child {
-          display: flex;
-        }
+    .videoCard {
+      width: 100%;
+      &:nth-child(n+4) {
+        display: none;
+      }
+      &:last-child {
+        display: flex;
       }
     }
   }

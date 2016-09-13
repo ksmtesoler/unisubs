@@ -1,0 +1,213 @@
+label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: inherit;
+}
+
+input, .easy-autocomplete input {
+  line-height: 30px;
+  width: 100%;
+  padding: 0 10px;
+  margin: 5px 0;
+  border: 1px solid $gray-light;
+  border-radius: $border-radius-base;
+}
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  &:focus {
+   outline: none;
+  }
+}
+.select {
+  position: relative;
+  cursor: pointer;
+  &:after {
+    content: "\e901";
+    display: inline-block;
+    position: relative;
+    font-family: 'amara' !important;
+    speak: none;
+    transform-origin: center;
+    transform: rotate(90deg);
+    @include transition();
+    pointer-events: none;
+  }
+}
+
+.selectBorder {
+  position:relative;
+  width: 150px;
+  margin-bottom: 20px;
+  select {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 25px;
+    padding: 0 12px;
+    color: #a9a9a9;
+    border: 1px solid #ccc;
+  }
+  &:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 25px;
+    height: 25px;
+    background: $gray-light;
+    z-index: 5;
+    border-radius: 0 $border-radius-base $border-radius-base 0;
+    pointer-events: none;
+  }
+  &:after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 7px;
+    top: 10px;
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fff;
+    z-index: 6;
+    pointer-events: none;
+  }
+}
+
+.searchbar {
+  position: relative;
+  &:after {
+    content: "\e905";
+    display: block;
+    position: absolute;
+    right: 15px;
+    top: 8px;
+    font-family: 'amara' !important;
+    speak: none;
+    text-transform: none;
+    font-size: 23px;
+    line-height: 1.2em;
+    color: $gray-light;
+  }
+}
+
+// Filters
+.filterList {
+  h3 {
+    background: $gray-light;
+    padding: 10px;
+    font-weight: 300;
+  }
+  ul {
+    padding-left: 10px;
+    list-style-type: none;
+    height: 100px;
+    overflow-y: auto;
+    li {
+      padding: 2px 0;
+    }
+  }
+
+  .filterList-select {
+    .select2-selection {
+      text-indent: 10px;
+    }
+    .select2-selection__rendered {
+      &:after {
+        top: -5px;
+      }
+    }
+  }
+}
+
+
+// Custom Checkboxes
+
+.checkbox {
+  margin: 0;
+  input[type="checkbox"] {
+    display: none;
+    margin-left: 0;
+    &+label {
+      span {
+        position: relative;
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
+        background: transparent;
+        border: 1px solid $gray-light;
+        border-radius: 16px;
+        cursor: pointer;
+        &:after {
+          font-family: 'amara';
+          display: block;
+          content: "";
+          position: absolute;
+          height: 10px;
+          width: 10px;
+          top: 3px;
+          left: 3px;
+          border-radius: 16px;
+          background-color: transparent;
+        }
+      }
+    }
+    &:checked {
+      &+label {
+        font-weight: 600;
+        span {
+          &:after {
+            background-color: $gray-light;
+          }
+        }
+      }
+    }
+  }
+  label {
+    min-height: 20px;
+    padding-left: 5px;
+    margin-bottom: 0;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  &.checkbox-check {
+    input[type="checkbox"] {
+      &+label {
+        span {
+          border-radius: 2px;
+        }
+      }
+      &:checked {
+        &+label {
+          span {
+            background-color: $gray-light;
+            &:after {
+              content: "\e909";
+              display: block;
+              position: absolute;
+              height: 18px;
+              line-height: 18px;
+              width: 18px;
+              top: 0;
+              left: 0;
+              text-align: center;
+              background-color: transparent;
+              color: #fff;
+              font-size: 10px;
+              text-align: center;
+            }
+          }
+        }
+      }
+    }
+  }
+}

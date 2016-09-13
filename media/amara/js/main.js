@@ -1,10 +1,3 @@
-//= require jquery
-//= require bootstrap
-//= require chartist
-//= require chartist-plugin-tooltip
-//= require EasyAutocomplete
-//= require select2
-
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });

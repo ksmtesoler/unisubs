@@ -2,7 +2,7 @@
 {% load url from future %}
 {% if user.is_authenticated %}
 {% cache-by-user future-top-panel %}
-<li class="dropdown">
+<li class="topNav-nav-item dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user }} <span class="caret"></span></a>
   <ul class="dropdown-menu">
     <li>

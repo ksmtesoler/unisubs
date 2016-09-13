@@ -397,15 +397,14 @@ API_DOCS_MODULES = [
 MEDIA_BUNDLES = {
     "amara.css": {
         "files": [
-            "amara/css/_util.scss",
+            "bower/chartist/dist/chartist.css",
             "bower/select2/dist/css/select2.css",
             "bower/select2-bootstrap-theme/dist/select2-bootstrap.css",
-            "bower/chartist/dist/chartist.css",
+            "bower/EasyAutocomplete/dist/easy-autocomplete.css",
+            "bower/EasyAutocomplete/dist/easy-autocomplete.themes.css",
+            "bower/bootstrap-sass/assets/stylesheets/_bootstrap.scss",
             "amara/css/main.scss",
         ],
-        "include_paths": [
-            'bower/bootstrap-sass/assets/stylesheets',
-        ]
     },
     "amara.js": {
         "files": [
@@ -419,7 +418,6 @@ MEDIA_BUNDLES = {
             'bower/underscore/underscore.js',
             # TODO: move this out of src once we don't need it for site.js
             'src/js/third-party/behaviors.js',
-            'amara/js/_plugins.js',
             'amara/js/ajaxForm.js',
             'amara/js/dropdownFilter.js',
             'amara/js/videoPage.js',
