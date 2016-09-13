@@ -70,7 +70,6 @@ class TeamWorkflow(object):
       All workflows should allow the user to change membership_policy and
       video_policy in their workflow settings page.
     """
-
     def __init__(self, team):
         self.team = team
 
@@ -122,6 +121,24 @@ class TeamWorkflow(object):
     def video_page_customize(self, request, video):
         """Add extra content to the video sidebar."""
         return DONT_OVERRIDE
+
+    def activity_type_filter_options(self):
+        """
+        Get possible activity type filter values
+
+        This is used on the activity page to populate the type dropdown.
+        """
+        return [
+            'video-added',
+            'comment-added',
+            'version-added',
+            'video-url-added',
+            'member-joined',
+            'member-left',
+            'video-deleted',
+            'video-url-edited',
+            'video-url-deleted',
+        ]
 
     # these can be used to customize the content in the project/language
     # manager pages
