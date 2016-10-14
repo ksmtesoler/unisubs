@@ -56,5 +56,5 @@ def lookup_team_workflow(video):
         return TeamWorkflow.get_workflow(team_video.team)
 
 # register default team workflows
-OldTeamWorkflow.register()
-SimpleTeamWorkflow.register()
+OldTeamWorkflow.register('O', 'default')
+SimpleTeamWorkflow.register('S', 'simple')
