@@ -22,7 +22,39 @@ var angular = angular || null;
 
     var module = angular.module('amara.SubtitleEditor.video.services', []);
 
-    module.factory('VideoPlayer', ["$rootScope", "SubtitleStorage", "EditorData", function($rootScope, SubtitleStorage, EditorData) {
+
+    module.factory('VideoData', ["$http", "EditorData", function($http, EditorData) {
+        var getVideoUpdateAPIURL = function(videoId) {
+            return ('/api/videos/' + videoId + '/');
+        };
+        function authHeaders() {
+            var rv = {};
+            for (var key in EditorData.authHeaders) {
+                var val = EditorData.authHeaders[key];
+                var utfVal = unescape(encodeURIComponent(val));
+               rv[key] = utfVal;
+            }
+            return rv;
+        }
+        return {
+            updateVideoDuration: function(duration) {
+		duration = Math.round(duration / 1000);
+		if ((isNaN(EditorData.video.duration)) || (Math.abs(duration - EditorData.video.duration) > 2)) {
+                    var url = getVideoUpdateAPIURL(EditorData.video.id);
+                    $http({
+                        method: 'PUT',
+                        headers: authHeaders(),
+                        url: url,
+                        data: {'duration': duration}
+                    }).then(function(response) {
+                        EditorData.video.duration = duration;
+                    });
+		}
+	    }
+        };
+    }]);
+
+    module.factory('VideoPlayer', ["$rootScope", "SubtitleStorage", "EditorData", "VideoData", function($rootScope, SubtitleStorage, EditorData, VideoData) {
         var videoURLs = [];
         var pop = null;
         var playing = false;
@@ -37,7 +69,14 @@ var angular = angular || null;
                 $rootScope.$emit(signalName, data);
             }
         }
-
+        function routeEvents() {
+	    $rootScope.$on("duration-change", function(event, d) {
+		VideoData.updateVideoDuration(d);
+	    });
+        }
+        function getDuration() {
+                return Math.round(pop.duration() * 1000);
+        }
         function handlePopcornEvents() {
             // Handle popcorn events
             pop.on('canplay', function() {
@@ -56,6 +95,7 @@ var angular = angular || null;
                 emitSignal('video-update');
             }).on('durationchange', function() {
                 emitSignal('video-update');
+                emitSignal('duration-change', getDuration());
             }).on('seeked', function() {
                 emitSignal('video-update');
             }).on('timeupdate', function() {
@@ -87,6 +127,7 @@ var angular = angular || null;
 			controls: false,
                     });
                 handlePopcornEvents();
+                routeEvents();
             },
             play: function() {
                 pop.play();
@@ -113,7 +154,7 @@ var angular = angular || null;
                 return Math.round(pop.currentTime() * 1000);
             },
             duration: function() {
-                return Math.round(pop.duration() * 1000);
+                return getDuration();
             },
             isPlaying: function() {
                 return playing;

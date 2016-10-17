@@ -472,11 +472,7 @@ class VideoSerializer(serializers.Serializer):
         )
         for field_name in simple_fields:
             if field_name in validated_data:
-                if field_name == "duration":
-                    if not getattr(video, field_name):
-                        setattr(video, field_name, validated_data[field_name])
-                else:
-                    setattr(video, field_name, validated_data[field_name])
+                setattr(video, field_name, validated_data[field_name])
         if validated_data.get('metadata'):
             video.update_metadata(validated_data['metadata'], commit=True)
         self._update_team(video, validated_data)
