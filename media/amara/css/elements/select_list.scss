@@ -1,0 +1,78 @@
+ul.selectList {
+  display: flex;
+  flex-wrap: wrap;
+  li {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 30px;
+    font-weight: 200;
+    color: $gray;
+  }
+  h3 {
+    font-family: $font-family-sans-serif;
+    font-weight: 600;
+    margin: 0;
+  }
+  h4 {
+    color: $gray-darker;
+    margin: 0;
+  }
+  dl {
+    margin-bottom: 10px;
+    dt,dd{display:inline; font-weight: 100;}
+    dt {color: $gray-darker;}
+    dd {margin-right: 10px;}
+  }
+  .actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    a {
+      color: $gray-light;
+      &:hover, &:focus, &:active {
+        color: $teal;
+      }
+    }
+    i {
+      font-size: 22px;
+    }
+  }
+  .message-excerpt {
+    @include clamp(3, 1.2);
+    &:after {
+      display: block;
+      content: "";
+      position: absolute;
+      height: 2.4em;
+      width: 100%;
+      bottom: 0;
+      left: 0;
+      background: #fff;
+      background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,1));
+      z-index: 9;
+    }
+  }
+}
+
+.selectList-members {
+  div {
+    margin-right: 5px;
+  }
+  .selectList-memberDetails {
+    width: 280px;
+  }
+
+  .selectList-itemActions {
+    i {
+      font-size: 22px;
+    }
+  }
+}
+
+.selectList-messages {
+  .message {
+    margin-bottom: 0;
+  }
+}

@@ -34,11 +34,31 @@ i {
 .icon-arrow:before {
   content: "\e901";
 }
+.icon-forward:before {
+  content: "\e901";
+}
+.icon-back:before {
+  content: "\e901";
+  display: inline-block;
+  transform: rotate(180deg);
+}
+.icon-up:before {
+  content: "\e901";
+  display: inline-block;
+  transform: rotate(90deg);
+}
+.icon-down:before {
+  content: "\e901";
+  display: inline-block;
+  transform: rotate(-90deg);
+}
+
 .icon-clock:before {
   content: "\e902";
 }
 .icon-mail:before {
   content: "\e903";
+  color: $teal !important;
 }
 .icon-review:before {
   content: "\e904";

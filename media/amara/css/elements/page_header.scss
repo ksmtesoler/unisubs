@@ -11,8 +11,13 @@
     }
   }
   .dropdown-menu {
-    right: 10px;
-    left: -75px;
+    left: auto;
+    right: 0;
+    width: auto;
+    &:before {
+      right: 5px;
+      left: auto;
+    }
   }
   
   .topNav-nav {
@@ -41,6 +46,8 @@
   height: 50px;
   .navbar {
     border: none;
+    padding-left: 10px;
+    padding-right: 10px;
   }
   .navbar-nav,
   .mainNav-nav {
@@ -74,6 +81,37 @@
   .navbar-toggle {
     .icon-bar {
       background-color: $gray-dark;
+    }
+  }
+}
+
+
+@media(max-width: 767px) {
+  .topNav {
+    .dropdown {
+      .dropdown-toggle {
+        padding: 0 0 0 10px;
+      }
+    }
+  }
+  .mainNav {
+    .container {
+      padding: 0;
+    }
+    .navbar-collapse {
+      position: relative;
+      background-color: #fff;
+      box-shadow: 0 4px 2px rgba(0,0,0,0.1);
+      z-index: 10;
+    }    
+  }
+  .footerNav {
+    ul {
+      float: none;
+      display: inline-block;
+      &:first-child {
+        padding-left: 0;
+      }
     }
   }
 }

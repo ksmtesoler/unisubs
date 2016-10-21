@@ -12,43 +12,28 @@
 //
 // Styleguide buttons
 
-// We leverage bootstrap to handle the button CSS
-
-
-.btn {
+button {
   border: none;
-  font-family: $font-family-sans-serif;
-  font-size: 15px;
-  &.btn-xs {
-    font-size: 13px;
-    font-weight: 300;
+  background-color: transparent;
+  color: $teal;
+  &:disabled {
+    color: $gray-light;
   }
-  i {
-    margin-right: 9px;
-  }
-  &:hover {
-    color: inherit;
-  }
-  &.btn-primary, &.btn-default {
-    &:hover {
-      color: #ffffff;
-    }
+  &:focus {
+    outline: none;
   }
 }
-
-
 
 .button {
   display: inline-block;
   margin-bottom: 0;
   padding: 7px 30px;
-  font-family: "Open Sans",sans-serif;
+  font-family: $font-family-sans-serif;
   font-size: 15px;
   font-weight: 600;
   text-align: center;
   vertical-align: middle;
   background-image: none;
-  border: none;
   white-space: nowrap;
   line-height: 1.42857;
   border-radius: 4px;
@@ -57,20 +42,79 @@
   cursor: pointer;
   color: #fff;
   background-color: $teal;
-  &:hover {
+  border: 1px solid $teal;
+  &:hover, &:focus {
     color: #fff;
     background-color: darken($teal, 10%);
+    outline: none;
+  }
+  &.block {
+    display: block;
+    width: 100%;
   }
   &.small {
-    @extend .btn-xs;
+    padding: 2px 15px;
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.5em;
+    border-radius: 3px;
   }
-
+  &.disabled {
+    background-color: $gray-light;
+    border-color: $gray-light;
+    cursor: default;
+  }
   &.cta {
     color: #fff;
-    background-color: $brand-primary;
-    &:hover {
+    background-color: $plum;
+    border-color: $plum;
+    &:hover, &:focus {
       color: #fff;
-      background-color: darken($teal, 10%);
+      background-color: darken($plum, 10%);
+    }
+  }
+  &.cta-reverse {
+    color: $plum;
+    background-color: transparent;
+    border-color: $plum;
+    &:hover, &:focus {
+      color: #fff;
+      background-color: darken($plum, 10%);
+    }
+  }
+  &.inline {
+    display: inline-block;
+    line-height: inherit;
+    padding: 0;
+    color: inherit;
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: inherit;
+  }
+  i {
+    margin-right: 9px;
+  }
+}
+
+.collapseButton-moreLess {
+  color: $gray-darker;
+  font-weight: 600;
+  &:before {
+    display: inline-block;
+    position: relative;
+    content: "Less";
+  }
+  i {
+    display: inline-block;
+    margin-left: 10px;
+    transform: rotate(-90deg);
+  }
+  &.collapsed {
+    &:before {
+      content: "More";
+    }
+    i {
+      transform: rotate(90deg);
     }
   }
 }

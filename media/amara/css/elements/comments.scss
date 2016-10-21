@@ -1,0 +1,32 @@
+ul.comments {
+  li {
+    position: relative;
+    padding: 10px 0;
+    &:nth-of-type(odd) {
+      background-color: $gray-lighter;
+    }
+    &:last-child {
+      background-color: #fff;
+    }
+    .avatar {
+      margin-left: 0;
+    }
+    .memberName {
+      font-weight: 600;
+    }
+    .memberRole {}
+    .commentBody {
+      position: relative;
+      padding-bottom: 30px;
+      margin-bottom: 0;
+      span {
+        position: absolute;
+        bottom: 0px;
+        right: 10px;
+      }
+    }
+    form {
+      margin-left: 60px;
+    }
+  }
+}

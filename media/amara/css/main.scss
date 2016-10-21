@@ -6,7 +6,7 @@
 // Global
 @import 'global/base';
 @import 'global/typography';
-// @import 'global/grid';
+@import 'global/grid';
 
 @import 'global/buttons';
 @import 'global/tables';
@@ -22,19 +22,27 @@
 @import 'elements/page_header';
 @import 'elements/page_footer';
 
-@import 'elements/cards';
-@import 'elements/user_list';
-@import 'elements/dialog_box';
+@import 'elements/avatars';
+@import 'elements/assignment_card';
+@import 'elements/video_card';
+@import 'elements/select_list';
+// @import 'elements/dialog_box';
+@import 'elements/action_bar';
+@import 'elements/filters';
+@import 'elements/comments';
 
 @import 'vendor/select2';
 
 // Views
+@import 'views/landing';
 @import 'views/dashboard';
-
-@import 'views/video_overview';
 @import 'views/video_details';
-@import 'views/subtitle_management';
+@import 'views/video_subtitles';
 @import 'views/messaging_center';
+@import 'views/member_directory';
+
+
+
 
 // Responsive
 @import 'media_queries';

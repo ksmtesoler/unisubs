@@ -1,11 +1,5 @@
 // Layout
-.grid {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  justify-content: space-between; 
-}
+
 
 .col2 {
   column-count: 2;
@@ -27,10 +21,6 @@
   font-family: $font-family-sans-serif;
 }
 
-.avatar {
-  width: 30px;
-}
-
 .inprogress {
   display: inline-block;
   opacity: 0.5;
@@ -44,5 +34,21 @@
   float: right !important;
 }
 .pull-left {
-  float: right !important;
+  float: left !important;
 }
+
+
+// Text
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+.text-gray-base { color: $gray-base; }
+.text-gray-darker { color: $gray-darker; }
+.text-gray-dark { color: $gray-dark; }
+.text-gray { color: $gray; }
+.text-gray-light { color: $gray-light; }
+.text-gray-lighter { color: $gray-lighter; }
+
+.text-plum { color: $plum; }
+.text-teal { color: $teal; }

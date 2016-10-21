@@ -3,6 +3,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    margin-bottom: 20px;
     li {
       min-height: 1.75em;
       line-height: 1.75em;
@@ -36,6 +37,12 @@
   &:first-child {
     border-top: 1px solid $gray-light;
   }
+  .checkbox {
+    padding-top: 10px;
+  }
+  .number {
+    color: $text-color;
+  }
   .message-title {
     margin: 0;
     font-weight: 400;
@@ -51,6 +58,7 @@
 
   .message-summary {
     position: relative;
+    padding: 10px;
     border-bottom: 1px solid $gray-light;
   }
 
@@ -98,7 +106,6 @@
 }
 
 .thread {
-  margin-top: 92px;
   border: 1px solid $gray-light;
   border-right: none;
   ul.thread-actions {

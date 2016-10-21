@@ -1,5 +1,11 @@
 // Tables
 .table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background-color: transparent;
   thead {
 
   }
@@ -11,7 +17,6 @@
       }      
     }
   }
-
   &.table-striped {
     tr {
       &:nth-of-type(odd) {
@@ -22,6 +27,40 @@
       }
       td {
 
+      }
+    }
+  }
+}
+
+table.historyTable {
+  max-height: 250px;
+  table-layout: fixed;
+  tr {
+    td {
+      padding: 0px 10px;
+      height: 40px;
+      line-height: 40px;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      &:first-child {
+        width: 50%;
+      }
+      &:last-child {
+        width: 120px;
+        text-align: right;
+        i {
+          margin-left: 10px;
+          font-size: 18px;
+          color: $gray;
+        }
+        i.icon {
+          display: inline-block;
+          width: 30px;
+          margin: 0;
+          text-align: center;
+        }
       }
     }
   }

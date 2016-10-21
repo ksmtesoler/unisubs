@@ -1,4 +1,6 @@
-html {}
+html {
+  font-size: 100%;
+}
 
 body {}
 
@@ -7,21 +9,51 @@ main {}
 section {
   padding: 30px 0px 30px 0px;
 }
+header {
+  position: relative;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid $gray-lighter;
+  &.borderless {
+    border-bottom: none;
+  }
+  h1, h2, h3, h4 { margin: 0; }
+  .header-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
 
 a {
-  color: $brand-primary;
+  color: $teal;
   text-decoration: none;
   &:hover,
   &:focus,
   &:active {
+    color: darken($teal, 10%);
     outline: none;
     text-decoration: none;
   }
+  &.block {
+    display: inline-block;
+  }
+}
+
+em {
+  color: $teal;
+  font-style: normal;
+}
+
+ul, ol {
+  list-style: none;
+  padding: 0;
 }
 
 hr {
   margin-top: 10px;
   margin-bottom: 10px;
+  border-top-color: $gray-lighter;
 }
 
 
@@ -29,18 +61,100 @@ hr {
 // Content Spacing
 .content {
   position: relative;
-  padding: 10px 0;
+  padding: 10px;
   margin: 0;
-  &.content-right {
-    padding-right: 0px;
-    padding-left: 10px;
-  }
-  &.content-left {
-    padding-left: 0px;
-    padding-right: 10px;
+}
+
+.row {
+  section {
+    padding: 0 0 30px 0;
   }
 }
 
-.sectionHeader {
-  height: 60px;
+
+// TODO - Sort
+
+// Color Palette
+.gray-light {
+  background-color: $gray-light;
+}
+.gray-lighter {
+  background-color: $gray-lighter;
+}
+
+.zero-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  padding: 20px;
+  text-align: center;
+  background-color: transparent;
+  border: 1px solid $gray-lighter;
+  margin-bottom: 30px;
+  h3 {
+    font-size: 15px;
+    font-weight: 200;
+    small { font-size: 12px; }
+  }
+  p {
+    font-size: 13px;
+  }
+}
+
+.profileWell {
+  min-height: 20px;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 0px;
+  box-shadow: none;
+  background-color: $gray-lighter;
+  color: $gray-dark;
+  .icon.icon-mail {
+    margin-left: 15px;
+    font-size: 22px;
+  }
+  .col-xs {
+    flex-basis: auto;
+    flex-grow: 0;
+  }
+  .switch {
+    float: right;
+    margin-top: 13px;
+    margin-bottom: 0;
+    margin-right: 40px;
+  }
+  h3, h4 { color: $gray-darker; }
+  hr {
+    border-top: 1px solid $gray-light;
+    margin: 1rem -10px;
+  }
+}
+
+.player {
+  min-height: 350px;
+  margin-bottom: 20px;
+}
+
+
+
+
+
+@media(max-width: 1199px) {
+  .container {
+    width:100%;
+  }
+}
+
+@media(max-width: 991px) {
+  h1 {
+    font-size: 19px;
+  }
+}
+
+@media(max-width: 767px) {
+
+
 }

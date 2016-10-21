@@ -1,13 +1,21 @@
 ul.nav-tabs {
+  list-style: none;
+  border-bottom: none;
   li {
+    display: block;
+    position: relative;
+    float: left;
     margin: 0 10px;
+    list-style: none;
     &:first-child {
       margin-left: 0;
     }
     a {
-      padding: 10px 5px;
+      padding: 10px 0;
       border: none;
       border-bottom: 2px solid transparent;
+      font-weight: 300;
+      color: $teal;
       &:hover {
         background-color: transparent;
         border-bottom: 2px solid transparent;
@@ -16,13 +24,13 @@ ul.nav-tabs {
     &.active {
       a {
         border: none;
-        border-bottom: 2px solid $turquoise;
+        border-bottom: 2px solid $teal;
         outline: none;
-        color: $turquoise;
-        font-weight: bold;
+        color: $teal;
+        font-weight: 600;
         &:hover, &:focus, &:active {
           color: $turquoise;
-          font-weight: bold;
+          font-weight: 600;
           border: none;
           border-bottom: 2px solid $teal;
         }  
@@ -32,6 +40,15 @@ ul.nav-tabs {
 }
 
 .tab-pane {
-  padding: 20px 0;
+  position: relative;
+  padding: 15px 0;
   min-height: 400px;
+  .tab-actions {
+    position: absolute;
+    top: -30px;
+    right: 0;
+  }
+  .tab-content {
+
+  }
 }

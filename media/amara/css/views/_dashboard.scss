@@ -1,3 +1,8 @@
+.dashboardHeader {
+  height: 60px;
+  border-bottom: none;
+}
+
 /* -----------------------------------------
 Dashboard Sections
 ----------------------------------------- */
@@ -9,14 +14,29 @@ Dashboard Sections
       border-bottom: 1px solid $gray-light;
     }
   }
-}
-
-#my_assignments {
-  .assignmentCard {
-    margin-bottom: 10px;
+  .zero-state {
+    border: 1px solid $gray-light;
+    text-align: center;
+    border-radius: 4px;
+    text-align: center;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    h3 {
+      font-size: 15px;
+      font-weight: 200;
+      small { font-size: 12px; }
+    }
   }
 }
-
+#my_assignments {
+  .zero-state {
+    height: 305px;
+  }
+}
 #available_assignments {
   ul {
     display: table;
@@ -119,7 +139,7 @@ Dashboard Sections
   }
 }
 
-#big-picture {
+#big_picture {
   .ct-chart {
     width: 70%;
     float: left;
@@ -149,41 +169,41 @@ Dashboard Sections
   }
   .users {
     height: 220px;
-    ul {
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    li {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
+      width: 50%;
       align-items: center;
-      li {
-        display: flex;
-        width: 50%;
-        align-items: center;
-        justify-content: flex-start;
-        flex-wrap: nowrap;
-        &:nth-child(odd) {
-          border-right: 1px solid $gray-light;
-          span {
-            &:last-child {
-              margin: auto;
-              margin-right: 5px;
-            }
-          }
-        }
-        &:nth-child(even) {
-          span {
-            &:last-child {
-              margin: auto;
-              margin-right: 5px;
-            }
-            &:first-child {
-              margin: 0;
-              margin-left: 5px;
-            }
-          }
-        }
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+      &:nth-child(odd) {
+        border-right: 1px solid $gray-light;
         span {
-          display: inline-block;
+          &:last-child {
+            margin: auto;
+            margin-right: 5px;
+          }
         }
+      }
+      &:nth-child(even) {
+        span {
+          &:last-child {
+            margin: auto;
+            margin-right: 5px;
+          }
+          &:first-child {
+            margin: 0;
+            margin-left: 5px;
+          }
+        }
+      }
+      span {
+        display: inline-block;
       }
     }
   }
@@ -228,22 +248,62 @@ Dashboard Sections
   }
 }
 
+
+/* -----------------------------------------
+ Member Lists on Dashboard
+ TODO - refactor
+----------------------------------------- */
+
+.users {
+  height: 275px;
+  padding: 5px;
+  border-radius: $border-radius-base;
+  background-color: #ffffff;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.userList {
+  display: table;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.userList-user {
+  display: table-row;
+  width: 100%;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.user-avatar,
+.user-name,
+.user-email {
+  display: table-cell;
+  padding: 5px;
+  vertical-align: middle;
+  text-align: left;
+  &:first-child {
+    width: 40px;
+  }
+  &:last-child {
+    width: 40px;
+  }
+  i {
+    font-size: 22px;
+    margin-right: 10px;
+  }
+}
+
+
+
 /* -----------------------------------------
 Responsive
 ----------------------------------------- */
-@media (max-width: 1200px) {
-  #my_assignments {
-    .assignmentCard {
-      width: 47%;
-      margin: 0;
-      &:nth-of-type(1) {
-        margin-right:2%;
-      }
-      &:nth-of-type(3) {
-        display: none;
-      }
-    }
-  }
+@media (max-width: 1199px) {
+
 
   #available_assignments {
     ul {
@@ -263,7 +323,7 @@ Responsive
     }
   }
 
-  #big-picture {
+  #big_picture {
     #published_stats {
       font-size: 16px;
       span {
@@ -284,19 +344,43 @@ Responsive
       }
     }
   }
-}
-@media(max-width: 900px){
+
   #newest_members {
-    .users {
-      .userList {
-        .userList-user {
-          width: 100%;
+    ul {
+      li {
+        width: 100%;
+        &:nth-child(odd) {
+          border-right: none;
+          span {
+            &:last-child {
+              margin-right: 0;
+            }
+          }
+        }
+        &:nth-child(even) {
+          span {
+            &:last-child {
+              margin-right: 0;
+            }
+            &:first-child {
+              margin-left: 0;
+            }
+          }
         }
       }
     }
   }
 }
-@media(max-width: 768px){
+@media(max-width: 991px) {
+  #my_assignments {
+    .assignmentCard {
+      &:nth-of-type(n+3) {
+        display: none;
+      }
+    }
+  }
+}
+@media(max-width: 767px) {
   #dashboard {
     .pageSection {
       // Switch background color variation at smaller screen sizes
@@ -317,15 +401,7 @@ Responsive
       } 
     }
   }
-  #my_assignments {
-    .assignmentCard {
-      width: 90%;
-      margin: 50px auto;
-      &:nth-of-type(1) {
-        margin: 50px auto;
-      }
-    }
-  }
+
   #big-picture {
     .ct-chart, .stat {
       width: 100%;
@@ -347,3 +423,5 @@ Responsive
     }
   }
 }
+
+

@@ -1,0 +1,65 @@
+/* -----------------------------------------
+ Video Cards on Dashboard & Landing
+ TODO - refactor
+----------------------------------------- */
+.videoCard {
+  display: block;
+  position: relative;
+  width: 260px;
+  height: auto;
+  margin: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: $gray-base;
+  color: #ffffff;
+  text-align: left;
+  &:after {
+    font-family: 'amara';
+    content: "\e901";
+    display: block;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #ffffff;
+    font-size: 25px;
+  }
+  &.videoCard-summary {
+    display: flex;
+    color: #ffffff;
+    &:after {
+      display: none;
+    }
+    span {
+      margin: auto;
+      font-size: 40px;
+      margin-left: 40px;
+      margin-right: 10px;
+      font-weight: 300;
+    }
+    h3 {
+      margin: auto;
+      margin-right: 40px;
+      font-size: 15px;
+      font-weight: 300;
+    }
+  }
+}
+.videoCard-img {
+  max-width: 100%;
+}
+.videoCard-caption {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  padding: 60px 30px 0 10px;
+  color: #ffffff;
+  background: linear-gradient(rgba(0,0,0,0.0), rgba(0,0,0,0.7));
+}
+.videoCard-title {
+  @include clamp(2, 1.2);
+  font-weight: 500;
+}
+.videoCard-subtitle {
+  margin-top: 3px;
+}

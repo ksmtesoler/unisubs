@@ -1,31 +1,6 @@
 // Navigation
-ul.navList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  li {
-    min-height: 1.75em;
-    line-height: 1.75em;
-    a {
-      color: $text-color;
-      &:hover, &:focus, &:active {
-        color: $teal;
-      }
-    }
-  }
-  &.horizontal {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    li {
-      display: inline-block;
-      margin: 0 8px;
-    }
-  }
-}
 
-
-ul.nav-table {
+.nav-table {
   display: table;
   padding: 0;
   margin: 0;
@@ -49,7 +24,7 @@ ul.nav-table {
   }
 }
 
-ul.nav-stacked {
+.nav-stacked {
   padding-left: 10px;
   li {
     position: relative;
@@ -74,6 +49,25 @@ ul.nav-stacked {
   }
 }
 
+.nav-icons {
+  a {
+    padding:5px 20px 5px 0;
+    i {
+      font-size: 20px;
+      color: $gray;
+    }
+  }
+}
+
+.nav-actions {
+  position: relative;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  button {
+    margin-left: 15px;
+  }
+}
+
 .pagination {
   li {
     a {
@@ -81,9 +75,24 @@ ul.nav-stacked {
       padding: 5px 12px;
     }
     &.active {
-      a {
+      a, span {
         color: #fff;
+        background-color: $teal;
+        &:hover, &:focus {
+          color: #fff;
+          background-color: $teal;
+        }
       }
+    }
+  }
+}
+
+
+@media(max-width: 767px) {
+  .nav-actions {
+    .pull-right {
+      float: none !important;
+      display: block;
     }
   }
 }
