@@ -220,10 +220,13 @@ from rest_framework import filters
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework import serializers
+from rest_framework import status
+from rest_framework import views
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.reverse import reverse
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 import json
 
 from api.fields import LanguageCodeField, TimezoneAwareDateTimeField
@@ -596,8 +599,16 @@ class VideoViewSet(mixins.CreateModelMixin,
         if serializer.will_add_video_to_team():
             if not team_perms.can_add_video(team, self.request.user, project):
                 raise PermissionDenied()
+        if serializer.instance:
+            self.check_update_permissions(serializer)
+
+    def check_update_permissions(self, serializer):
+        video = serializer.instance
+        team_video = video.get_team_video()
+        workflow = video.get_workflow()
+        if not workflow.user_can_edit_video(self.request.user):
+            raise PermissionDenied()
         if serializer.will_remove_video_from_team():
-            team_video = serializer.instance.get_team_video()
             if not team_perms.can_remove_video(team_video, self.request.user):
                 raise PermissionDenied()
 
@@ -651,6 +662,30 @@ class VideoURLSerializer(serializers.Serializer):
 
 class VideoURLUpdateSerializer(VideoURLSerializer):
     url = serializers.CharField(read_only=True)
+
+class VideoDurationView(views.APIView):
+    def get(self, request, video_id, *args, **kwargs):
+        video = Video.objects.get(video_id=video_id)
+        workflow = video.get_workflow()
+        if not workflow.user_can_view_video(request.user):
+            return Response("Not authorized", status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'duration': video.duration}, status=status.HTTP_200_OK)
+
+    def put(self, request, video_id, *args, **kwargs):
+        video = Video.objects.get(video_id=video_id)
+        workflow = video.get_workflow()
+        if not workflow.user_can_view_video(request.user):
+            return Response("Not authorized", status=status.HTTP_401_UNAUTHORIZED)
+        if not video.duration:
+            new_duration = request.data.get('duration', None)
+            if new_duration is not None:
+                video.duration = new_duration
+                video.save()
+                return Response({'duration': video.duration}, status=status.HTTP_200_OK)
+            else:
+                return Response("Duration is missing", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Duration already set", status=status.HTTP_304_NOT_MODIFIED)
 
 class VideoURLViewSet(viewsets.ModelViewSet):
     serializer_class = VideoURLSerializer

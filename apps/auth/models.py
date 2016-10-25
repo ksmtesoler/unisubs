@@ -39,6 +39,8 @@ from django.db.models.signals import post_save
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _, ugettext
 from tastypie.models import ApiKey
+
+from auth import signals
 from caching import CacheGroup, ModelCacheManager
 from utils.amazon import S3EnabledImageField
 from utils import secureid
@@ -101,6 +103,14 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         (AUTOPLAY_ON_LANGUAGES, 'Autoplay subtitles in languages I know'),
         (DONT_AUTOPLAY, 'Don\'t autoplay subtitles')
     )
+    PLAYBACK_MODE_MAGIC = 1
+    PLAYBACK_MODE_STANDARD = 2
+    PLAYBACK_MODE_BEGINNER = 3
+    PLAYBACK_MODE_CHOICES = (
+        (PLAYBACK_MODE_MAGIC, 'Magical auto-pause'),
+        (PLAYBACK_MODE_STANDARD, 'No automatic pausing'),
+        (PLAYBACK_MODE_BEGINNER, 'Play for 4 seconds, then pause')
+    )
     homepage = models.URLField(blank=True)
     preferred_language = models.CharField(
         max_length=16, choices=ALL_LANGUAGES, blank=True)
@@ -129,6 +139,8 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     pay_rate_code = models.CharField(max_length=3, blank=True, default='')
     can_send_messages = models.BooleanField(default=True)
     show_tutorial = models.BooleanField(default=True)
+    playback_mode = models.IntegerField(
+        choices=PLAYBACK_MODE_CHOICES, default=PLAYBACK_MODE_STANDARD)
     created_by = models.ForeignKey('self', null=True, blank=True,
                                    related_name='created_users')
 
@@ -138,8 +150,19 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
 
     cache = ModelCacheManager(default_cache_pattern='user')
 
+    # Fields that constitute a user's profile, things like names, bios, etc.
+    # When these change we emit the user_profile_changed signal.
+    PROFILE_FIELDS = [
+        'first_name', 'last_name', 'full_name', 'biography', 'picture',
+        'homepage', 'email',
+    ]
+
     class Meta:
         verbose_name = 'User'
+
+    def __init__(self, *args, **kwargs):
+        super(CustomUser, self).__init__(*args, **kwargs)
+        self.start_tracking_profile_fields()
 
     def __unicode__(self):
         if not self.is_active:
@@ -179,10 +202,26 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
             self.valid_email = False
 
         send_email_confirmation = kwargs.pop('send_email_confirmation', True)
+        if self.pk:
+            self.check_profile_changed()
         super(CustomUser, self).save(*args, **kwargs)
+        self.start_tracking_profile_fields()
 
         if send_confirmation and send_email_confirmation:
             EmailConfirmation.objects.send_confirmation(self)
+
+    def start_tracking_profile_fields(self):
+        self._initial_profile_data = self.calc_profile_data()
+
+    def calc_profile_data(self):
+        return {
+            name: getattr(self, name)
+            for name in CustomUser.PROFILE_FIELDS
+        }
+
+    def check_profile_changed(self):
+        if self.calc_profile_data() != self._initial_profile_data:
+            signals.user_profile_changed.send(self)
 
     def clean(self):
         if '$' in self.username:
@@ -204,9 +243,11 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def unread_messages_count(self, hidden_meassage_id=None):
         return self.unread_messages(hidden_meassage_id).count()
 
-    @classmethod
-    def tutorial_was_shown(self, id):
-        self.objects.filter(pk=id).update(show_tutorial=False)
+    def tutorial_was_shown(self):
+        CustomUser.objects.filter(pk=self.id).update(show_tutorial=False)
+
+    def set_playback_mode(self, playback_mode):
+        CustomUser.objects.filter(pk=self.id).update(playback_mode=playback_mode)
 
     @classmethod
     def displayable_users(self, ids):
@@ -292,6 +333,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
                 for l in languages
             ]
         self.cache.invalidate()
+        signals.user_profile_changed.send(self)
 
     def get_language_names(self):
         """Get a list of language names that the user speaks."""

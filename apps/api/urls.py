@@ -42,6 +42,9 @@ router.register(r'teams/(?P<team_slug>[\w\d\-]+)/tasks',
 router.register(r'teams/(?P<team_slug>[\w\d\-]+)/applications',
                 views.teams.TeamApplicationViewSetSwitcher,
                 base_name='team-application')
+router.register(r'teams/(?P<team_slug>[\w\d\-]+)/notifications',
+                views.teams.TeamNotificationViewSet,
+                base_name='team-notifications')
 router.register(r'users', views.users.UserViewSet, base_name='users')
 router.register(r'activity', views.activity.ActivityViewSet,
                 base_name='activity')
@@ -59,6 +62,8 @@ urlpatterns = router.urls + patterns('',
     url(r'^videos/(?P<video_id>[\w\d]+)'
         '/languages/(?P<language_code>[\w-]+)/subtitles/notes/$',
         views.subtitles.NotesListSwitcher.as_view(), name='subtitle-notes'),
+    url(r'videos/(?P<video_id>[\w\d]+)/duration',
+        views.videos.VideoDurationView.as_view(), name='video-duration'),
     url(r'^teams/(?P<team_slug>[\w\d\-]+)/languages/$',
         views.teams.team_languages, name='team-languages'),
      url(r'teams/(?P<team_slug>[\w\d\-]+)/languages/preferred/',
