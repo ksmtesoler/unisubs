@@ -1,34 +1,37 @@
 {% load i18n %}
 {% load url from future %}
-<table class="table table-striped">
-  <thead></thead>
-  <tbody>
-    {% for comment in comments %}
-    <tr>
-      <td>{% include "future/user-icon.html" with user=comment.user %}</td>
-      <td>{% include "future/user-name.html" with user=comment.user %}</td>
-      <td class="comment-body">
+<ul class="comments">
+  {% for comment in comments %}
+  <li class="row">
+    <div class="col-xs-4">
+      <a href="{{ user.get_absolute_url }}" class="pull-left"><img class="avatar avatar-md" src="{{ user.small_avatar }}" /></a>
+      <p>
+        <span class="memberName"><a href="{{ user.get_absolute_url }}">{{ comment.user }}</a></span>
+      </p>
+    </div>
+    <div class="col-xs-8">
+      <div class="commentBody">
         {{ comment.content|linebreaks }}
         <span>{{ comment.submit_date|timesince }}</span>
-      </td>
-    </tr>
-    {% endfor %}
-    {% if comment_form %}
-    <tr>
-      <td>{% include "future/user-icon.html" %}</td>
-      <td colspan="2">
-        <form action="" class="ajax" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="form" value="comment">
-          {{ comment_form.object_pk }}
-          {{ comment_form.content_type }}
-          <div class="form-group">
-            {{ comment_form.content }}
-          </div>
-          <button type="submit" class="btn btn-primary pull-right">{% trans "Post" %}</button>
-        </form>
-      </td>
-    </tr>
-    {% endif %}
-  </tbody>
-</table>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+  {% if comment_form %}
+  <li class="row addComment">
+    <div class="col-xs">
+      <a href="{{ user.get_absolute_url }}" class="pull-left"><img class="avatar avatar-md" src="{{ user.small_avatar }}" /></a>
+      <form action="" class="ajax" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form" value="comment">
+        {{ comment_form.object_pk }}
+        {{ comment_form.content_type }}
+        <div class="form-group">
+          {{ comment_form.content }}
+        </div>
+        <button type="submit" class="button small pull-right">{% trans "Post comment" %}</button>
+      </form>
+    </div>
+  </li>
+  {% endif %}
+</ul>

@@ -28,6 +28,7 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import query, Q
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 
@@ -527,6 +528,11 @@ class SubtitleLanguage(models.Model):
         for signal, kwargs in thawed.items():
             signal.send(self, **kwargs)
 
+    def get_workflow(self):
+        """Get the LanguageWorkflow for this SubtitleLanguage."""
+        return (self.video.get_workflow()
+                .get_language_workflow(self.language_code))
+
     def mark_complete(self):
         if not self.subtitles_complete:
             self.subtitles_complete = True
@@ -944,22 +950,11 @@ EXISTS(
         return self.video.primary_audio_language_code == self.language_code
 
     def versions_for_user(self, user):
-        from teams.models import TeamVideo
-        from teams.permissions import get_member
-
-        try:
-            team_video = (TeamVideo.objects.select_related('team')
-                                           .get(video=self.video))
-        except TeamVideo.DoesNotExist:
-            team_video = None
-
-        if team_video:
-            member = get_member(user, team_video.team)
-
-            if not member:
-                return self.subtitleversion_set.public()
-
-        return self.subtitleversion_set.extant()
+        workflow = self.get_workflow()
+        if workflow.user_can_view_private_subtitles(user):
+            return self.subtitleversion_set.extant()
+        else:
+            return self.subtitleversion_set.public()
 
     def version(self, public_only=True, version_number=None):
         """Return a SubtitleVersion of this language matching the arguments.
@@ -1120,8 +1115,7 @@ LIMIT 1;""", (self.id, self.id))
         self.save()
 
 
-    def get_widget_url(self):
-        """SHIM for getting the widget URL for this language."""
+    def editor_url(self):
         return reverse('subtitles:subtitle-editor', kwargs={
             'video_id': self.video.video_id,
             'language_code': self.language_code,

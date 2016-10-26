@@ -634,26 +634,6 @@ class ActivityRecord(models.Model):
         else:
             return None
 
-    def get_time_since(self):
-        delta = dates.now() - self.created
-        if delta.days != 0:
-            return fmt(
-                ungettext('%(count)s day ago', '%(count)s days ago', delta.days),
-                count=delta.days)
-        elif delta.seconds > 3600:
-            hours = int(round(delta.seconds / 3600.0))
-            return fmt(
-                ungettext('%(count)shour ago', '%(count)s hours ago', hours),
-                count=hours)
-        elif delta.seconds > 60:
-            minutes = int(round(delta.seconds / 60.0))
-            return fmt(
-                ungettext('%(count)s minute ago', '%(count)s minutes ago',
-                          minutes),
-                count=minutes)
-        else:
-            return gettext('Just now')
-
     def get_related_obj(self):
         if not hasattr(self, '_related_obj_cache'):
             self._related_obj_cache = self.type_obj.get_related_obj(

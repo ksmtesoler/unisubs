@@ -117,7 +117,13 @@ class TeamWorkflow(object):
         return TeamPage(name, title,  url)
 
     def video_page_customize(self, request, video):
-        """Add extra content to the video sidebar."""
+        """Add extra content to the video page when viewing from the context
+        of a team."""
+        return DONT_OVERRIDE
+
+    def subtitles_page_customize(self, request, video, subtitle_language):
+        """Add extra content to the subtitles page when viewing from the context
+        of a team."""
         return DONT_OVERRIDE
 
     def activity_type_filter_options(self):

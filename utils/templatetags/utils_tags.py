@@ -1,7 +1,10 @@
 from django import template
-from django.utils.translation import ugettext
+from django.utils.translation import ugettext, ungettext
 from django.utils.html import escape
 from pprint import pformat
+
+from utils import dates
+from utils.text import fmt
 
 try:
     from django.utils.safestring import mark_safe
@@ -117,3 +120,24 @@ def simplify_number(value):
 
     else:
         return num
+
+@register.filter
+def timesince_short(datetime):
+    delta = dates.now() - datetime
+    if delta.days != 0:
+        return fmt(
+            ungettext('%(count)s day ago', '%(count)s days ago', delta.days),
+            count=delta.days)
+    elif delta.seconds > 3600:
+        hours = int(round(delta.seconds / 3600.0))
+        return fmt(
+            ungettext('%(count)shour ago', '%(count)s hours ago', hours),
+            count=hours)
+    elif delta.seconds > 60:
+        minutes = int(round(delta.seconds / 60.0))
+        return fmt(
+            ungettext('%(count)s minute ago', '%(count)s minutes ago',
+                      minutes),
+            count=minutes)
+    else:
+        return ugettext('Just now')

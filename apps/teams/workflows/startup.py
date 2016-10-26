@@ -30,30 +30,43 @@ from teams.workflows.simple import SimpleTeamWorkflow
 
 @subtitles.workflows.get_workflow.override
 def get_workflow_override(video):
-    team_workflow = lookup_team_workflow(video)
-    if team_workflow is None:
+    team_video = video.get_team_video()
+    if team_video is None:
         return DONT_OVERRIDE
+    if video.cache.cache_pattern is not None:
+        # If we have have a video from cache also get the team from cache
+        team = Team.cache.get_instance(team_video.team_id,
+                                       video.cache.cache_pattern)
+        team_video.team = team
+        team_workflow = TeamWorkflow.get_workflow(team)
+    else:
+        team_workflow = TeamWorkflow.get_workflow(team_video.team)
     return team_workflow.get_subtitle_workflow(video.get_team_video())
 
 @videos.behaviors.video_page_customize.override
 def video_page_customize(request, video):
-    team_workflow = lookup_team_workflow(video)
+    team_workflow = get_workflow_from_request(request)
     if team_workflow is None:
         return DONT_OVERRIDE
     return team_workflow.video_page_customize(request, video)
 
-def lookup_team_workflow(video):
-    # if we have have a video from cache also get the team from cache
-    team_video = video.get_team_video()
-    if team_video is None:
+@videos.behaviors.subtitles_page_customize.override
+def subtitles_page_customize(request, video, subtitle_language):
+    team_workflow = get_workflow_from_request(request)
+    if team_workflow is None:
+        return DONT_OVERRIDE
+    return team_workflow.subtitles_page_customize(request, video,
+                                                  subtitle_language)
+
+def get_workflow_from_request(request):
+    if 'team' not in request.GET:
         return None
-    if video.cache.cache_pattern is not None:
-        team = Team.cache.get_instance(team_video.team_id,
-                                       video.cache.cache_pattern)
-        team_video.team = team
-        return TeamWorkflow.get_workflow(team)
-    else:
-        return TeamWorkflow.get_workflow(team_video.team)
+    try:
+        team = Team.objects.get(slug=request.GET['team'],
+                                members__user=request.user)
+    except Team.DoesNotExist:
+        return None
+    return TeamWorkflow.get_workflow(team)
 
 # register default team workflows
 OldTeamWorkflow.register('O', 'default')

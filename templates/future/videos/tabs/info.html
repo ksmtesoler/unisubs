@@ -1,17 +1,17 @@
 {% load i18n videos_tags %}
-<dl>
+<dl class="inline-description">
   <dt>{% trans "Title:" %}</dt>
   <dd>{{ video.title_display }}
-
-  {% if video.description %}
-  <dt>{% trans "Description:" %}</dt>
-  <dd class="constrain">{{ video.description|linebreaks }}</dd>
-  {% endif %}
 
   {% for entry in metadata %}
   <dt>{{ entry.label }}</dt>
   <dd>{{ entry.content }}</dd>
   {% endfor %}
+
+  {% if video.description %}
+  <dt>{% trans "Description:" %}</dt>
+  <dd class="constrain">{{ video.description|linebreaks }}</dd>
+  {% endif %}
 
   {% if video.primary_audio_language_code %}
   <dt>{% trans "Language:" %}</dt>

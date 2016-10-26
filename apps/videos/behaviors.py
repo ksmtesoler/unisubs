@@ -28,4 +28,61 @@ VideoPageCustomization = namedtuple('VideoPageCustomization',
                                     'sidebar_extra header')
 @behavior
 def video_page_customize(request, video):
+    """Customize the video page.
+
+    Note: this is already overridden by the team.workflows package.  If you
+    want to override the page by team, then check out the TeamWorkflow class.
+    """
     return VideoPageCustomization(None, None)
+
+class SubtitlesPageCustomization(object):
+    """
+    Base class for customizing the subtitles page.
+
+    To customize the subtitles page, create a subclass of this then make sure
+    it gets returned from the subtitles_page_customize() behavior.
+    subtitles_page_customize() is already overridden by the team.workflows
+    package.  The simplest way to customize the page is probably using the
+    TeamWorkflow class.
+
+    Attrs:
+        steps: list of SubtitlesStep objects to display in the top-right
+            section
+        action_button: Button object to display underneath the steps
+    """
+    def __init__(self):
+        self.steps = None
+        self.action_button = None
+
+@behavior
+def subtitles_page_customize(request, video, subtitle_language):
+    """Customize the subtitles page.
+
+    """
+    return SubtitlesPageCustomization()
+
+class SubtitlesStep(object):
+    """Represents an item on the subtitle steps list
+
+    These are displayed on the top-right of the subtitles page.  By default,
+    we don't display anything.  They are used in more complex workflows like
+    the collab model.  To set this up, override the subtitles_page_customize()
+    function which can be done from the TeamWorkflow class.
+
+    Attrs:
+        label: text that describes the step (Subtitle, Review, Approve, etc).
+        status: text that describes the progress on the step (In progress,
+           Complete, etc).
+        icon: icon that represents the step
+        user: user icon to display in the step.  If present, the avatar for
+            this user is displayed instead of the icon.
+        current: Is this step currently in-progress?
+    """
+    def __init__(self, label, status, icon=None, user=None, current=False):
+        self.label = label
+        self.status = status
+        self.icon = icon
+        self.user = user
+        self.current = current
+
+Button = namedtuple('Button', 'url label')

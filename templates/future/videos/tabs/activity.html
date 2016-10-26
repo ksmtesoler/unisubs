@@ -1,5 +1,5 @@
-{% load i18n %}
-<table class="table">
+{% load i18n utils_tags %}
+<table class="table table-striped">
   <tbody>
     {% for record in activity %}
     {% with url=record.get_url %}
@@ -7,8 +7,8 @@
       <td>{% include "future/user-icon.html" with user=record.user %}</td>
       <td>{{ record.user }}</td>
       <td>{{ record.get_action_name }}</td>
-      <td>{% if record.language_code %}<a href="{{ record.get_language_url }}">{{ record.get_language_code_display }}</a>{% elif url %}<a href="{{ url }}">{{ url }}</a>{% endif %}</td>
-      <td>{{ record.get_time_since }}</td>
+      <td>{% if record.language_code %}<a href="{{ record.get_language_url }}">{% blocktrans with language=record.get_language_code_display %}{{ language }} Subtitles{% endblocktrans %}</a>{% elif url %}<a href="{{ url }}">{{ url }}</a>{% endif %}</td>
+      <td>{{ record.created|timesince_short }}</td>
     </tr>
     {% endwith %}
     {% endfor %}
