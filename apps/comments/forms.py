@@ -29,6 +29,7 @@ class CommentForm(forms.ModelForm):
     content = forms.CharField(label='Comment', max_length=COMMENT_MAX_LENGTH,
                               widget=forms.Textarea(attrs={
                                   'placeholder': _("Write a comment"),
+                                  'rows': 3,
                               }))
 
     class Meta:
