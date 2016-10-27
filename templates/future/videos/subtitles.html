@@ -86,11 +86,11 @@
             {% endif %}
           </section>
           {% endif %}
-          {% if all_subtitle_versions %}
+          {% if all_subtitle_versions and all_subtitle_versions|length > 2%}
           <section class="videoSubtitles-revisions">
             <header>
               <h3>{% trans "Revisions" %}</h3>
-              <div class="header-actions"><a href="#" title="{% trans "Compare revisions" %}">{% trans "Compare revisions" %}</a></div>
+              <div class="header-actions"><a href="#" class="videoSubtitles-compare" data-url-template="{% url "videos:diffing" "111" "222" %}" title="{% trans "Compare revisions" %}">{% trans "Compare revisions" %}</a></div>
             </header>
             <ul>
               {% for revision in all_subtitle_versions %}
@@ -114,6 +114,32 @@
               </li>
               {%  endfor %}
             </ul>
+          </section>
+          {% elif all_subtitle_versions %}
+          <section class="videoSubtitles-revisions">
+            <header>
+              <h3>{% trans "Revisions" %}</h3>
+            </header>
+            <ul>
+              {% for revision in all_subtitle_versions %}
+              <li class="row condensed{% if revision == subtitle_version %} currentRevision{% endif %}">
+                <div class="col-xs-7">
+                  <a href="{{ revision.get_absolute_url }}"><strong>{% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}</strong></a>
+                  <br>
+                  {{ revision.author }}
+                </div>
+                <div class="col-xs-5 end-xs">
+                  <strong>{% trans "Edited" %}</strong>
+                  <br>
+                  {{ revision.created|timesince_short }}
+                </div>
+              </li>
+              {%  endfor %}
+            </ul>
+          </section>
+          {% else %}
+          <section class="videoSubtitles-revisions">
+              <div class="zero-state">{% trans "No revisions available." %}</div>
           </section>
           {% endif %}
         </div>
