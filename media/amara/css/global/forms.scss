@@ -29,6 +29,8 @@ select,
     outline: none;
   }
 }
+
+
 .select {
   position: relative;
   cursor: pointer;
@@ -198,13 +200,13 @@ select,
         span {
           background-color: $gray-light;
           &:after {
-            content: "\e909";
+            content: "\e900";
             display: block;
             position: absolute;
             height: 1rem;
             line-height: 1rem;
             width: 1rem;
-            top: -1px;
+            top: 0;
             left: -1px;
             text-align: center;
             background-color: transparent;
@@ -290,4 +292,3 @@ select,
     border-radius: 50%;
   }
 }
-

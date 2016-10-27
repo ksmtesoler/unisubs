@@ -66,13 +66,15 @@ def render_subtitles(subtitle_version):
     """
     subtitles = subtitle_version.get_subtitles()
     timing_template = string.Template(u"""\
-<td>
-    <a class="subtilesList-timing" href="#" data-start-time="$start_time" title="{}">
+<div class="subtitlesList-time">
+    <a class="subtitlesList-seek" href="#" data-start-time="$start_time" title="{}">
         $start_time_display - $end_time_display
     </a>
-</td>""".format(_('Play video here')))
-    not_synced_timing = u'<td>{}</td>'.format(_('Not Synced'))
-    text_template = string.Template(u'<td>$text</td>')
+</div>""".format(_('Play video here')))
+    not_synced_timing = u'<div class="subtitlesList-time">{}</div>'.format(_('Not Synced'))
+    text_template = string.Template(u'<div class="subtitlesList-subtitle">$text</div>')
+    text_template_new_p = string.Template(
+        u'<div class="subtitlesList-subtitle topicSentence">$text</div>')
 
     synced_subs = []
     unsynced_subs = []
@@ -85,10 +87,10 @@ def render_subtitles(subtitle_version):
     synced_subs.sort(key=lambda item: item.start_time)
 
     parts = []
-    parts.append(u'<table class="subtitlesList table table-striped">')
+    parts.append(u'<ul class="subtitlesList">')
     for item in synced_subs + unsynced_subs:
         new_paragraph = item.meta.get('new_paragraph', False)
-        parts.append(u'<tr>')
+        parts.append(u'<li>')
         if item.start_time is not None:
             parts.append(timing_template.substitute(
                 start_time=item.start_time,
@@ -96,9 +98,12 @@ def render_subtitles(subtitle_version):
                 end_time_display=format_time(item.end_time)))
         else:
             parts.append(not_synced_timing)
-        parts.append(text_template.substitute(text=item.text))
-        parts.append(u'</tr>')
-    parts.append(u'</table>')
+        if new_paragraph:
+            parts.append(text_template_new_p.substitute(text=item.text))
+        else:
+            parts.append(text_template.substitute(text=item.text))
+        parts.append(u'</li>')
+    parts.append(u'</ul>')
     return mark_safe(u"\n".join(parts))
 
 @register.simple_tag

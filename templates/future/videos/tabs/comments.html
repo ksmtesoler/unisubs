@@ -26,9 +26,7 @@
         <input type="hidden" name="form" value="comment">
         {{ comment_form.object_pk }}
         {{ comment_form.content_type }}
-        <div class="form-group">
-          {{ comment_form.content }}
-        </div>
+        {{ comment_form.content }}
         <button type="submit" class="button small pull-right">{% trans "Post comment" %}</button>
       </form>
     </div>

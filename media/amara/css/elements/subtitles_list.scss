@@ -1,0 +1,34 @@
+// Subtitles List
+ul.subtitlesList {
+  display: flex;
+  flex-wrap: wrap;
+  li {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    width: 100%;
+    padding: 10px 0;
+    &:nth-of-type(odd) {
+      background-color: $gray-lighter;
+    }
+    .subtitlesList-subtitleTime {
+      margin: 0 10px;
+    }
+    .subtitlesList-subtitle {
+      position: relative;
+      padding-left: 30px;
+      &.topicSentence {
+        &:before {
+          content: "\00B6";
+          display: inline-block;
+          position: absolute;
+          top: 0;
+          left: 10px;
+          color: $gray;
+          font-weight: 100;
+        }
+      }
+    }
+  }
+}

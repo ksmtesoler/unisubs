@@ -25,12 +25,29 @@ i {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-.icon-check:before {
+
+.icon-approve_outline:before {
   content: "\e909";
 }
 .icon-approve:before {
+  content: "\e909";
+}
+
+.icon-check:before {
   content: "\e900";
 }
+
+.icon-deny:before {
+  content: "\e90a";
+}
+.icon-close:before {
+  content: "\e90a";
+}
+
+
+
+
+// Arrows
 .icon-arrow:before {
   content: "\e901";
 }
@@ -52,6 +69,7 @@ i {
   display: inline-block;
   transform: rotate(-90deg);
 }
+
 
 .icon-clock:before {
   content: "\e902";
@@ -79,3 +97,5 @@ i {
 .icon-trash:before {
   content: "\e910";
 }
+
+
