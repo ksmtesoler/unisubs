@@ -453,16 +453,6 @@ class Video(models.Model):
                 title = 'No title'
         return behaviors.make_video_title(self, title, self.get_metadata())
 
-    def page_title(self):
-        """Get the title that should appear at the top of the video page."""
-        cached = self.cache.get('page-title')
-        if cached is not None:
-            return cached
-        title = fmt(ugettext('%(title)s with subtitles | Amara'),
-                     title=self.title_display())
-        self.cache.set('page-title', title)
-        return title
-
     def get_download_filename(self):
         """Get the filename to download this video as
 

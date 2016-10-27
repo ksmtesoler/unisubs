@@ -254,20 +254,6 @@ class DeleteLanguageViewTest(UnpublishTestCase):
             self.assertRedirects(response,
                                  '/auth/login/?next=' + self.url,
                                  target_status_code=302)
-        self.check_button_present(self.versions[-1], should_have_permission)
-
-    def check_button_present(self, version, should_be_present):
-        url = '/en/videos/%s/%s/%s/' % (
-            version.video.video_id,
-            version.subtitle_language.language_code,
-            version.subtitle_language.pk,
-        )
-        response = self.client.get(url)
-        button_html = '<a class="button" href="%s">' % self.url
-        if should_be_present:
-            self.assert_(button_html in response.content.decode('utf-8'))
-        else:
-            self.assert_(button_html not in response.content.decode('utf-8'))
 
     def test_permissions(self):
         self.check_user_perm(UserFactory(), False)
@@ -278,8 +264,3 @@ class DeleteLanguageViewTest(UnpublishTestCase):
         for role in (ROLE_CONTRIBUTOR, ROLE_MANAGER):
             member = TeamMemberFactory(team=self.team, role=role)
             self.check_user_perm(member.user, False)
-
-    def test_no_button_for_non_team_videos(self):
-        non_team_version = pipeline.add_subtitles(self.non_team_video, 'en',
-                                                  None)
-        self.check_button_present(non_team_version, False)

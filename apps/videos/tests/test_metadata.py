@@ -197,7 +197,7 @@ class MetadataFieldsTest(TestCase):
                                              'location': 'North Pole',
                                          })
         self.assertEquals(version.get_metadata().convert_for_display(), [
-            { 'label': 'Speaker Name', 'content': 'Santa'},
+            { 'label': 'Speaker', 'content': 'Santa'},
             { 'label': 'Location', 'content': 'North Pole'},
         ])
 

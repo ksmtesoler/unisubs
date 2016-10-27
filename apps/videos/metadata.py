@@ -53,17 +53,21 @@ METADATA_FIELD_COUNT = 3
 
 # Define possible values for the metadata type fields.  List of
 # (db_value, slug, label) tuples.
-metadata_type_choices = [
-    (0, 'speaker_name', ugettext_noop('Speaker')),
+metadata_type_defs = [
+    (0, 'speaker-name', ugettext_noop('Speaker')),
     (1, 'location', ugettext_noop('Location')),
 ]
 
 type_value_to_name = dict((val, slug)
-                         for val, slug, label in metadata_type_choices)
+                         for val, slug, label in metadata_type_defs)
 name_to_type_value = dict((slug, val)
-                         for val, slug, label in metadata_type_choices)
+                         for val, slug, label in metadata_type_defs)
 name_to_label = dict((slug, label)
-                     for val, slug, label in metadata_type_choices)
+                     for val, slug, label in metadata_type_defs)
+metadata_type_choices = [
+    (val, label)
+    for val, slug, label in metadata_type_defs
+]
 
 def all_names():
     return name_to_type_value.keys()

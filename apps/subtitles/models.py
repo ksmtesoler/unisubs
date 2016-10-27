@@ -528,11 +528,6 @@ class SubtitleLanguage(models.Model):
         for signal, kwargs in thawed.items():
             signal.send(self, **kwargs)
 
-    def get_workflow(self):
-        """Get the LanguageWorkflow for this SubtitleLanguage."""
-        return (self.video.get_workflow()
-                .get_language_workflow(self.language_code))
-
     def mark_complete(self):
         if not self.subtitles_complete:
             self.subtitles_complete = True
@@ -950,8 +945,8 @@ EXISTS(
         return self.video.primary_audio_language_code == self.language_code
 
     def versions_for_user(self, user):
-        workflow = self.get_workflow()
-        if workflow.user_can_view_private_subtitles(user):
+        workflow = self.video.get_workflow()
+        if workflow.user_can_view_private_subtitles(user, self.language_code):
             return self.subtitleversion_set.extant()
         else:
             return self.subtitleversion_set.public()

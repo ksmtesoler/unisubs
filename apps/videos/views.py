@@ -507,8 +507,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
 
     if request.method == 'POST':
         return subtitles_form(request, video, version)
-    workflow = video.get_workflow().get_language_workflow(
-        subtitle_language.language_code)
+    workflow = video.get_workflow()
     if request.user.is_authenticated():
         comment_form = CommentForm(subtitle_language)
     else:
@@ -529,7 +528,8 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'comment_form': comment_form,
         'steps': customization.steps,
         'action_button': customization.action_button,
-        'can_edit': workflow.user_can_edit_subtitles(request.user),
+        'can_edit': workflow.user_can_edit_subtitles(
+            request.user, subtitle_language.language_code),
     })
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
