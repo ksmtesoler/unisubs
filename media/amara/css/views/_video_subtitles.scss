@@ -46,7 +46,7 @@
       &.pending {
 
       }
-      &.needed {
+      &.current {
         color: $plum;
         background-color: $gray-light;
         &:before {

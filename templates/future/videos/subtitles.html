@@ -67,7 +67,7 @@
             {% if steps %}
             <ol>
               {% for step in steps %}
-              <li{% if step.current %} class="needed"{% endif %}>
+              <li{% if step.current %} class="current"{% endif %}>
                 <span class="col-xs-6">{{ step.label }}</span>
                 <span class="col-xs-6">
                   {% if step.user %}
