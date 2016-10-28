@@ -54,7 +54,8 @@ from teams.permissions import (
 from teams.permissions_const import ROLE_NAMES
 from teams.workflows import TeamWorkflow
 from videos.forms import (AddFromFeedForm, VideoForm, CreateSubtitlesForm,
-                          MultiVideoCreateSubtitlesForm, VideoURLField)
+                          MultiVideoCreateSubtitlesForm, VideoURLField,
+                          VideoLanguageField, VideoDurationField)
 from videos.models import (
         VideoMetadata, VIDEO_META_TYPE_IDS, Video, VideoFeed,
 )
@@ -1000,16 +1001,14 @@ class VideoFiltersForm(forms.Form):
     Note that this form is a bit weird because it uses the GET params, rather
     than POST data.
     """
-    q = forms.CharField(label=_('Title/Description'), required=False)
-    project = forms.ChoiceField(label=_('Project'), required=False,
+    q = forms.CharField(label="", required=False, widget=forms.TextInput(attrs={
+        'placeholder': _('Search for videos')
+    }))
+    language = VideoLanguageField(label="", required=False)
+    project = forms.ChoiceField(label="", required=False, widget=forms.RadioSelect,
                                 choices=[])
-    has_language = forms.ChoiceField(
-        label=_('Has completed language'), required=False,
-        choices=get_language_choices(with_empty=True))
-    missing_language = forms.ChoiceField(
-        label=_('Missing completed language'), required=False,
-        choices=get_language_choices(with_empty=True))
-    sort = forms.ChoiceField(choices=[
+    duration = VideoDurationField(label="", required=False, widget=forms.RadioSelect)
+    sort = forms.ChoiceField(label="", choices=[
         ('name', _('Name, a-z')),
         ('-name', _('Name, z-a')),
         ('time', _('Time, oldest')),
@@ -1029,9 +1028,9 @@ class VideoFiltersForm(forms.Form):
         if get_data is None:
             return None
         data = {
-            name: value
-            for name, value in get_data.items()
-            if name not in ('page', 'selection')
+            name: get_data[name]
+            for name in self.base_fields.keys()
+            if name in get_data
         }
         return data if data else None
 
@@ -1057,8 +1056,6 @@ class VideoFiltersForm(forms.Form):
 
     def get_queryset(self):
         project = self.cleaned_data.get('project')
-        has_language = self.cleaned_data.get('has_language')
-        missing_language = self.cleaned_data.get('missing_language')
         q = self.cleaned_data['q']
         sort = self.cleaned_data['sort']
 
@@ -1066,10 +1063,6 @@ class VideoFiltersForm(forms.Form):
 
         if q:
             qs = qs.search(q)
-        if has_language:
-            qs = qs.has_completed_language(has_language)
-        if missing_language:
-            qs = qs.missing_completed_language(missing_language)
         if project:
             if project == 'none':
                 project = Project.DEFAULT_NAME
@@ -1079,6 +1072,9 @@ class VideoFiltersForm(forms.Form):
                     slug=project)
             except Project.DoesNotExist:
                 pass
+        for name in ('duration', 'language'):
+            qs = self.fields[name].filter_query(
+                qs, self.cleaned_data.get(name))
 
         if sort in ('subs', '-subs'):
             qs = qs.add_num_completed_languages()
@@ -1093,16 +1089,6 @@ class VideoFiltersForm(forms.Form):
         }.get(sort or '-time'))
 
         return qs.select_related('video')
-
-    def is_filtered(self):
-        return self.is_bound and self.is_valid()
-
-    def get_current_filters(self):
-        return [
-            u'{}: {}'.format(self[name].label,
-                             get_label_for_value(self, name))
-            for name in self.changed_data
-        ]
 
 class ActivityFiltersForm(forms.Form):
     SORT_CHOICES = [

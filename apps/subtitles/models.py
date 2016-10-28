@@ -27,7 +27,7 @@ from datetime import datetime, date, timedelta
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import query, Q
+from django.db.models import query, Q, Count
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
@@ -1175,6 +1175,18 @@ LIMIT 1;""", (self.id, self.id))
             return True
 
         return False
+
+    @classmethod
+    def count_completed_subtitles(cls, videos):
+        """Count the completed subtitles for a set of videos
+
+        Returns: dict mapping video.id to the completed language count
+        """
+        qs = cls.objects.all().filter(video__in=videos, subtitles_complete=True)
+        return {
+            d['video_id']: d['count']
+            for d in qs.values('video_id').annotate(count=Count('id'))
+        }
 
 
 # SubtitleVersions ------------------------------------------------------------

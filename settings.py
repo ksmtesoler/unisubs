@@ -421,6 +421,7 @@ MEDIA_BUNDLES = {
             # TODO: move this out of src once we don't need it for site.js
             'src/js/third-party/behaviors.js',
             'amara/js/ajaxForm.js',
+            'amara/js/proxyField.js',
             'amara/js/dropdownFilter.js',
             'amara/js/videoPage.js',
             'amara/js/videoSubtitles.js',

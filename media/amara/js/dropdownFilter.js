@@ -42,38 +42,40 @@ function dropdownFilter(select) {
 function languageChoiceData(select) {
     var data = [];
     var enabledSelections = select.data('languageOptions').split(" ");
+    var initial = select.data('initial');
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
     }
     if(sectionEnabled('any')) {
         data.push({
             id: 'any',
-            text: gettext('Any language')
+            text: gettext('Any language'),
+            selected: initial == 'any'
         });
     }
     if(sectionEnabled('my')) {
         data.push({
             text: gettext('My Languages'),
-            children: _.map(userLanguages, languageChoice)
+            children: _.map(userLanguages, languageChoice, initial)
         });
     }
     if(sectionEnabled('popular')) {
         data.push({
             text: gettext('Popular Languages'),
-            children: _.map(popularLanguages, languageChoice)
+            children: _.map(popularLanguages, languageChoice, initial)
         });
     }
     if(sectionEnabled('all')) {
         data.push({
             text: gettext('All Languages'),
-            children: _.map(allLanguages, languageChoice)
+            children: _.map(allLanguages, languageChoice, initial)
         });
     }
     return data;
 }
 
 function languageChoice(code) {
-    return { id: code, text: getLanguageName(code) };
+    return { id: code, text: getLanguageName(code), selected: code == this };
 }
 
 })(jQuery);

@@ -1,0 +1,19 @@
+{% load i18n videos_tags %}
+{% load url from future %}
+<div class="videoCard">
+  <header class="videoCard-header">
+    {% if priority %}<span class="videoCard-priority"><i class="icon icon-star"></i></span>{% endif %}
+    {% if video.duration %}<span class="videoCard-duration">{{ video.duration|format_duration }}</span>{% endif %}
+  </header>
+  <div class="videoCard-thumbnail">
+    <a href="{{ video.get_absolute_url }}{% if team %}?team={{ team.slug }}{% endif %}">
+      <img class="videoCard-img" src="{{ video.get_huge_thumbnail }}" />
+      <div class="videoCard-caption">
+        <h4 class="videoCard-title">{{ video.title_display }}</h4>
+        {% block subtitle %}{% if subtitle %}<h5 class="videoCard-subtitle">{{ subtitle }}</h5>{% endif %}{% endblock %}
+      </div>
+    </a>
+  </div>
+  {% block footer %}<footer class="videoCard-footer"></footer>{% endblock %}
+  {% block extra %}{% endblock %}
+</div>

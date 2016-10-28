@@ -1,0 +1,31 @@
+{% extends "future/teams/base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-4">
+        {% block left-column %}
+        {% endblock %}
+      </div>
+      <div class="col-xs-12 col-sm-8">
+        {% if extra_tabs %}
+        <ul class="nav nav-tabs">
+          <li><a href="{% url "team:videos" team.slug %}"{% if tab == "videos" %} class="active"{% endif %}>{% trans "All Videos" %}</a></li>
+          {% for name, label, href in extra_tabs %}
+          <li><a href="{{ href }}"{% if tab == name %} class="active"{% endif %}>{{ label }}</a></li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <h1>{% trans "Videos" %}</h1>
+        {% endif %}
+
+        {% block main-column %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

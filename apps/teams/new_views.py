@@ -40,7 +40,7 @@ from django.db.models import Q
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseBadRequest, HttpResponseForbidden)
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ungettext
 
 from . import views as old_views
 from . import forms
@@ -58,9 +58,10 @@ from auth.models import CustomUser as User
 from messages import tasks as messages_tasks
 from subtitles.models import SubtitleLanguage
 from teams.workflows import TeamWorkflow
+from utils.ajax import AJAXResponseRenderer
 from utils.breadcrumbs import BreadCrumb
 from utils.decorators import staff_member_required
-from utils.pagination import AmaraPaginator
+from utils.pagination import AmaraPaginator, AmaraPaginatorFuture
 from utils.forms import autocomplete_user_view, FormRouter
 from utils.text import fmt
 from utils.translation import get_language_label
@@ -69,7 +70,7 @@ from videos.models import Video
 logger = logging.getLogger('teams.views')
 
 ACTIONS_PER_PAGE = 20
-VIDEOS_PER_PAGE = 8
+VIDEOS_PER_PAGE = 12
 MEMBERS_PER_PAGE = 10
 
 def team_view(view_func):
@@ -262,75 +263,47 @@ class VideoPageForms(object):
 def _videos_and_filters_form(request, team):
     filters_form = forms.VideoFiltersForm(team, request.GET)
     if filters_form.is_bound and filters_form.is_valid():
-        team_videos = filters_form.get_queryset()
+        videos = filters_form.get_queryset()
     else:
-        team_videos = (team.videos.all()
+        videos = (team.videos.all()
                        .order_by('-created')
                        .select_related('teamvideo'))
         main_project = get_main_project(team)
         if main_project:
-            team_videos = team_videos.filter(
+            videos = videos.filter(
                 video__teamvideo__project=main_project)
-    return team_videos, filters_form
+    return videos, filters_form
 
 @with_old_view(old_views.detail)
 @team_view
 def videos(request, team):
-    team_videos, filters_form = _videos_and_filters_form(request, team)
-
-    page_forms = VideoPageForms(team, request.user, team_videos)
-    error_form = error_form_name = None
-
-    add_form, add_formset = page_forms.build_add_multiple_forms(request, filters_form)
-    if add_form.is_bound and add_form.is_valid() and add_formset.is_bound and add_formset.is_valid():
-        errors = ""
-        added = 0
-        project = add_form.cleaned_data['project']
-        thumbnail = add_form.cleaned_data['thumbnail']
-        language = add_form.cleaned_data['language']
-        for form in add_formset:
-            created, error = form.save(team, request.user, project=project, thumbnail=thumbnail, language=language)
-            if len(error) > 0:
-                errors += error + "<br/>"
-            if created:
-                added += 1
-        message = fmt(_(u"%(added)i videos added<br/>%(errors)s"), added=added, errors=errors)
-        messages.success(request, message)
-        return HttpResponseRedirect(request.build_absolute_uri())
-    paginator = AmaraPaginator(team_videos, VIDEOS_PER_PAGE)
+    videos, filters_form = _videos_and_filters_form(request, team)
+    paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE)
     page = paginator.get_page(request)
-
-    if request.method == 'POST':
-        csv_form = forms.TeamVideoCSVForm(data=request.POST, files=request.FILES)
-        if csv_form.is_bound and csv_form.is_valid():
-            csv_file = csv_form.cleaned_data['csv_file']
-            if csv_file is not None:
-                try:
-                    add_videos_from_csv(team, request.user, csv_file)
-                    message = fmt(_(u"File successfully uploaded, you should receive the summary shortly."))
-                except:
-                    message = fmt(_(u"File was not successfully parsed."))
-                messages.success(request, message)
-    else:
-        csv_form = forms.TeamVideoCSVForm()
-
-    return render(request, 'new-teams/videos.html', {
+    add_completed_subtitles_count(list(page))
+    context = {
         'team': team,
         'page': page,
         'paginator': paginator,
         'filters_form': filters_form,
-        'forms': page_forms,
-        'add_form': add_form,
-        'add_formset': add_formset,
-        'add_csv_form': csv_form,
-        'error_form': error_form,
-        'error_form_name': error_form_name,
-        'bulk_mode_enabled': page and page_forms.has_bulk_form,
-        'breadcrumbs': [
-            BreadCrumb(team, 'teams:dashboard', team.slug),
-            BreadCrumb(_('Videos')),
-        ],
-    })
+    }
+    if request.is_ajax():
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#video-list', 'future/teams/video-list.html', context
+        )
+        return response_renderer.render()
+
+    return render(request, 'future/teams/videos.html', context)
+
+def add_completed_subtitles_count(videos):
+    counts = SubtitleLanguage.count_completed_subtitles(videos)
+    for v in videos:
+        count=counts.get(v.id, 0)
+        msg = ungettext((u'%(count)s completed subtitle'),
+                        (u'%(count)s completed subtitles'),
+                        count)
+        v.completed_subtitles = fmt(msg, count=count)
 
 @team_view
 def videos_form(request, team, name):

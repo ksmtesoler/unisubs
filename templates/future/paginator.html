@@ -1,0 +1,19 @@
+{% if paginator.num_pages > 1 %}
+<nav class="text-center">
+  <ul class="pagination">
+    <li>
+      <a href="#" aria-label="Previous">
+        <span aria-hidden="true">&#xab;</span>
+      </a>
+    </li>
+    {% for number, url in page.nearest_page_links %}
+    <li{% if number == page.number %} class="active"{% endif %}><a href="{{ url }}">{{ number }}</a></li>
+    {% endfor %}
+    <li>
+      <a href="#" aria-label="Next">
+        <span aria-hidden="true">&#xbb;</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+{% endif %}

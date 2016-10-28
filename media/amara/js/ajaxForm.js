@@ -1,7 +1,7 @@
 // Simple ajax form implementation
 
 (function($) {
-    $.behaviors('form.ajax', ajaxForm);
+    $.behaviors('.ajaxForm', ajaxForm);
 
     function ajaxForm(form) {
         var submitting = false;
@@ -12,8 +12,11 @@
                 if(submitting) {
                     sawSecondSubmit = true;
                     return false;
-                } else {
-                    submitting = true;
+                }
+                submitting = true;
+                if(form.hasClass('updateLocation')) {
+                    history.pushState(null, "", window.location.protocol + "//" + window.location.host +
+                            window.location.pathname + '?' + form.formSerialize());
                 }
             },
             complete: function() {
@@ -43,8 +46,8 @@
             }
         });
 
-        if(form.hasClass('update-on-change')) {
-            $('select, input, textbox', form).change(submitIfChanged);
+        if(form.hasClass('updateOnChange')) {
+            $(':input', form).change(submitIfChanged);
             $('input[type=text]', form).keyup(submitIfChanged);
         }
 

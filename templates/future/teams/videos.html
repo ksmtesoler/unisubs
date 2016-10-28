@@ -1,0 +1,44 @@
+{% extends "future/teams/videos-base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block left-column %}
+<header>
+  <h1>{% trans "Filters" %}</h1>
+</header>
+<form method="GET" action="" class="ajaxForm updateOnChange updateLocation">
+  {{ filters_form.q.as_hidden }}
+  {{ filters_form.sort.as_hidden }}
+  <div class="filterList filterList-select">
+    <h3>{% trans "Video language" %}</h3>
+    {{ filters_form.language }}
+  </div>
+  {% if filters_form.project %}
+  <div class="filterList">
+    <h3>{% trans "Project" %}</h3>
+    {% include "future/_field.html" with field=filters_form.project %}
+  </div>
+  {% endif %}
+  <div class="filterList">
+    <h3>{% trans "Video length" %}</h3>
+    {% include "future/_field.html" with field=filters_form.duration %}
+  </div>
+</form>
+{% endblock %}
+
+
+{% block main-column %}
+<div class="row">
+  <div class="col-xs-8 proxyField deferUpdate" data-proxy-for="#id_q">
+    <div class="form-group searchbar">
+      {{ filters_form.q }}
+    </div>
+  </div>
+  <div class="col-xs-4 proxyField" data-proxy-for="#id_sort">
+    <div class="form-group select-border">
+      {{ filters_form.sort }}
+    </div>
+  </div>
+</div>
+<div id="video-list">{% include "future/teams/video-list.html" %}</div>
+{% endblock %}

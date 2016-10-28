@@ -19,8 +19,36 @@
 """utils.forms.languages -- form fields for selecting languages."""
 
 from django import forms
+from django.forms.util import flatatt
+from django.utils.safestring import mark_safe
 
 from utils.translation import get_language_choices
+
+class LanguageDropdown(forms.Select):
+    """Widget that renders a language dropdown
+
+    Attrs:
+        options: space separate string containing language options.  Each one
+            of these corresponds to a section on the dropdown.  If present,
+            that section will be enabled.  Possible values are "any", "my",
+            "popular" and "all".
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(LanguageDropdown, self).__init__(*args, **kwargs)
+        self.options = "any my popular all"
+
+    def render(self, name, value, attrs, choices=()):
+        final_attrs = attrs.copy()
+        final_attrs['name'] = name
+        if 'class' in final_attrs:
+            final_attrs['class'] += ' dropdownFilter'
+        else:
+            final_attrs['class'] = 'dropdownFilter'
+        final_attrs['data-language-options'] = self.options
+        if value:
+            final_attrs['data-initial'] = value
+        return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
 
 class MultipleLanguageChoiceField(forms.MultipleChoiceField):
     # TODO: implement a nicer widget for selecting multiple languages
