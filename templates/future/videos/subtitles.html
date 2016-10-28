@@ -90,7 +90,7 @@
           <section class="videoSubtitles-revisions">
             <header>
               <h3>{% trans "Revisions" %}</h3>
-              <div class="header-actions"><a href="#" class="videoSubtitles-compare" data-url-template="{% url "videos:diffing" "111" "222" %}" title="{% trans "Compare revisions" %}">{% trans "Compare revisions" %}</a></div>
+              <div class="header-actions"><a href="#" class="videoSubtitles-compare disabled" data-url-template="{% url "videos:diffing" "111" "222" %}" title="{% trans "Compare revisions" %}">{% trans "Compare revisions" %}</a></div>
             </header>
             <ul>
               {% for revision in all_subtitle_versions %}
@@ -119,6 +119,7 @@
           <section class="videoSubtitles-revisions">
             <header>
               <h3>{% trans "Revisions" %}</h3>
+              <div class="header-actions"><a href="#" class="disabled" title="{% trans "Compare revisions" %}">{% trans "Compare revisions" %}</a></div>
             </header>
             <ul>
               {% for revision in all_subtitle_versions %}

@@ -21,9 +21,9 @@
                 var id1 = checked.eq(0).data('id');
                 var id2 = checked.eq(1).data('id');
                 var url = compareLink.data('urlTemplate').replace(/111\/222\/$/, id1 + '/' + id2 + '/');
-                compareLink.attr("href", url);
+                compareLink.attr("href", url).removeClass('disabled');
             } else {
-                compareLink.attr("href", "#");
+                compareLink.attr("href", "#").addClass('disabled');
             }
         }
     }

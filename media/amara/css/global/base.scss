@@ -38,6 +38,11 @@ a {
   &.block {
     display: inline-block;
   }
+  &.disabled {
+    cursor: default;
+    color: $gray-light;
+    pointer-events: none;
+  }
 }
 
 em {
