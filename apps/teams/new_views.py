@@ -286,6 +286,7 @@ def videos(request, team):
         'page': page,
         'paginator': paginator,
         'filters_form': filters_form,
+        'team_nav': 'videos',
     }
     if request.is_ajax():
         response_renderer = AJAXResponseRenderer(request)
