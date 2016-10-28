@@ -287,6 +287,8 @@ def videos(request, team):
         'paginator': paginator,
         'filters_form': filters_form,
         'team_nav': 'videos',
+        'tab': 'videos',
+        'extra_tabs': team.new_workflow.team_video_page_extra_tabs(request),
     }
     if request.is_ajax():
         response_renderer = AJAXResponseRenderer(request)

@@ -2,10 +2,7 @@
 {% load i18n %}
 {% load url from future %}
 
-{% block left-column %}
-<header>
-  <h1>{% trans "Filters" %}</h1>
-</header>
+{% block filters %}
 <form method="GET" action="" class="ajaxForm updateOnChange updateLocation">
   {{ filters_form.q.as_hidden }}
   {{ filters_form.sort.as_hidden }}
@@ -26,8 +23,7 @@
 </form>
 {% endblock %}
 
-
-{% block main-column %}
+{% block filters2 %}
 <div class="row">
   <div class="col-xs-8 proxyField deferUpdate" data-proxy-for="#id_q">
     <div class="form-group searchbar">
@@ -40,5 +36,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block videos %}
 <div id="video-list">{% include "future/teams/video-list.html" %}</div>
 {% endblock %}

@@ -126,6 +126,13 @@ class TeamWorkflow(object):
         of a team."""
         return DONT_OVERRIDE
 
+    def team_video_page_extra_tabs(self, request):
+        """Add extra sub tabs to the team video page.
+
+        These appear near the top of the page.
+        """
+        return []
+
     def activity_type_filter_options(self):
         """
         Get possible activity type filter values
