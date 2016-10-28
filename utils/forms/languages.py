@@ -60,6 +60,9 @@ class LanguageField(forms.ChoiceField):
         if isinstance(self.widget, LanguageDropdown) and options:
             self.widget.options = options
 
+    def clean(self, value):
+        return value if value != 'any' else None
+
 class MultipleLanguageChoiceField(forms.MultipleChoiceField):
     # TODO: implement a nicer widget for selecting multiple languages
     widget = forms.SelectMultiple
