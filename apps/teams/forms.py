@@ -55,7 +55,7 @@ from teams.permissions_const import ROLE_NAMES
 from teams.workflows import TeamWorkflow
 from videos.forms import (AddFromFeedForm, VideoForm, CreateSubtitlesForm,
                           MultiVideoCreateSubtitlesForm, VideoURLField,
-                          VideoLanguageField, VideoDurationField)
+                          VideoDurationField)
 from videos.models import (
         VideoMetadata, VIDEO_META_TYPE_IDS, Video, VideoFeed,
 )
@@ -63,6 +63,7 @@ from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
 from utils.forms import (ErrorableModelForm, get_label_for_value,
                          UserAutocompleteField)
+from utils.forms import LanguageField
 from utils.panslugify import pan_slugify
 from utils.translation import get_language_choices, get_language_label
 from utils.text import fmt
@@ -1004,7 +1005,7 @@ class VideoFiltersForm(forms.Form):
     q = forms.CharField(label="", required=False, widget=forms.TextInput(attrs={
         'placeholder': _('Search for videos')
     }))
-    language = VideoLanguageField(label="", required=False)
+    language = LanguageField(label="", required=False)
     project = forms.ChoiceField(label="", required=False, widget=forms.RadioSelect,
                                 choices=[])
     duration = VideoDurationField(label="", required=False, widget=forms.RadioSelect)
@@ -1056,6 +1057,8 @@ class VideoFiltersForm(forms.Form):
 
     def get_queryset(self):
         project = self.cleaned_data.get('project')
+        duration = self.cleaned_data.get('duration')
+        language = self.cleaned_data.get('language')
         q = self.cleaned_data['q']
         sort = self.cleaned_data['sort']
 
@@ -1072,9 +1075,10 @@ class VideoFiltersForm(forms.Form):
                     slug=project)
             except Project.DoesNotExist:
                 pass
-        for name in ('duration', 'language'):
-            qs = self.fields[name].filter_query(
-                qs, self.cleaned_data.get(name))
+        if language:
+            qs = qs.filter(primary_audio_language_code=language)
+        if duration:
+            qs = self.fields['duration'].filter(qs, duration)
 
         if sort in ('subs', '-subs'):
             qs = qs.add_num_completed_languages()

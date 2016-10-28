@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from .autocomplete import AutocompleteTextInput
 from .dates import MonthChoiceField
 from .formrouter import FormRouter
-from .languages import MultipleLanguageChoiceField
+from .languages import (LanguageDropdown, LanguageField, MultipleLanguageChoiceField)
 from .recapcha import ReCaptchaField
 from .teamautocomplete import TeamAutocompleteField, autocomplete_team_view
 from .userautocomplete import UserAutocompleteField, autocomplete_user_view
@@ -27,6 +27,7 @@ class AjaxForm(object):
         return output
 
 class LanguageCodeField(forms.ChoiceField):
+    # DEPRECATED: the LanguageField should be used in the new UI
     def __init__(self, *args, **kwargs):
         self.with_any = kwargs.pop('with_any', None)
         kwargs['choices'] = self.static_choices() + get_language_choices()

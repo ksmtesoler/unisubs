@@ -50,6 +50,16 @@ class LanguageDropdown(forms.Select):
             final_attrs['data-initial'] = value
         return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
 
+class LanguageField(forms.ChoiceField):
+    widget = LanguageDropdown
+
+    def __init__(self, *args, **kwargs):
+        options = kwargs.pop('options', None)
+        kwargs['choices'] = get_language_choices()
+        super(LanguageField, self).__init__(*args, **kwargs)
+        if isinstance(self.widget, LanguageDropdown) and options:
+            self.widget.options = options
+
 class MultipleLanguageChoiceField(forms.MultipleChoiceField):
     # TODO: implement a nicer widget for selecting multiple languages
     widget = forms.SelectMultiple

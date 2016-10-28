@@ -39,7 +39,6 @@ from teams.permissions import can_create_and_edit_subtitles
 from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
 from utils.forms import AjaxForm, EmailListField, UsernameListField, StripRegexField, FeedURLField, ReCaptchaField
-from utils.forms.languages import LanguageDropdown
 from utils import http
 from utils.text import fmt
 from utils.translation import get_language_choices, get_user_languages_from_request
@@ -74,7 +73,7 @@ class VideoDurationField(forms.ChoiceField):
             kwargs['initial'] = ''
         super(VideoDurationField, self).__init__(*args, **kwargs)
 
-    def filter_query(self, qs, value):
+    def filter(self, qs, value):
         if value == self.DURATION_SHORT:
             qs = qs.filter(duration__lt=10*60)
         elif value == self.DURATION_MEDIUM:
@@ -83,20 +82,6 @@ class VideoDurationField(forms.ChoiceField):
         elif value == self.DURATION_LONG:
             qs = qs.filter(duration__gte=(30*60))
         return qs
-
-class VideoLanguageField(forms.ChoiceField):
-    widget = LanguageDropdown
-
-    def __init__(self, *args, **kwargs):
-        options = kwargs.pop('options', None)
-        kwargs['choices'] = get_language_choices()
-        super(VideoLanguageField, self).__init__(*args, **kwargs)
-        if isinstance(self.widget, LanguageDropdown) and options:
-            self.widget.options = options
-
-    def filter_query(self, qs, value):
-        if value:
-            return qs.filter(primary_audio_language_code=value)
 
 class VideoURLField(forms.URLField):
     """Field for inputting URLs for videos.
