@@ -1016,7 +1016,6 @@ class VideoFiltersForm(FiltersForm):
         self.team = team
         super(VideoFiltersForm, self).__init__(get_data, **kwargs)
         self.setup_project_field()
-        self.selected_project = None
 
     def setup_project_field(self):
         projects = Project.objects.for_team(self.team)
@@ -1033,10 +1032,8 @@ class VideoFiltersForm(FiltersForm):
                 self.fields['project'].initial = ''
             else:
                 self.fields['project'].initial = main_project.slug
-            self.show_project = True
         else:
             del self.fields['project']
-            self.show_project = False
 
     def get_queryset(self):
         project = self.cleaned_data.get('project')
@@ -1053,11 +1050,6 @@ class VideoFiltersForm(FiltersForm):
             if project == 'none':
                 project = Project.DEFAULT_NAME
             qs = qs.filter(teamvideo__project__slug=project)
-            try:
-                self.selected_project = self.team.project_set.get(
-                    slug=project)
-            except Project.DoesNotExist:
-                pass
         if language:
             qs = qs.filter(primary_audio_language_code=language)
         if duration:
