@@ -62,8 +62,7 @@ from videos.models import (
 from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
 from utils.forms import (ErrorableModelForm, get_label_for_value,
-                         UserAutocompleteField)
-from utils.forms import LanguageField
+                         UserAutocompleteField, LanguageField, FiltersForm)
 from utils.panslugify import pan_slugify
 from utils.translation import get_language_choices, get_language_label
 from utils.text import fmt
@@ -996,12 +995,7 @@ class MoveVideosForm(forms.Form):
         super(MoveVideosForm, self).__init__(*args, **kwargs)
         self.fields['team'].queryset = user.managed_teams(include_manager=False)
 
-class VideoFiltersForm(forms.Form):
-    """Form to handle the filters on the team videos page
-
-    Note that this form is a bit weird because it uses the GET params, rather
-    than POST data.
-    """
+class VideoFiltersForm(FiltersForm):
     q = forms.CharField(label="", required=False, widget=forms.TextInput(attrs={
         'placeholder': _('Search for videos')
     }))
@@ -1019,21 +1013,10 @@ class VideoFiltersForm(forms.Form):
     ], initial='-time', required=False)
 
     def __init__(self, team, get_data=None, **kwargs):
-        super(VideoFiltersForm, self).__init__(data=self.calc_data(get_data),
-                                               **kwargs)
         self.team = team
+        super(VideoFiltersForm, self).__init__(get_data, **kwargs)
         self.setup_project_field()
         self.selected_project = None
-
-    def calc_data(self, get_data):
-        if get_data is None:
-            return None
-        data = {
-            name: get_data[name]
-            for name in self.base_fields.keys()
-            if name in get_data
-        }
-        return data if data else None
 
     def setup_project_field(self):
         projects = Project.objects.for_team(self.team)

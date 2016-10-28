@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 
 from .autocomplete import AutocompleteTextInput
 from .dates import MonthChoiceField
+from .filters import FiltersForm
 from .formrouter import FormRouter
 from .languages import (LanguageDropdown, LanguageField, MultipleLanguageChoiceField)
 from .recapcha import ReCaptchaField
