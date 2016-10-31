@@ -59,6 +59,16 @@
   }
 }
 
+.navIcons {
+  .navIcons-item {
+    padding:5px 20px 5px 0;
+    i {
+      font-size: 20px;
+      color: $gray;
+    }
+  }
+}
+
 .nav-actions {
   position: relative;
   padding: 10px 0;
