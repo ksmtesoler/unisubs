@@ -1180,14 +1180,20 @@ LIMIT 1;""", (self.id, self.id))
     def count_completed_subtitles(cls, videos):
         """Count the completed subtitles for a set of videos
 
-        Returns: dict mapping video.id to the completed language count
+        Returns: dict mapping video.id to (incomplete_count, completed_count)
         """
-        qs = cls.objects.all().filter(video__in=videos, subtitles_complete=True)
-        return {
-            d['video_id']: d['count']
-            for d in qs.values('video_id').annotate(count=Count('id'))
+        qs = (cls.objects.all().filter(video__in=videos)
+              .values('video_id', 'subtitles_complete')
+              .annotate(count=Count('id')))
+        count_map = {
+            (d['video_id'], d['subtitles_complete']): d['count']
+            for d in qs
         }
-
+        return {
+            video.id: (count_map.get((video.id, False), 0),
+                       count_map.get((video.id, True), 0))
+            for video in videos
+        }
 
 # SubtitleVersions ------------------------------------------------------------
 class SubtitleVersionManager(models.Manager):

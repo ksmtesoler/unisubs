@@ -71,6 +71,7 @@ logger = logging.getLogger('teams.views')
 
 ACTIONS_PER_PAGE = 20
 VIDEOS_PER_PAGE = 12
+VIDEOS_PER_PAGE_MANAGEMENT = 5
 MEMBERS_PER_PAGE = 10
 
 def team_view(view_func):
@@ -260,24 +261,14 @@ class VideoPageForms(object):
         for ext_form in self.get_extension_forms():
             yield ext_form.form_class
 
-def _videos_and_filters_form(request, team):
-    filters_form = forms.VideoFiltersForm(team, request.GET)
-    if filters_form.is_bound and filters_form.is_valid():
-        videos = filters_form.get_queryset()
-    else:
-        videos = (team.videos.all()
-                       .order_by('-created')
-                       .select_related('teamvideo'))
-        main_project = get_main_project(team)
-        if main_project:
-            videos = videos.filter(
-                video__teamvideo__project=main_project)
-    return videos, filters_form
-
 @with_old_view(old_views.detail)
 @team_view
 def videos(request, team):
-    videos, filters_form = _videos_and_filters_form(request, team)
+    filters_form = forms.VideoFiltersForm(team, request.GET)
+    filters_form.set_initial_project(get_main_project(team))
+    videos = filters_form.get_queryset().select_related('teamvideo',
+                                                        'teamvideo__video')
+
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE)
     page = paginator.get_page(request)
     add_completed_subtitles_count(list(page))
@@ -302,7 +293,7 @@ def videos(request, team):
 def add_completed_subtitles_count(videos):
     counts = SubtitleLanguage.count_completed_subtitles(videos)
     for v in videos:
-        count=counts.get(v.id, 0)
+        count = counts[v.id][1]
         msg = ungettext((u'%(count)s completed subtitle'),
                         (u'%(count)s completed subtitles'),
                         count)
@@ -770,6 +761,32 @@ def welcome(request, team):
         ]),
         'videos': videos,
     })
+
+@team_view
+def management(request, team):
+    filters_form = forms.ManagementVideoFiltersForm(team, request.GET)
+    videos = filters_form.get_queryset().select_related('teamvideo',
+                                                        'teamvideo__video')
+    paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
+    page = paginator.get_page(request)
+    team.new_workflow.video_management_add_counts(list(page))
+    context = {
+        'team': team,
+        'page': page,
+        'paginator': paginator,
+        'filters_form': filters_form,
+        'team_nav': 'management',
+        'current_tab': 'videos',
+        'extra_tabs': team.new_workflow.management_page_extra_tabs(request),
+    }
+    if request.is_ajax():
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#video-list', 'future/teams/management/video-list.html', context
+        )
+        return response_renderer.render()
+
+    return render(request, 'future/teams/management/videos.html', context)
 
 @team_settings_view
 def settings_basic(request, team):

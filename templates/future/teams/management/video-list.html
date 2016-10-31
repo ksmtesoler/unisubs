@@ -1,0 +1,14 @@
+{% load i18n videos_tags %}
+{% if page %}
+{% load url from future %}
+<ul id="video-list" class="selectList">
+  {% for video in page %}
+  {% include "future/teams/management/video-item.html" with subtitle=video|speaker_name %}
+  {% endfor %}
+</ul>
+<div class="row">
+  {% include "future/paginator.html" %}
+</div>
+{% else %}
+<div class="zero-state">{% trans "No videos" %}</div>
+{% endif %}

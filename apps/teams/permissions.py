@@ -512,6 +512,10 @@ def can_view_settings_tab(team, user):
 
     return role in [ROLE_ADMIN, ROLE_OWNER]
 
+def can_view_management_tab(team, user):
+    """Return whether the given user can view the management pages """
+    return team.user_is_manager(user)
+
 def can_view_stats_tab(team, user):
     role = get_role_for_target(user, team)
     return not role == ROLE_OUTSIDER

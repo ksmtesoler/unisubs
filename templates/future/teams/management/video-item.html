@@ -1,0 +1,21 @@
+{% load i18n %}
+<li class="row condensed">
+  <div class="checkbox">
+    <input name="videos" value="{{ video.id }}" id="video-{{ video.id }}" type="checkbox">
+    <label for="video-{{ video.id }}"><span></span></label>
+  </div>
+  <div class="col-xs-3">
+    <img src="{{ video.get_huge_thumbnail }}" alt="" class="img-responsive">
+  </div>
+  <div class="col-xs-8">
+    <h3><a href="{{ video.get_absolute_url }}">{% if subtitle %}{% blocktrans with video_title=video.title_display %}{{ subtitle }}: {{ video_title }}{% endblocktrans %}{% else %}{{ video.title_display }}{% endif %}</a></h3>
+    <h4>{{ video.get_primary_audio_language_code_display }}</h4>
+    {% if video.counts %}
+    <ul class="subtitleCounts">
+      {% for text in video.counts %}
+      <li>{{ text }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</li>

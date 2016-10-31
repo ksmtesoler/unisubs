@@ -38,7 +38,6 @@ from django.utils.translation import ungettext
 
 from activity.models import ActivityRecord
 from subtitles.forms import SubtitlesUploadForm
-from teams.behaviors import get_main_project
 from teams.models import (
     Team, TeamMember, TeamVideo, Task, Project, Workflow, Invite,
     BillingReport, MembershipNarrowing, Application
@@ -1001,7 +1000,7 @@ class VideoFiltersForm(FiltersForm):
     }))
     language = LanguageField(label="", required=False)
     project = forms.ChoiceField(label="", required=False, widget=forms.RadioSelect,
-                                choices=[])
+                                initial='', choices=[])
     duration = VideoDurationField(label="", required=False, widget=forms.RadioSelect)
     sort = forms.ChoiceField(label="", choices=[
         ('name', _('Name, a-z')),
@@ -1027,20 +1026,25 @@ class VideoFiltersForm(FiltersForm):
                 (p.slug, p.name) for p in projects
             ]
             self.fields['project'].choices = choices
-            main_project = get_main_project(self.team)
-            if main_project is None:
-                self.fields['project'].initial = ''
-            else:
-                self.fields['project'].initial = main_project.slug
         else:
             del self.fields['project']
 
+    def set_initial_project(self, slug):
+        if 'project' in self.fields and slug:
+            self.initial['project'] = slug
+
     def get_queryset(self):
-        project = self.cleaned_data.get('project')
-        duration = self.cleaned_data.get('duration')
-        language = self.cleaned_data.get('language')
-        q = self.cleaned_data['q']
-        sort = self.cleaned_data['sort']
+        if self.is_bound and self.is_valid():
+            return self._get_queryset(self.cleaned_data)
+        else:
+            return self._get_queryset(self.initial)
+
+    def _get_queryset(self, data):
+        project = data.get('project')
+        duration = data.get('duration')
+        language = data.get('language')
+        q = data.get('q')
+        sort = data.get('sort')
 
         qs = Video.objects.filter(teamvideo__team=self.team)
 
@@ -1068,6 +1072,23 @@ class VideoFiltersForm(FiltersForm):
         }.get(sort or '-time'))
 
         return qs.select_related('video')
+
+class ManagementVideoFiltersForm(VideoFiltersForm):
+    language = LanguageField(label="", required=False,
+                             options="any popular all")
+    completed_subtitles = LanguageField(label="", required=False,
+                                        options="any popular all")
+    needs_subtitles = LanguageField(label="", required=False,
+                                    options="any popular all")
+    def _get_queryset(self, data):
+        qs = super(ManagementVideoFiltersForm, self)._get_queryset(data)
+        completed_subtitles = data.get('completed_subtitles')
+        needs_subtitles = data.get('needs_subtitles')
+        if completed_subtitles:
+            qs = qs.has_completed_language(completed_subtitles)
+        if needs_subtitles:
+            qs = qs.missing_completed_language(needs_subtitles)
+        return qs
 
 class ActivityFiltersForm(forms.Form):
     SORT_CHOICES = [

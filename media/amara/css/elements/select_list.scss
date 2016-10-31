@@ -19,12 +19,6 @@ ul.selectList {
     color: $gray-darker;
     margin: 0;
   }
-  dl {
-    margin-bottom: 10px;
-    dt,dd{display:inline; font-weight: 100;}
-    dt {color: $gray-darker;}
-    dd {margin-right: 10px;}
-  }
   .actions {
     position: absolute;
     top: 0;

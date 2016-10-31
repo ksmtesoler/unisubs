@@ -44,8 +44,12 @@ from collections import namedtuple
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
+from django.utils.safestring import mark_safe
+from django.utils.translation import ungettext
 
+from subtitles.models import SubtitleLanguage
 from utils.behaviors import DONT_OVERRIDE
+from utils.text import fmt
 
 class TeamWorkflow(object):
     label = NotImplemented
@@ -132,6 +136,46 @@ class TeamWorkflow(object):
         These appear near the top of the page.
         """
         return []
+
+    def management_page_extra_tabs(self, request):
+        """Add extra sub tabs to the team management page.
+
+        These appear near the top of the page.
+        """
+        return []
+
+    def video_management_add_counts(self, videos):
+        """Add the subtitle counts for the videos management page
+
+        By default we add the number of completed subtitles, but other
+        workflows may want to add other/different counts.
+
+        For each video you can set the counts attribute to a list of strings.
+        Each string should describe a count of something, like the number of
+        completed subtitles.  The number should be wrapped in a <strong> tag
+        (and the whole thing should be wrapped in a mark_safe() call).
+        You can also set the counts2 attribute to create a
+        second line of counts.
+
+        Args:
+            videos -- List of Video instances.
+        """
+        counts = SubtitleLanguage.count_completed_subtitles(videos)
+        for v in videos:
+            incomplete_count, completed_count = counts[v.id]
+            v.counts = []
+            if completed_count > 0:
+                msg = ungettext(
+                    (u'<strong>%(count)s</strong> Completed subtitle'),
+                    (u'<strong>%(count)s</strong> Completed subtitles'),
+                    completed_count)
+                v.counts.append(mark_safe(fmt(msg, count=completed_count)))
+            if incomplete_count > 0:
+                msg = ungettext(
+                    (u'<strong>%(count)s</strong> Incomplete subtitle'),
+                    (u'<strong>%(count)s</strong> Incomplete subtitles'),
+                    incomplete_count)
+                v.counts.append(mark_safe(fmt(msg, count=incomplete_count)))
 
     def activity_type_filter_options(self):
         """
