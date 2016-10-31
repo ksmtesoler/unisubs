@@ -763,7 +763,7 @@ def welcome(request, team):
     })
 
 @team_view
-def management(request, team):
+def manage_videos(request, team):
     filters_form = forms.ManagementVideoFiltersForm(team, request.GET)
     videos = filters_form.get_queryset().select_related('teamvideo',
                                                         'teamvideo__video')
