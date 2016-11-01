@@ -43,13 +43,15 @@ function languageChoiceData(select) {
     var data = [];
     var enabledSelections = select.data('languageOptions').split(" ");
     var initial = select.data('initial');
+    var anyLabel = select.data('languageAnyLabel') || gettext('Any language');
+
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
     }
     if(sectionEnabled('any')) {
         data.push({
             id: 'any',
-            text: gettext('Any language'),
+            text: anyLabel,
             selected: initial == 'any'
         });
     }

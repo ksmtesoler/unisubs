@@ -37,6 +37,7 @@ class LanguageDropdown(forms.Select):
     def __init__(self, *args, **kwargs):
         super(LanguageDropdown, self).__init__(*args, **kwargs)
         self.options = "any my popular all"
+        self.any_label = None
 
     def render(self, name, value, attrs, choices=()):
         final_attrs = attrs.copy()
@@ -46,6 +47,8 @@ class LanguageDropdown(forms.Select):
         else:
             final_attrs['class'] = 'dropdownFilter'
         final_attrs['data-language-options'] = self.options
+        if self.any_label:
+            final_attrs['data-language-any-label'] = self.any_label
         if value:
             final_attrs['data-initial'] = value
         return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
@@ -55,10 +58,14 @@ class LanguageField(forms.ChoiceField):
 
     def __init__(self, *args, **kwargs):
         options = kwargs.pop('options', None)
+        dashed_any_label = kwargs.pop('dashed_any_label', None)
         kwargs['choices'] = get_language_choices()
         super(LanguageField, self).__init__(*args, **kwargs)
-        if isinstance(self.widget, LanguageDropdown) and options:
-            self.widget.options = options
+        if isinstance(self.widget, LanguageDropdown):
+            if options:
+                self.widget.options = options
+            if dashed_any_label:
+                self.widget.any_label = '--------'
 
     def clean(self, value):
         return value if value != 'any' else None
