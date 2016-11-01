@@ -166,14 +166,14 @@ class TeamWorkflow(object):
             v.counts = []
             if completed_count > 0:
                 msg = ungettext(
-                    (u'<strong>%(count)s</strong> Completed subtitle'),
-                    (u'<strong>%(count)s</strong> Completed subtitles'),
+                    (u'<strong>%(count)s</strong> subtitle completed'),
+                    (u'<strong>%(count)s</strong> subtitles completed'),
                     completed_count)
                 v.counts.append(mark_safe(fmt(msg, count=completed_count)))
             if incomplete_count > 0:
                 msg = ungettext(
-                    (u'<strong>%(count)s</strong> Incomplete subtitle'),
-                    (u'<strong>%(count)s</strong> Incomplete subtitles'),
+                    (u'<strong>%(count)s</strong> subtitle needed'),
+                    (u'<strong>%(count)s</strong> subtitles needed'),
                     incomplete_count)
                 v.counts.append(mark_safe(fmt(msg, count=incomplete_count)))
 
