@@ -42,7 +42,7 @@ from teams.models import (
     Team, TeamMember, TeamVideo, Task, Project, Workflow, Invite,
     BillingReport, MembershipNarrowing, Application
 )
-from teams import permissions
+from teams import behaviors, permissions
 from teams.exceptions import ApplicationInvalidException
 from teams.fields import TeamMemberInput
 from teams.permissions import (
@@ -994,13 +994,47 @@ class MoveVideosForm(forms.Form):
         super(MoveVideosForm, self).__init__(*args, **kwargs)
         self.fields['team'].queryset = user.managed_teams(include_manager=False)
 
+class ProjectField(forms.ChoiceField):
+    def __init__(self, *args, **kwargs):
+        if 'widget' not in kwargs:
+            kwargs['widget'] = forms.RadioSelect
+        super(ProjectField, self).__init__(*args, **kwargs)
+        self.enabled = True
+
+    def setup(self, team, promote_main_project=False):
+        projects = list(Project.objects.for_team(team))
+        if projects:
+            self.initial = ''
+            if promote_main_project:
+                main_project = behaviors.get_main_project(team)
+                if main_project:
+                    projects.remove(main_project)
+                    projects.insert(0, main_project)
+                    self.initial = main_project.slug
+            choices = [
+                ('', _('Any')),
+                ('none', _('No Project')),
+            ] + [
+                (p.slug, p.name) for p in projects
+            ]
+            self.choices = choices
+        else:
+            self.enabled = False
+
+    def clean(self, value):
+        if not self.enabled:
+            return ''
+        if value == 'none':
+            return Project.DEFAULT_NAME
+        else:
+            return value
+
 class VideoFiltersForm(FiltersForm):
     q = forms.CharField(label="", required=False, widget=forms.TextInput(attrs={
         'placeholder': _('Search for videos')
     }))
     language = LanguageField(label="", required=False)
-    project = forms.ChoiceField(label="", required=False, widget=forms.RadioSelect,
-                                initial='', choices=[])
+    project = ProjectField(label="", required=False)
     duration = VideoDurationField(label="", required=False, widget=forms.RadioSelect)
     sort = forms.ChoiceField(label="", choices=[
         ('-time', _('Time, newest')),
@@ -1011,27 +1045,12 @@ class VideoFiltersForm(FiltersForm):
         ('subs', _('Least complete languages')),
     ], initial='-time', required=False)
 
+    promote_main_project = True
+
     def __init__(self, team, get_data=None, **kwargs):
         self.team = team
         super(VideoFiltersForm, self).__init__(get_data, **kwargs)
-        self.setup_project_field()
-
-    def setup_project_field(self):
-        projects = Project.objects.for_team(self.team)
-        if projects:
-            choices = [
-                ('', _('Any')),
-                ('none', _('No Project')),
-            ] + [
-                (p.slug, p.name) for p in projects
-            ]
-            self.fields['project'].choices = choices
-        else:
-            del self.fields['project']
-
-    def set_initial_project(self, slug):
-        if 'project' in self.fields and slug:
-            self.initial['project'] = slug
+        self.fields['project'].setup(team, self.promote_main_project)
 
     def get_queryset(self):
         if self.is_bound and self.is_valid():
@@ -1080,6 +1099,9 @@ class ManagementVideoFiltersForm(VideoFiltersForm):
                                         options="any popular all")
     needs_subtitles = LanguageField(label="", required=False,
                                     options="any popular all")
+
+    promote_main_project = False
+
     def _get_queryset(self, data):
         qs = super(ManagementVideoFiltersForm, self)._get_queryset(data)
         completed_subtitles = data.get('completed_subtitles')

@@ -18,7 +18,7 @@
     <h3>{% trans "Needs subtitles" %}</h3>
     {{ filters_form.needs_subtitles }}
   </div>
-  {% if filters_form.project %}
+  {% if filters_form.fields.project.enabled %}
   <div class="filterList">
     <h3>{% trans "Project" %}</h3>
     {% include "future/_field.html" with field=filters_form.project %}

@@ -265,7 +265,6 @@ class VideoPageForms(object):
 @team_view
 def videos(request, team):
     filters_form = forms.VideoFiltersForm(team, request.GET)
-    filters_form.set_initial_project(get_main_project(team))
     videos = filters_form.get_queryset().select_related('teamvideo',
                                                         'teamvideo__video')
 
