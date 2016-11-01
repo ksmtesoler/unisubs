@@ -71,7 +71,7 @@ logger = logging.getLogger('teams.views')
 
 ACTIONS_PER_PAGE = 20
 VIDEOS_PER_PAGE = 12
-VIDEOS_PER_PAGE_MANAGEMENT = 5
+VIDEOS_PER_PAGE_MANAGEMENT = 20
 MEMBERS_PER_PAGE = 10
 
 def team_view(view_func):
