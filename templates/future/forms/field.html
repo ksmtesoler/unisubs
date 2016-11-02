@@ -1,6 +1,12 @@
 {% load form_helpers %}
 {% if field.is_hidden %}
 {{ field }}
+{% elif field|is_checkbox %}
+<div class="checkbox">{{ field }}<label for="{{ field.auto_id }}"><span></span>{{ field.label }}</label></div>
+{% include "_error-list.html" with errors=field.errors %}
+{% if field.help_text %}
+<p class="help-block">{{ field.help_text }}</p>
+{% endif %}
 {% else %}
 <div class="row">
   <div class="col col-xs-4">{{ field.label_tag }}</div>

@@ -1808,3 +1808,34 @@ class EditVideosForm(VideoManagementForm):
                         '%(count)s videos edited',
                         self.count)
         return fmt(msg, count=self.count)
+
+class DeleteVideosForm(VideoManagementForm):
+    name = 'delete'
+    label = _('Delete')
+    template = 'future/teams/management/forms/delete.html'
+    permissions_check = staticmethod(permissions.can_remove_videos)
+    css_class = 'cta-reverse'
+
+    delete = forms.BooleanField(
+        label=_('Delete entirely'), required=False, initial=False,
+        help_text=_('Delete videos rather than moving them to the '
+                    'public area'))
+
+    def setup_fields(self):
+        if not permissions.can_delete_video_in_team(self.team, self.user):
+            del self.fields['delete']
+
+    def perform_save(self, qs):
+        delete = self.cleaned_data.get('delete', False)
+
+        for team_video in qs:
+            video = team_video.video
+            team_video.remove(self.user)
+            if delete:
+                video.delete()
+
+    def message(self):
+        msg = ungettext('Video deleted',
+                        '%(count)s videos deleted',
+                        self.count)
+        return fmt(msg, count=self.count)

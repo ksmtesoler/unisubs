@@ -799,6 +799,7 @@ def manage_videos(request, team):
 # Functions to handle the forms on the videos pages
 video_management_forms = [
     forms.EditVideosForm,
+    forms.DeleteVideosForm,
 ]
 
 def all_manage_video_forms(team):
