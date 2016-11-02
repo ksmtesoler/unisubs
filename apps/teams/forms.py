@@ -982,7 +982,7 @@ class TeamMultiVideoCreateSubtitlesForm(MultiVideoCreateSubtitlesForm):
              .update(language=language))
         return MultiVideoCreateSubtitlesForm.handle_post(self)
 
-class MoveVideosForm(forms.Form):
+class OldMoveVideosForm(forms.Form):
     team = forms.ModelChoiceField(queryset=Team.objects.none(),
                                   required=True,
                                   empty_label=None)
@@ -991,7 +991,7 @@ class MoveVideosForm(forms.Form):
         fields = ('team')
 
     def __init__(self, user,  *args, **kwargs):
-        super(MoveVideosForm, self).__init__(*args, **kwargs)
+        super(OldMoveVideosForm, self).__init__(*args, **kwargs)
         self.fields['team'].queryset = user.managed_teams(include_manager=False)
 
 class ProjectField(forms.ChoiceField):
@@ -1839,3 +1839,107 @@ class DeleteVideosForm(VideoManagementForm):
                         '%(count)s videos deleted',
                         self.count)
         return fmt(msg, count=self.count)
+
+class MoveVideosForm(VideoManagementForm):
+    name = 'move'
+    label = _('Move')
+    template = 'future/teams/management/forms/move.html'
+
+    new_team = forms.ChoiceField(label=_('New Team'), choices=[])
+    project = forms.ChoiceField(label=_('Project'), choices=[],
+                                required=False)
+
+    @staticmethod
+    def permissions_check(team, user):
+        return permissions.can_move_videos_to(team, user) > 0
+
+    def setup_fields(self):
+        dest_teams = [self.team] + permissions.can_move_videos_to(
+            self.team, self.user)
+        dest_teams.sort(key=lambda t: t.name)
+        self.fields['new_team'].choices = [
+            (dest.id, dest.name) for dest in dest_teams
+        ]
+        self.setup_project_field(dest_teams)
+
+    def setup_project_field(self, dest_teams):
+        # choices regular django choices object.  project_options is a list of
+        # (id, name, team_id) tuples.  We need to store team_id in the
+        # <option> tag to make our javascript work
+        choices = [ ('', _('None')) ]
+        self.project_options = [
+            ('', _('None'), 0),
+        ]
+
+        qs = (Project.objects
+              .filter(team__in=dest_teams)
+              .exclude(name=Project.DEFAULT_NAME))
+        for project in qs:
+            choices.append((project.id, project.name))
+            self.project_options.append(
+                (project.id, project.name, project.team_id)
+            )
+        self.fields['project'].choices = choices
+        self['project'].field.initial = ''
+
+    def clean_project(self):
+        try:
+            team = self.cleaned_data['new_team']
+        except KeyError:
+            # No valid team, so we can't validate the project.
+            return None
+
+        project_id = self.cleaned_data.get('project', '')
+
+        if project_id == '':
+            return team.default_project
+
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            raise forms.ValidationError(_("Invalid project"))
+
+        if project.team_id != team.id:
+            raise forms.ValidationError(_("Project is not part of team"))
+        return project
+
+    def clean_new_team(self):
+        if not self.cleaned_data.get('new_team'):
+            return None
+        return Team.objects.get(id=self.cleaned_data['new_team'])
+
+    def perform_save(self, qs):
+        for team_video in qs:
+            team_video.move_to(self.cleaned_data['new_team'],
+                               self.cleaned_data['project'])
+
+    def message(self):
+        new_team = self.cleaned_data['new_team']
+        project = self.cleaned_data['project']
+        if new_team == self.team:
+            if project.is_default_project:
+                msg = ungettext(
+                    'Video removed from project',
+                    '%(count)s videos removed from projects',
+                    self.count)
+            else:
+                msg = ungettext(
+                    'Video moved to Project: %(project)s',
+                    '%(count)s moved to Project: %(project)s',
+                    self.count)
+        else:
+            if project.is_default_project:
+                msg = ungettext(
+                    'Video moved to %(team_link)s',
+                    '%(count)s moved to %(team_link)s',
+                    self.count)
+            else:
+                msg = ungettext(
+                    'Video moved to %(team_link)s (Project: %(project)s)',
+                    '%(count)s moved to %(team_link)s (Project: %(project)s)',
+                    self.count)
+        team_link = '<a href="{}">{}</a>.'.format(
+            reverse('teams:dashboard', args=(new_team.slug,)),
+            new_team)
+        return fmt(msg, team_link=team_link, project=project.name,
+                   count=self.count)

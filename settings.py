@@ -422,6 +422,7 @@ MEDIA_BUNDLES = {
             'src/js/third-party/behaviors.js',
             'amara/js/ajaxForm.js',
             'amara/js/proxyField.js',
+            'amara/js/dependentSelect.js',
             'amara/js/dropdownFilter.js',
             'amara/js/querystring.js',
             'amara/js/selectAll.js',

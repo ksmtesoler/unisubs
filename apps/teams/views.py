@@ -53,7 +53,7 @@ from teams.forms import (
     GuidelinesMessagesForm, RenameableSettingsForm, ProjectForm, LanguagesForm,
     DeleteLanguageForm, MoveTeamVideoForm, TaskUploadForm,
     make_billing_report_form, TaskCreateSubtitlesForm,
-    TeamMultiVideoCreateSubtitlesForm, MoveVideosForm, AddVideoToTeamForm,
+    TeamMultiVideoCreateSubtitlesForm, OldMoveVideosForm, AddVideoToTeamForm,
     GuidelinesLangMessagesForm,
 )
 from teams.models import (
@@ -623,7 +623,7 @@ def move_videos(request, slug, project_slug=None, languages=None):
     managed_projects_choices = map(lambda project: {'id': project.id, 'team': str(project.team.id), 'name': str(project)}, managed_projects)
 
     if request.method == 'POST':
-        form = MoveVideosForm(request.user, request.POST)
+        form = OldMoveVideosForm(request.user, request.POST)
         if 'move' in request.POST and form.is_valid():
             target_team = form.cleaned_data['team']
             if target_team not in managed_teams:
@@ -652,7 +652,7 @@ def move_videos(request, slug, project_slug=None, languages=None):
                 except MultipleObjectsReturned:
                     return  HttpResponseServerError("Internal Error")
     else:
-        form = MoveVideosForm(request.user)
+        form = OldMoveVideosForm(request.user)
      
     project_filter = (project_slug if project_slug is not None
                       else request.GET.get('project'))
