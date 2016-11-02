@@ -283,11 +283,11 @@ def videos(request, team):
     if request.is_ajax():
         response_renderer = AJAXResponseRenderer(request)
         response_renderer.replace(
-            '#video-list', 'future/teams/video-list.html', context
+            '#video-list', 'future/teams/videos/list.html', context
         )
         return response_renderer.render()
 
-    return render(request, 'future/teams/videos.html', context)
+    return render(request, 'future/teams/videos/videos.html', context)
 
 def add_completed_subtitles_count(videos):
     counts = SubtitleLanguage.count_completed_subtitles(videos)

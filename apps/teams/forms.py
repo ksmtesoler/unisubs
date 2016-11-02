@@ -1003,6 +1003,7 @@ class ProjectField(forms.ChoiceField):
         self.enabled = True
 
     def setup(self, team, promote_main_project=False, initial=None):
+        self.team = team
         projects = list(Project.objects.for_team(team))
         if projects:
             if promote_main_project:
@@ -1028,9 +1029,9 @@ class ProjectField(forms.ChoiceField):
         if not self.enabled:
             return ''
         if value == 'none':
-            return Project.DEFAULT_NAME
-        elif value:
-            return Project.objects.get(slug=value)
+            value = Project.DEFAULT_NAME
+        if value:
+            return Project.objects.get(team=self.team, slug=value)
         else:
             return value
 
