@@ -34,38 +34,43 @@ class LanguageDropdown(forms.Select):
             "popular" and "all".
     """
 
-    def __init__(self, *args, **kwargs):
-        super(LanguageDropdown, self).__init__(*args, **kwargs)
-        self.options = "null my popular all"
-        self.null_label = None
-
     def render(self, name, value, attrs, choices=()):
-        final_attrs = attrs.copy()
+        final_attrs = self.build_attrs(attrs)
         final_attrs['name'] = name
         if 'class' in final_attrs:
             final_attrs['class'] += ' dropdownFilter'
         else:
             final_attrs['class'] = 'dropdownFilter'
-        final_attrs['data-language-options'] = self.options
-        if self.null_label:
-            final_attrs['data-language-null-label'] = self.null_label
         if value:
             final_attrs['data-initial'] = value
         return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
+
+class WidgetAttrDescriptor(object):
+    """Field attribute that gets/sets a widget attribute."""
+    def __init__(self, attr_name):
+        self.attr_name = attr_name
+
+    def __get__(self, field, cls=None):
+        return field.widget.attrs.get(self.attr_name)
+
+    def __set__(self, field, value):
+        field.widget.attrs[self.attr_name] = value
 
 class LanguageField(forms.ChoiceField):
     widget = LanguageDropdown
 
     def __init__(self, *args, **kwargs):
-        options = kwargs.pop('options', None)
+        options = kwargs.pop('options', "null my popular all")
         null_label = kwargs.pop('null_label', None)
         kwargs['choices'] = get_language_choices()
         super(LanguageField, self).__init__(*args, **kwargs)
-        if isinstance(self.widget, LanguageDropdown):
-            if options:
-                self.widget.options = options
-            if null_label:
-                self.widget.null_label = null_label
+        if options:
+            self.options = options
+        if null_label:
+            self.null_label = null_label
+
+    options = WidgetAttrDescriptor('data-language-options')
+    null_label = WidgetAttrDescriptor('data-language-null-label')
 
     def clean(self, value):
         return value if value != 'X' else None

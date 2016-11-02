@@ -1714,12 +1714,19 @@ class VideoManagementForm(forms.Form):
     def save(self):
         self.perform_save(self.find_team_videos_to_update())
 
+    def single_selection(self):
+        return len(self.selection) == 1
+
+    def get_first_video(self):
+        return self.team.videos.get(id=self.selection[0])
+
     def find_team_videos_to_update(self):
         qs = self.videos_qs
         if not self.cleaned_data.get('include_all'):
             qs = qs.filter(id__in=self.selection)
         self.count = qs.count()
-        return TeamVideo.objects.filter(video__in=qs).select_related('video')
+        return TeamVideo.objects.filter(video__in=qs).select_related(
+            'video', 'project')
 
     def setup_include_all(self, videos_qs, selection, all_selected):
         if not all_selected:
@@ -1764,27 +1771,40 @@ class EditVideosForm(VideoManagementForm):
 
     def setup_fields(self):
         self.fields['project'].setup(self.team)
+        if self.single_selection():
+            self.setup_single_selection()
+
+    def setup_single_selection(self):
+        video = self.get_first_video()
+        team_video = video.get_team_video()
+        self.fields['project'].required = True
+        self.fields['project'].initial = team_video.project.slug
+        self.fields['project'].choices = self.fields['project'].choices[1:]
+        self.fields['language'].null_label = _('Unset')
+        self.fields['language'].initial = video.primary_audio_language_code
 
     def perform_save(self, qs):
-        qs = qs.select_related('video')
         project = self.cleaned_data.get('project')
         language = self.cleaned_data['language']
         thumbnail = self.cleaned_data['thumbnail']
+        if language is None and self.single_selection():
+            language = ''
 
         for team_video in qs:
             video = team_video.video
 
-            if project and project.id != team_video.project_id:
+            if project is not None and project != team_video.project:
                 team_video.project = project
                 team_video.save()
-            if (language and language != video.primary_audio_language_code):
+            if (language is not None and
+                    language != video.primary_audio_language_code):
                 video.primary_audio_language_code = language
                 video.save()
             if thumbnail:
                 team_video.video.s3_thumbnail.save(thumbnail.name, thumbnail)
 
     def message(self):
-        msg = ungettext('Video updated',
-                        '%(count)s videos updated',
+        msg = ungettext('Video edited',
+                        '%(count)s videos edited',
                         self.count)
         return fmt(msg, count=self.count)

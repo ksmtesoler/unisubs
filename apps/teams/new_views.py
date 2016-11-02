@@ -849,6 +849,7 @@ def manage_videos_form(request, team, form_name, videos, filters_form):
         'form': form,
         'first_video': first_video,
         'selection_count': len(selection),
+        'single_selection': len(selection) == 1,
         'all_selected': all_selected,
     })
 
