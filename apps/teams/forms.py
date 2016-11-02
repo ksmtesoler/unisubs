@@ -998,26 +998,29 @@ class ProjectField(forms.ChoiceField):
     def __init__(self, *args, **kwargs):
         if 'widget' not in kwargs:
             kwargs['widget'] = forms.RadioSelect
+        self.null_label = kwargs.pop('null_label', _('Any'))
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
 
-    def setup(self, team, promote_main_project=False):
+    def setup(self, team, promote_main_project=False, initial=None):
         projects = list(Project.objects.for_team(team))
         if projects:
-            self.initial = ''
             if promote_main_project:
                 main_project = behaviors.get_main_project(team)
                 if main_project:
                     projects.remove(main_project)
                     projects.insert(0, main_project)
-                    self.initial = main_project.slug
-            choices = [
-                ('', _('Any')),
-                ('none', _('No Project')),
-            ] + [
-                (p.slug, p.name) for p in projects
-            ]
+                    if initial is None:
+                        initial = main_project.slug
+            choices = []
+            if not self.required:
+                choices.append(('', self.null_label))
+            choices.append(('none', _('No Project')))
+            choices.extend((p.slug, p.name) for p in projects)
             self.choices = choices
+            if initial is None:
+                initial = choices[0][0]
+            self.initial = initial
         else:
             self.enabled = False
 
@@ -1026,6 +1029,8 @@ class ProjectField(forms.ChoiceField):
             return ''
         if value == 'none':
             return Project.DEFAULT_NAME
+        elif value:
+            return Project.objects.get(slug=value)
         else:
             return value
 
@@ -1070,9 +1075,7 @@ class VideoFiltersForm(FiltersForm):
         if q:
             qs = qs.search(q)
         if project:
-            if project == 'none':
-                project = Project.DEFAULT_NAME
-            qs = qs.filter(teamvideo__project__slug=project)
+            qs = qs.filter(teamvideo__project=project)
         if language:
             qs = qs.filter(primary_audio_language_code=language)
         if duration:
@@ -1094,11 +1097,11 @@ class VideoFiltersForm(FiltersForm):
 
 class ManagementVideoFiltersForm(VideoFiltersForm):
     language = LanguageField(label="", required=False,
-                             options="any popular all")
+                             options="null popular all")
     completed_subtitles = LanguageField(label="", required=False,
-                                        options="any popular all")
+                                        options="null popular all")
     needs_subtitles = LanguageField(label="", required=False,
-                                    options="any popular all")
+                                    options="null popular all")
 
     promote_main_project = False
 
@@ -1678,3 +1681,109 @@ TeamVideoURLFormSet = formset_factory(TeamVideoURLForm)
 
 class TeamVideoCSVForm(forms.Form):
     csv_file = forms.FileField(label=_(u"CSV file"), required=True, allow_empty_file=False)
+
+class VideoManagementForm(forms.Form):
+    """Base class for forms on the video management page."""
+
+    # unique slug to identify the form
+    name = NotImplemented
+    # human-friendly label
+    label = NotImplemented
+    # css class for the button
+    css_class = 'cta'
+
+    include_all = forms.BooleanField(label='', required=False)
+
+    @staticmethod
+    def permissions_check(team, user):
+        """Check if we should enable the form for a given user."""
+        return True
+
+    def __init__(self, team, user, videos_qs, selection, all_selected,
+                 filters_form, *args, **kwargs):
+        super(VideoManagementForm, self).__init__(*args, **kwargs)
+        self.team = team
+        self.user = user
+        self.videos_qs = videos_qs
+        self.selection = selection
+        self.filters_form = filters_form
+        self.setup_include_all(videos_qs, selection, all_selected)
+        self.setup_fields()
+
+    def save(self):
+        self.perform_save(self.find_team_videos_to_update())
+
+    def find_team_videos_to_update(self):
+        qs = self.videos_qs
+        if not self.cleaned_data.get('include_all'):
+            qs = qs.filter(id__in=self.selection)
+        self.count = qs.count()
+        return TeamVideo.objects.filter(video__in=qs).select_related('video')
+
+    def setup_include_all(self, videos_qs, selection, all_selected):
+        if not all_selected:
+            del self.fields['include_all']
+        else:
+            total_videos = videos_qs.count()
+            if total_videos <= len(selection):
+                del self.fields['include_all']
+            else:
+                self.fields['include_all'].label = fmt(
+                    _('Include all %(count)s filtered videos'),
+                    count=total_videos)
+
+    def setup_fields(self):
+        """Override this if you need to dynamically setup the form fields."""
+        pass
+
+    def perform_save(self, qs):
+        """Does the work for the save() method.
+
+        Args:
+            qs -- queryset of TeamVideos that should be operated on.
+        """
+        raise NotImplementedError()
+
+    def message(self):
+        """Success message after the form is submitted."""
+        raise NotImplementedError()
+
+class EditVideosForm(VideoManagementForm):
+    name = 'edit'
+    label = _('Edit')
+    template = 'future/teams/management/forms/edit.html'
+    permissions_check = staticmethod(permissions.can_edit_videos)
+
+    language = LanguageField(label=_("Video Language"), required=False,
+                             options="null popular all",
+                             null_label=_('No change'))
+    project = ProjectField(label=_('Project'), required=False,
+                           widget=forms.Select, null_label=_('No change'))
+    thumbnail = forms.ImageField(label=_('Change thumbnail'), required=False)
+
+    def setup_fields(self):
+        self.fields['project'].setup(self.team)
+
+    def perform_save(self, qs):
+        qs = qs.select_related('video')
+        project = self.cleaned_data.get('project')
+        language = self.cleaned_data['language']
+        thumbnail = self.cleaned_data['thumbnail']
+
+        for team_video in qs:
+            video = team_video.video
+
+            if project and project.id != team_video.project_id:
+                team_video.project = project
+                team_video.save()
+            if (language and language != video.primary_audio_language_code):
+                video.primary_audio_language_code = language
+                video.save()
+            if thumbnail:
+                team_video.video.s3_thumbnail.save(thumbnail.name, thumbnail)
+
+    def message(self):
+        msg = ungettext('Video updated',
+                        '%(count)s videos updated',
+                        self.count)
+        return fmt(msg, count=self.count)

@@ -1,0 +1,26 @@
+{% load i18n %}
+<div class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">{% blocktrans count count=selection_count %}Edit {{ count }} video{% plural %}Edit {{ count }} videos{% endblocktrans %}</h4>
+        </div>
+        <div class="modal-body">
+          {% csrf_token %}
+          {% include "future/non-field-errors.html" %}
+          {% include "future/forms/field.html" with field=form.language %}
+          {% if form.fields.project.enabled %}
+          {% include "future/forms/field.html" with field=form.project %}
+          {% endif %}
+          {% include "future/forms/field.html" with field=form.thumbnail %}
+        </div>
+        <div class="modal-footer">
+          <button class="button cta">{% trans "Update" %}</button>
+          <button class="button cta-reverse" data-dismiss="modal">{% trans "Cancel" %}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -763,9 +763,14 @@ def welcome(request, team):
 
 @team_view
 def manage_videos(request, team):
-    filters_form = forms.ManagementVideoFiltersForm(team, request.GET)
+    filters_form = forms.ManagementVideoFiltersForm(team, request.GET,
+                                                    auto_id="id_filters_%s")
     videos = filters_form.get_queryset().select_related('teamvideo',
                                                         'teamvideo__video')
+    form_name = request.GET.get('form')
+    if form_name:
+        return manage_videos_form(request, team, form_name, videos,
+                                  filters_form)
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
     page = paginator.get_page(request)
     team.new_workflow.video_management_add_counts(list(page))
@@ -777,6 +782,10 @@ def manage_videos(request, team):
         'team_nav': 'management',
         'current_tab': 'videos',
         'extra_tabs': team.new_workflow.management_page_extra_tabs(request),
+        'manage_forms': [
+            (form.name, form.css_class, form.label)
+            for form in calc_manage_videos_forms(team, request.user)
+        ],
     }
     if request.is_ajax():
         response_renderer = AJAXResponseRenderer(request)
@@ -786,6 +795,62 @@ def manage_videos(request, team):
         return response_renderer.render()
 
     return render(request, 'future/teams/management/videos.html', context)
+
+# Functions to handle the forms on the videos pages
+video_management_forms = [
+    forms.EditVideosForm,
+]
+
+def all_manage_video_forms(team):
+    return video_management_forms
+
+def calc_manage_videos_forms(team, user):
+    return [
+        FormClass for FormClass in all_manage_video_forms(team)
+        if FormClass.permissions_check(team, user)
+    ]
+
+def lookup_manage_video_form(team, user, form_name):
+    for FormClass in all_manage_video_forms(team):
+        if (FormClass.name == form_name and
+                FormClass.permissions_check(team, user)):
+            return FormClass
+    return None
+
+@team_view
+def manage_videos_form(request, team, form_name, videos, filters_form):
+    try:
+        selection = request.GET['selection'].split('-')
+    except StandardError:
+        return HttpResponseBadRequest()
+    FormClass = lookup_manage_video_form(team, request.user, form_name)
+    if FormClass is None:
+        raise Http404()
+
+    all_selected = len(selection) >= VIDEOS_PER_PAGE_MANAGEMENT
+    if request.method == 'POST':
+        form = FormClass(team, request.user, videos, selection, all_selected,
+                         filters_form, data=request.POST, files=request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, form.message())
+            response = HttpResponse("SUCCESS", content_type="text/plain")
+            response['X-Form-Success'] = '1'
+            return response
+    else:
+        form = FormClass(team, request.user, videos, selection, all_selected,
+                         filters_form)
+
+    first_video = Video.objects.get(id=selection[0])
+    template_name = 'future/teams/management/video-forms/{}.html'.format(
+        form_name)
+    return render(request, template_name, {
+        'team': team,
+        'form': form,
+        'first_video': first_video,
+        'selection_count': len(selection),
+        'all_selected': all_selected,
+    })
 
 @team_settings_view
 def settings_basic(request, team):

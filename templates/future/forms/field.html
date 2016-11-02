@@ -1,0 +1,13 @@
+{% load form_helpers %}
+{% if field.is_hidden %}
+{{ field }}
+{% else %}
+<div class="row">
+  <div class="col col-xs-4">{{ field.label_tag }}</div>
+  <div class="col col-xs-8">{{ field }}</div>
+</div>
+{% include "_error-list.html" with errors=field.errors %}
+{% if field.help_text %}
+<p class="help-block">{{ field.help_text }}</p>
+{% endif %}
+{% endif %}

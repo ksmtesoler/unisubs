@@ -1,7 +1,6 @@
-/*
- * Amara, universalsubtitles.org
+/* Amara, universalsubtitles.org
  *
- * Copyright (C) 2016 Participatory Culture Foundation
+ * Copyright (C) 2015 Participatory Culture Foundation
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,22 +16,18 @@
  * along with this program.  If not, see
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
-(function($) {
-    $.behaviors('.selectAll', selectAll);
+(function() {
 
-    function selectAll(checkbox) {
-        checkbox = $(checkbox);
-        var inputs = $(':input[name=' + checkbox.data('field') + ']');
+getQueryParams = function() {
+    var queryString = window.location.search.substr(1);
+    var params = {};
+    $.each(queryString.split('&'), function(i, pair) {
+        if (pair === "") return;
+        var parts = pair.split("=");
+        params[parts[0]] = parts[1] && decodeURIComponent(parts[1].replace(/\+/g, " "));
+    });
+    return params;
+}
 
-        checkbox.change(function() {
-            inputs.prop('checked', this.checked).trigger('change');
-        });
-        inputs.change(function() {
-            var allChecked = inputs.filter(':checked').length == inputs.length;
-            checkbox.prop('checked', allChecked);
-        });
-    }
-
-})(jQuery);
-
+})();
 

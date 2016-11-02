@@ -43,16 +43,16 @@ function languageChoiceData(select) {
     var data = [];
     var enabledSelections = select.data('languageOptions').split(" ");
     var initial = select.data('initial');
-    var anyLabel = select.data('languageAnyLabel') || gettext('Any language');
+    var nullLabel = select.data('languageNullLabel') || gettext('Any language');
 
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
     }
-    if(sectionEnabled('any')) {
+    if(sectionEnabled('null')) {
         data.push({
-            id: 'any',
-            text: anyLabel,
-            selected: initial == 'any'
+            id: 'X',
+            text: nullLabel,
+            selected: initial == 'X'
         });
     }
     if(sectionEnabled('my')) {

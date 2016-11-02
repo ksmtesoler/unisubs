@@ -30,14 +30,14 @@ class LanguageDropdown(forms.Select):
     Attrs:
         options: space separate string containing language options.  Each one
             of these corresponds to a section on the dropdown.  If present,
-            that section will be enabled.  Possible values are "any", "my",
+            that section will be enabled.  Possible values are "null", "my",
             "popular" and "all".
     """
 
     def __init__(self, *args, **kwargs):
         super(LanguageDropdown, self).__init__(*args, **kwargs)
-        self.options = "any my popular all"
-        self.any_label = None
+        self.options = "null my popular all"
+        self.null_label = None
 
     def render(self, name, value, attrs, choices=()):
         final_attrs = attrs.copy()
@@ -47,8 +47,8 @@ class LanguageDropdown(forms.Select):
         else:
             final_attrs['class'] = 'dropdownFilter'
         final_attrs['data-language-options'] = self.options
-        if self.any_label:
-            final_attrs['data-language-any-label'] = self.any_label
+        if self.null_label:
+            final_attrs['data-language-null-label'] = self.null_label
         if value:
             final_attrs['data-initial'] = value
         return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
@@ -58,17 +58,17 @@ class LanguageField(forms.ChoiceField):
 
     def __init__(self, *args, **kwargs):
         options = kwargs.pop('options', None)
-        dashed_any_label = kwargs.pop('dashed_any_label', None)
+        null_label = kwargs.pop('null_label', None)
         kwargs['choices'] = get_language_choices()
         super(LanguageField, self).__init__(*args, **kwargs)
         if isinstance(self.widget, LanguageDropdown):
             if options:
                 self.widget.options = options
-            if dashed_any_label:
-                self.widget.any_label = '--------'
+            if null_label:
+                self.widget.null_label = null_label
 
     def clean(self, value):
-        return value if value != 'any' else None
+        return value if value != 'X' else None
 
 class MultipleLanguageChoiceField(forms.MultipleChoiceField):
     # TODO: implement a nicer widget for selecting multiple languages

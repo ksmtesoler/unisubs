@@ -33,12 +33,12 @@
 
 {% block filters2 %}
 <div class="row">
-  <div class="col-xs-8 proxyField deferUpdate" data-proxy-for="#id_q">
+  <div class="col-xs-8 proxyField deferUpdate" data-proxy-for="#id_filters_q">
     <div class="form-group searchbar">
       {{ filters_form.q }}
     </div>
   </div>
-  <div class="col-xs-4 proxyField" data-proxy-for="#id_sort">
+  <div class="col-xs-4 proxyField" data-proxy-for="#id_filters_sort">
     <div class="form-group select-border">
       {{ filters_form.sort }}
     </div>
@@ -57,4 +57,14 @@
   </div>
 </nav>
 <div id="video-list">{% include "future/teams/management/video-list.html" %}</div>
+{% endblock %}
+
+{% block bottom %}
+{% if manage_forms %}
+<div id="manage-actions" class="actionBar">
+  {% for name, css_class, label in manage_forms %}
+  <button class="button {{ css_class }} selectList-action" data-form="{{ name }}">{{ label }}</button>
+  {% endfor %}
+</div>
+{% endif %}
 {% endblock %}
