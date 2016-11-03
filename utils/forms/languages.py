@@ -22,7 +22,7 @@ from django import forms
 from django.forms.util import flatatt
 from django.utils.safestring import mark_safe
 
-from utils.translation import get_language_choices
+from utils import translation
 
 class LanguageDropdown(forms.Select):
     """Widget that renders a language dropdown
@@ -45,6 +45,30 @@ class LanguageDropdown(forms.Select):
             final_attrs['data-initial'] = value
         return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
 
+
+class MultipleLanguageDropdown(forms.SelectMultiple):
+    """Widget that renders a language dropdown
+
+    Attrs:
+        options: space separate string containing language options.  Each one
+            of these corresponds to a section on the dropdown.  If present,
+            that section will be enabled.  Possible values are "null", "my",
+            "popular" and "all".
+    """
+
+    def render(self, name, value, attrs, choices=()):
+        final_attrs = self.build_attrs(attrs)
+        final_attrs['name'] = name
+        if 'class' in final_attrs:
+            final_attrs['class'] += ' dropdownFilter'
+        else:
+            final_attrs['class'] = 'dropdownFilter'
+        if value:
+            final_attrs['data-initial'] = value
+        # FIXME: add multiple once we get the UI right
+        return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
+        #return mark_safe(u'<select{} multiple></select>'.format(flatatt(final_attrs)))
+
 class WidgetAttrDescriptor(object):
     """Field attribute that gets/sets a widget attribute."""
     def __init__(self, attr_name):
@@ -56,14 +80,12 @@ class WidgetAttrDescriptor(object):
     def __set__(self, field, value):
         field.widget.attrs[self.attr_name] = value
 
-class LanguageField(forms.ChoiceField):
-    widget = LanguageDropdown
-
+class LanguageFieldMixin(object):
     def __init__(self, *args, **kwargs):
         options = kwargs.pop('options', "null my popular all")
         null_label = kwargs.pop('null_label', None)
-        kwargs['choices'] = get_language_choices()
-        super(LanguageField, self).__init__(*args, **kwargs)
+        kwargs['choices'] = translation.get_language_choices()
+        super(LanguageFieldMixin, self).__init__(*args, **kwargs)
         if options:
             self.options = options
         if null_label:
@@ -72,32 +94,31 @@ class LanguageField(forms.ChoiceField):
     options = WidgetAttrDescriptor('data-language-options')
     null_label = WidgetAttrDescriptor('data-language-null-label')
 
+    def exclude(self, languages):
+        self.widget.attrs['data-language-exclude'] = languages
+        self.choices = [
+            c for c in self.choices if c[0] not in languages
+        ]
+
+    def limit_to(self, languages):
+        self.widget.attrs['data-language-limit-to'] = languages
+        self.choices = [
+            c for c in self.choices if c[0] in languages
+        ]
+
+class LanguageField(LanguageFieldMixin, forms.ChoiceField):
+    widget = LanguageDropdown
+
     def clean(self, value):
         return value if value != 'X' else None
 
-class MultipleLanguageChoiceField(forms.MultipleChoiceField):
-    # TODO: implement a nicer widget for selecting multiple languages
-    widget = forms.SelectMultiple
-
-    def __init__(self, *args, **kwargs):
-        super(MultipleLanguageChoiceField, self).__init__(*args, **kwargs)
-        self._setup_choices()
-
-    def __deepcopy__(self, memo):
-        # This is called when we create a new form and bind this field.  We
-        # need to reset the choice iter in this case.  This code is copied
-        # from ModelChoiceField
-        result = super(forms.ChoiceField, self).__deepcopy__(memo)
-        result._setup_choices()
-        return result
-
-    def _setup_choices(self):
-        self._choices = self.widget.choices = self.choice_iter()
-
-    def choice_iter(self):
-        for choice in self.calc_language_choices():
-            yield choice
-
-    def calc_language_choices(self):
-        return get_language_choices()
-
+class MultipleLanguageField(LanguageFieldMixin, forms.MultipleChoiceField):
+    widget = MultipleLanguageDropdown
+    def clean(self, value):
+        if value:
+            return [
+                code if code != 'X' else None
+                for code in value
+            ]
+        else:
+            return value

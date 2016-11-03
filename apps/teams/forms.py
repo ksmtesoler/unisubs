@@ -1467,7 +1467,6 @@ class VideoManagementForm(forms.Form):
 class EditVideosForm(VideoManagementForm):
     name = 'edit'
     label = _('Edit')
-    template = 'future/teams/management/forms/edit.html'
     permissions_check = staticmethod(permissions.can_edit_videos)
 
     language = LanguageField(label=_("Video Language"), required=False,
@@ -1520,7 +1519,6 @@ class EditVideosForm(VideoManagementForm):
 class DeleteVideosForm(VideoManagementForm):
     name = 'delete'
     label = _('Delete')
-    template = 'future/teams/management/forms/delete.html'
     permissions_check = staticmethod(permissions.can_remove_videos)
     css_class = 'cta-reverse'
 
@@ -1551,7 +1549,6 @@ class DeleteVideosForm(VideoManagementForm):
 class MoveVideosForm(VideoManagementForm):
     name = 'move'
     label = _('Move')
-    template = 'future/teams/management/forms/move.html'
 
     new_team = forms.ChoiceField(label=_('New Team'), choices=[])
     project = forms.ChoiceField(label=_('Project'), choices=[],

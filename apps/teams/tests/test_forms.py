@@ -25,13 +25,16 @@ from utils.test_utils import *
 class TeamVideoManagementFormBase(TestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.team = TeamFactory(owner=self.user)
+        self.team = self.make_team()
         self.project = ProjectFactory(team=self.team)
         self.team_videos = [
             TeamVideoFactory(team=self.team)
             for i in range(10)
         ]
         self.videos = [tv.video for tv in self.team_videos]
+
+    def make_team(self):
+        return TeamFactory(owner=self.user)
 
     def build_form(self, form_class, selected_videos, all_selected=False,
                    data=None, files=None, skip_save=False):

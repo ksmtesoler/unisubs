@@ -613,8 +613,7 @@ def manage_videos(request, team):
                                                         'teamvideo__video')
     form_name = request.GET.get('form')
     if form_name:
-        return manage_videos_form(request, team, form_name, videos,
-                                  filters_form)
+        return manage_videos_form(request, team, form_name, videos)
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
     page = paginator.get_page(request)
     team.new_workflow.video_management_add_counts(list(page))
@@ -641,15 +640,15 @@ def manage_videos(request, team):
     return render(request, 'future/teams/management/videos.html', context)
 
 # Functions to handle the forms on the videos pages
-video_management_forms = [
-    forms.EditVideosForm,
-    forms.MoveVideosForm,
-    forms.DeleteVideosForm,
-]
-
 def all_manage_video_forms(team):
-    form_list = list(video_management_forms)
-    signal.build_video_management_forms(sender=team, form_list=form_list)
+    form_list = [
+        forms.EditVideosForm,
+        forms.MoveVideosForm,
+    ]
+    signals.build_video_management_forms.send(sender=team, form_list=form_list)
+    form_list.extend([
+        forms.DeleteVideosForm
+    ])
     return form_list
 
 def calc_manage_videos_forms(team, user):
@@ -666,7 +665,7 @@ def lookup_manage_video_form(team, user, form_name):
     return None
 
 @team_view
-def manage_videos_form(request, team, form_name, videos, filters_form):
+def manage_videos_form(request, team, form_name, videos):
     try:
         selection = request.GET['selection'].split('-')
     except StandardError:
@@ -678,7 +677,7 @@ def manage_videos_form(request, team, form_name, videos, filters_form):
     all_selected = len(selection) >= VIDEOS_PER_PAGE_MANAGEMENT
     if request.method == 'POST':
         form = FormClass(team, request.user, videos, selection, all_selected,
-                         filters_form, data=request.POST, files=request.FILES)
+                         data=request.POST, files=request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, form.message())
@@ -686,8 +685,7 @@ def manage_videos_form(request, team, form_name, videos, filters_form):
             response['X-Form-Success'] = '1'
             return response
     else:
-        form = FormClass(team, request.user, videos, selection, all_selected,
-                         filters_form)
+        form = FormClass(team, request.user, videos, selection, all_selected)
 
     first_video = Video.objects.get(id=selection[0])
     template_name = 'future/teams/management/video-forms/{}.html'.format(

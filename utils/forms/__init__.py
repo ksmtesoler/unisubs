@@ -12,7 +12,7 @@ from .autocomplete import AutocompleteTextInput
 from .dates import MonthChoiceField
 from .filters import FiltersForm
 from .formrouter import FormRouter
-from .languages import (LanguageDropdown, LanguageField, MultipleLanguageChoiceField)
+from .languages import LanguageDropdown, LanguageField, MultipleLanguageField
 from .recapcha import ReCaptchaField
 from .teamautocomplete import TeamAutocompleteField, autocomplete_team_view
 from .userautocomplete import UserAutocompleteField, autocomplete_user_view
