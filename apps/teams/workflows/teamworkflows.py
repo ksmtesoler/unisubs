@@ -177,7 +177,7 @@ class TeamWorkflow(object):
                     incomplete_count)
                 v.counts.append(mark_safe(fmt(msg, count=incomplete_count)))
 
-    def video_management_extra_forms(self, request):
+    def video_management_extra_forms(self):
         """Add extra forms to the video management page """
         return []
 

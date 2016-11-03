@@ -1,6 +1,6 @@
 # Amara, universalsubtitles.org
 #
-# Copyright (C) 2015 Participatory Culture Foundation
+# Copyright (C) 2016 Participatory Culture Foundation
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,197 +16,184 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-from __future__ import absolute_import
-import os
-
 from django.test import TestCase
-from django.conf import settings
-from django.core.exceptions import PermissionDenied
-from django.core.files.uploadedfile import SimpleUploadedFile
-from nose.tools import *
-import mock
 
 from teams import forms
-from teams import signals
-from teams.models import TeamVideo
-from teams.permissions import *
-from teams.new_views import VideoPageForms, VideoPageExtensionForm
 from utils.factories import *
 from utils.test_utils import *
-from videos.models import Video, VideoUrl
 
-import logging
-logger = logging.getLogger("TESTS")
-
-class EditMemberFormTest(TestCase):
-    @patch_for_test('teams.permissions.get_edit_member_permissions')
-    def setUp(self, mock_permission_check):
-        self.mock_permission_check = mock_permission_check
-        self.mock_permission_check.return_value = EDIT_MEMBER_ALL_PERMITTED
-        self.team = TeamFactory()
-        self.member = TeamMemberFactory(team=self.team)
-        self.contributor = TeamMemberFactory(team=self.team,
-                                             role=ROLE_CONTRIBUTOR)
-        self.manager = TeamMemberFactory(team=self.team,
-                                         role=ROLE_MANAGER)
-        self.admin = TeamMemberFactory(team=self.team,
-                                       role=ROLE_ADMIN)
-        self.owner = TeamMemberFactory(team=self.team,
-                                       role=ROLE_OWNER)
-
-    def make_form(self, data=None):
-        return forms.EditMembershipForm(self.member, data=data)
-
-    def check_choices(self, form, member_choices, role_choices):
-        assert_equal(
-            [c[0] for c in form.fields['member'].choices],
-            [m.id for m in member_choices]
-        )
-        assert_equal(
-            [c[0] for c in form.fields['role'].choices],
-            role_choices
-        )
-        assert_items_equal(form.editable_member_ids,
-                           [m.id for m in member_choices])
-
-
-    def test_all_permitted(self):
-        form = self.make_form()
-        self.check_choices(
-            form,
-            [ self.contributor, self.manager, self.admin, self.owner, ],
-            [ ROLE_CONTRIBUTOR, ROLE_MANAGER, ROLE_ADMIN, ],
-        )
-
-        assert_true('remove' in form.fields)
-
-    def test_cant_edit_admin(self):
-        self.mock_permission_check.return_value = EDIT_MEMBER_CANT_EDIT_ADMIN
-        form = self.make_form()
-        self.check_choices(
-            form,
-            [ self.contributor, self.manager, ],
-            [ ROLE_CONTRIBUTOR, ROLE_MANAGER, ],
-        )
-        assert_true('remove' in form.fields)
-
-    def test_not_pemitted(self):
-        self.mock_permission_check.return_value = EDIT_MEMBER_NOT_PERMITTED
-        form = self.make_form()
-        self.check_choices(form, [], [])
-        assert_false('remove' in form.fields)
-
-    def test_update_role(self):
-        form = self.make_form(data={
-            'member': self.contributor.id,
-            'role': ROLE_MANAGER,
-        })
-        assert_true(form.is_valid())
-        form.save()
-        assert_equal(reload_obj(self.contributor).role, ROLE_MANAGER)
-
-    def test_remove(self):
-        form = self.make_form(data={
-            'member': self.contributor.id,
-            'role': ROLE_MANAGER,
-            'remove': 1,
-        })
-        assert_true(form.is_valid())
-        form.save()
-        assert_false(
-            TeamMember.objects.filter(id=self.contributor.id).exists()
-        )
-
-def test_thumbnail_file():
-    p = os.path.join(settings.PROJECT_ROOT,
-                     'media/images/video-no-thumbnail-wide.png')
-    content = open(p).read()
-    return SimpleUploadedFile('thumb.png', content)
-
-class AddTeamVideoFormTest(TestCase):
+class TeamVideoManagementFormBase(TestCase):
     def setUp(self):
-        self.team = TeamFactory()
-        self.user = TeamMemberFactory(team=self.team).user
-
-    def make_form(self, data=None, files=None):
-        return forms.NewAddTeamVideoDataForm(self.team,
-                                         data=data, files=files)
-
-    def test_add(self):
-        form = self.make_form({})
-        assert_true(form.is_valid(), form.errors.as_text())
-
-    @patch_for_test('utils.amazon.fields.S3ImageFieldFile.save')
-    def test_add_with_thumbnail(self, mock_save):
-        thumb_file = test_thumbnail_file()
-        form = self.make_form({
-            'thumbnail': thumb_file,
-        })
-        assert_true(form.is_valid(), form.errors.as_text())
-
-    def test_add_with_project(self):
-        project = ProjectFactory.create(team=self.team)
-        form = self.make_form({
-            'project': project.id,
-        })
-        assert_true(form.is_valid(), form.errors.as_text())
-
-    def test_add_non_team_video(self):
-        form = self.make_form({})
-        assert_true(form.is_valid(), form.errors.as_text())
-
-
-class EditTeamVideoFormTest(TestCase):
-    def setUp(self):
-        self.team = TeamFactory()
-        self.user = TeamMemberFactory(team=self.team).user
+        self.user = UserFactory()
+        self.team = TeamFactory(owner=self.user)
         self.project = ProjectFactory(team=self.team)
-        self.project2 = ProjectFactory(team=self.team)
-        self.team_video = TeamVideoFactory(team=self.team,
-                                           project=self.project)
+        self.team_videos = [
+            TeamVideoFactory(team=self.team)
+            for i in range(10)
+        ]
+        self.videos = [tv.video for tv in self.team_videos]
 
-    def make_form(self, data=None, files=None):
-        return forms.NewEditTeamVideoForm(self.team, self.user,
-                                          self.team.teamvideo_set.all(),
-                                          [self.team_video.id], False,
-                                          forms.VideoFiltersForm(self.team),
-                                          data=data, files=files)
+    def build_form(self, form_class, selected_videos, all_selected=False,
+                   data=None, files=None, skip_save=False):
+        form = form_class(self.team, self.user, self.team.videos.all(),
+                          [v.id for v in selected_videos], all_selected,
+                          data=data, files=files)
+        if data is not None:
+            if form.errors:
+                print form.errors.as_text()
+            if not skip_save:
+                form.save()
+        return form
 
-    @patch_for_test('utils.amazon.fields.S3ImageFieldFile.save')
-    def test_update(self, mock_save):
-        thumb_file = test_thumbnail_file()
-        form = self.make_form({
-            'primary_audio_language': 'en',
-            'project': self.project2.id,
-        }, {
-            'thumbnail': thumb_file,
+class TestVideoManagementForm(TeamVideoManagementFormBase):
+    def test_find_team_videos_to_update(self):
+        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
+                               data={}, skip_save=True)
+        assert_items_equal(form.find_team_videos_to_update(),
+                           self.team_videos[0:4])
+
+    def test_find_team_videos_to_update_include_all(self):
+        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
+                               all_selected=True,
+                               data={'include_all': True}, skip_save=True)
+        assert_items_equal(form.find_team_videos_to_update(),
+                           self.team_videos)
+
+    def test_enable_include_all_logic(self):
+        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
+                               all_selected=True)
+        assert_true('include_all' in form.fields)
+
+        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
+                               all_selected=False)
+        assert_false('include_all' in form.fields)
+
+class TestEditVideosForm(TeamVideoManagementFormBase):
+    def test_set_project(self):
+        videos = self.videos[:2]
+        form = self.build_form(forms.EditVideosForm, videos, data={
+            'project': self.project.slug,
         })
-        assert_true(form.is_valid(), form.errors.as_text())
-        form.save()
-        team_video = reload_obj(self.team_video)
-        assert_equal(team_video.project, self.project2)
-        assert_equal(team_video.video.primary_audio_language_code, 'en')
-        assert_equal(mock_save.call_args,
-                     mock.call(thumb_file.name, thumb_file))
+        for v in videos:
+            assert_equal(reload_obj(v).get_team_video().project, self.project)
 
-    def delete_projects(self):
-        self.team_video.project = self.team.default_project
-        self.team_video.save()
-        self.project.delete()
-        self.project2.delete()
+    def test_unset_project(self):
+        self.team.teamvideo_set.update(project=self.project)
+        videos = self.videos[:2]
+        form = self.build_form(forms.EditVideosForm, videos, data={
+            'project': self.team.default_project.slug,
+        })
+        for v in videos:
+            assert_equal(reload_obj(v).get_team_video().project,
+                         self.team.default_project)
 
-    def test_no_project_field_when_team_has_no_projects(self):
-        self.delete_projects()
-        form = self.make_form()
-        assert_false('project' in form.fields)
+    @patch_for_test('utils.amazon.fields.S3ImageFieldFile.save', autospec=True)
+    def test_change_thumbnail(self, mock_save):
+        mock_file = UploadedFileFactory()
+        videos = self.videos[:2]
+        form = self.build_form(forms.EditVideosForm, videos, data={},
+                               files={
+            'thumbnail': mock_file,
+        })
+        assert_items_equal(mock_save.call_args_list, [
+            mock.call(v.thumbnail, mock_file.name, mock_file)
+            for v in videos
+        ])
 
-    @patch_for_test('utils.amazon.fields.S3ImageFieldFile.save')
-    def test_submit_with_no_projects(self, mock_save):
-        self.delete_projects()
-        thumb_file = test_thumbnail_file()
-        form = self.make_form({}, { 'thumbnail': thumb_file, })
-        assert_true(form.is_valid(), form.errors.as_text())
-        form.save()
-        assert_equal(mock_save.call_args,
-                     mock.call(thumb_file.name, thumb_file))
+    def test_set_language(self):
+        videos = self.videos[:2]
+        form = self.build_form(forms.EditVideosForm, videos, data={
+            'language': 'en',
+        })
+        for v in videos:
+            assert_equal(reload_obj(v).primary_audio_language_code, 'en')
 
+    def test_no_changes(self):
+        self.team.videos.update(primary_audio_language_code='en')
+        videos = self.videos[:2]
+        form = self.build_form(forms.EditVideosForm, videos, data={
+            'language': '',
+        })
+        for v in videos:
+            assert_equal(reload_obj(v).primary_audio_language_code, '')
+
+    def test_single_selection_mode(self):
+        video = self.videos[0]
+        video.primary_audio_language_code = 'en'
+        video.save()
+        self.team_videos[0].project = self.project
+        self.team_videos[0].save()
+        video = reload_obj(video)
+
+        form = self.build_form(forms.EditVideosForm, [video])
+        assert_true(form.single_selection())
+        assert_true(form.fields['language'].initial, 'en')
+        assert_true(form.fields['project'].initial, self.project.slug)
+
+class TestDeleteVideosForm(TeamVideoManagementFormBase):
+    def test_remove(self):
+        videos = self.videos[:2]
+        form = self.build_form(forms.DeleteVideosForm, videos, data={})
+        for v in videos:
+            assert_equal(v.get_team_video(), None)
+            assert_true(obj_exists(v))
+
+    def test_delete(self):
+        videos = self.videos[:2]
+        form = self.build_form(forms.DeleteVideosForm, videos, data={
+            'delete': 1,
+        })
+        for v in videos:
+            assert_false(obj_exists(v))
+
+    @patch_for_test('teams.permissions.can_delete_video_in_team')
+    def test_delete_permissions(self, can_delete_video_in_team):
+        can_delete_video_in_team.return_value = False
+        form = self.build_form(forms.DeleteVideosForm, self.videos)
+        assert_false('delete' in form.fields)
+        assert_equal(can_delete_video_in_team.call_args,
+                     mock.call(self.team, self.user))
+
+class TestMoveVideosForm(TeamVideoManagementFormBase):
+    def setUp(self):
+        super(TestMoveVideosForm, self).setUp()
+        self.other_team = TeamFactory(admin=self.user)
+        self.other_project = ProjectFactory(team=self.other_team)
+
+    def test_move(self):
+        videos = self.videos[:2]
+        form = self.build_form(forms.MoveVideosForm, videos, data={
+            'new_team': self.other_team.id,
+            'project': self.other_project.id,
+        })
+        for v in videos:
+            tv = v.get_team_video()
+            assert_equal(tv.team, self.other_team)
+            assert_equal(tv.project, self.other_project)
+
+    def test_move_no_project(self):
+        videos = self.videos[:2]
+        form = self.build_form(forms.MoveVideosForm, videos, data={
+            'new_team': self.other_team.id,
+            'project': '',
+        })
+        for v in videos:
+            tv = v.get_team_video()
+            assert_equal(tv.team, self.other_team)
+            assert_equal(tv.project, self.other_team.default_project)
+
+    @patch_for_test('teams.permissions.can_move_videos_to')
+    def test_team_and_project_choices(self, can_move_videos_to):
+        invalid_team = TeamFactory()
+        invalid_project = ProjectFactory(team=invalid_team)
+        can_move_videos_to.return_value = [ self.other_team ]
+        form = self.build_form(forms.MoveVideosForm, self.videos)
+        assert_items_equal([c[0] for c in form.fields['new_team'].choices],
+                           [self.team.id, self.other_team.id])
+        assert_items_equal([c[0] for c in form.fields['project'].choices],
+                           ['', self.project.id, self.other_project.id])
+        assert_items_equal([(c[0], c[2]) for c in form.project_options], [
+            ('', 0),
+            (self.project.id, self.team.id),
+            (self.other_project.id, self.other_team.id),
+        ])
