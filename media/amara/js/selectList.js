@@ -29,6 +29,7 @@
 
     function selectList(container) {
         var actionBar = $($(container).data('target'));
+        var actions =$('.selectList-action', actionBar);
         var checkboxes = $('.selectList-checkbox', container);
         checkboxes.change(function() {
             if(checkboxes.is(':checked')) {
@@ -36,6 +37,7 @@
             } else {
                 actionBar.removeClass('open');
             }
+            actions.data('selection', getSelection().join('-'));
         });
 
         function getSelection() {
@@ -45,37 +47,5 @@
             });
             return selection;
         }
-
-        function showModal(content) {
-            var modal = $(content);
-            $(document.body).append(modal);
-            modal.updateBehaviors();
-            modal.modal().on('hidden.bs.modal', function() {
-                modal.remove();
-            });
-            $('form', modal).ajaxForm({
-                success: function (data, textStatus, xhr) {
-                    if(xhr.getResponseHeader('X-Form-Success')) {
-                        window.location.reload();
-                    } else {
-                        modal.modal('hide');
-                        showModal(data);
-                    }
-                }
-            });
-        }
-
-        $('.selectList-action', actionBar).click(function() {
-            var button = $(this);
-            var query = getQueryParams();
-            query['form'] = button.data("form");
-            query['selection'] = getSelection().join('-');
-            var url = window.location.pathname + '?' + $.param(query);
-            $.ajax(url, {
-                success: function(data) {
-                    showModal(data);
-                }
-            });
-        });
     }
 })(jQuery);

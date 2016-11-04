@@ -613,7 +613,10 @@ def manage_videos(request, team):
                                                         'teamvideo__video')
     form_name = request.GET.get('form')
     if form_name:
-        return manage_videos_form(request, team, form_name, videos)
+        if form_name == 'add-video':
+            return add_video_form(request, team)
+        else:
+            return manage_videos_form(request, team, form_name, videos)
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
     page = paginator.get_page(request)
     team.new_workflow.video_management_add_counts(list(page))
@@ -664,8 +667,9 @@ def lookup_manage_video_form(team, user, form_name):
             return FormClass
     return None
 
-@team_view
 def manage_videos_form(request, team, form_name, videos):
+    """Render a form from the action bar on the video management page.
+    """
     try:
         selection = request.GET['selection'].split('-')
     except StandardError:
@@ -697,6 +701,31 @@ def manage_videos_form(request, team, form_name, videos):
         'selection_count': len(selection),
         'single_selection': len(selection) == 1,
         'all_selected': all_selected,
+    })
+
+def add_video_form(request, team):
+    if request.method == 'POST':
+        form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, form.success_message())
+            response = HttpResponse("SUCCESS", content_type="text/plain")
+            response['X-Form-Success'] = '1'
+            return response
+    else:
+        form = forms.AddTeamVideoForm(team, request.user)
+    form.use_future_ui()
+
+    if form.is_bound and form.is_valid():
+        form.save()
+        messages.success(request, form.message())
+        response = HttpResponse("SUCCESS", content_type="text/plain")
+        response['X-Form-Success'] = '1'
+        return response
+    template_name = 'future/teams/management/video-forms/add-video.html'
+    return render(request, template_name, {
+        'team': team,
+        'form': form,
     })
 
 @team_settings_view

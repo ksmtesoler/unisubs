@@ -62,13 +62,58 @@ from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
 from utils.forms import (ErrorableModelForm, get_label_for_value,
                          UserAutocompleteField, LanguageField, FiltersForm,
-                         Dropdown)
+                         LanguageDropdown, Dropdown)
 from utils.panslugify import pan_slugify
 from utils.translation import get_language_choices, get_language_label
 from utils.text import fmt
 from utils.validators import MaxFileSizeValidator
 
 logger = logging.getLogger(__name__)
+
+class ProjectField(forms.ChoiceField):
+    def __init__(self, *args, **kwargs):
+        if 'widget' not in kwargs:
+            kwargs['widget'] = forms.RadioSelect
+        self.null_label = kwargs.pop('null_label', _('Any'))
+        super(ProjectField, self).__init__(*args, **kwargs)
+        self.enabled = True
+
+    def setup(self, team, promote_main_project=False, initial=None):
+        self.team = team
+        projects = list(Project.objects.for_team(team))
+        if projects:
+            if promote_main_project:
+                main_project = behaviors.get_main_project(team)
+                if main_project:
+                    projects.remove(main_project)
+                    projects.insert(0, main_project)
+                    if initial is None:
+                        initial = main_project
+            choices = []
+            if not self.required:
+                choices.append(('', self.null_label))
+            choices.append(('none', _('No Project')))
+            choices.extend((p.slug, p.name) for p in projects)
+            self.choices = choices
+            if initial is None:
+                initial = choices[0][0]
+            self.initial = initial
+        else:
+            self.enabled = False
+
+    def prepare_value(self, value):
+        return value.slug if isinstance(value, Project) else value
+
+    def clean(self, value):
+        if not self.enabled:
+            return ''
+        if value == 'none':
+            value = Project.DEFAULT_NAME
+        if value:
+            return Project.objects.get(team=self.team, slug=value)
+        else:
+            return value
+
 
 class EditTeamVideoForm(forms.ModelForm):
     author = forms.CharField(max_length=255, required=False)
@@ -184,15 +229,13 @@ class AddVideoToTeamForm(forms.Form):
         ]
 
 class AddTeamVideoForm(forms.ModelForm):
-    language = forms.ChoiceField(label=_(u'Video language'), choices=(),
-                                 required=False,
-                                 help_text=_(u'It will be saved only if video does not exist in our database.'))
+    language = LanguageField(label=_(u'Video language'),
+                             widget=forms.Select,
+                             required=False,
+                             help_text=_(u'It will be saved only if video does not exist in our database.'))
 
-    project = forms.ModelChoiceField(
+    project = ProjectField(
         label=_(u'Project'),
-        queryset = Project.objects.none(),
-        required=True,
-        empty_label=None,
         help_text=_(u"Let's keep things tidy, shall we?")
     )
     video_url = VideoURLField(label=_('Video URL'),
@@ -207,22 +250,17 @@ class AddTeamVideoForm(forms.ModelForm):
         self.user = user
         super(AddTeamVideoForm, self).__init__(*args, **kwargs)
 
-        projects = self.team.project_set.all()
+        self.fields['project'].setup(team)
 
-        if len(projects) > 1:
-            projects = projects.exclude(slug='_root')
-
-        self.fields['project'].queryset = projects
-
-        ordered_projects = ([p for p in projects if p.is_default_project] +
-                            [p for p in projects if not p.is_default_project])
-        ordered_projects = [p for p in ordered_projects if can_add_video(team, user, p)]
-
-        self.fields['project'].choices = [(p.pk, p) for p in ordered_projects]
-
-        writable_langs = team.get_writable_langs()
-        self.fields['language'].choices = [c for c in get_language_choices(True)
-                                           if c[0] in writable_langs]
+    def use_future_ui(self):
+        self.fields['project'].widget = Dropdown()
+        self.fields['project'].widget.choices = self.fields['project'].choices
+        self.fields['project'].help_text = None
+        self.fields['language'].widget = LanguageDropdown()
+        self.fields['language'].widget.choices = self.fields['language'].choices
+        self.fields['language'].help_text = None
+        self.fields['language'].options = 'null popular all'
+        self.fields['language'].null_label = _('Select language')
 
     def clean(self):
         if self._errors:
@@ -276,7 +314,7 @@ class AddTeamVideoForm(forms.ModelForm):
 
     def save(self):
         # TeamVideo was already created in clean()
-        return self.team_video
+        return self.saved_team_video
 
 class AddTeamVideosFromFeedForm(AddFromFeedForm):
     def __init__(self, team, user, *args, **kwargs):
@@ -995,50 +1033,6 @@ class OldMoveVideosForm(forms.Form):
         super(OldMoveVideosForm, self).__init__(*args, **kwargs)
         self.fields['team'].queryset = user.managed_teams(include_manager=False)
 
-class ProjectField(forms.ChoiceField):
-    def __init__(self, *args, **kwargs):
-        if 'widget' not in kwargs:
-            kwargs['widget'] = forms.RadioSelect
-        self.null_label = kwargs.pop('null_label', _('Any'))
-        super(ProjectField, self).__init__(*args, **kwargs)
-        self.enabled = True
-
-    def setup(self, team, promote_main_project=False, initial=None):
-        self.team = team
-        projects = list(Project.objects.for_team(team))
-        if projects:
-            if promote_main_project:
-                main_project = behaviors.get_main_project(team)
-                if main_project:
-                    projects.remove(main_project)
-                    projects.insert(0, main_project)
-                    if initial is None:
-                        initial = main_project
-            choices = []
-            if not self.required:
-                choices.append(('', self.null_label))
-            choices.append(('none', _('No Project')))
-            choices.extend((p.slug, p.name) for p in projects)
-            self.choices = choices
-            if initial is None:
-                initial = choices[0][0]
-            self.initial = initial
-        else:
-            self.enabled = False
-
-    def prepare_value(self, value):
-        return value.slug if isinstance(value, Project) else value
-
-    def clean(self, value):
-        if not self.enabled:
-            return ''
-        if value == 'none':
-            value = Project.DEFAULT_NAME
-        if value:
-            return Project.objects.get(team=self.team, slug=value)
-        else:
-            return value
-
 class VideoFiltersForm(FiltersForm):
     q = forms.CharField(label="", required=False, widget=forms.TextInput(attrs={
         'placeholder': _('Search for videos')
@@ -1063,7 +1057,6 @@ class VideoFiltersForm(FiltersForm):
         self.fields['project'].setup(team, self.promote_main_project)
 
     def _get_queryset(self, data):
-        print data
         project = data.get('project')
         duration = data.get('duration')
         language = data.get('language')

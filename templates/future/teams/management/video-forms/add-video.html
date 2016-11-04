@@ -5,24 +5,20 @@
       <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
         <button type="button" class="button-closeModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <div class="dialogTitle">
-          {% if single_selection %}
-          <h4>{% blocktrans with title=first_video.title_display %}Editing: {{ title }}{% endblocktrans %}</h4>
-          {% else %}
-          <h4>{% blocktrans count count=selection_count %}Editing {{ count }} video{% plural %}Editing {{ count }} videos{% endblocktrans %}</h4>
-          {% endif %}
+          {% trans "Add Video" %}
         </div>
         <div class="modal-body">
           {% csrf_token %}
           {% include "future/non-field-errors.html" %}
+          {% include "future/forms/field.html" with field=form.video_url %}
           {% include "future/forms/field.html" with field=form.language %}
           {% if form.fields.project.enabled %}
           {% include "future/forms/field.html" with field=form.project %}
           {% endif %}
-          {% include "future/forms/field.html" with field=form.thumbnail %}
         </div>
         <div class="modal-footer">
           <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
-          <button class="button cta">{% trans "Update" %}</button>
+          <button class="button cta">{% trans "Add Video" %}</button>
         </div>
       </form>
     </div>
