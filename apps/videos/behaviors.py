@@ -49,10 +49,12 @@ class SubtitlesPageCustomization(object):
         steps: list of SubtitlesStep objects to display in the top-right
             section
         action_button: Button object to display underneath the steps
+        header: HTML to display in the header
     """
     def __init__(self):
         self.steps = None
         self.action_button = None
+        self.header = None
 
 @behavior
 def subtitles_page_customize(request, video, subtitle_language):

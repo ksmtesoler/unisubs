@@ -6,6 +6,7 @@
 {% include "future/videos/embed-script.html" %}
 {% endblock %}
 
+{% block header %}{% if header %}{{ header }}{% else %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block content %}
 <section>

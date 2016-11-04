@@ -536,6 +536,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'action_button': customization.action_button,
         'can_edit': workflow.user_can_edit_subtitles(
             request.user, subtitle_language.language_code),
+        'header': customization.header,
     })
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
