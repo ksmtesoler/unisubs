@@ -267,6 +267,11 @@ def video(request, video_id, video_url=None, title=None):
         create_url_form = None
         allow_delete = allow_make_primary = False
 
+    if request.META['QUERY_STRING']:
+        subtitle_link_query = '?' + request.META['QUERY_STRING']
+    else:
+        subtitle_link_query = ''
+
     customization = behaviors.video_page_customize(request, video)
     return render(request, 'future/videos/video.html', {
         'video': video,
@@ -283,6 +288,7 @@ def video(request, video_id, video_url=None, title=None):
         'activity': ActivityRecord.objects.for_video(video)[:8],
         'metadata': video.get_metadata().convert_for_display(),
         'sidebar_extra': customization.sidebar_extra,
+        'subtitle_link_query': subtitle_link_query,
         'header': customization.header,
     })
 
