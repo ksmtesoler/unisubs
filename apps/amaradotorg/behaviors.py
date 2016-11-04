@@ -28,17 +28,6 @@ from videos.behaviors import make_video_title
 
 logger = logging.getLogger(__name__)
 
-@make_video_title.override
-def amara_make_video_title(video, title, metadata):
-    if not metadata.get('speaker-name'):
-        return DONT_OVERRIDE
-    tv = video.get_team_video()
-    if tv is None or tv.team.slug != 'ted':
-        return DONT_OVERRIDE
-    return fmt(_('%(speaker_name)s: %(title)s'),
-               speaker_name=metadata['speaker-name'],
-               title=title)
-
 @get_main_project.override
 def amara_get_main_project(team):
     if team.slug == 'ted':
