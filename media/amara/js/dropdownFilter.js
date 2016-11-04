@@ -44,37 +44,68 @@ function languageChoiceData(select) {
     var enabledSelections = select.data('languageOptions').split(" ");
     var initial = select.data('initial');
     var nullLabel = select.data('languageNullLabel') || gettext('Any language');
+    var choiceMaker = new LanguageChoiceMaker(initial);
 
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
     }
     if(sectionEnabled('null')) {
-        data.push({
-            id: 'X',
-            text: nullLabel,
-            selected: initial == 'X'
-        });
+        if(select.data("placeholder")) {
+            data.push({
+                id: '',
+                selected: initial == '',
+            });
+        } else {
+            data.push({
+                id: 'X',
+                text: nullLabel,
+                selected: initial == 'X'
+            });
+        }
     }
     if(sectionEnabled('my')) {
         data.push({
             text: gettext('My Languages'),
-            children: _.map(userLanguages, languageChoice, initial)
+            children: choiceMaker.makeChoices(userLanguages)
         });
     }
     if(sectionEnabled('popular')) {
         data.push({
             text: gettext('Popular Languages'),
-            children: _.map(popularLanguages, languageChoice, initial)
+            children: choiceMaker.makeChoices(popularLanguages)
         });
     }
     if(sectionEnabled('all')) {
         data.push({
             text: gettext('All Languages'),
-            children: _.map(allLanguages, languageChoice, initial)
+            children: choiceMaker.makeChoices(allLanguages)
         });
     }
     return data;
 }
+
+function LanguageChoiceMaker(initial) {
+    this.initial = initial;
+    this.alreadyAdded = {};
+}
+
+LanguageChoiceMaker.prototype = {
+    makeChoices: function(languages) {
+        var choices = [];
+        var self = this;
+        _.each(languages, function(code) {
+            if(!self.alreadyAdded[code]) {
+                choices.push({
+                    id: code,
+                    text: getLanguageName(code),
+                    selected: code == self.initial
+                });
+                self.alreadyAdded[code] = true;
+            }
+        });
+        return choices;
+    }
+};
 
 function languageChoice(code) {
     return { id: code, text: getLanguageName(code), selected: code == this };

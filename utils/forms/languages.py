@@ -67,10 +67,8 @@ class MultipleLanguageDropdown(forms.SelectMultiple):
             final_attrs['class'] = 'dropdownFilter'
         if value:
             final_attrs['data-initial'] = value
-        # FIXME: add multiple once we get the UI right
-        return mark_safe(u'<select{}></select>'.format(
+        return mark_safe(u'<select multiple{}></select>'.format(
             flatatt(final_attrs)))
-        #return mark_safe(u'<select{} multiple></select>'.format(flatatt(final_attrs)))
 
 class WidgetAttrDescriptor(object):
     """Field attribute that gets/sets a widget attribute."""
@@ -81,21 +79,32 @@ class WidgetAttrDescriptor(object):
         return field.widget.attrs.get(self.attr_name)
 
     def __set__(self, field, value):
-        field.widget.attrs[self.attr_name] = value
+        if value is True:
+            field.widget.attrs[self.attr_name] = '1'
+        else:
+            field.widget.attrs[self.attr_name] = value
 
 class LanguageFieldMixin(object):
     def __init__(self, *args, **kwargs):
         options = kwargs.pop('options', "null my popular all")
         null_label = kwargs.pop('null_label', None)
+        placeholder = kwargs.pop('placeholder', False)
+        allow_clear = kwargs.pop('allow_clear', False)
         kwargs['choices'] = translation.get_language_choices()
         super(LanguageFieldMixin, self).__init__(*args, **kwargs)
         if options:
             self.options = options
         if null_label:
             self.null_label = null_label
+        if placeholder:
+            self.placeholder = placeholder
+        if allow_clear:
+            self.allow_clear = allow_clear
 
     options = WidgetAttrDescriptor('data-language-options')
     null_label = WidgetAttrDescriptor('data-language-null-label')
+    placeholder = WidgetAttrDescriptor('data-placeholder')
+    allow_clear = WidgetAttrDescriptor('data-allow-clear')
 
     def exclude(self, languages):
         self.widget.attrs['data-language-exclude'] = languages

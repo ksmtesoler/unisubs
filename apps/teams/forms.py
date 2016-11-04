@@ -1092,9 +1092,13 @@ class ManagementVideoFiltersForm(VideoFiltersForm):
     language = LanguageField(label="", required=False,
                              options="null popular all")
     completed_subtitles = LanguageField(label="", required=False,
-                                        options="null popular all")
+                                        options="null popular all",
+                                        placeholder=_('Select language'),
+                                        allow_clear=True)
     needs_subtitles = LanguageField(label="", required=False,
-                                    options="null popular all")
+                                    options="null popular all",
+                                    placeholder=_('Select language'),
+                                    allow_clear=True)
 
     promote_main_project = False
 
