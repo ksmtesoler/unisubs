@@ -523,6 +523,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
 
     return render(request, 'future/videos/subtitles.html', {
         'video': video,
+        'team_video': video.get_team_video(),
         'subtitle_language': subtitle_language,
         'subtitle_version': version,
         'all_subtitle_versions': subtitle_language.versions_for_user(
