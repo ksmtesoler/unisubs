@@ -8,10 +8,11 @@
 <p class="help-block">{{ field.help_text }}</p>
 {% endif %}
 {% else %}
-<div class="row">
-  <div class="col col-xs-4">{{ field.label_tag }}</div>
-  <div class="col col-xs-8">{{ field }}</div>
-</div>
+{% if field|is_select %}
+<div class="form-group">{{ field.label_tag }}<div class="select">{{ field }}</div></div>
+{% else %}
+<div class="form-group">{{ field.label_tag }} {{ field }}</div>
+{% endif %}
 {% include "_error-list.html" with errors=field.errors %}
 {% if field.help_text %}
 <p class="help-block">{{ field.help_text }}</p>

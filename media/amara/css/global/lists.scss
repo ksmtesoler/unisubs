@@ -51,3 +51,20 @@ dl {
     }
   }
 }
+
+ul {
+  &.inline {
+      padding: 0;
+      margin: 0 0 10px 0;
+      li {
+        display: inline-block;
+        font-weight: 100;
+        margin-right: 10px;
+        color: $gray;
+      }
+      strong {
+        color: $gray-darker;
+        font-weight: 100;
+      }
+  }
+}

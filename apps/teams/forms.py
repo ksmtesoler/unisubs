@@ -61,7 +61,8 @@ from videos.models import (
 from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
 from utils.forms import (ErrorableModelForm, get_label_for_value,
-                         UserAutocompleteField, LanguageField, FiltersForm)
+                         UserAutocompleteField, LanguageField, FiltersForm,
+                         Dropdown)
 from utils.panslugify import pan_slugify
 from utils.translation import get_language_choices, get_language_label
 from utils.text import fmt
@@ -1473,7 +1474,7 @@ class EditVideosForm(VideoManagementForm):
                              options="null popular all",
                              null_label=_('No change'))
     project = ProjectField(label=_('Project'), required=False,
-                           widget=forms.Select, null_label=_('No change'))
+                           widget=Dropdown, null_label=_('No change'))
     thumbnail = forms.ImageField(label=_('Change thumbnail'), required=False)
 
     def setup_fields(self):
@@ -1550,9 +1551,10 @@ class MoveVideosForm(VideoManagementForm):
     name = 'move'
     label = _('Move')
 
-    new_team = forms.ChoiceField(label=_('New Team'), choices=[])
+    new_team = forms.ChoiceField(label=_('New Team'), choices=[],
+                                 widget=Dropdown)
     project = forms.ChoiceField(label=_('Project'), choices=[],
-                                required=False)
+                                required=False, widget=Dropdown)
 
     @staticmethod
     def permissions_check(team, user):

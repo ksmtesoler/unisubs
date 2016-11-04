@@ -37,6 +37,7 @@ class LanguageDropdown(forms.Select):
     def render(self, name, value, attrs, choices=()):
         final_attrs = self.build_attrs(attrs)
         final_attrs['name'] = name
+        final_attrs['style'] = "width: 100%"
         if 'class' in final_attrs:
             final_attrs['class'] += ' dropdownFilter'
         else:
@@ -59,6 +60,7 @@ class MultipleLanguageDropdown(forms.SelectMultiple):
     def render(self, name, value, attrs, choices=()):
         final_attrs = self.build_attrs(attrs)
         final_attrs['name'] = name
+        final_attrs['style'] = "width: 100%"
         if 'class' in final_attrs:
             final_attrs['class'] += ' dropdownFilter'
         else:
@@ -66,7 +68,8 @@ class MultipleLanguageDropdown(forms.SelectMultiple):
         if value:
             final_attrs['data-initial'] = value
         # FIXME: add multiple once we get the UI right
-        return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
+        return mark_safe(u'<select{}></select>'.format(
+            flatatt(final_attrs)))
         #return mark_safe(u'<select{} multiple></select>'.format(flatatt(final_attrs)))
 
 class WidgetAttrDescriptor(object):

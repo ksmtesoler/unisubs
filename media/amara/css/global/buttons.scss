@@ -91,6 +91,12 @@ button {
     border-color: transparent;
     font-weight: inherit;
   }
+  &.borderless {
+    color: inherit;
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: inherit;
+  }
   i {
     margin-right: 9px;
   }

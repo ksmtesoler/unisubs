@@ -182,3 +182,13 @@ def get_label_for_value(form, name):
             if smart_unicode(choice[0]) == value:
                 return unicode(choice[1])
     return value
+
+class Dropdown(forms.Select):
+    def build_attrs(self, extra_attrs=None, **kwargs):
+        attrs = super(Dropdown, self).build_attrs(extra_attrs, **kwargs)
+        if 'class' in attrs:
+            attrs['class'] += ' dropdownFilter'
+        else:
+            attrs['class'] = 'dropdownFilter'
+        attrs['style'] = 'width: 100%'
+        return attrs

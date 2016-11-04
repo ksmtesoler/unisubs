@@ -30,6 +30,31 @@ select,
   }
 }
 
+.buttonFile {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 4px 4px 0;
+    padding: 0 10px;
+    line-height: 32px;
+    margin: 5px 0;
+    font-size: 12px;
+    font-weight: 400;
+}
+.buttonFile input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
 
 .select {
   position: relative;
@@ -150,7 +175,7 @@ select,
         height: 1rem;
         margin-right: 8px;
         vertical-align: middle;
-        background: transparent;
+        background: #ffffff;
         border: 1px solid $gray-light;
         border-radius: 50%;
         cursor: pointer;
