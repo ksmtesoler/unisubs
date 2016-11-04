@@ -39,3 +39,15 @@ class FiltersForm(forms.Form):
             if name in get_data
         }
         return data if data else None
+
+    def get_queryset(self):
+        if self.is_bound and self.is_valid():
+            return self._get_queryset(self.cleaned_data)
+        else:
+            return self._get_queryset({
+                name: self.initial.get(name, field.initial)
+                for name, field in self.fields.items()
+            })
+
+    def _get_queryset(self, data):
+        raise NotImplementedError()

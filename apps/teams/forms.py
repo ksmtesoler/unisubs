@@ -1013,7 +1013,7 @@ class ProjectField(forms.ChoiceField):
                     projects.remove(main_project)
                     projects.insert(0, main_project)
                     if initial is None:
-                        initial = main_project.slug
+                        initial = main_project
             choices = []
             if not self.required:
                 choices.append(('', self.null_label))
@@ -1025,6 +1025,9 @@ class ProjectField(forms.ChoiceField):
             self.initial = initial
         else:
             self.enabled = False
+
+    def prepare_value(self, value):
+        return value.slug if isinstance(value, Project) else value
 
     def clean(self, value):
         if not self.enabled:
@@ -1059,13 +1062,8 @@ class VideoFiltersForm(FiltersForm):
         super(VideoFiltersForm, self).__init__(get_data, **kwargs)
         self.fields['project'].setup(team, self.promote_main_project)
 
-    def get_queryset(self):
-        if self.is_bound and self.is_valid():
-            return self._get_queryset(self.cleaned_data)
-        else:
-            return self._get_queryset(self.initial)
-
     def _get_queryset(self, data):
+        print data
         project = data.get('project')
         duration = data.get('duration')
         language = data.get('language')
