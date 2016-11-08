@@ -16,7 +16,7 @@
           {% block tabs %}
           {% if extra_tabs %}
           <ul class="nav nav-tabs">
-            <li{% if current_tab == "videos" %} class="active"{% endif %}><a href="{% url "teams:videos" team.slug %}">{% trans "Videos" %}</a></li>
+            <li{% if current_tab == "videos" %} class="active"{% endif %}><a href="{% url "teams:videos" team.slug %}">{% trans "All Videos" %}</a></li>
             {% for tab in extra_tabs %}
             <li{% if current_tab == tab.name %} class="active"{% endif %}><a href="{{ tab.url }}">{{ tab.label }}</a></li>
             {% endfor %}
