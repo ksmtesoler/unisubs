@@ -61,7 +61,7 @@ class VideoDurationField(forms.ChoiceField):
     DURATION_MEDIUM = 'M'
     DURATION_LONG = 'L'
     DURATION_CHOICES = (
-        (DURATION_ANY, _('Any Length')),
+        (DURATION_ANY, _('Any length')),
         (DURATION_SHORT, _('< 10 min')),
         (DURATION_MEDIUM, _('10 - 30 min')),
         (DURATION_LONG, _('> 30 min')),

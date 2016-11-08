@@ -92,7 +92,7 @@ class ProjectField(forms.ChoiceField):
             choices = []
             if not self.required:
                 choices.append(('', self.null_label))
-            choices.append(('none', _('No Project')))
+            choices.append(('none', _('No project')))
             choices.extend((p.slug, p.name) for p in projects)
             self.choices = choices
             if initial is None:
