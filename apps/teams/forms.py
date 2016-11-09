@@ -62,7 +62,7 @@ from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
 from utils.forms import (ErrorableModelForm, get_label_for_value,
                          UserAutocompleteField, LanguageField, FiltersForm,
-                         LanguageDropdown, Dropdown)
+                         LanguageDropdown, Dropdown, AmaraRadioSelect)
 from utils.panslugify import pan_slugify
 from utils.translation import get_language_choices, get_language_label
 from utils.text import fmt
@@ -73,7 +73,9 @@ logger = logging.getLogger(__name__)
 class ProjectField(forms.ChoiceField):
     def __init__(self, *args, **kwargs):
         if 'widget' not in kwargs:
-            kwargs['widget'] = forms.RadioSelect
+            kwargs['widget'] = AmaraRadioSelect
+        if 'label' not in kwargs:
+            kwargs['label'] = _("Project")
         self.null_label = kwargs.pop('null_label', _('Any'))
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
@@ -1037,9 +1039,9 @@ class VideoFiltersForm(FiltersForm):
     q = forms.CharField(label="", required=False, widget=forms.TextInput(attrs={
         'placeholder': _('Search for videos')
     }))
-    language = LanguageField(label="", required=False)
-    project = ProjectField(label="", required=False)
-    duration = VideoDurationField(label="", required=False, widget=forms.RadioSelect)
+    language = LanguageField(label=_("Video language"), required=False)
+    project = ProjectField(required=False)
+    duration = VideoDurationField(required=False, widget=AmaraRadioSelect)
     sort = forms.ChoiceField(label="", choices=[
         ('-time', _('Time, newest')),
         ('time', _('Time, oldest')),
@@ -1089,13 +1091,14 @@ class VideoFiltersForm(FiltersForm):
         return qs.select_related('video')
 
 class ManagementVideoFiltersForm(VideoFiltersForm):
-    language = LanguageField(label="", required=False,
+    language = LanguageField(label=_("Video language"), required=False,
                              options="null popular all")
-    completed_subtitles = LanguageField(label="", required=False,
+    completed_subtitles = LanguageField(label=_("Completed subtitles"),
+                                        required=False,
                                         options="null popular all",
                                         placeholder=_('Select language'),
                                         allow_clear=True)
-    needs_subtitles = LanguageField(label="", required=False,
+    needs_subtitles = LanguageField(label=_("Needs subtitles"), required=False,
                                     options="null popular all",
                                     placeholder=_('Select language'),
                                     allow_clear=True)

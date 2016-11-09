@@ -1,17 +1,10 @@
-{% load form_helpers %}
-{% if field.is_hidden %}
+{% if widget_type == "hidden" %}
 {{ field }}
-{% elif field|is_checkbox %}
+{% else %}
+{% if widget_type == "checkbox" %}
 <div class="checkbox">{{ field }}<label for="{{ field.auto_id }}"><span></span>{{ field.label }}</label></div>
-{% include "_error-list.html" with errors=field.errors %}
-{% if field.help_text %}
-<p class="help-block">{{ field.help_text }}</p>
-{% endif %}
 {% else %}
-{% if field|is_select %}
-<div class="form-group">{{ field.label_tag }}<div class="select">{{ field }}</div></div>
-{% else %}
-<div class="form-group">{{ field.label_tag }} {{ field }}</div>
+<div class="form-group">{{ field.label_tag }}<div class="{{ widget_type }}">{{ field }}</div></div>
 {% endif %}
 {% include "_error-list.html" with errors=field.errors %}
 {% if field.help_text %}

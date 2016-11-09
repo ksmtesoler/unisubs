@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n forms %}
 <div class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -13,9 +13,9 @@
         </div>
         <div class="modal-body">
           {% csrf_token %}
-          {% include "future/non-field-errors.html" %}
-          {% if form.fields.delete %}
-          {% include "future/forms/field.html" with field=form.delete %}
+          {% include "future/forms/non-field-errors.html" %}
+          {% if form.delete %}
+          {{ form.delete|render_field }}
           {% endif %}
         </div>
         <div class="modal-footer">

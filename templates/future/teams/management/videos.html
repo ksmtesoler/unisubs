@@ -1,33 +1,18 @@
 {% extends "future/teams/management/base.html" %}
-{% load i18n %}
+{% load i18n forms %}
 {% load url from future %}
 
 {% block filters %}
 <form method="GET" action="" class="ajaxForm updateOnChange updateLocation">
   {{ filters_form.q.as_hidden }}
   {{ filters_form.sort.as_hidden }}
-  <div class="filterList filterList-select">
-    <h3>{% trans "Video language" %}</h3>
-    {{ filters_form.language }}
-  </div>
-  <div class="filterList filterList-select">
-    <h3>{% trans "Completed subtitles" %}</h3>
-    {{ filters_form.completed_subtitles }}
-  </div>
-  <div class="filterList filterList-select">
-    <h3>{% trans "Needs subtitles" %}</h3>
-    {{ filters_form.needs_subtitles }}
-  </div>
+  {{ filters_form.language|render_filter_field }}
+  {{ filters_form.completed_subtitles|render_filter_field }}
+  {{ filters_form.needs_subtitles|render_filter_field }}
   {% if filters_form.fields.project.enabled %}
-  <div class="filterList">
-    <h3>{% trans "Project" %}</h3>
-    {% include "future/_field.html" with field=filters_form.project %}
-  </div>
+  {{ filters_form.project|render_filter_field }}
   {% endif %}
-  <div class="filterList">
-    <h3>{% trans "Video length" %}</h3>
-    {% include "future/_field.html" with field=filters_form.duration %}
-  </div>
+  {{ filters_form.duration|render_filter_field }}
 </form>
 {% endblock %}
 

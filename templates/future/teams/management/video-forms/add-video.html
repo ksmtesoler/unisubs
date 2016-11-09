@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n forms %}
 <div class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -9,11 +9,11 @@
         </div>
         <div class="modal-body">
           {% csrf_token %}
-          {% include "future/non-field-errors.html" %}
-          {% include "future/forms/field.html" with field=form.video_url %}
-          {% include "future/forms/field.html" with field=form.language %}
+          {% include "future/forms/non-field-errors.html" %}
+          {{ form.video_url|render_field }}
+          {{ form.language|render_field }}
           {% if form.fields.project.enabled %}
-          {% include "future/forms/field.html" with field=form.project %}
+          {{ form.project|render_field }}
           {% endif %}
         </div>
         <div class="modal-footer">

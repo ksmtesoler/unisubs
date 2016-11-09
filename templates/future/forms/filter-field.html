@@ -1,0 +1,12 @@
+<div class="filterList{% if widget_type == "select" %} filterList-select{% endif %}">
+  <h3>{{ field.label }}</h3>
+  {% if widget_type == "radio" %}
+  <div class="radio">{{ field }}</div>
+  {% else %}
+  {{ field }}
+  {% endif %}
+  {% include "future/forms/error-list.html" with errors=field.errors %}
+  {% if field.help_text %}
+  <p class="help-block">{{ field.help_text }}</p>
+  {% endif %}
+</div>

@@ -71,6 +71,8 @@ class VideoDurationField(forms.ChoiceField):
             kwargs['choices'] = self.DURATION_CHOICES
         if 'initial' not in kwargs:
             kwargs['initial'] = ''
+        if 'label' not in kwargs:
+            kwargs['label'] = _("Video length")
         super(VideoDurationField, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):

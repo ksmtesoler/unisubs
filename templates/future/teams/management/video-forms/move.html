@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n forms %}
 <div class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -13,20 +13,9 @@
         </div>
         <div class="modal-body">
           {% csrf_token %}
-          {% include "future/non-field-errors.html" %}
-          {% include "future/forms/field.html" with field=form.new_team %}
-          <div class="form-group">
-            {{ form.project.label_tag }}
-            <select name="project" class="dependentSelect" data-controller="#id_new_team">
-              {% for project_id, project_name, team_id in form.project_options %}
-              <option value="{{ project_id }}"{% if project_id == form.project.value %} selected{% endif %}{% if project_id %} data-enabled-for="{{ team_id }}"{% endif %}>{{ project_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          {% include "_error-list.html" with errors=form.project.errors %}
-          {% if form.project.help_text %}
-          <p class="help-block">{{ form.project.help_text }}</p>
-          {% endif %}
+          {% include "future/forms/non-field-errors.html" %}
+          {{ form.new_team|render_field }}
+          {{ form.project|render_field }}
         </div>
         <div class="modal-footer">
           <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
