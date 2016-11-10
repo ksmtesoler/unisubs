@@ -58,13 +58,13 @@ ul {
       margin: 0 0 10px 0;
       li {
         display: inline-block;
-        font-weight: 100;
+        font-weight: 500;
         margin-right: 10px;
         color: $gray;
       }
       strong {
+        font-weight: 300;
         color: $gray-darker;
-        font-weight: 100;
       }
   }
 }

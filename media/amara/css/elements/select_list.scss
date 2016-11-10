@@ -11,14 +11,21 @@ ul.selectList {
     color: $gray;
   }
   h3 {
-    font-family: $font-family-sans-serif;
-    font-weight: 600;
+    font-family: $headings-font-family;
+    font-weight: 500;
     margin: 0;
   }
   h4 {
+    font-size: 13px;
+    font-weight: 600;
     color: $gray-darker;
     margin: 0;
   }
+  h3, h4 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
   dl {
     margin-bottom: 10px;
     dt,dd{display:inline; font-weight: 100;}
