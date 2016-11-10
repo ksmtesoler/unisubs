@@ -23,8 +23,9 @@ from django.forms.util import flatatt
 from django.utils.safestring import mark_safe
 
 from utils import translation
+from .widgets import Dropdown
 
-class LanguageDropdown(forms.Select):
+class LanguageDropdown(Dropdown):
     """Widget that renders a language dropdown
 
     Attrs:
@@ -37,15 +38,9 @@ class LanguageDropdown(forms.Select):
     def render(self, name, value, attrs, choices=()):
         final_attrs = self.build_attrs(attrs)
         final_attrs['name'] = name
-        final_attrs['style'] = "width: 100%"
-        if 'class' in final_attrs:
-            final_attrs['class'] += ' dropdownFilter'
-        else:
-            final_attrs['class'] = 'dropdownFilter'
         if value:
             final_attrs['data-initial'] = value
         return mark_safe(u'<select{}></select>'.format(flatatt(final_attrs)))
-
 
 class MultipleLanguageDropdown(forms.SelectMultiple):
     """Widget that renders a language dropdown

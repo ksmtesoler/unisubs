@@ -23,6 +23,16 @@ from django.forms.util import flatatt
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 
+class Dropdown(widgets.Select):
+    def build_attrs(self, *args, **kwargs):
+        attrs = super(Dropdown, self).build_attrs(*args, **kwargs)
+        attrs['style'] = "width: 100%"
+        if 'class' in attrs:
+            attrs['class'] += ' dropdownFilter'
+        else:
+            attrs['class'] = 'dropdownFilter'
+        return attrs
+
 class AmaraRadioSelect(widgets.RadioSelect):
     def render(self, name, value, attrs=None, choices=()):
         if value is None:
