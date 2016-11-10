@@ -22,7 +22,7 @@
         <div class="collapse navbar-collapse" id="navbar-collapse">
           <ul class="nav navbar-nav mainNav-nav">
             <li class="mainNav-nav-item{% if team_nav == "dashboard" %} active{% endif %}"><a href="{% url "teams:dashboard" team.slug %}">{% trans "Dashboard" %}</a></li>
-            <li class="mainNav-nav-item{% if team_nav == "videos" %} active{% endif %}"><a href="{% url "teams:videos" team.slug %}">{% trans "Videos" %}</a></li>
+            <li class="mainNav-nav-item{% if team_nav == "videos" %} active{% endif %}"><a href="{% url "collab:assignments" team.slug %}">{% trans "Videos" %}</a></li>
             <li class="mainNav-nav-item{% if team_nav == "member_directory" %} active{% endif %}"><a href="{% url "teams:members" team.slug %}">{% trans "Members" %}</a></li>
             <li class="mainNav-nav-item{% if team_nav == "activity" %} active{% endif %}"><a href="{% url "teams:activity" team.slug %}">{% trans "Activity" %}</a></li>
             {% if team|can_view_management_tab:request.user %}
