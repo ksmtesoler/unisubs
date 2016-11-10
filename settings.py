@@ -210,6 +210,7 @@ INSTALLED_APPS = (
     'teams',
     'testhelpers',
     'thirdpartyaccounts',
+    'ui',
     'unisubs_compressor',
     'utils',
     'videos',

@@ -52,6 +52,14 @@ from teams.permissions import (
 )
 from teams.permissions_const import ROLE_NAMES
 from teams.workflows import TeamWorkflow
+from ui.forms import ManagementForm
+from utils.forms import (ErrorableModelForm, get_label_for_value,
+                         UserAutocompleteField, LanguageField, FiltersForm,
+                         LanguageDropdown, Dropdown, AmaraRadioSelect)
+from utils.panslugify import pan_slugify
+from utils.translation import get_language_choices, get_language_label
+from utils.text import fmt
+from utils.validators import MaxFileSizeValidator
 from videos.forms import (AddFromFeedForm, VideoForm, CreateSubtitlesForm,
                           MultiVideoCreateSubtitlesForm, VideoURLField,
                           VideoDurationField)
@@ -60,13 +68,6 @@ from videos.models import (
 )
 from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
-from utils.forms import (ErrorableModelForm, get_label_for_value,
-                         UserAutocompleteField, LanguageField, FiltersForm,
-                         LanguageDropdown, Dropdown, AmaraRadioSelect)
-from utils.panslugify import pan_slugify
-from utils.translation import get_language_choices, get_language_label
-from utils.text import fmt
-from utils.validators import MaxFileSizeValidator
 
 logger = logging.getLogger(__name__)
 
@@ -1391,77 +1392,21 @@ TeamVideoURLFormSet = formset_factory(TeamVideoURLForm)
 class TeamVideoCSVForm(forms.Form):
     csv_file = forms.FileField(label=_(u"CSV file"), required=True, allow_empty_file=False)
 
-class VideoManagementForm(forms.Form):
+class VideoManagementForm(ManagementForm):
     """Base class for forms on the video management page."""
 
-    # unique slug to identify the form
-    name = NotImplemented
-    # human-friendly label
-    label = NotImplemented
-    # css class for the button
-    css_class = 'cta'
-
-    include_all = forms.BooleanField(label='', required=False)
+    include_all_label = _('Include all %(count)s filtered videos')
+    save_queryset_select_related = ('teamvideo', 'teamvideo__project')
 
     @staticmethod
     def permissions_check(team, user):
         """Check if we should enable the form for a given user."""
         return True
 
-    def __init__(self, team, user, videos_qs, selection, all_selected,
-                 *args, **kwargs):
-        super(VideoManagementForm, self).__init__(*args, **kwargs)
+    def __init__(self, team, user, *args, **kwargs):
         self.team = team
         self.user = user
-        self.videos_qs = videos_qs
-        self.selection = selection
-        self.setup_include_all(videos_qs, selection, all_selected)
-        self.setup_fields()
-
-    def save(self):
-        self.perform_save(self.find_team_videos_to_update())
-
-    def single_selection(self):
-        return len(self.selection) == 1
-
-    def get_first_video(self):
-        return self.team.videos.get(id=self.selection[0])
-
-    def find_team_videos_to_update(self):
-        qs = self.videos_qs
-        if not self.cleaned_data.get('include_all'):
-            qs = qs.filter(id__in=self.selection)
-        self.count = qs.count()
-        return TeamVideo.objects.filter(video__in=qs).select_related(
-            'video', 'project')
-
-    def setup_include_all(self, videos_qs, selection, all_selected):
-        if not all_selected:
-            del self.fields['include_all']
-        else:
-            total_videos = videos_qs.count()
-            if total_videos <= len(selection):
-                del self.fields['include_all']
-            else:
-                self.fields['include_all'].label = fmt(
-                    _('Include all %(count)s filtered videos'),
-                    count=total_videos)
-
-    def setup_fields(self):
-        """Override this if you need to dynamically setup the form fields."""
-        pass
-
-    def perform_save(self, qs):
-        """Does the work for the save() method.
-
-        Args:
-            qs -- queryset of TeamVideos that should be operated on.
-        """
-        raise NotImplementedError()
-
-    def message(self):
-        """Success message after the form is submitted."""
-        raise NotImplementedError()
+        super(VideoManagementForm, self).__init__(*args, **kwargs)
 
 class EditVideosForm(VideoManagementForm):
     name = 'edit'
@@ -1481,8 +1426,8 @@ class EditVideosForm(VideoManagementForm):
             self.setup_single_selection()
 
     def setup_single_selection(self):
-        video = self.get_first_video()
-        team_video = video.get_team_video()
+        video = self.get_first_object()
+        team_video = video.teamvideo
         self.fields['project'].required = True
         self.fields['project'].initial = team_video.project.slug
         self.fields['project'].choices = self.fields['project'].choices[1:]
@@ -1496,8 +1441,8 @@ class EditVideosForm(VideoManagementForm):
         if language is None and self.single_selection():
             language = ''
 
-        for team_video in qs:
-            video = team_video.video
+        for video in qs:
+            team_video = video.teamvideo
 
             if project is not None and project != team_video.project:
                 team_video.project = project
@@ -1533,8 +1478,8 @@ class DeleteVideosForm(VideoManagementForm):
     def perform_save(self, qs):
         delete = self.cleaned_data.get('delete', False)
 
-        for team_video in qs:
-            video = team_video.video
+        for video in qs:
+            team_video = video.teamvideo
             team_video.remove(self.user)
             if delete:
                 video.delete()
@@ -1614,7 +1559,8 @@ class MoveVideosForm(VideoManagementForm):
         return Team.objects.get(id=self.cleaned_data['new_team'])
 
     def perform_save(self, qs):
-        for team_video in qs:
+        for video in qs:
+            team_video = video.teamvideo
             team_video.move_to(self.cleaned_data['new_team'],
                                self.cleaned_data['project'])
 

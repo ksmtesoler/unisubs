@@ -48,29 +48,6 @@ class TeamVideoManagementFormBase(TestCase):
                 form.save()
         return form
 
-class TestVideoManagementForm(TeamVideoManagementFormBase):
-    def test_find_team_videos_to_update(self):
-        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
-                               data={}, skip_save=True)
-        assert_items_equal(form.find_team_videos_to_update(),
-                           self.team_videos[0:4])
-
-    def test_find_team_videos_to_update_include_all(self):
-        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
-                               all_selected=True,
-                               data={'include_all': True}, skip_save=True)
-        assert_items_equal(form.find_team_videos_to_update(),
-                           self.team_videos)
-
-    def test_enable_include_all_logic(self):
-        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
-                               all_selected=True)
-        assert_true('include_all' in form.fields)
-
-        form = self.build_form(forms.VideoManagementForm, self.videos[0:4],
-                               all_selected=False)
-        assert_false('include_all' in form.fields)
-
 class TestEditVideosForm(TeamVideoManagementFormBase):
     def test_set_project(self):
         videos = self.videos[:2]
