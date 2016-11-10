@@ -37,6 +37,16 @@ function dropdownFilter(select) {
         options.minimumResultsForSearch = 8;
     }
     select.select2(options);
+    // Workaround to prevent clicking the clear button from opening the dialog (see
+    // http://stackoverflow.com/questions/29618382/disable-dropdown-opening-on-select2-clear#29688626)
+    select.on('select2:unselecting', function() {
+        $(this).data('unselecting', true);
+    }).on('select2:opening', function(e) {
+        if ($(this).data('unselecting')) {
+            $(this).removeData('unselecting');
+            e.preventDefault();
+        }
+    });
 }
 
 function languageChoiceData(select) {
