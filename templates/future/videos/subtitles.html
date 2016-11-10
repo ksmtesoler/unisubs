@@ -87,7 +87,7 @@
             {% endif %}
           </section>
           {% endif %}
-          {% if all_subtitle_versions and all_subtitle_versions|length > 2%}
+          {% if all_subtitle_versions and all_subtitle_versions|length >= 2 %}
           <section class="videoSubtitles-revisions">
             <header>
               <h3>{% trans "Revisions" %}</h3>
