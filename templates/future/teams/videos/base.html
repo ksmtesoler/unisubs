@@ -19,7 +19,7 @@
             {% for tab in extra_tabs %}
             <li{% if current_tab == tab.name %} class="active"{% endif %}><a href="{{ tab.url }}">{{ tab.label }}</a></li>
             {% endfor %}
-            <li{% if current_tab == "videos" %} class="active"{% endif %}><a href="{% url "teams:videos" team.slug %}">{% trans "All Videos" %}</a></li>
+            <li{% if current_tab == "videos" %} class="active"{% endif %}><a href="{% url "teams:videos" team.slug %}">{% trans "All videos" %}</a></li>
           </ul>
           {% else %}
           <h1>{% trans "Videos" %}</h1>
