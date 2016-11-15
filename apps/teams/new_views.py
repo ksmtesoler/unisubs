@@ -58,8 +58,8 @@ from auth.models import CustomUser as User
 from messages import tasks as messages_tasks
 from subtitles.models import SubtitleLanguage
 from teams.workflows import TeamWorkflow
+from ui.ajax import AJAXResponseRenderer
 from ui.forms import ManagementFormList
-from utils.ajax import AJAXResponseRenderer
 from utils.breadcrumbs import BreadCrumb
 from utils.decorators import staff_member_required
 from utils.pagination import AmaraPaginator, AmaraPaginatorFuture
@@ -673,22 +673,23 @@ def manage_videos_form(request, team, form_name, videos):
         raise Http404()
 
     all_selected = len(selection) >= VIDEOS_PER_PAGE_MANAGEMENT
+    response_renderer = AJAXResponseRenderer(request)
+
     if request.method == 'POST':
         form = FormClass(team, request.user, videos, selection, all_selected,
                          data=request.POST, files=request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, form.message())
-            response = HttpResponse("SUCCESS", content_type="text/plain")
-            response['X-Form-Success'] = '1'
-            return response
+            response_renderer.reload_page()
+            return response_renderer.render()
     else:
         form = FormClass(team, request.user, videos, selection, all_selected)
 
     first_video = Video.objects.get(id=selection[0])
     template_name = 'future/teams/management/video-forms/{}.html'.format(
         form_name)
-    return render(request, template_name, {
+    response_renderer.show_modal(template_name, {
         'team': team,
         'form': form,
         'first_video': first_video,
@@ -696,6 +697,7 @@ def manage_videos_form(request, team, form_name, videos):
         'single_selection': len(selection) == 1,
         'all_selected': all_selected,
     })
+    return response_renderer.render()
 
 def add_video_form(request, team):
     if request.method == 'POST':

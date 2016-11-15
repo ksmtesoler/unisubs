@@ -62,7 +62,7 @@ from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
 from teams.models import Task
-from utils.ajax import AJAXResponseRenderer
+from ui.ajax import AJAXResponseRenderer
 from utils.decorators import staff_member_required
 from videos import behaviors
 from videos import permissions
@@ -318,8 +318,6 @@ def comments_form(request, obj, replace_id):
 
     if request.is_ajax():
         response_renderer = AJAXResponseRenderer(request)
-        if comment_form.is_valid():
-            response_renderer.clear_form()
         response_renderer.replace(
             replace_id, 'future/videos/tabs/comments.html', {
                 'comments': Comment.get_for_object(obj),
@@ -337,14 +335,9 @@ def video_add_url_form(request, video):
     response_renderer = AJAXResponseRenderer(request)
     if create_url_form.is_valid():
         create_url_form.save()
-        response_renderer.clear_form()
+        response_renderer.clear_form('#add-url-form form')
         response_renderer.replace(*urls_tab_replacement_data(request, video))
         response_renderer.hide_modal('#add-url-dialog')
-    response_renderer.replace('#add-url-form',
-                              'future/videos/forms/create-url.html', {
-                                  'video': video,
-                                  'create_url_form': create_url_form,
-                              })
 
     return response_renderer.render()
 

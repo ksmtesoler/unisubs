@@ -1,30 +1,28 @@
 {% load i18n forms %}
-<div class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
-        <button type="button" class="button-closeModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <div class="dialogTitle">
-          {% if single_selection %}
-          <h4>{% blocktrans with title=first_video.title_display %}Editing: {{ title }}{% endblocktrans %}</h4>
-          {% else %}
-          <h4>{% blocktrans count count=selection_count %}Editing {{ count }} video{% plural %}Editing {{ count }} videos{% endblocktrans %}</h4>
-          {% endif %}
-        </div>
-        <div class="modal-body">
-          {% csrf_token %}
-          {% include "future/forms/non-field-errors.html" %}
-          {{ form.language|render_field }}
-          {% if form.fields.project.enabled %}
-          {{ form.project|render_field }}
-          {% endif %}
-          {{ form.thumbnail|render_field }}
-        </div>
-        <div class="modal-footer">
-          <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
-          <button class="button cta">{% trans "Update" %}</button>
-        </div>
-      </form>
-    </div>
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
+      <button type="button" class="button-closeModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="dialogTitle">
+        {% if single_selection %}
+        <h4>{% blocktrans with title=first_video.title_display %}Editing: {{ title }}{% endblocktrans %}</h4>
+        {% else %}
+        <h4>{% blocktrans count count=selection_count %}Editing {{ count }} video{% plural %}Editing {{ count }} videos{% endblocktrans %}</h4>
+        {% endif %}
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        {% include "future/forms/non-field-errors.html" %}
+        {{ form.language|render_field }}
+        {% if form.fields.project.enabled %}
+        {{ form.project|render_field }}
+        {% endif %}
+        {{ form.thumbnail|render_field }}
+      </div>
+      <div class="modal-footer">
+        <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
+        <button class="button cta">{% trans "Update" %}</button>
+      </div>
+    </form>
   </div>
 </div>

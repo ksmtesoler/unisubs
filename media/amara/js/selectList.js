@@ -29,7 +29,7 @@
 
     function selectList(container) {
         var actionBar = $($(container).data('target'));
-        var actions =$('.selectList-action', actionBar);
+        var selection = $('.selectList-selection', actionBar);
         var checkboxes = $('.selectList-checkbox', container);
         checkboxes.change(function() {
             if(checkboxes.is(':checked')) {
@@ -37,7 +37,7 @@
             } else {
                 actionBar.removeClass('open');
             }
-            actions.data('selection', getSelection().join('-'));
+            selection.val(getSelection().join('-'));
         });
 
         function getSelection() {

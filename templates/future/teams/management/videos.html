@@ -47,9 +47,12 @@
 {% block bottom %}
 {% if manage_forms %}
 <div id="manage-actions" class="actionBar">
-  {% for name, css_class, label in manage_forms %}
-  <button class="button {{ css_class }} selectList-action openAjaxModal" data-form="{{ name }}">{{ label }}</button>
-  {% endfor %}
+  <form class="ajaxForm copyQuery" method="GET" action="{{ request.path }}">
+    <input class="selectList-selection" type="hidden" name="selection">
+    {% for name, css_class, label in manage_forms %}
+    <button class="button {{ css_class }}" type="submit" name="form" value="{{ name }}">{{ label }}</button>
+    {% endfor %}
+  </form>
 </div>
 {% endif %}
 {% endblock %}

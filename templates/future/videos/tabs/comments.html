@@ -21,7 +21,7 @@
   <li class="row addComment">
     <div class="col-xs">
       <a href="{{ user.get_absolute_url }}" class="pull-left"><img class="avatar avatar-md" src="{{ user.small_avatar }}" /></a>
-      <form action="" class="ajax" method="post">
+      <form id="comments-form" action="" class="ajaxForm" method="post">
         {% csrf_token %}
         <input type="hidden" name="form" value="comment">
         {{ comment_form.object_pk }}
