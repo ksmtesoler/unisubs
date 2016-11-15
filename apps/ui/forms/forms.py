@@ -16,6 +16,8 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
+from collections import OrderedDict
+
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
@@ -61,6 +63,16 @@ class ManagementForm(forms.Form):
         self.selection = selection
         self.setup_include_all(queryset, selection, all_selected)
         self.setup_fields()
+        if self.single_selection():
+            self.setup_single_selection(self.get_first_object())
+
+    @staticmethod
+    def permissions_check():
+        """Permissions check for the form
+
+        Subclasses may implement this and also probably want to add arguments.
+        """
+        return True
 
     def save(self):
         self.perform_save(self.get_save_queryset())
@@ -99,6 +111,10 @@ class ManagementForm(forms.Form):
         """Override this if you need to dynamically setup the form fields."""
         pass
 
+    def setup_single_selection(self, obj):
+        """Override this if you alter the form when 1 object is selected."""
+        pass
+
     def perform_save(self, qs):
         """Does the work for the save() method.
 
@@ -110,3 +126,38 @@ class ManagementForm(forms.Form):
     def message(self):
         """Success message after the form is submitted."""
         raise NotImplementedError()
+
+class ManagementFormList(object):
+    """Handle a list of Managment forms
+
+    ManagementFormList is a convient want to store a bunch of ManagementForm
+    subclasses.  It supports looking them all up in order or looking one up by
+    name.
+    """
+    def __init__(self, forms=None):
+        self.forms = OrderedDict()
+        if forms:
+            self.extend(forms)
+
+    def append(self, form):
+        self.forms[form.name] = form
+
+    def extend(self, forms):
+        for form in forms:
+            self.append(form)
+
+    def all(self, *permissions_check_args):
+        return [
+            f for f in self.forms.values()
+            if f.permissions_check(*permissions_check_args)
+        ]
+
+    def lookup(self, name, *permissions_check_args):
+        try:
+            form = self.forms[name]
+        except KeyError:
+            return None
+        if form.permissions_check(*permissions_check_args):
+            return form
+        else:
+            return None

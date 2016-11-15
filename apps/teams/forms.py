@@ -1422,11 +1422,8 @@ class EditVideosForm(VideoManagementForm):
 
     def setup_fields(self):
         self.fields['project'].setup(self.team)
-        if self.single_selection():
-            self.setup_single_selection()
 
-    def setup_single_selection(self):
-        video = self.get_first_object()
+    def setup_single_selection(self, video):
         team_video = video.teamvideo
         self.fields['project'].required = True
         self.fields['project'].initial = team_video.project.slug

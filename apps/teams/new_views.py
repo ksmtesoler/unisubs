@@ -58,6 +58,7 @@ from auth.models import CustomUser as User
 from messages import tasks as messages_tasks
 from subtitles.models import SubtitleLanguage
 from teams.workflows import TeamWorkflow
+from ui.forms import ManagementFormList
 from utils.ajax import AJAXResponseRenderer
 from utils.breadcrumbs import BreadCrumb
 from utils.decorators import staff_member_required
@@ -630,7 +631,7 @@ def manage_videos(request, team):
         'extra_tabs': team.new_workflow.management_page_extra_tabs(request),
         'manage_forms': [
             (form.name, form.css_class, form.label)
-            for form in calc_manage_videos_forms(team, request.user)
+            for form in all_video_management_forms(team, request.user)
         ],
     }
     if request.is_ajax():
@@ -643,29 +644,22 @@ def manage_videos(request, team):
     return render(request, 'future/teams/management/videos.html', context)
 
 # Functions to handle the forms on the videos pages
-def all_manage_video_forms(team):
-    form_list = [
+def get_video_management_forms(team):
+    form_list = ManagementFormList([
         forms.EditVideosForm,
         forms.MoveVideosForm,
-    ]
+    ])
     signals.build_video_management_forms.send(sender=team, form_list=form_list)
     form_list.extend([
         forms.DeleteVideosForm
     ])
     return form_list
 
-def calc_manage_videos_forms(team, user):
-    return [
-        FormClass for FormClass in all_manage_video_forms(team)
-        if FormClass.permissions_check(team, user)
-    ]
+def all_video_management_forms(team, user):
+    return get_video_management_forms(team).all(team, user)
 
-def lookup_manage_video_form(team, user, form_name):
-    for FormClass in all_manage_video_forms(team):
-        if (FormClass.name == form_name and
-                FormClass.permissions_check(team, user)):
-            return FormClass
-    return None
+def lookup_video_managment_form(team, user, form_name):
+    return get_video_management_forms(team).lookup(form_name, team, user)
 
 def manage_videos_form(request, team, form_name, videos):
     """Render a form from the action bar on the video management page.
@@ -674,7 +668,7 @@ def manage_videos_form(request, team, form_name, videos):
         selection = request.GET['selection'].split('-')
     except StandardError:
         return HttpResponseBadRequest()
-    FormClass = lookup_manage_video_form(team, request.user, form_name)
+    FormClass = lookup_video_managment_form(team, request.user, form_name)
     if FormClass is None:
         raise Http404()
 
