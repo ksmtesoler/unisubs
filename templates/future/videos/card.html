@@ -7,7 +7,9 @@
   </header>
   <div class="videoCard-thumbnail">
     <a href="{{ video.get_absolute_url }}{% if team %}?team={{ team.slug }}{% endif %}">
-      <img class="videoCard-img" src="{{ video.get_huge_thumbnail }}" />
+      <div class="thumbWrapper">
+        <img src="{{ video.get_huge_thumbnail }}" />
+      </div>
       <div class="videoCard-caption">
         <h4 class="videoCard-title">{{ video.title_display }}</h4>
         {% block subtitle %}{% if subtitle %}<h5 class="videoCard-subtitle">{{ subtitle }}</h5>{% endif %}{% endblock %}

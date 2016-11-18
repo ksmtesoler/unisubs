@@ -52,3 +52,17 @@
 
 .text-plum { color: $plum; }
 .text-teal { color: $teal; }
+
+// Video Thumbnails
+.thumbWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 0;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  img {
+    max-width: 100%;
+    margin-top: 56.25%
+  }
+}
