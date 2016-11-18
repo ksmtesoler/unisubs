@@ -20,12 +20,12 @@ import datetime
 import logging
 import re
 
-from auth.models import CustomUser as User
 from django import forms
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
+from django.core.validators import EMPTY_VALUES
 from django.db.models import Q
 from django.db import transaction
 from django.forms.formsets import formset_factory
@@ -36,6 +36,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.utils.translation import ungettext
 
+from auth.forms import UserField
+from auth.models import CustomUser as User
 from activity.models import ActivityRecord
 from subtitles.forms import SubtitlesUploadForm
 from teams.models import (
@@ -70,6 +72,25 @@ from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
 
 logger = logging.getLogger(__name__)
+
+class TeamMemberField(UserField):
+    default_error_messages = {
+        'not-team-member': _(u'Not a team member'),
+    }
+
+    def __init__(self, **kwargs):
+        super(TeamMemberField, self).__init__(**kwargs)
+        self.team = None
+
+    def setup(self, team):
+        self.team = team
+
+    def validate(self, value):
+        if value not in EMPTY_VALUES:
+            if self.team and not self.team.user_is_member(value):
+                raise forms.ValidationError(
+                    self.error_messages['not-team-member']
+                )
 
 class ProjectField(forms.ChoiceField):
     def __init__(self, *args, **kwargs):

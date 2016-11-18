@@ -34,7 +34,7 @@ class UserField(forms.Field):
 
     def prepare_value(self, value):
         if isinstance(value, User):
-            return value.id
+            return value.username
         return value
 
     def to_python(self, value):
@@ -43,9 +43,9 @@ class UserField(forms.Field):
         if isinstance(value, User):
             return value
         try:
-            return User.objects.get(id=value)
+            return User.objects.get(username=value)
         except User.DoesNotExist:
-            raise ValidationError(self.error_messages['invalid'])
+            raise forms.ValidationError(self.error_messages['invalid'])
 
 class CustomUserCreationForm(UserCreationForm):
     captcha = CaptchaField()
