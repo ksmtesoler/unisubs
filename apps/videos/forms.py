@@ -24,6 +24,7 @@ from django import forms
 from django.conf import settings
 from django.core.mail import EmailMessage, send_mail
 from django.core.urlresolvers import reverse
+from django.core.validators import EMPTY_VALUES
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
@@ -56,16 +57,18 @@ def language_choices_with_empty():
     return choices
 
 class VideoDurationField(forms.ChoiceField):
-    DURATION_ANY = ''
-    DURATION_SHORT = 'S'
-    DURATION_MEDIUM = 'M'
-    DURATION_LONG = 'L'
-    DURATION_CHOICES = (
-        (DURATION_ANY, _('Any length')),
-        (DURATION_SHORT, _('< 10 min')),
-        (DURATION_MEDIUM, _('10 - 30 min')),
-        (DURATION_LONG, _('> 30 min')),
-    )
+    # Duration choices in the form of (min, max, label)
+    DURATION_CHOICE_DATA = [
+        (None, 6, _('< 6 min')),
+        (6, 12, _('6-12 min')),
+        (12, 18, _('12-18 min')),
+        (18, 30, _('18-30  min')),
+        (30, None, _('> 30 min')),
+    ]
+    DURATION_CHOICES = [ ('', _('Any length')) ] + [
+        (str(i+1), option[2])
+        for i, option in enumerate(DURATION_CHOICE_DATA)
+    ]
     def __init__(self, *args, **kwargs):
         if 'choices' not in kwargs:
             kwargs['choices'] = self.DURATION_CHOICES
@@ -76,13 +79,16 @@ class VideoDurationField(forms.ChoiceField):
         super(VideoDurationField, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):
-        if value == self.DURATION_SHORT:
-            qs = qs.filter(duration__lt=10*60)
-        elif value == self.DURATION_MEDIUM:
-            qs = qs.filter(Q(duration__gte=10*60) &
-                           Q(duration__lt=30*60))
-        elif value == self.DURATION_LONG:
-            qs = qs.filter(duration__gte=(30*60))
+        if value in EMPTY_VALUES:
+            return qs
+        try:
+            min, max, label = self.DURATION_CHOICE_DATA[int(value)-1]
+        except StandardError:
+            return qs.none()
+        if min is not None:
+            qs = qs.filter(duration__gte=min * 60)
+        if max is not None:
+            qs = qs.filter(duration__lt=max * 60)
         return qs
 
 class VideoURLField(forms.URLField):
