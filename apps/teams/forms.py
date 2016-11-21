@@ -129,14 +129,11 @@ class ProjectField(forms.ChoiceField):
         return value.slug if isinstance(value, Project) else value
 
     def clean(self, value):
-        if not self.enabled:
-            return ''
+        if not self.enabled or value in EMPTY_VALUES:
+            return None
         if value == 'none':
             value = Project.DEFAULT_NAME
-        if value:
-            return Project.objects.get(team=self.team, slug=value)
-        else:
-            return value
+        return Project.objects.get(team=self.team, slug=value)
 
 
 class EditTeamVideoForm(forms.ModelForm):
@@ -286,13 +283,13 @@ class AddTeamVideoForm(forms.ModelForm):
         self.fields['language'].options = 'null popular all'
         self.fields['language'].null_label = _('Select language')
 
+    def clean_project(self):
+        project = self.cleaned_data['project']
+        return project if project else self.team.default_project
+
     def clean(self):
         if self._errors:
             return self.cleaned_data
-
-        self.project = self.cleaned_data.get('project')
-        if not self.project:
-            self.project = self.team.default_project
 
         # See if any error happen when we create our video
         try:
@@ -305,14 +302,14 @@ class AddTeamVideoForm(forms.ModelForm):
     def setup_video(self, video, video_url):
         video.is_public = self.team.is_visible
         self.saved_team_video = TeamVideo.objects.create(
-            video=video, team=self.team, project=self.project,
+            video=video, team=self.team, project=self.cleaned_data['project'],
             added_by=self.user)
         self._success_message = ugettext('Video successfully added to team.')
 
     def setup_existing_video(self, video, video_url):
         team_video, created = TeamVideo.objects.get_or_create(
             video=video, defaults={
-                'team': self.team, 'project': self.project,
+                'team': self.team, 'project': self.cleaned_data['project'],
                 'added_by': self.user
             })
 
