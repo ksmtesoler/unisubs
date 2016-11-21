@@ -4,10 +4,12 @@
     <input name="videos" value="{{ video.id }}" id="video-{{ video.id }}" type="checkbox" class="selectList-checkbox">
     <label for="video-{{ video.id }}"><span></span></label>
   </div>
-  <div class="col-xs-3">
-    <label for="video-{{ video.id }}"><img src="{{ video.get_huge_thumbnail }}" alt="" class="img-responsive"></label>
-  </div>
-  <div class="col-xs-8">
+  <div class="col-xs-11">
+    <div class="selectList-thumb">
+      <div class="thumbWrapper">
+        <label for="video-{{ video.id }}"><img src="{{ video.get_medium_thumbnail }}" alt="" class="img-responsive"></label>
+      </div>
+    </div>
     <h3><a href="{{ video.get_absolute_url }}?team={{ team.slug }}">{% if subtitle %}{% blocktrans with video_title=video.title_display %}{{ subtitle }}: {{ video_title }}{% endblocktrans %}{% else %}{{ video.title_display }}{% endif %}</a></h3>
     <h4>{{ video.get_primary_audio_language_code_display }}</h4>
     {% if video.counts %}
