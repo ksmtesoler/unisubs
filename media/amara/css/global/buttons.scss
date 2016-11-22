@@ -5,7 +5,9 @@
 //
 //
 // .small - Small sized button
-// .cta  - Call-to-action button.  Displayed with a plum color and full-width.  A typical use for this is the buttons to create subtitles
+// .cta  - Call-to-action button.  Displayed with a plum color.  A typical use for this is the buttons to create subtitles
+// .cta-reverse  - Reversed call-to-action button.  Used for delete, remove, etc.
+// .borderless  - borderless button.  Used for cancelation, deselection, etc.
 //
 // Example:
 // <button class="button $modifier_class">Click me</button>
