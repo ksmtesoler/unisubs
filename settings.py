@@ -417,8 +417,7 @@ MEDIA_BUNDLES = {
             'bower/select2/dist/js/select2.js',
             'bower/jquery-form/jquery.form.js',
             'bower/underscore/underscore.js',
-            # TODO: move this out of src once we don't need it for site.js
-            'src/js/third-party/behaviors.js',
+            'bower/jquery-behaviors/behaviors.js',
             'amara/js/ajax.js',
             'amara/js/dialogs.js',
             'amara/js/proxyField.js',
