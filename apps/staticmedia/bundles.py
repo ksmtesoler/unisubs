@@ -41,9 +41,7 @@ from staticmedia import utils
 import optionalapps
 
 def media_directories():
-    dirs = [
-        os.path.join(settings.PROJECT_ROOT, 'media')
-    ]
+    dirs = [ settings.STATIC_ROOT ]
     for repo_dir in optionalapps.get_repository_paths():
         repo_media_dir = os.path.join(repo_dir, 'media')
         if os.path.exists(repo_media_dir):

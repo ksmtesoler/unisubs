@@ -118,6 +118,7 @@ USE_I18N = True
 # Example: "/home/media/media.lawrence.com/"
 STATIC_ROOT = rel('media')+'/'
 MEDIA_ROOT  = rel('user-data')+'/'
+CSS_ROOT = os.path.join(STATIC_ROOT, 'amara/css')
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -402,8 +403,6 @@ MEDIA_BUNDLES = {
             "bower/chartist/dist/chartist.css",
             "bower/select2/dist/css/select2.css",
             "bower/select2-bootstrap-theme/dist/select2-bootstrap.css",
-            "bower/EasyAutocomplete/dist/easy-autocomplete.css",
-            "bower/EasyAutocomplete/dist/easy-autocomplete.themes.css",
             "amara/bootstrap/bootstrap-theme.min.css",
             "amara/bootstrap/bootstrap.min.css",
             "amara/css/main.scss",
@@ -415,7 +414,6 @@ MEDIA_BUNDLES = {
             'bower/bootstrap/dist/js/bootstrap.js',
             'bower/chartist/dist/chartist.js',
             'bower/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.js',
-            'bower/EasyAutocomplete/dist/jquery.easy-autocomplete.js',
             'bower/select2/dist/js/select2.js',
             'bower/jquery-form/jquery.form.js',
             'bower/underscore/underscore.js',

@@ -23,7 +23,6 @@ from django.template.loader import render_to_string
 
 from staticmedia import bundles
 from staticmedia import utils
-import widget
 
 def js_code():
     """Build the JS for the old embed.js file """

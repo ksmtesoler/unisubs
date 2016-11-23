@@ -25,8 +25,7 @@ from markdown import markdown
 import pykss
 import yaml
 
-CSS_ROOT = os.path.join(settings.STATIC_ROOT, 'amara/css')
-TOC_PATH = os.path.join(CSS_ROOT, 'styleguide-toc.yml')
+TOC_PATH = os.path.join(settings.CSS_ROOT, 'styleguide-toc.yml')
 
 # Single example in a section
 StyleGuideExample = namedtuple('StyleGuideExample', 'source styles')
@@ -74,7 +73,7 @@ class StyleGuideSection(object):
 
 class StyleGuide(object):
     def __init__(self):
-        self.pykss_parser = pykss.Parser(CSS_ROOT)
+        self.pykss_parser = pykss.Parser(settings.CSS_ROOT)
         self.sections = []
         self.walk_toc_file()
 
