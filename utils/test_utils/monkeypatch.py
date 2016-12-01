@@ -53,13 +53,40 @@ class MockNow(mock.Mock):
 
     def reset(self):
         self.set(2015, 1, 1)
+        self.frozen = False
+
+    def freeze(self):
+        """Freeze the now() value to a specific time
+
+        Returns: The current now() value.
+        """
+        self.frozen = True
+        return self.current
+
+    def unfreeze(self):
+        """Reverse a freeze() call and increment the time immediately.
+
+        Returns: the current now() value
+        """
+        self.frozen = False
+        return self.current
+
+    def increment(self):
+        """Increment the now() value by 1 minute
+
+        Returns: The new current now() value.
+        """
+        self.current += timedelta(minutes=1)
+        return self.current
 
     def set(self, *args, **kwargs):
+        """Set the now() value to a specific time."""
         self.current = datetime(*args, **kwargs)
 
     def __call__(self):
         rv = self.current
-        self.current += timedelta(minutes=1)
+        if not self.frozen:
+            self.increment()
         return rv
 
 mock_now = MockNow()
@@ -88,6 +115,7 @@ delete_subtitles = mock.Mock()
 update_all_subtitles = mock.Mock()
 fetch_subs_task = mock.Mock()
 import_videos_from_feed = mock.Mock()
+notifications_do_http_post = mock.Mock()
 
 class MonkeyPatcher(object):
     """Replace a functions with mock objects for the tests.
@@ -117,6 +145,7 @@ class MonkeyPatcher(object):
         ('externalsites.tasks.update_all_subtitles', update_all_subtitles),
         ('externalsites.tasks.fetch_subs', fetch_subs_task),
         ('videos.tasks.import_videos_from_feed', import_videos_from_feed),
+        ('notifications.handlers.do_http_post', notifications_do_http_post),
     ]
     @classmethod
     def register_patch(cls, spec, mock_obj):
