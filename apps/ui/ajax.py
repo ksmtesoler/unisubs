@@ -42,9 +42,6 @@ class AJAXResponseRenderer(object):
     def add_header(self, name, value):
         self.headers.append((name, value))
 
-    def add_form_success_header(self):
-        self.add_header('X-Form-Success', '1')
-
     def add_change(self, *data):
         self.changes.append(data)
 

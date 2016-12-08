@@ -700,29 +700,24 @@ def manage_videos_form(request, team, form_name, videos):
     return response_renderer.render()
 
 def add_video_form(request, team):
+    response_renderer = AJAXResponseRenderer(request)
     if request.method == 'POST':
         form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, form.success_message())
-            response = HttpResponse("SUCCESS", content_type="text/plain")
-            response['X-Form-Success'] = '1'
-            return response
+            response_renderer.reload_page()
+            return response_renderer.render()
     else:
         form = forms.AddTeamVideoForm(team, request.user)
     form.use_future_ui()
 
-    if form.is_bound and form.is_valid():
-        form.save()
-        messages.success(request, form.message())
-        response = HttpResponse("SUCCESS", content_type="text/plain")
-        response['X-Form-Success'] = '1'
-        return response
     template_name = 'future/teams/management/video-forms/add-video.html'
-    return render(request, template_name, {
+    response_renderer.show_modal(template_name, {
         'team': team,
         'form': form,
     })
+    return response_renderer.render()
 
 @team_settings_view
 def settings_basic(request, team):
