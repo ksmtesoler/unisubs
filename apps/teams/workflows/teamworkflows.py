@@ -172,8 +172,8 @@ class TeamWorkflow(object):
                 v.counts.append(mark_safe(fmt(msg, count=completed_count)))
             if incomplete_count > 0:
                 msg = ungettext(
-                    (u'<strong>%(count)s</strong> subtitle needed'),
-                    (u'<strong>%(count)s</strong> subtitles needed'),
+                    (u'<strong>%(count)s</strong> subtitle started'),
+                    (u'<strong>%(count)s</strong> subtitles started'),
                     incomplete_count)
                 v.counts.append(mark_safe(fmt(msg, count=incomplete_count)))
 
