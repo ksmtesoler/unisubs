@@ -46,7 +46,6 @@ from utils import dates
 from utils.compress import compress, decompress
 from utils.subtitles import create_new_subtitles
 from utils import translation
-from videos.behaviors import make_video_title
 
 WRITELOCK_EXPIRATION = 30 # 30 seconds
 
@@ -1451,8 +1450,7 @@ class SubtitleVersion(models.Model):
 
     def title_display(self):
         if self.title and self.title.strip():
-            return make_video_title(self.video, self.title,
-                                    self.get_metadata())
+            return self.title
         else:
             # fall back to the video title, but prevent infinite loops if we
             # are the primary audio language

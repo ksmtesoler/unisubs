@@ -3,7 +3,7 @@
 {% load url from future %}
 <div class="row">
   {% for video in page %}
-  {% include "future/teams/videos/card.html" with subtitle=video|speaker_name %}
+  {% include "future/teams/videos/card.html" %}
   {% endfor %}
 </div>
 {% include "future/paginator.html" %}

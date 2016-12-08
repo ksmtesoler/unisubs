@@ -1,5 +1,6 @@
 {% load i18n videos_tags %}
 {% load url from future %}
+{% with subtitle=video.get_subtitle %}
 <div class="videoCard">
   <header class="videoCard-header">
     {% if priority %}<span class="videoCard-priority"><i class="icon icon-star"></i></span>{% endif %}
@@ -19,3 +20,4 @@
   {% block footer %}<footer class="videoCard-footer"></footer>{% endblock %}
   {% block extra %}{% endblock %}
 </div>
+{% endwith %}

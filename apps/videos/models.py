@@ -444,14 +444,15 @@ class Video(models.Model):
         audio language?
         """
         if self.title:
-            title = self.title
+            return self.title
+        video_url = self.get_primary_videourl_obj()
+        if video_url:
+            return make_title_from_url(video_url.url)
         else:
-            video_url = self.get_primary_videourl_obj()
-            if video_url:
-                title = make_title_from_url(video_url.url)
-            else:
-                title = 'No title'
-        return behaviors.make_video_title(self, title, self.get_metadata())
+            return 'No title'
+
+    def get_subtitle(self):
+        return behaviors.get_video_subtitle(self, self.get_metadata())
 
     def get_download_filename(self):
         """Get the filename to download this video as

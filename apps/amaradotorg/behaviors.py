@@ -24,7 +24,6 @@ from teams.behaviors import get_main_project
 from teams.models import Project
 from utils.behaviors import DONT_OVERRIDE
 from utils.text import fmt
-from videos.behaviors import make_video_title
 
 logger = logging.getLogger(__name__)
 

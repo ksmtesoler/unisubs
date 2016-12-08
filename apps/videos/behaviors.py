@@ -21,8 +21,8 @@ from collections import namedtuple
 from utils.behaviors import behavior
 
 @behavior
-def make_video_title(video, title, metadata):
-    return title
+def get_video_subtitle(video, metadata):
+    return metadata.get('speaker-name')
 
 VideoPageCustomization = namedtuple('VideoPageCustomization',
                                     'sidebar_extra header')
