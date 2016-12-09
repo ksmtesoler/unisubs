@@ -1,3 +1,37 @@
+// Typography
+// 
+// Amara uses two typefaces: Raleway and Open Sans. Raleway, primarily used for titling and headers provides the clear messaging of a sans serif, but with a subtle, accessible playfulness. Used for subheaders and body copy, open sans provides a more precise counterpoint to Raleway’s unconventional nature, and champions readability, especially in smaller point sizes.
+// 
+// <h1><em>Titling & headers</em></h1>
+// <h1>Raleway<br>
+// ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxy<br>
+// 0123456789</h1>
+// 
+// <h1><em>Sub-headers, CTAs & body copy</em></h1>
+// <h1 class="alt">Open Sans<br>
+// ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz
+// 0123456789</h1>
+// 
+// <h1><em>Usage</em></h1>
+// Here are examples of the most commonly used type specifications. This list is not exlcusive, and may be ammended in the future as more type solutions prove necessary or appropriate.
+// 
+// Example:
+// <h1>h1. Amara heading</h1>
+// <h2>h2. Amara heading</h2>
+// <h3>h3. Amara heading</h3>
+// <h4>h4. Amara heading</h4>
+// <h5>h5. Amara heading</h5>
+// <h6>h6. Amara heading</h6>
+//
+// Amara's global default font-size is 14px, with a line-height of 1.428. This is applied to the `<body>` and all paragraphs. In addition, `<p>` (paragraphs) receive a bottom margin of half their computed line-height (10px by default).
+// 
+// Example:
+// <p>...</p>
+// 
+// Styleguide typography
+
+
+
 body {
   font-family: $font-family-sans-serif;
   font-size: $font-size-base;

@@ -1,18 +1,16 @@
-// Buttons
+// Tags
 //
-// Used to provide a clickable action to the user.  These should typically be used for things that change state in some way.  Use `<a>` tags for
-// simple navigation.
+// Used to provide a clickable action to the user.  These should typically be used for things that change state in some way. Use the button classes on an `<a>`, `<button>`, or `<input>` element. Use `<a>` tags for simple navigation.
 //
-//
-// .small - Small sized button
-// .cta  - Call-to-action button.  Displayed with a plum color.  A typical use for this is the buttons to create subtitles
-// .cta-reverse  - Reversed call-to-action button.  Used for delete, remove, etc.
-// .borderless  - borderless button.  Used for cancelation, deselection, etc.
 //
 // Example:
-// <button class="button $modifier_class">Click me</button>
+// <a class="button" href="#" role="button">Link</a>
+// <button class="button">Button</button>
+// <input class="button" type="button" value="Input">
+// <input class="button" type="submit" value="Submit">
 //
-// Styleguide buttons
+// Styleguide buttonTags
+
 
 button {
   border: none;
@@ -26,8 +24,29 @@ button {
   }
 }
 
+// Options
+//
+// Use any of the available button classes to quickly create a styled button.
+//
+//
+// .small - Small sized button
+// .block - Full width button
+// .cta  - Call-to-action button.  Displayed with a plum color.  A typical use for this is the buttons to create subtitles
+// .cta-reverse  - Reversed call-to-action button.  Used for delete, remove, etc.
+// .borderless  - borderless button.  Used for cancelation, deselection, etc.
+// .inline  - inline button
+// .disabled  - A disabled button
+//
+// Example:
+// <button type="button" class="button $modifier_class">Click me</button>
+//
+// Styleguide buttonOptions
+
 .button {
   display: inline-block;
+  width: auto;
+  height: auto;
+  margin-top: 0;
   margin-bottom: 0;
   padding: 7px 30px;
   font-family: $font-family-sans-serif;
@@ -103,6 +122,7 @@ button {
     margin-right: 9px;
   }
 }
+
 
 .collapseButton-moreLess {
   color: $gray-darker;

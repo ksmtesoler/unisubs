@@ -1,13 +1,9 @@
 $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
+  $('[data-toggle="tooltip"]').tooltip();
+  $('[data-toggle="popover"]').popover();
 });
 
 $(document).on('ready', function(){
-
-  // Select / Autofill
-  $('.select_autofill').select2({
-    theme: "bootstrap"
-  });
 
   // Collapsible / Constrained content
   $('.constrain').on('click', function() {
@@ -19,5 +15,5 @@ $(document).on('ready', function(){
     var href = $(this).attr('data-href');
     window.location.href = href;
   });
-  $('[data-toggle="popover"]').popover();
+
 });

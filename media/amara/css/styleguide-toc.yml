@@ -3,5 +3,50 @@
 # This file is formatted as a YAML list.  Each item is one of the following:
 #  - Reference to a style guide section
 #  - Nested list containing a header, followed by more items
-- buttons
-- dropdownFilter
+
+- - Global
+  - palette
+  - typography
+  - alerts
+  - progressbars
+  # - grid
+  # - utilities
+
+# - - Tables
+
+- - Buttons
+  - buttonTags
+  - buttonOptions
+  # - buttonStates
+
+- - Forms
+  - fields
+  - checkboxes
+  - switch
+  - searchbar
+  - inputstates
+  - selects
+
+- - Modals / Dialogs
+  - modalbaseline
+  - dialogconfirmation
+
+- - Utility Classes
+  # - text
+  - thumbWrapper
+
+- - Elements
+  - videoCards
+  - filterList
+  - actionBar
+  # - select2
+  # - avatars
+  # - comments
+
+# - - Charts
+  # - barChart
+  # - lineChart
+
+# - - Views
+
+

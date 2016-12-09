@@ -1,0 +1,146 @@
+// Dropdown Filter
+//
+// The dropdownFilter class is used to create an input that filters a content area.
+//
+// dropdownFilters are often used to select a language.  Use the `data-language-options` attribute to populate the list with language data.  The possibilities
+// are:
+//
+//   - `any` -- Any language option
+//   - `my` -- My languages section
+//   - `popular` -- Popular languages section
+//   - `all` -- All languages section
+//
+// By default, we display a searchbox if there are more than 8 options.  Use the nosearchbox if you want to force it to always be disabled.
+//
+// Normally the width is auto-selected to be 100%.  However, this doesn't always work.  If it doesn't work (like in this styleguide), add an
+// inline style for 100% width.
+//
+// Example:
+// <select class="dropdownFilter" style="width: 100%">
+//   <option>Foo</option>
+//   <option>Bar</option>
+// </select>
+//
+// Example:
+// <select class="dropdownFilter" data-language-options="my all" style="width: 100%"></select>
+//
+// Styleguide dropdownFilter
+
+.dropdownFilter {
+  width: 100%;
+}
+
+
+// Selects
+// 
+// Selects are standardized using a wrapping element for the `select` tag.
+//
+// Example:
+// <div class="select">
+//   <select name="" id="" class="selectLanguage" data-language-options="popular">
+//     <option>Select Language</option>
+//   </select>
+// </div>
+// 
+// Example:
+// <div class="select">
+//   <select name="" id="" class="selectMultiple" style="width:100%;">
+//     <optgroup label="Group 1">
+//       <option>Option 1</option>
+//       <option>Option 2</option>
+//       <option>Option 3</option>
+//       <option>Option 4</option>
+//     </optgroup>
+//   </select>
+// </div>
+//
+// Styleguide selects
+
+
+// autocomplete example
+
+// regular select example
+// multiselect
+// option groups
+// language selects
+
+
+select {
+  appearance: none;
+  &:focus {
+   outline: none;
+  }
+}
+input,
+select,
+.easy-autocomplete input {
+  height: $base-line-height;
+  line-height: $base-line-height;
+  width: 100%;
+  padding: 0 $base-line-height/2;
+  margin: 5px 0;
+  border: 1px solid $gray-light;
+  border-radius: $border-radius-base;
+  background-color: #fff;
+  color: $gray;
+  &:focus {
+    outline: none;
+  }
+}
+
+.select {
+  position: relative;
+  cursor: pointer;
+  &:after {
+    content: "\e901";
+    display: inline-block;
+    position: relative;
+    font-family: 'amara' !important;
+    speak: none;
+    transform-origin: center;
+    transform: rotate(90deg);
+    @include transition();
+    pointer-events: none;
+  }
+}
+
+.select-border {
+  position:relative;
+  select {
+    position: relative;
+    display: block;
+    // width: 100%;
+    // height: $base-line-height;
+    // padding: 0 12px;
+    // color: #a9a9a9;
+    // border: 1px solid #ccc;
+  }
+  &:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: $base-line-height;
+    height: $base-line-height;
+    background: $gray-light;
+    z-index: 5;
+    border-radius: 0 $border-radius-base $border-radius-base 0;
+    pointer-events: none;
+  }
+  &:after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: $base-line-height / 2 - 5;
+    top: $base-line-height / 2 - 2;
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fff;
+    z-index: 6;
+    pointer-events: none;
+  }
+}
+

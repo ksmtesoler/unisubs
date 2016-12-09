@@ -1,116 +1,65 @@
+// Standard Fields
+//
+// Individual form controls automatically receive some global styling. All textual `<input>`, `<textarea>`, and `<select>` elements with .form-control are set to width: 100%; by default. Wrap labels and controls in .form-group for optimum spacing.
+// 
+// Example:
+// <div class="form-group">
+//   <label for="">Text Input</label>
+//   <input type="text" class="form-control" id="" placeholder="Enter Text">
+// </div>
+// <div class="form-group">
+//   <label for="">Email</label>
+//   <input type="email" class="form-control" id="" placeholder="Enter Email">
+// </div>
+// <div class="form-group">
+//   <label for="">Password</label>
+//   <input type="password" class="form-control" id="" placeholder="Enter Password">
+// </div>
+// <div class="form-group">
+//   <label for="">Collaborator</label>
+//   <input type="text" class="form-control" id="" placeholder="+ Add Collaborator">
+// </div>
+// <div class="form-group">
+//   <label for="">Date</label>
+//   <input type="text" class="form-control" id="" placeholder="+ Add date">
+// </div>
+// <div class="form-group">
+//   <label for="">URL</label>
+//   <input type="text" class="form-control" id="" placeholder="http://video.tube.com/8Sc2i7z">
+// </div>
+// <div class="form-group">
+//   <label for="">Textarea</label>
+//   <textarea class="form-control"></textarea>
+// </div>
+// <div class="form-group">
+//   <button type="submit" class="button cta">Submit</button>
+//   <button class="button cta-reverse">Cancel</button>
+// </div>
+//
+//
+// Styleguide fields
+
 label {
   display: inline-block;
   max-width: 100%;
   margin-bottom: 5px;
   font-weight: inherit;
+  color: $gray-darker;
 }
 textarea {
   resize: vertical;
 }
-select {
-  appearance: none;
-  &:focus {
-   outline: none;
-  }
-}
-input,
-select,
-.easy-autocomplete input {
-  height: $base-line-height;
-  line-height: $base-line-height;
-  width: 100%;
-  padding: 0 $base-line-height/2;
-  margin: 5px 0;
-  border: 1px solid $gray-light;
-  border-radius: $border-radius-base;
-  background-color: #fff;
-  color: $gray;
-  &:focus {
-    outline: none;
-  }
-}
 
-.buttonFile {
-    position: relative;
-    overflow: hidden;
-    border-radius: 0 4px 4px 0;
-    padding: 0 10px;
-    line-height: 32px;
-    margin: 5px 0;
-    font-size: 12px;
-    font-weight: 400;
-}
-.buttonFile input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 100px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
-}
 
-.select {
-  position: relative;
-  cursor: pointer;
-  &:after {
-    content: "\e901";
-    display: inline-block;
-    position: relative;
-    font-family: 'amara' !important;
-    speak: none;
-    transform-origin: center;
-    transform: rotate(90deg);
-    @include transition();
-    pointer-events: none;
-  }
-}
-
-.select-border {
-  position:relative;
-  select {
-    position: relative;
-    display: block;
-    // width: 100%;
-    // height: $base-line-height;
-    // padding: 0 12px;
-    // color: #a9a9a9;
-    // border: 1px solid #ccc;
-  }
-  &:before {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: $base-line-height;
-    height: $base-line-height;
-    background: $gray-light;
-    z-index: 5;
-    border-radius: 0 $border-radius-base $border-radius-base 0;
-    pointer-events: none;
-  }
-  &:after {
-    content: '';
-    display: block;
-    position: absolute;
-    right: $base-line-height / 2 - 5;
-    top: $base-line-height / 2 - 2;
-    width: 0; 
-    height: 0; 
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #fff;
-    z-index: 6;
-    pointer-events: none;
-  }
-}
+// Searchbar
+//
+// Example:
+// <div class="searchbar">
+//   <label class="sr-only">Search</label>
+//   <input id="field_id" type="text" placeholder="Search for members">
+// </div>
+//
+// Styleguide searchbar
 
 .searchbar {
   position: relative;
@@ -129,38 +78,94 @@ select,
   }
 }
 
-// Filters
-.filterList {
-  h3 {
-    background: $gray-light;
-    padding: 10px;
-    font-weight: 300;
-  }
-  ul {
-    padding-left: 10px;
-    list-style-type: none;
-    height: 100px;
-    overflow-y: auto;
-    li {
-      padding: 2px 0;
-    }
-  }
+// File Uploads
+//
+// TODO - needs refactor to match new design direction
+// 
+// Example:
+// <div class="form-group">
+//   <label for="">Change thumbnail</label>
+//   <div class="input-group fileUpload">
+//     <input type="text" class="form-control" readonly>
+//     <label class="input-group-btn">
+//         <span class="button buttonFile">
+//             Browse&hellip; <input type="file" style="display: none;" multiple>
+//         </span>
+//     </label>
+//   </div>
+// </div>
+//
+// Styleguide fileUpload
 
+.buttonFile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 4px 4px 0;
+  padding: 0 10px;
+  line-height: 32px;
+  margin: 5px 0;
+  font-size: 12px;
+  font-weight: 400;
+}
+.buttonFile input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  background: white;
+  cursor: inherit;
+  display: block;
 }
 
-.filterList-select {
-  .select2-selection {
-    text-indent: 10px;
-  }
-  .select2-selection__rendered {
-    &:after {
-      top: -5px;
-    }
-  }
-}
 
-
-// Custom Checkboxes
+// Checkboxes and radios
+//
+// Example:
+// <div class="form-group">
+//   <div class="radio">
+//     <input type="checkbox" id="" value="" checked>
+//     <label for=""><span></span> Selected</label>
+//   </div>
+// </div>
+// <div class="form-group">
+//   <div class="radio">
+//     <input type="checkbox" id="" value="">
+//     <label for=""><span></span> unselected</label>
+//   </div>
+// </div>
+// <div class="form-group">
+//   <div class="radio">
+//     <input type="checkbox" id="" value="">
+//     <label for=""><span></span> unselected</label>
+//   </div>
+// </div>
+// <hr>
+// <div class="form-group">
+//   <div class="checkbox">
+//     <input type="checkbox" id="" value="" checked="">
+//     <label for=""><span></span>Selected</label>
+//   </div>
+// </div>
+// <div class="form-group">
+//   <div class="checkbox">
+//     <input type="checkbox" id="" value="">
+//     <label for=""><span></span>Unselected</label>
+//   </div>
+// </div>
+// <div class="form-group">
+//   <div class="checkbox">
+//     <input type="checkbox" id="" value="">
+//     <label for=""><span></span>Unselected</label>
+//   </div>
+// </div>
+//
+// Styleguide checkboxes
 
 .checkbox, .radio {
   margin: 0;
@@ -246,7 +251,17 @@ select,
   }
 }
 
-/* The switch - the box around the slider */
+// Switches
+//
+// Example:
+// <h4>Ludicrous SPEED</h4>
+// <label class="switch">
+//   <input type="checkbox">
+//   <div class="slider round"></div>
+// </label>
+//
+// Styleguide switch
+
 .switch {
   position: relative;
   display: inline-block;
@@ -318,3 +333,40 @@ select,
     border-radius: 50%;
   }
 }
+
+
+
+// Input States
+//
+// TODO - refactor state color palette to match comp and overwrite Bootstrap defaults
+// 
+// Example:
+// <div class="form-group">
+//   <label for="">Email address</label>
+//   <input type="text" class="form-control" id="" placeholder="Enter email address" value="email@email.com">
+// </div>
+// <div class="form-group">
+//   <label for="">Email address</label>
+//   <input type="text" class="form-control" id="" placeholder="Enter email address" value="email@email.com" disabled>
+//   <span class="help-block">Disabled message</span>
+// </div>
+// <div class="form-group has-success">
+//   <label class="control-label" for="inputSuccess1">Input with success</label>
+//   <input type="text" class="form-control" id="inputSuccess1" value="email@email.com">
+//   <span class="help-block">Success message</span>
+// </div>
+// <div class="form-group has-warning">
+//   <label class="control-label" for="inputWarning1">Input with warning</label>
+//   <input type="text" class="form-control" id="inputWarning1" value="email@email.com">
+//   <span class="help-block">Warning message</span>
+// </div>
+// <div class="form-group has-error">
+//   <label class="control-label" for="inputError1">Input with error</label>
+//   <input type="text" class="form-control" id="inputError1" value="email@email.com">
+//   <span class="help-block">Error message</span>
+// </div>
+//
+// Styleguide inputstates
+
+
+

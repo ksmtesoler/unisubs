@@ -1,15 +1,15 @@
 {% load i18n forms %}
-<div class="modal-dialog" role="document">
+<div class="modal-dialog modal-md" role="document">
   <div class="modal-content">
     <form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
-      <button type="button" class="button-closeModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <div class="dialogTitle">
+      <button type="button" class="dialogButton-closeModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <header class="dialogTitle">
         {% if single_selection %}
-        <h4>{% blocktrans with title=first_video.title_display %}Editing: {{ title }}{% endblocktrans %}</h4>
+        <h4 class="dialogHeader">{% blocktrans with title=first_video.title_display %}Editing: {{ title }}{% endblocktrans %}</h4>
         {% else %}
-        <h4>{% blocktrans count count=selection_count %}Editing {{ count }} video{% plural %}Editing {{ count }} videos{% endblocktrans %}</h4>
+        <h4 class="dialogHeader">{% blocktrans count count=selection_count %}Editing {{ count }} video{% plural %}Editing {{ count }} videos{% endblocktrans %}</h4>
         {% endif %}
-      </div>
+      </header>
       <div class="modal-body">
         {% csrf_token %}
         {% include "future/forms/non-field-errors.html" %}

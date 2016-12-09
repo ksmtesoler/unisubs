@@ -1,3 +1,18 @@
+// Action Bar
+//
+// TODO - We need to write styles specific to the styleguide that overwrite the initial state of the actionBar (hidden)
+// 
+// Example:
+// <div class="actionBar">
+//   <button class="button cta" data-toggle="modal" data-target="#modal_id">Move</button>
+//   <button class="button cta">Mark complete</button>
+//   <button class="button cta">Manage assignments</button>
+//   <button class="button cta-reverse">Delete</button>
+//   <button class="button inline">Deselect</button>
+// </div>
+//
+// Styleguide actionBar
+
 .actionBar {
   display: flex;
   align-items: center;

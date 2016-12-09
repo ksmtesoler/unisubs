@@ -1,6 +1,22 @@
+#styleGuide-toc {
+  ul {
+    li {
+      a {
+
+      }
+      ul {
+        li {
+
+        }
+      }
+    }
+  }
+}
 .styleGuide-navLink {
+  padding-left: 10px;
+  border-left: 4px solid transparent;
   &.active {
-    font-weight: bold;
+    border-left-color: $teal;
   }
 }
 
@@ -12,7 +28,21 @@
 }
 
 .styleGuide-exampleBox {
+  position: relative;
   border: 1px solid $gray-light;
+}
+
+.styleGuide-exampleTitle {
+  position: absolute;
+  display: inline-block;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 3px 5px;
+  background-color: darken($gray-lighter, 15%);
+  color: $gray-lighter;
+  border-radius: 0 0 0 4px;
+  font-size: 12px;
 }
 
 .styleGuide-exampleBoxHeader {
@@ -23,6 +53,8 @@
 }
 
 .styleGuide-exampleSource {
+  padding: 20px;
+  padding-top: 30px;
   border-radius: 0;
   border: none;
   border-bottom: 1px solid $gray-light;

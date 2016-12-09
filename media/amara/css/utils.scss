@@ -30,6 +30,7 @@
   opacity: 1;
 }
 
+
 .pull-right {
   float: right !important;
 }
@@ -39,6 +40,11 @@
 
 
 // Text
+//
+// TODO - Please add documentation here...
+//
+// Styleguide text
+
 .text-left { text-align: left; }
 .text-right { text-align: right; }
 .text-center { text-align: center; }
@@ -54,6 +60,13 @@
 .text-teal { color: $teal; }
 
 // Video Thumbnails
+//
+// <div class="thumbWrapper">
+//   <img src="/media/images/styleguide/placehold4.3.png" alt="Placeholder Image">
+// </div>
+//
+// Styleguide thumbWrapper
+
 .thumbWrapper {
   position: relative;
   display: flex;

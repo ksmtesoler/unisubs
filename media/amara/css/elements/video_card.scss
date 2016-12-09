@@ -1,4 +1,47 @@
-// Video Cards... Formerly known as Assignment Cards
+// Video Cards
+//
+// Example:
+// <div class="videoCard">
+//   <header class="videoCard-header">
+//     <span class="videoCard-priority"><i class="icon icon-star"></i></span>
+//     <span class="videoCard-duration">2 min</span>
+//   </header>
+//   <a href="#" class="videoCard-thumbnail">
+//     <div class="thumbWrapper">
+//       <img src="/media/images/styleguide/placehold4.3.png" alt="Placeholder Image">
+//     </div>
+//     <div class="videoCard-caption"> 
+//       <h4 class="videoCard-title">Video Title</h4>
+//       <h5 class="videoCard-subtitle">Video Subtitle</h5>
+//     </div>
+//   </a>
+//   <footer class="videoCard-footer">
+//     <p>Portuguese, Brazilian to <strong>English</strong></p>
+//   </footer>
+//   <a href="#" 
+//     class="button cta" 
+//     title="Review">
+//     <i class="icon icon-review"></i>
+//     Review
+//   </a>
+//   <span>Due in 2 days</span>
+//   <a href="#" class="pull-right" data-toggle="modal" data-target="#">Decline</a>
+// </div>
+// 
+// Video Cards on Dashboard & Landing
+// 
+// Example:
+// 
+// <a href="#" class="videoCardSimple">
+//   <div class="thumbWrapper">
+//     <img src="/media/images/styleguide/styleguide/placehold4.3.png" alt="Placeholder Image">
+//   </div>
+//   <div class="videoCardSimple-caption">
+//     <h4 class="videoCardSimple-title">The Future Of News? Virtual Reality</h4>
+//     <h5 class="videoCardSimple-subtitle">Carl Safina</h5>
+//   </div>
+// </a>
+// Styleguide videoCards
 
 .videoCard {
   display: block;
@@ -104,10 +147,6 @@
   margin-top: 3px;
 }
 
-
-/* -----------------------------------------
- Video Cards on Dashboard & Landing
------------------------------------------ */
 
 .videoCardSimple {
   display: block;
