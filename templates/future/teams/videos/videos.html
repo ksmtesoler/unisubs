@@ -14,6 +14,15 @@
 </form>
 {% endblock %}
 
+{% block side_buttons %}
+{% if "add_form" in forms.enabled %}
+<a href="#" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#add-form">{% trans "Add Videos" %}</a>
+{% endif %}
+{% if "add_csv" in forms.enabled %}
+<a href="#" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#add-csv-form">{% trans "Add Videos from CSV" %}</a>
+{% endif %}
+{% endblock %}
+
 {% block filters2 %}
 <div class="row">
   <div class="col-xs-8 proxyField deferUpdate" data-proxy-for="#id_q">
@@ -31,4 +40,63 @@
 
 {% block videos %}
 <div id="video-list">{% include "future/teams/videos/list.html" %}</div>
+{% endblock %}
+
+{% block bottom %}
+
+{% if "add_form" in forms.enabled %}
+<div class="modal fade{% if add_form.errors %} start-open{% endif %}" id="add-form">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <h4>{% trans "Add Videos" %}</h4>
+      <form action="" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	{% include "_non-field-errors.html" with form=add_form %}
+	<input type="hidden" name="form" value="add">
+	{% include "_field.html" with field=add_form.project %}
+	{% include "_field.html" with field=add_form.language %}
+	{% include "_field.html" with field=add_form.thumbnail %}
+	{{ add_formset.management_form }}
+	<table class="formset-table">
+	  {% for form in add_formset %}
+	  {{ form }}
+	  {% endfor %}
+	</table>
+	<footer class="buttons">
+	  <button>{% trans "Add" %}</button>
+	</footer>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% if "add_csv" in forms.enabled %}
+<div class="modal{% if add_csv_form.errors %} start-open{% endif %}" id="add-csv-form">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <h4>{% trans "Add Videos from CSV" %}</h4>
+      <button class="close"></button>
+      <p>{% trans "Please use this " %}<a href="{{ STATIC_URL }}images/template.csv" download>{% trans "CSV Import Template" %}</a>{% trans " as the basis for your import. The Video URL field is mandatory, but all other fields can be left blank." %}</p>
+      <p>{% trans "A CSV file can be created with a text editor or using the export function of a spreadsheet editor." %}</p>
+      <p>{% trans "Upon completion, you will receive a summary by email." %}</p>
+      <form action="" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	{% include "_non-field-errors.html" with form=add_csv_form %}
+	<input type="hidden" name="form" value="add-csv">
+	{{ add_csv_form }}
+	<footer class="buttons">
+	  <button>{% trans "Upload" %}</button>
+	</footer>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}

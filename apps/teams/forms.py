@@ -1609,3 +1609,20 @@ class MoveVideosForm(VideoManagementForm):
             new_team)
         return fmt(msg, team_link=team_link, project=project.name,
                    count=self.count)
+class NewAddTeamVideoDataForm(forms.Form):
+    project = forms.ChoiceField(label=_('Project'), choices=[],
+                                required=False)
+    language = forms.ChoiceField(choices=(), required=False)
+    thumbnail = forms.ImageField(required=False)
+
+    def __init__(self, team, *args, **kwargs):
+        super(NewAddTeamVideoDataForm, self).__init__(*args, **kwargs)
+        self.team = team
+        self.fields['language'].choices = get_language_choices(with_empty=True)
+        self.fields['project'].choices = [
+            ('', _('None')),
+        ] + [
+            (p.id, p.name) for p in Project.objects.for_team(team)
+        ]
+        if not self.fields['project'].choices:
+            del self.fields['project']
