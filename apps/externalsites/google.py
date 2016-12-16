@@ -476,5 +476,10 @@ def update_video_metadata(video_id, access_token, primary_audio_language_code, l
         snippet = item['snippet']
     if 'localizations' in item:
         localizations = response.json()['items'][0]['localizations']
+        # google might use uppercase for second part of language code
+        for key in localizations.keys():
+            if language_code == key.lower():
+                language_code = key
+                break
         localizations[language_code] = {"title": title, "description": description}
         result = video_put(access_token, video_id, localizations=localizations)
