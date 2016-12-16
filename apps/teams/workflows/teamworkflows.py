@@ -144,6 +144,24 @@ class TeamWorkflow(object):
         """
         return []
 
+    def team_video_page_default(self, request):
+        extra_tabs = self.team_video_page_extra_tabs(request)
+        if extra_tabs:
+            return extra_tabs[0].url
+        else:
+            return reverse("teams:videos", kwargs={
+                'slug': self.team.slug,
+            })
+
+    def management_page_default(self, request):
+        extra_tabs = self.management_page_extra_tabs(request)
+        if extra_tabs:
+            return extra_tabs[0].url
+        else:
+            return reverse("teams:manage_videos", kwargs={
+                'slug': self.team.slug,
+            })
+
     def video_management_add_counts(self, videos):
         """Add the subtitle counts for the videos management page
 

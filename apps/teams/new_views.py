@@ -157,7 +157,6 @@ def videos(request, team):
         'filters_form': filters_form,
         'team_nav': 'videos',
         'current_tab': 'videos',
-        'extra_tabs': team.new_workflow.team_video_page_extra_tabs(request),
     }
     if request.is_ajax():
         response_renderer = AJAXResponseRenderer(request)
@@ -628,7 +627,6 @@ def manage_videos(request, team):
         'filters_form': filters_form,
         'team_nav': 'management',
         'current_tab': 'videos',
-        'extra_tabs': team.new_workflow.management_page_extra_tabs(request),
         'manage_forms': [
             (form.name, form.css_class, form.label)
             for form in all_video_management_forms(team, request.user)

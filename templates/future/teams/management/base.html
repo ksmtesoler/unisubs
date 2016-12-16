@@ -1,15 +1,17 @@
 {% extends "future/teams/videos/base.html" %}
-{% load i18n %}
+{% load i18n teams_tags %}
 {% load url from future %}
 {% block tabs %}
+{% with extra_tabs=team|management_page_extra_tabs:request %}
 {% if extra_tabs %}
 <ul class="nav nav-tabs">
-  <li{% if current_tab == "videos" %} class="active"{% endif %}><a href="{% url "teams:manage_videos" team.slug %}">{% trans "Videos" %}</a></li>
   {% for tab in extra_tabs %}
   <li{% if current_tab == tab.name %} class="active"{% endif %}><a href="{{ tab.url }}">{{ tab.label }}</a></li>
   {% endfor %}
+  <li{% if current_tab == "videos" %} class="active"{% endif %}><a href="{% url "teams:manage_videos" team.slug %}">{% trans "Videos" %}</a></li>
 </ul>
 {% else %}
 <h1>{% trans "Videos" %}</h1>
 {% endif %}
+{% endwith %}
 {% endblock %}

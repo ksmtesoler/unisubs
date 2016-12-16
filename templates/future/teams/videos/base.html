@@ -1,8 +1,9 @@
 {% extends "future/teams/base.html" %}
-{% load i18n %}
+{% load i18n teams_tags %}
 {% load url from future %}
 
 {% block content %}
+{% with extra_tabs=team|team_video_page_extra_tabs:request %}
 <section>
   <div class="container">
     <div class="content">
@@ -41,4 +42,5 @@
     </div>
   </div>
 </section>
+{% endwith %}
 {% endblock %}

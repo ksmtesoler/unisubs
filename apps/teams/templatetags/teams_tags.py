@@ -563,3 +563,19 @@ def extra_pages(team, user):
 @register.filter
 def extra_settings_pages(team, user):
     return team.new_workflow.extra_settings_pages(user)
+
+@register.filter
+def team_video_page_default(team, request):
+    return team.new_workflow.team_video_page_default(request)
+
+@register.filter
+def team_video_page_extra_tabs(team, request):
+    return team.new_workflow.team_video_page_extra_tabs(request)
+
+@register.filter
+def management_page_default(team, request):
+    return team.new_workflow.management_page_default(request)
+
+@register.filter
+def management_page_extra_tabs(team, request):
+    return team.new_workflow.management_page_extra_tabs(request)
