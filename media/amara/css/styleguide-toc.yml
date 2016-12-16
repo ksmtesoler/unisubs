@@ -9,6 +9,9 @@
   - typography
   - alerts
   - progressbars
+  - indicators
+  - scrollBars
+  - avatars
   # - grid
   # - utilities
 
@@ -30,6 +33,7 @@
 - - Modals / Dialogs
   - modalbaseline
   - dialogconfirmation
+  - modalvalidation
 
 - - Utility Classes
   # - text
@@ -39,6 +43,7 @@
   - videoCards
   - filterList
   - actionBar
+  - selectList
   # - select2
   # - avatars
   # - comments

@@ -1,3 +1,37 @@
+// Search results
+//
+// Example:
+// <ul id="styleGuide-selectList" class="selectList">
+//   <li class="row condensed">
+//     <div class="checkbox">
+//       <input id="styleGuide_item_1" type="checkbox" value="">
+//       <label for="styleGuide_item_1"><span></span></label>
+//     </div>
+//     <div class="col-xs-11">
+//       <div class="selectList-thumb">
+//         <div class="thumbWrapper">
+//           <img src="media/images/styleguide/placehold4.3.png" alt="Placeholder Image">
+//         </div>
+//       </div>
+//       <h3><a href="#">Daniele Quercia: Happy Maps</a></h3>
+//       <h4>Transcription</h4>
+//       <ul class="inline">
+//         <li><strong>Source:</strong> English</li>
+//         <li><strong>Target:</strong> Dutch</li>
+//       </ul>
+//       <nav class="nav-icons">
+//         <a role="button" class="completed" data-toggle="popover" data-container="body" data-placement="top" title="Transcription Complete" data-content="Naiara Pérez de Villarreal Amilburu">
+//           <img src="media/images/styleguide/fpo_avatar.png" class="avatar">
+//         </a> 
+//         <a href="#"><i class='icon icon-review'></i></a>
+//         <a href="#"><i class='icon icon-approve'></i></a> 
+//       </nav>
+//     </div>
+//   </li>
+// </ul>
+//
+// Styleguide selectList
+
 ul.selectList {
   display: flex;
   flex-wrap: wrap;
@@ -25,7 +59,7 @@ ul.selectList {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
+  }
   dl {
     margin-bottom: 10px;
     dt,dd{display:inline; font-weight: 100;}
@@ -43,7 +77,14 @@ ul.selectList {
       }
     }
     i {
-      font-size: 22px;
+      font-size: 18px;
+      margin-left: 3px;
+      &.icon-close {
+        font-size: 16px;
+      }
+      &.icon-mail {
+        font-size: 22px;
+      }
     }
   }
   .message-excerpt {

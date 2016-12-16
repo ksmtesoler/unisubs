@@ -73,11 +73,33 @@
 }
 .videoSubtitles-revisions {
   li {
+    position: relative;
     margin: 0 0 5px 0;
     &.currentRevision {
       border: 1px solid $gray-light;
     }
-    a { color: $gray-darker; }
+    &.private {
+      color: $lime-green;
+    }
+    a { color: inherit; }
+    &:hover {
+      background-color: rgba(0,0,0,0.05);
+      &:after {
+        font-family: 'amara' !important;
+        content: "\e907";
+        display: block;
+        position: absolute;
+        width: 30px;
+        height: 100%;
+        line-height: 40px;
+        right: -30px;
+        top: 0;
+        background-color: $teal;
+        color: #fff;
+        text-align: center;
+        cursor: pointer;
+      }
+    }
   }
 }
 

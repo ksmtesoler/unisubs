@@ -1,7 +1,23 @@
 // Color palette
 // 
-// TODO - Show thumbnails of color palette
+// <ul class="colorGrid">
+//   <li><i class="icon-gray-base"></i>Gray Base<br>#222626</li>
+//   <li><i class="icon-gray-darker"></i>Gray Darker<br>#393839</li>
+//   <li><i class="icon-gray-dark"></i>Gray Dark<br>#7e7f80</li>
+//   <li><i class="icon-gray"></i>Gray<br>#9fa0a1</li>
+//   <li><i class="icon-gray-light"></i>Gray Light<br>#d9d9d9</li>
+//   <li><i class="icon-gray-lighter"></i>Gray Lighter<br>#F3F4F6</li>
+// </ul>
 // 
+// 
+// <ul class="colorGrid">
+//   <li><i class="icon-teal"></i>Teal<br>#1d806a</li>
+//   <li><i class="icon-magenta"></i>Magenta<br>#e61972</li>
+//   <li><i class="icon-turquoise"></i>Turquoise<br>#3da285</li>
+//   <li><i class="icon-plum"></i>Plum<br>#632e50</li>
+//   <li><i class="icon-lime-green"></i>Lime Dark<br>#77a841</li>
+// </ul>
+// <hr>
 // <h3><em>Color Do’s</em></h3>
 // <ul>
 //  <li>Headers and copy use Dark Grey, #222626</li>
@@ -30,7 +46,28 @@ $teal:              #1d806a;
 $magenta:           #e61972;
 $turquoise:         #3da285;
 $plum:              #632e50;
-$lime-dark:         #77a841;
+$lime-green:         #77a841;
+
+
+// Form states and alerts
+// Define colors for form feedback states and, by default, alerts.
+
+$state-success-text:             $lime-green;
+$state-success-bg:               #dff0d8;
+$state-success-border:           $lime-green;
+
+$state-info-text:                $teal;
+$state-info-bg:                  #E5F2F0;
+$state-info-border:              $teal;
+
+$state-warning-text:             $plum;
+$state-warning-bg:               #F7EFF5;
+$state-warning-border:           $plum;
+
+$state-danger-text:              $magenta;
+$state-danger-bg:                #FAEFF4;
+$state-danger-border:            $magenta;
+
 
 
 

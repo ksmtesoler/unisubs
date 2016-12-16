@@ -412,6 +412,8 @@ MEDIA_BUNDLES = {
         "files": [
             'bower/jquery/dist/jquery.js',
             'bower/bootstrap/dist/js/bootstrap.js',
+            'bower/jScrollPane/script/jquery.jscrollpane.js',
+            'bower/jScrollPane/script/jquery.mousewheel.js',
             'bower/chartist/dist/chartist.js',
             'bower/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.js',
             'bower/select2/dist/js/select2.js',
@@ -422,7 +424,8 @@ MEDIA_BUNDLES = {
             'amara/js/dialogs.js',
             'amara/js/proxyField.js',
             'amara/js/dependentSelect.js',
-            'amara/js/dropdownFilter.js',
+            'amara/js/select.js',
+            'amara/js/scrollBars.js',
             'amara/js/querystring.js',
             'amara/js/selectAll.js',
             'amara/js/selectList.js',

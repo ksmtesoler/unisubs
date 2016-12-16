@@ -16,8 +16,11 @@
 @import 'global/lists';
 @import 'global/icons';
 @import 'global/forms';
+@import 'global/selects';
 @import 'global/alerts';
 @import 'global/progressbars';
+@import 'global/indicators';
+@import 'global/scrollbars';
 @import 'global/charts';
 
 // Elements
@@ -34,7 +37,9 @@
 @import 'elements/filters';
 @import 'elements/comments';
 
-@import 'elements/select2';
+@import 'elements/switches';
+
+@import 'elements/_select2';
 
 // Views
 @import 'views/style_guide';

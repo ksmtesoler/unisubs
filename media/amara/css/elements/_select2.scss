@@ -1,4 +1,5 @@
 .select2-container--bootstrap {
+  width: 100% !important;
   &.select2-container {
     .select2-selection {
       background: transparent;
@@ -27,21 +28,34 @@
     .select2-selection--single {
       padding: 0;
       height: 22px;
+      .select2-selection__clear {
+        position: absolute;
+        top: 2px;
+        right: 0;
+      }
       .select2-selection__rendered {
-        display:inline-block;
-        color: #555555;
-        &:after {
-         content: "\e901";
-         display: inline-block;
-         margin-left: 5px;
-         position: relative;
-         // top: -5px;
-         font-family: 'amara' !important;
-         speak: none;
-         transform: rotate(90deg);
-         @include transition();
-         pointer-events: none;
-       }
+        display: block;
+        color: $gray-dark;
+      }
+    }
+    .select2-selection--multiple {
+
+      .select2-search--inline {
+        width: 100%;
+        .select2-search__field {
+          width: 100% !important;
+        }
+      }
+      .select2-selection__choice__remove {
+        float: right;
+        margin-right: 0;
+        margin-left: 5px;
+        color: lighten($gray, 15%);
+      }
+      .select2-selection__choice {
+        padding: 3px 6px;
+        border: 1px solid lighten($gray, 15%);
+        background-color: $gray-lighter;
       }
     }
   }
@@ -69,5 +83,17 @@
       border-bottom: 1px solid $gray-light;
     }
   }
+}
+
+.select2-selection__rendered:after {
+  content: "\e901";
+  display: inline-block;
+  margin-left: 5px;
+  position: relative;
+  font-family: 'amara' !important;
+  speak: none;
+  transform: rotate(90deg);
+  @include transition();
+  pointer-events: none;
 }
 

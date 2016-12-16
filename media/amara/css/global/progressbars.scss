@@ -1,14 +1,73 @@
 // Progress Bars
 //
+// 
 // Example:
-// <div class="progress">
-//   <div class="progress-bar" role="progressbar" style="width: 60%;">
+// <div class="progressBar">
+//   <div class="progressBar-progress" role="progressbar" style="width: 60%;">
 //     <span class="sr-only">60% Complete</span>
 //   </div>
 // </div>
+// <p class="progressBar-label">Fun copy regarding what's happening</p>
 //
+// 
+// Example:
+// <div class="progressBar teal">
+//   <div class="progressBar-progress" role="progressbar" style="width: 60%;">
+//     <span class="sr-only">60% Complete</span>
+//   </div>
+// </div>
+// <p class="progressBar-label teal">Fun copy regarding what's happening</p>
+// 
 // Styleguide progressbars
 
-.progress {
-  // Blah
+.progressBar {
+  overflow: hidden;
+  height: 30px;
+  margin-bottom: 20px;
+  background-color: transparent;
+  border-radius: 4px;
+  border: 2px solid #fff;
+  &:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0; right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: -1;
+  }
+}
+
+.progressBar-progress {
+  float: left;
+  width: 0%;
+  height: 100%;
+  font-size: 12px;
+  line-height: 30px;
+  text-align: center;
+  background-color: #fff;
+  clip-path: polygon(-1% 0, 100% 0, 99% 100%, -1% 100%);
+  -webkit-clip-path: polygon(-1% 0, 100% 0, 99% 100%, -1% 100%);
+  @include transition(0.6s);
+}
+
+.progressBar-label {
+  margin-top: -20px;
+  color: #fff;
+  &.teal {
+    color: $teal;
+  }
+}
+
+// Color Palette
+.progressBar.teal {
+  border-color: $teal;
+  &:after {
+    background: rgba(255,255,255,0.7);
+  }
+  .progressBar-progress {
+    background-color: $teal;
+  }
 }

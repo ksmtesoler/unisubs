@@ -1,8 +1,19 @@
 // Avatars
+//
+// Example:
+// <img src="media/images/styleguide/fpo_avatar.png" class="avatar">
+// <p>Standard Size: 30x30</p>
+// <img src="media/images/styleguide/fpo_avatar.png" class="avatar avatar-md">
+// <p>Medium Size: 50x50</p>
+// <img src="media/images/styleguide/fpo_avatar.png" class="avatar avatar-lg">
+// <p>Large Size: 60x60</p>
+// <img src="media/images/styleguide/fpo_avatar.png" class="avatar avatar-xl">
+// <p>X-Large Size: 110x110</p>
+//
+// Styleguide avatars
 
 .avatar {
   width: 30px;
-  // max-width: 100%;
   height: auto;
   &.avatar-md {
     width: 50px;

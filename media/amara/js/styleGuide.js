@@ -31,6 +31,10 @@ function styleGuide(container) {
         // Add new active classes
         link.addClass('active');
         $(link.attr('href')).addClass('active');
+
+        // TODO - refactor the use of a global contentUpdate event
+        $(document).trigger("contentUpdate");
+
         evt.preventDefault();
     });
     $('.styleGuide-navLink', container).filter(':first').click();

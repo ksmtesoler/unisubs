@@ -47,6 +47,10 @@ ul.nav-tabs {
     position: absolute;
     top: -30px;
     right: 0;
+    .switch {
+      top: 8px;
+      margin-right: 20px;
+    }
   }
   .tab-content {
 

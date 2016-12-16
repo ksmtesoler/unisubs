@@ -55,6 +55,7 @@
 .styleGuide-exampleSource {
   padding: 20px;
   padding-top: 30px;
+  margin-bottom: 0;
   border-radius: 0;
   border: none;
   border-bottom: 1px solid $gray-light;
@@ -62,7 +63,8 @@
 }
 
 .styleGuide-examples {
-  padding: 0 20px;
+  position: relative;
+  padding: 20px;
 }
 
 .styleGuide-example {
@@ -74,3 +76,42 @@
   font-family: $font-family-sans-serif;
   margin-left: 20px;
 }
+
+
+.styleGuide {
+  // Color Palette
+  ul.colorGrid {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    li {
+      display: inline-block;
+      width: 100px;
+      margin: 10px;
+      i {
+        display: block;
+        width: 100px;
+        height: 50px;
+        &.icon-gray-base { background-color: $gray-base; }
+        &.icon-gray-darker { background-color: $gray-darker; }
+        &.icon-gray-dark { background-color: $gray-dark; }
+        &.icon-gray { background-color: $gray; }
+        &.icon-gray-light { background-color: $gray-light; }
+        &.icon-gray-lighter { background-color: $gray-lighter; }
+        &.icon-teal { background-color: $teal; }
+        &.icon-magenta { background-color: $magenta; }
+        &.icon-turquoise { background-color: $turquoise; }
+        &.icon-plum { background-color: $plum; }
+        &.icon-lime-green { background-color: $lime-green; }
+      }
+    }
+  }
+  // Typography
+  .type-open-sans {
+    font-family: $font-family-sans-serif;
+  }
+  .type-raleway {
+    font-family: $headings-font-family;
+  }
+}
+

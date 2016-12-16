@@ -2,30 +2,66 @@
   "name": "amara",
   "version": "0.0.0",
   "authors": [
-    "Jon Burr"
+    "Ocupop"
   ],
   "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
-    "src/_assets/bower",
     "test",
     "tests"
   ],
   "dependencies": {
     "bootstrap-sass": "~3.3.6",
+    "bootstrap": "^3.3.6",
     "chartist": "^0.9.7",
     "chartist-plugin-tooltip": "~0.0.12",
-    "jquery": "~2.2.4",
     "select2": "~4.0.2",
     "select2-bootstrap-theme": "~0.1.0-beta.4",
-    "bootstrap": "^3.3.6",
-    "jquery-form": "jquery-form#^3.46.0",
     "underscore": "^1.8.3",
-    "jquery-behaviors": "tiff/jquery-behaviors"
+    "jquery": "~2.2.4",
+    "jquery-behaviors": "tiff/jquery-behaviors",
+    "jquery-form": "^3.46.0",
+    "jScrollPane": "^2.0.23"
   },
-  "resolutions": {
-    "jquery": ">= 1.9.0"
+  "overrides": {
+    "jquery-behaviors": {
+      "main": [
+        "behaviors.js"
+      ]
+    },
+    "jScrollPane": {
+      "main": [
+        "script/jquery.jscrollpane.js",
+        "script/jquery.mousewheel.js"
+      ]
+    },
+    "chartist": {
+      "main": [
+        "dist/chartist.js",
+        "dist/chartist.min.js",
+        "dist/chartist.min.js.map",
+        "dist/chartist.min.css"
+      ]
+    },
+    "chartist-plugin-tooltip": {
+      "main": [
+        "dist/chartist-plugin-tooltip.js",
+        "dist/chartist-plugin-tooltip.min.js",
+        "dist/chartist-plugin-tooltip.min.js.map"
+      ]
+    },
+    "select2": {
+      "main": [
+        "dist/js/select2.js",
+        "dist/**/*.css"
+      ]
+    },
+    "select2-bootstrap-theme": {
+      "main": [
+        "dist/*.css"
+      ]
+    }
   }
 }
