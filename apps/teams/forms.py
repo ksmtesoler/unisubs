@@ -1413,7 +1413,6 @@ class TeamVideoCSVForm(forms.Form):
 class VideoManagementForm(ManagementForm):
     """Base class for forms on the video management page."""
 
-    include_all_label = _('Include all %(count)s filtered videos')
     save_queryset_select_related = ('teamvideo', 'teamvideo__project')
 
     @staticmethod

@@ -46,7 +46,7 @@ class ManagementForm(forms.Form):
     css_class = 'cta'
 
     include_all = forms.BooleanField(label='', required=False)
-    include_all_label = _("Include all %(count) objects")
+    include_all_label = _('Select all %(count)s results')
     save_queryset_select_related = None
 
     def __init__(self, queryset, selection, all_selected,

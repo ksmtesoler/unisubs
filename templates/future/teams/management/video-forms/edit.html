@@ -13,6 +13,9 @@
       <div class="modal-body">
         {% csrf_token %}
         {% include "future/forms/non-field-errors.html" %}
+        {% if form.include_all %}
+        {{ form.include_all|render_field }}
+        {% endif  %}
         {{ form.language|render_field }}
         {% if form.fields.project.enabled %}
         {{ form.project|render_field }}
