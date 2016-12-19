@@ -57,9 +57,9 @@ class MultipleLanguageDropdown(forms.SelectMultiple):
         final_attrs['name'] = name
         final_attrs['style'] = "width: 100%"
         if 'class' in final_attrs:
-            final_attrs['class'] += ' dropdownFilter'
+            final_attrs['class'] += ' select'
         else:
-            final_attrs['class'] = 'dropdownFilter'
+            final_attrs['class'] = 'select'
         if value:
             final_attrs['data-initial'] = value
         return mark_safe(u'<select multiple{}></select>'.format(

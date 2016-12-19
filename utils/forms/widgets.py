@@ -28,9 +28,9 @@ class Dropdown(widgets.Select):
         attrs = super(Dropdown, self).build_attrs(*args, **kwargs)
         attrs['style'] = "width: 100%"
         if 'class' in attrs:
-            attrs['class'] += ' dropdownFilter'
+            attrs['class'] += ' select'
         else:
-            attrs['class'] = 'dropdownFilter'
+            attrs['class'] = 'select'
         return attrs
 
 class AmaraRadioSelect(widgets.RadioSelect):

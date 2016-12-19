@@ -188,8 +188,8 @@ class Dropdown(forms.Select):
     def build_attrs(self, extra_attrs=None, **kwargs):
         attrs = super(Dropdown, self).build_attrs(extra_attrs, **kwargs)
         if 'class' in attrs:
-            attrs['class'] += ' dropdownFilter'
+            attrs['class'] += ' select'
         else:
-            attrs['class'] = 'dropdownFilter'
+            attrs['class'] = 'select'
         attrs['style'] = 'width: 100%'
         return attrs
