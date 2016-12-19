@@ -107,10 +107,12 @@ def sync_metadata(video_id, access_token, subtitle_version,
             subtitle_version.title and video.primary_audio_language_code):
         return
     primary_audio_language_code = video.primary_audio_language_code
-    if enable_language_mapping:
-        primary_audio_language_code = convert_language_code(
-            primary_audio_language_code)
-        language_code = convert_language_code(language_code)
+    #It seems like youtube is not using the same mapping for metadata
+    #and subtitles. Keeping this in case they change
+    #if enable_language_mapping:
+    #    primary_audio_language_code = convert_language_code(
+    #        primary_audio_language_code)
+    #    language_code = convert_language_code(language_code)
 
     google.update_video_metadata(video_id,
                                  access_token,
