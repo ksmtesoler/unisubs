@@ -5,6 +5,8 @@
 <div class="checkbox">{{ field }}<label for="{{ field.auto_id }}"><span></span>{{ field.label }}</label></div>
 {% elif widget_type == "select" %}
 <div class="form-group">{{ field.label_tag }}<div class="selectWrapper">{{ field }}</div></div>
+{% elif widget_type == "select-multiple" %}
+<div class="form-group">{{ field.label_tag }}<div class="selectWrapper-multiple">{{ field }}</div></div>
 {% else %}
 <div class="form-group">{{ field.label_tag }}{{ field }}</div>
 {% endif %}

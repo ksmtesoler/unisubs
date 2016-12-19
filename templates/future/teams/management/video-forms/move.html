@@ -5,7 +5,7 @@
       <button type="button" class="dialogButton-closeModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       <header class="dialogTitle">
         {% if single_selection %}
-        <h4 class="dialogHeader">{% blocktrans with title=first_video.title_display %}Moving: {{ title }}{% endblocktrans %}</h4>
+        <h4 class="dialogHeader">{% blocktrans with title=first_video.title_display %}Moving: '{{ title }}'{% endblocktrans %}</h4>
         {% else %}
         <h4 class="dialogHeader">{% blocktrans count count=selection_count %}Moving {{ count }} video{% plural %}Moving {{ count }} videos{% endblocktrans %}</h4>
         {% endif %}

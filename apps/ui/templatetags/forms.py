@@ -43,8 +43,10 @@ def calc_widget_type(field):
         widget = field.field.widget
     except StandardError:
         return 'default'
-    if isinstance(widget, (forms.Select, forms.SelectMultiple)):
+    if isinstance(widget, forms.Select):
         return 'select'
+    elif isinstance(widget, forms.SelectMultiple):
+        return 'select-multiple'
     elif isinstance(widget, forms.CheckboxInput):
         return 'checkbox'
     else:
