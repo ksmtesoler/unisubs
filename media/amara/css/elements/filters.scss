@@ -67,13 +67,15 @@
   ul {
     padding-left: 10px;
     list-style-type: none;
-    height: 100px;
     li {
       padding: 2px 0;
     }
   }
 }
 
+.filterList-content {
+    height: 100px;
+}
 
 
 .filterList-select {
