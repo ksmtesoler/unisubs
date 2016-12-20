@@ -464,6 +464,26 @@ def update_video_description(video_id, access_token, description):
     snippet['description'] = description
     video_put(access_token, video_id, snippet=snippet)
 
+def convert_language_code_metadata(language_code):
+    """
+    The API for language codes requires region to be capitalized
+    in a tricky way:
+    en -> en
+    fr -> fr
+    fr-ca -> fr-CA
+    es-mx -> es-MX
+    zh-cn -> zh-CN
+    zh-hant -> zh-Hant
+    zh-hans -> zh-Hans
+    """
+    language_country = language_code.split('-')
+    if len(language_country) > 1:
+        if len(language_country[1]) > 2:
+            language_code = language_country[0] + '-' + language_country[1].capitalize()
+        else:
+            language_code = language_country[0] + '-' + language_country[1].upper()
+    return language_code
+
 def update_video_metadata(video_id, access_token, primary_audio_language_code, language_code, title, description):
     response = video_get(access_token, video_id, ['snippet','localizations'])
     item = response.json()['items'][0]
@@ -476,8 +496,6 @@ def update_video_metadata(video_id, access_token, primary_audio_language_code, l
         snippet = item['snippet']
     if 'localizations' in item:
         localizations = response.json()['items'][0]['localizations']
-        language_country = language_code.split('-')
-        if len(language_country) > 1:
-            language_code = language_country[0] + '-' + language_country[1].upper()
+        language_code = convert_language_code_metadata(language_code)
         localizations[language_code] = {"title": title, "description": description}
         result = video_put(access_token, video_id, localizations=localizations)

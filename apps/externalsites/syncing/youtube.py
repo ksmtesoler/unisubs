@@ -77,7 +77,6 @@ def find_existing_caption_id(access_token, video_id, language_code,
 def update_subtitles(video_id, access_token, subtitle_version,
                      enable_language_mapping):
     """Push the subtitles for a language to YouTube """
-
     language_code = subtitle_version.language_code
 
     subs = subtitle_version.get_subtitles()
@@ -107,12 +106,10 @@ def sync_metadata(video_id, access_token, subtitle_version,
             subtitle_version.title and video.primary_audio_language_code):
         return
     primary_audio_language_code = video.primary_audio_language_code
-    #It seems like youtube is not using the same mapping for metadata
-    #and subtitles. Keeping this in case they change
-    #if enable_language_mapping:
-    #    primary_audio_language_code = convert_language_code(
-    #        primary_audio_language_code)
-    #    language_code = convert_language_code(language_code)
+    if enable_language_mapping:
+        primary_audio_language_code = convert_language_code(
+            primary_audio_language_code)
+        language_code = convert_language_code(language_code)
 
     google.update_video_metadata(video_id,
                                  access_token,
