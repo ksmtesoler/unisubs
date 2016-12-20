@@ -52,6 +52,7 @@
     {% for name, css_class, label in manage_forms %}
     <button class="button {{ css_class }}" type="submit" name="form" value="{{ name }}">{{ label }}</button>
     {% endfor %}
+    <button class="button inline deselectAll" data-field="videos">{% trans "Deselect" %}</button>
   </form>
 </div>
 {% endif %}

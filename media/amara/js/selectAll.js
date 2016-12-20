@@ -19,6 +19,7 @@
  */
 (function($) {
     $.behaviors('.selectAll', selectAll);
+    $.behaviors('.deselectAll', deselectAll);
 
     function selectAll(checkbox) {
         checkbox = $(checkbox);
@@ -30,6 +31,16 @@
         inputs.change(function() {
             var allChecked = inputs.filter(':checked').length == inputs.length;
             checkbox.prop('checked', allChecked);
+        });
+    }
+
+    function deselectAll(button) {
+        button = $(button);
+        var inputs = $(':input[name=' + button.data('field') + ']');
+
+        button.click(function() {
+            inputs.prop('checked', false).trigger('change');
+            return false;
         });
     }
 
