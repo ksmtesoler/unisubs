@@ -32,35 +32,3 @@ class Dropdown(widgets.Select):
         else:
             attrs['class'] = 'select'
         return attrs
-
-class AmaraRadioSelect(widgets.RadioSelect):
-    def render(self, name, value, attrs=None, choices=()):
-        if value is None:
-            value = ''
-        choices = list(chain(self.choices, choices))
-        output = [u'<ul>']
-        for i, choice in enumerate(choices):
-            input_id = '{}_{}'.format(attrs['id'], i)
-            output.extend([
-                u'<li><div class="radio">',
-                self.render_input(name, value, choice, input_id),
-                self.render_label(name, value, choice, input_id),
-                u'</div></li>',
-            ])
-        output.append(u'</ul>')
-        return mark_safe(u''.join(output))
-
-    def render_input(self, name, value, choice, input_id):
-        attrs = {
-            'id': input_id,
-            'type': 'radio',
-            'name': name,
-            'value': force_unicode(choice[0]),
-        }
-        if choice[0] == value:
-            attrs['checked'] = 'checked'
-        return u'<input{}>'.format(flatatt(attrs))
-
-    def render_label(self, name, value, choice, input_id):
-        return u'<label for="{}"><span></span>{}</label>'.format(
-            input_id, force_unicode(choice[1]))

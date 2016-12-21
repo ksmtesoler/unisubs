@@ -20,20 +20,28 @@
 
 $.behaviors('.dependentSelect', dependentSelect);
 
-function dependentSelect(select) {
-    select = $(select);
-    var controllerField = $(select.data('controller'));
+function dependentSelect(wrapper) {
+    wrapper = $(wrapper);
+    select = $('select', wrapper);
+    var controllerField = $(wrapper.data('controller'));
     var originalOptions = $('option', select).clone();
+    // convert all values in choiceMap to strings to match the <option> elements.
+    var choiceMap = {};
+    _.each(wrapper.data('choiceMap'), function(value, key) {
+        choiceMap[key] = _.map(value, String);
+    });
+    console.log(choiceMap);
 
     controllerField.change(updateChoices);
     updateChoices();
 
     function updateChoices() {
         var currentValue = controllerField.val();
+        var enabledChoices = choiceMap[currentValue];
         $('option', select).remove();
         originalOptions.each(function() {
             option = $(this);
-            if(option.data('enabledFor') === undefined || option.data('enabledFor') == currentValue) {
+            if(_.contains(enabledChoices, option.val())) {
                 select.append(option.clone());
             }
         });

@@ -17,14 +17,10 @@
 {% block filters2 %}
 <div class="row">
   <div class="col-xs-8 proxyField deferUpdate" data-proxy-for="#id_q">
-    <div class="form-group searchbar">
-      {{ filters_form.q }}
-    </div>
+    {{ filters_form.q|render_field }}
   </div>
   <div class="col-xs-4 proxyField" data-proxy-for="#id_sort">
-    <div class="form-group select-border">
-      {{ filters_form.sort }}
-    </div>
+    {{ filters_form.sort|render_field }}
   </div>
 </div>
 {% endblock %}

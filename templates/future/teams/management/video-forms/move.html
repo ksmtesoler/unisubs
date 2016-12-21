@@ -17,7 +17,9 @@
         {{ form.include_all|render_field }}
         {% endif  %}
         {{ form.new_team|render_field }}
-        {{ form.project|render_field }}
+        <div class="dependentSelect" data-controller="#id_new_team" data-choice-map='{{ form.project_map_json }}'>
+          {{ form.project|render_field }}
+        </div>
       </div>
       <div class="modal-footer">
         <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>

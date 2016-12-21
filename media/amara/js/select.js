@@ -28,6 +28,12 @@ function arrayToMap(array) {
     return map;
 }
 
+function hasEmptyValue(select) {
+    return $('option', select).is(function (i, opt) {
+        return opt.value == "";
+    });
+}
+
 function initSelect(select) {
     select = $(select);
     var options = {
@@ -36,7 +42,7 @@ function initSelect(select) {
         maximumSelectionLength: select.data('maximumSelectionLength')
     };
 
-    if(select.attr('multiple')) {
+    if(select.attr('multiple') || hasEmptyValue(select)) {
         options.allowClear = true;
     }
 
@@ -48,6 +54,9 @@ function initSelect(select) {
 
     if(select.data('languageOptions')) {
         options.data = languageChoiceData(select);
+        if(select.data('languageOptions').indexOf('null') != -1) {
+            options.allowClear = true;
+        }
     }
 
     select.select2(options);

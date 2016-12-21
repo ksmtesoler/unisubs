@@ -17,6 +17,7 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 import datetime
+import json
 import logging
 import re
 
@@ -54,10 +55,12 @@ from teams.permissions import (
 )
 from teams.permissions_const import ROLE_NAMES
 from teams.workflows import TeamWorkflow
-from ui.forms import ManagementForm
+from ui.forms import (FiltersForm, ManagementForm, AmaraChoiceField,
+                      AmaraRadioSelect, SearchField)
+from ui.forms import LanguageField as NewLanguageField
 from utils.forms import (ErrorableModelForm, get_label_for_value,
-                         UserAutocompleteField, LanguageField, FiltersForm,
-                         LanguageDropdown, Dropdown, AmaraRadioSelect)
+                         UserAutocompleteField, LanguageField,
+                         LanguageDropdown, Dropdown )
 from utils.panslugify import pan_slugify
 from utils.translation import get_language_choices, get_language_label
 from utils.text import fmt
@@ -92,13 +95,11 @@ class TeamMemberField(UserField):
                     self.error_messages['not-team-member']
                 )
 
-class ProjectField(forms.ChoiceField):
+class ProjectField(AmaraChoiceField):
     def __init__(self, *args, **kwargs):
-        if 'widget' not in kwargs:
-            kwargs['widget'] = AmaraRadioSelect
+        self.null_label = kwargs.pop('null_label', _('Any'))
         if 'label' not in kwargs:
             kwargs['label'] = _("Project")
-        self.null_label = kwargs.pop('null_label', _('Any'))
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
 
@@ -250,10 +251,10 @@ class AddVideoToTeamForm(forms.Form):
         ]
 
 class AddTeamVideoForm(forms.ModelForm):
-    language = LanguageField(label=_(u'Video language'),
-                             widget=forms.Select,
-                             required=False,
-                             help_text=_(u'It will be saved only if video does not exist in our database.'))
+    language = NewLanguageField(label=_(u'Video language'),
+                                required=False,
+                                options='null popular all',
+                                help_text=_(u'It will be saved only if video does not exist in our database.'))
 
     project = ProjectField(
         label=_(u'Project'),
@@ -270,18 +271,11 @@ class AddTeamVideoForm(forms.ModelForm):
         self.team = team
         self.user = user
         super(AddTeamVideoForm, self).__init__(*args, **kwargs)
-
         self.fields['project'].setup(team)
 
     def use_future_ui(self):
-        self.fields['project'].widget = Dropdown()
-        self.fields['project'].widget.choices = self.fields['project'].choices
         self.fields['project'].help_text = None
-        self.fields['language'].widget = LanguageDropdown()
-        self.fields['language'].widget.choices = self.fields['language'].choices
         self.fields['language'].help_text = None
-        self.fields['language'].options = 'null popular all'
-        self.fields['language'].null_label = _('Select language')
 
     def clean_project(self):
         project = self.cleaned_data['project']
@@ -1055,13 +1049,11 @@ class OldMoveVideosForm(forms.Form):
         self.fields['team'].queryset = user.managed_teams(include_manager=False)
 
 class VideoFiltersForm(FiltersForm):
-    q = forms.CharField(label="", required=False, widget=forms.TextInput(attrs={
-        'placeholder': _('Search for videos')
-    }))
-    language = LanguageField(label=_("Video language"), required=False)
-    project = ProjectField(required=False)
+    q = SearchField(label=_('Search for videos'), required=False)
+    language = NewLanguageField(label=_("Video language"), required=False)
+    project = ProjectField(required=False, widget=AmaraRadioSelect)
     duration = VideoDurationField(required=False, widget=AmaraRadioSelect)
-    sort = forms.ChoiceField(label="", choices=[
+    sort = AmaraChoiceField(label="", border=True, choices=[
         ('-time', _('Time, newest')),
         ('time', _('Time, oldest')),
         ('name', _('Name, a-z')),
@@ -1110,17 +1102,15 @@ class VideoFiltersForm(FiltersForm):
         return qs.select_related('video')
 
 class ManagementVideoFiltersForm(VideoFiltersForm):
-    language = LanguageField(label=_("Video language"), required=False,
-                             options="null popular all")
-    completed_subtitles = LanguageField(label=_("Completed subtitles"),
-                                        required=False,
-                                        options="null popular all",
-                                        placeholder=_('Select language'),
-                                        allow_clear=True)
-    needs_subtitles = LanguageField(label=_("Needs subtitles"), required=False,
-                                    options="null popular all",
-                                    placeholder=_('Select language'),
-                                    allow_clear=True)
+    language = NewLanguageField(label=_("Video language"),
+                                required=False,
+                                options="null popular all")
+    completed_subtitles = NewLanguageField(label=_("Completed subtitles"),
+                                           required=False,
+                                           options="null popular all")
+    needs_subtitles = NewLanguageField(label=_("Needs subtitles"), 
+                                       required=False,
+                                       options="null popular all")
 
     promote_main_project = False
 
@@ -1431,11 +1421,11 @@ class EditVideosForm(VideoManagementForm):
     label = _('Edit')
     permissions_check = staticmethod(permissions.can_edit_videos)
 
-    language = LanguageField(label=_("Video Language"), required=False,
-                             options="null popular all",
-                             null_label=_('No change'))
+    language = NewLanguageField(label=_("Video Language"), required=False,
+                                options="null popular all",
+                                placeholder=_('No change'))
     project = ProjectField(label=_('Project'), required=False,
-                           widget=Dropdown, null_label=_('No change'))
+                           null_label=_('No change'))
     thumbnail = forms.ImageField(label=_('Change thumbnail'), required=False)
 
     def setup_fields(self):
@@ -1509,10 +1499,9 @@ class MoveVideosForm(VideoManagementForm):
     name = 'move'
     label = _('Move')
 
-    new_team = forms.ChoiceField(label=_('New Team'), choices=[],
-                                 widget=Dropdown)
-    project = forms.ChoiceField(label=_('Project'), choices=[],
-                                required=False, widget=Dropdown)
+    new_team = AmaraChoiceField(label=_('New Team'), choices=[])
+    project = AmaraChoiceField(label=_('Project'), choices=[],
+                               required=False)
 
     @staticmethod
     def permissions_check(team, user):
@@ -1528,24 +1517,24 @@ class MoveVideosForm(VideoManagementForm):
         self.setup_project_field(dest_teams)
 
     def setup_project_field(self, dest_teams):
-        # choices regular django choices object.  project_options is a list of
-        # (id, name, team_id) tuples.  We need to store team_id in the
-        # <option> tag to make our javascript work
         choices = [ ('', _('None')) ]
-        self.project_options = [
-            ('', _('None'), 0),
-        ]
+        # map team ids to project choices
+        self.project_map = {
+            team.id: ['']
+            for team in dest_teams
+        }
 
         qs = (Project.objects
               .filter(team__in=dest_teams)
               .exclude(name=Project.DEFAULT_NAME))
         for project in qs:
             choices.append((project.id, project.name))
-            self.project_options.append(
-                (project.id, project.name, project.team_id)
-            )
+            self.project_map[project.team_id].append(project.id)
         self.fields['project'].choices = choices
         self['project'].field.initial = ''
+
+    def project_map_json(self):
+        return json.dumps(self.project_map)
 
     def clean_project(self):
         try:

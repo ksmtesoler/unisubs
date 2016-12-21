@@ -23,6 +23,40 @@ from django.utils.translation import ugettext_lazy as _
 
 from utils.text import fmt
 
+class FiltersForm(forms.Form):
+    """Form to handle the filters on a page
+
+    These forms are intended to be used with GET params, rather than POST
+    data.  This means we need some special code to avoid them thinking they're
+    bound when there is another GET param that doesn't have to do with the
+    form (e.g. page).
+    """
+    def __init__(self, get_data=None, **kwargs):
+        super(FiltersForm, self).__init__(data=self.calc_data(get_data),
+                                          **kwargs)
+
+    def calc_data(self, get_data):
+        if get_data is None:
+            return None
+        data = {
+            name: get_data[name]
+            for name in self.base_fields.keys()
+            if name in get_data
+        }
+        return data if data else None
+
+    def get_queryset(self):
+        if self.is_bound and self.is_valid():
+            return self._get_queryset(self.cleaned_data)
+        else:
+            return self._get_queryset({
+                name: self.initial.get(name, field.initial)
+                for name, field in self.fields.items()
+            })
+
+    def _get_queryset(self, data):
+        raise NotImplementedError()
+
 class ManagementForm(forms.Form):
     """
     Management forms are forms that are used on the manage team videos page and
@@ -161,3 +195,9 @@ class ManagementFormList(object):
             return form
         else:
             return None
+
+__all__ = [
+    'FiltersForm',
+    'ManagementForm',
+    'ManagementFormList'
+]

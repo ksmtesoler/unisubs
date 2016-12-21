@@ -1,13 +1,16 @@
-<div class="filterList{% if widget_type == "select" or widget_type == "select-multiple" %} filterList-select{% endif %} scrollBars">
+<div class="filterList{% if widget_type == "select" or widget_type == "select-multiple" %} filterList-select{% endif %}">
   <h3>{{ field.label }}</h3>
   <div class="filterList-content scrollBars">
-    {% if widget_type == "radio" %}
-    <div class="radio">{{ field }}</div>
+    {% if widget_type == "select" %}
+    <div class="selectWrapper">{{ field }}</div>
+    {% elif widget_type == "select-multiple" %}
+    <div class="selectWrapper-multiple">{{ field }}</div>
     {% else %}
     {{ field }}
     {% endif %}
-    {% include "future/forms/error-list.html" with errors=field.errors %}
-    {% if field.help_text %}
+    {% if field.errors %}
+    {% include "_error-list.html" with errors=field.errors %}
+    {% elif field.help_text %}
     <p class="help-block">{{ field.help_text }}</p>
     {% endif %}
   </div>

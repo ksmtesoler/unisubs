@@ -1,17 +1,23 @@
 {% if widget_type == "hidden" %}
 {{ field }}
 {% else %}
-{% if widget_type == "checkbox" %}
-<div class="checkbox">{{ field }}<label for="{{ field.auto_id }}"><span></span>{{ field.label }}</label></div>
-{% elif widget_type == "select" %}
-<div class="form-group">{{ field.label_tag }}<div class="selectWrapper">{{ field }}</div></div>
-{% elif widget_type == "select-multiple" %}
-<div class="form-group">{{ field.label_tag }}<div class="selectWrapper-multiple">{{ field }}</div></div>
-{% else %}
-<div class="form-group">{{ field.label_tag }}{{ field }}</div>
-{% endif %}
-{% include "_error-list.html" with errors=field.errors %}
-{% if field.help_text %}
-<p class="help-block">{{ field.help_text }}</p>
-{% endif %}
+<div class="form-group{% if field.errors %} has-error{% endif %}">
+  {% if widget_type == "checkbox" %}
+  <div class="checkbox">{{ field }}<label for="{{ field.auto_id }}"><span></span>{{ field.label }}</label></div>
+  {% elif widget_type == "select" %}
+  {% if field.label %}{{ field.label_tag }}{% endif %}<div class="selectWrapper{% if field.field.border %}-border{% endif %}">{{ field }}</div>
+  {% elif widget_type == "select-multiple" %}
+  {% if field.label %}{{ field.label_tag }}{% endif %}<div class="selectWrapper-multiple">{{ field }}</div>
+  {% else %}
+  {% if field.label %}{{ field.label_tag }}{% endif %}{{ field }}
+  {% endif %}
+
+  {% if field.errors %}
+  {% for error in field.errors %}
+  <p class="help-block">{{ error|escape }}</p>
+  {% endfor %}
+  {% elif field.help_text %}
+  <p class="help-block">{{ field.help_text }}</p>
+  {% endif %}
+</div>
 {% endif %}

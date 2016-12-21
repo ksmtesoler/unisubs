@@ -10,13 +10,12 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 
 from .autocomplete import AutocompleteTextInput
 from .dates import MonthChoiceField
-from .filters import FiltersForm
 from .formrouter import FormRouter
 from .languages import LanguageDropdown, LanguageField, MultipleLanguageField
 from .recapcha import ReCaptchaField
 from .teamautocomplete import TeamAutocompleteField, autocomplete_team_view
 from .userautocomplete import UserAutocompleteField, autocomplete_user_view
-from .widgets import AmaraRadioSelect, Dropdown
+from .widgets import Dropdown
 from utils.translation import get_language_choices
 
 assert ReCaptchaField # Shut up, Pyflakes.
