@@ -25,6 +25,8 @@ nosetests.xml
 .deploy_keys
 /babelsubs
 /unilangs
-babelsubs-git/
-unilangs-git/
+/pykss
+/babelsubs-git/
+/unilangs-git/
+/pykss-git/
 amara-enterprise/
