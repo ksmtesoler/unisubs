@@ -22,6 +22,12 @@
 
 $.behaviors('.select', initSelect);
 
+function arrayToMap(array) {
+    var map = {};
+    _.each(array, function(val) { map[val] = true; });
+    return map;
+}
+
 function initSelect(select) {
     select = $(select);
     var options = {
@@ -61,25 +67,18 @@ function languageChoiceData(select) {
     var data = [];
     var enabledSelections = select.data('languageOptions').split(" ");
     var initial = select.data('initial');
-    var nullLabel = select.data('languageNullLabel') || gettext('Any language');
-    var choiceMaker = new LanguageChoiceMaker(initial);
+    var exclude = select.data('exclude');
+    var limitTo = select.data('limitTo');
+    var choiceMaker = new LanguageChoiceMaker(initial, exclude, limitTo);
 
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
     }
     if(sectionEnabled('null')) {
-        if(select.data("placeholder")) {
-            data.push({
-                id: '',
-                selected: initial == '',
-            });
-        } else {
-            data.push({
-                id: 'X',
-                text: nullLabel,
-                selected: initial == 'X'
-            });
-        }
+        data.push({
+            id: '',
+            selected: initial == '',
+        });
     }
     if(sectionEnabled('my')) {
         data.push({
@@ -102,8 +101,19 @@ function languageChoiceData(select) {
     return data;
 }
 
-function LanguageChoiceMaker(initial) {
+function LanguageChoiceMaker(initial, exclude, limitTo) {
     this.initial = initial;
+    if(exclude === undefined) {
+        exclude = [];
+    }
+    if(limitTo === undefined) {
+        limitTo = [];
+        limitToEnabled = false;
+    } else {
+        limitToEnabled = true;
+    }
+    this.exclude = arrayToMap(exclude);
+    this.limitTo = arrayToMap(limitTo);
     this.alreadyAdded = {};
 }
 
@@ -112,14 +122,17 @@ LanguageChoiceMaker.prototype = {
         var choices = [];
         var self = this;
         _.each(languages, function(code) {
-            if(!self.alreadyAdded[code]) {
-                choices.push({
-                    id: code,
-                    text: getLanguageName(code),
-                    selected: code == self.initial
-                });
-                self.alreadyAdded[code] = true;
+            if(self.alreadyAdded[code] || self.exclude[code] ||
+                (self.limitToEnabled && !self.limitTo[code])) {
+                return;
             }
+
+            choices.push({
+                id: code,
+                text: getLanguageName(code),
+                selected: code == self.initial
+            });
+            self.alreadyAdded[code] = true;
         });
         return choices;
     }
