@@ -115,6 +115,7 @@ class TestDeleteVideosForm(TeamVideoManagementFormBase):
         videos = self.videos[:2]
         form = self.build_form(forms.DeleteVideosForm, videos, data={})
         for v in videos:
+            v = reload_obj(v)
             assert_equal(v.get_team_video(), None)
             assert_true(obj_exists(v))
 
@@ -147,6 +148,7 @@ class TestMoveVideosForm(TeamVideoManagementFormBase):
             'project': self.other_project.id,
         })
         for v in videos:
+            v = reload_obj(v)
             tv = v.get_team_video()
             assert_equal(tv.team, self.other_team)
             assert_equal(tv.project, self.other_project)
@@ -158,6 +160,7 @@ class TestMoveVideosForm(TeamVideoManagementFormBase):
             'project': '',
         })
         for v in videos:
+            v = reload_obj(v)
             tv = v.get_team_video()
             assert_equal(tv.team, self.other_team)
             assert_equal(tv.project, self.other_team.default_project)
