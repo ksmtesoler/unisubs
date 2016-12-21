@@ -215,6 +215,8 @@ class TeamWorkflow(object):
             'video-deleted',
             'video-url-edited',
             'video-url-deleted',
+            'video-moved-from-team',
+            'video-moved-to-team',
         ]
 
     # these can be used to customize the content in the project/language
