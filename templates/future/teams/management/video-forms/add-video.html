@@ -3,8 +3,8 @@
   <div class="modal-content">
     <form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
       <button type="button" class="dialogButton-closeModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <header class="dialogTitle">
-        <h4 class="dialogHeader">{% trans "Add Video" %}</h4>
+      <header class="dialogHeader">
+        <h4 class="dialogTitle">{% trans "Add Video" %}</h4>
       </header>
       <div class="modal-body">
         {% csrf_token %}
