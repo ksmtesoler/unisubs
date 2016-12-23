@@ -78,18 +78,24 @@ class VideoDurationField(forms.ChoiceField):
             kwargs['label'] = _("Video length")
         super(VideoDurationField, self).__init__(*args, **kwargs)
 
-    def filter(self, qs, value):
+    @classmethod
+    def filter(cls, qs, value):
+        return qs.filter(**self.filter_data(value))
+
+    @classmethod
+    def filter_data(cls, value):
+        filter_data = {}
         if value in EMPTY_VALUES:
-            return qs
+            return filter_data
         try:
-            min, max, label = self.DURATION_CHOICE_DATA[int(value)-1]
+            min, max, label = cls.DURATION_CHOICE_DATA[int(value)-1]
         except StandardError:
-            return qs.none()
+            return filter_data
         if min is not None:
-            qs = qs.filter(duration__gte=min * 60)
+            filter_data['duration__gte'] = min * 60
         if max is not None:
-            qs = qs.filter(duration__lt=max * 60)
-        return qs
+            filter_data['duration__lt'] = max * 60
+        return filter_data
 
 class VideoURLField(forms.URLField):
     """Field for inputting URLs for videos.
