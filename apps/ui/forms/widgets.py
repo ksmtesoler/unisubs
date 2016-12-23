@@ -23,6 +23,32 @@ from django.forms.util import flatatt
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 
+class AmaraLanguageSelectMixin(object):
+    def render(self, name, value, attrs=None, choices=()):
+        if value is None:
+            value = ''
+        if attrs is None:
+            attrs = {}
+        if isinstance(value, basestring):
+            # single-select
+            attrs['data-initial'] = value
+        else:
+            # multi-select
+            attrs['data-initial'] = ':'.join(value)
+        return super(AmaraLanguageSelectMixin, self).render(
+            name, value, attrs, choices)
+
+    def render_options(self, choices, selected_choices):
+        # The JS code populates the options
+        return ''
+
+class AmaraLanguageSelect(AmaraLanguageSelectMixin, widgets.Select):
+    pass
+
+class AmaraLanguageSelectMultiple(AmaraLanguageSelectMixin,
+                                  widgets.SelectMultiple):
+    pass
+
 class AmaraRadioSelect(widgets.RadioSelect):
     def render(self, name, value, attrs=None, choices=()):
         if value is None:

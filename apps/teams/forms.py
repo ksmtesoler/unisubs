@@ -1436,7 +1436,7 @@ class EditVideosForm(VideoManagementForm):
         self.fields['project'].required = True
         self.fields['project'].initial = team_video.project.slug
         self.fields['project'].choices = self.fields['project'].choices[1:]
-        self.fields['language'].null_label = _('Unset')
+        self.fields['language'].set_placeholder(_('No language set'))
         self.fields['language'].initial = video.primary_audio_language_code
 
     def perform_save(self, qs):

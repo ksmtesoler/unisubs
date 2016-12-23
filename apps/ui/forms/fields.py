@@ -25,12 +25,14 @@ from utils import translation
 from ui.forms import widgets
 
 class AmaraChoiceFieldMixin(object):
-    def __init__(self, allow_search=True, border=False, *args, **kwargs):
+    def __init__(self, allow_search=True, border=False, max_choices=None,
+                 *args, **kwargs):
         super(AmaraChoiceFieldMixin, self).__init__(*args, **kwargs)
-        self.widget.attrs['class'] = 'select'
         self.border = border
         if not allow_search:
-            self.widget.attrs['nosearchbox'] = 1
+            self.set_select_data('nosearchbox')
+        if max_choices:
+            self.set_select_data('max-allowed-choices', max_choices)
 
     def _get_choices(self):
         return self._choices
@@ -42,61 +44,76 @@ class AmaraChoiceFieldMixin(object):
     choices = property(_get_choices, _set_choices)
 
     def _setup_widget_choices(self, choices):
-        placeholder = None
+        null_choice = None
         widget_choices = []
         for choice in choices:
             if choice[0]:
                 widget_choices.append(choice)
             else:
-                placeholder = choice[1]
+                null_choice = choice[1]
         self.widget.choices = choices
-        if placeholder:
-            self.widget.attrs['placeholder'] = placeholder
-            self.widget.attrs['data-allow-clear'] = 1
+        if null_choice:
+            self.set_select_data('placeholder', null_choice)
+            self.set_select_data('allow-clear')
         else:
-            self.widget.attrs.pop('placeholder', None)
-            self.widget.attrs.pop('data-allow-clear', None)
+            self.unset_select_data('placeholder')
+            self.unset_select_data('allow-clear')
+
+    def widget_attrs(self, widget):
+        if isinstance(widget, forms.Select):
+            return { 'class': 'select' }
+        else:
+            return {}
+
+    def set_select_data(self, name, value=1):
+        name = 'data-' + name
+        if isinstance(self.widget, forms.Select):
+            self.widget.attrs[name] = value
+
+    def unset_select_data(self, name):
+        name = 'data-' + name
+        if isinstance(self.widget, forms.Select):
+            self.widget.attrs.pop(name, None)
 
 class AmaraChoiceField(AmaraChoiceFieldMixin, forms.ChoiceField):
     pass
 
 class AmaraMultipleChoiceField(AmaraChoiceFieldMixin,
                                forms.MultipleChoiceField):
-    def __init__(self, max_choices=None, *args, **kwargs):
-        super(AmaraMultipleChoiceField, self).__init__(*arg, **kwargs)
-        if max_choices is not None:
-            self.widget.attrs['max-allowed-choices'] = max_choices
+    pass
 
 class LanguageFieldMixin(AmaraChoiceFieldMixin):
     def __init__(self, options="null my popular all",
                  placeholder=_("Select language"), *args, **kwargs):
         kwargs['choices'] = translation.get_language_choices()
         super(LanguageFieldMixin, self).__init__(*args, **kwargs)
-        self.widget.attrs['data-language-options'] = options
-        if 'null' in options:
-            self.widget.attrs['placeholder'] = placeholder
-            self.widget.attrs['data-allow-clear'] = 1
+        self.set_select_data('language-options', options)
+        if "null" in options:
+            self.set_placeholder(placeholder)
 
     def exclude(self, languages):
-        self.widget.attrs['data-exclude'] = json.dumps(languages)
+        self.set_select_data('exclude', json.dumps(languages))
         self.choices = [
             c for c in self.choices if c[0] not in languages
         ]
 
     def limit_to(self, languages):
-        self.widget.attrs['data-limit-to'] = json.dumps(languages)
+        self.set_select_data('limit-to', json.dumps(languages))
         self.choices = [
             c for c in self.choices if c[0] in languages
         ]
+
+    def set_placeholder(self, placeholder):
+        self.set_select_data('placeholder', placeholder)
 
     def _setup_widget_choices(self, choices):
         pass
 
 class LanguageField(LanguageFieldMixin, forms.ChoiceField):
-    pass
+    widget = widgets.AmaraLanguageSelect
 
 class MultipleLanguageField(LanguageFieldMixin, forms.MultipleChoiceField):
-    pass
+    widget = widgets.AmaraLanguageSelectMultiple
 
 class SearchField(forms.CharField):
     widget = widgets.SearchBar

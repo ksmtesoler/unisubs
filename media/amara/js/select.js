@@ -38,8 +38,6 @@ function initSelect(select) {
     select = $(select);
     var options = {
         theme: "bootstrap",
-        placeholder: select.attr('placeholder'),
-        maximumSelectionLength: select.data('maximumSelectionLength')
     };
 
     if(select.attr('multiple') || hasEmptyValue(select)) {
@@ -75,7 +73,7 @@ function initSelect(select) {
 function languageChoiceData(select) {
     var data = [];
     var enabledSelections = select.data('languageOptions').split(" ");
-    var initial = select.data('initial');
+    var initial = select.data('initial').split(':');
     var exclude = select.data('exclude');
     var limitTo = select.data('limitTo');
     var choiceMaker = new LanguageChoiceMaker(initial, exclude, limitTo);
@@ -86,7 +84,7 @@ function languageChoiceData(select) {
     if(sectionEnabled('null')) {
         data.push({
             id: '',
-            selected: initial == '',
+            selected: _.contains(initial, '')
         });
     }
     if(sectionEnabled('my')) {
@@ -139,7 +137,7 @@ LanguageChoiceMaker.prototype = {
             choices.push({
                 id: code,
                 text: getLanguageName(code),
-                selected: code == self.initial
+                selected: _.contains(self.initial, code)
             });
             self.alreadyAdded[code] = true;
         });
