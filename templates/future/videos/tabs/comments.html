@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n ui %}
 {% load url from future %}
 <ul class="comments">
   {% for comment in comments %}
@@ -12,7 +12,7 @@
     <div class="col-xs-8">
       <div class="commentBody">
         {{ comment.content|linebreaks }}
-        <span>{{ comment.submit_date|timesince }}</span>
+        <span>{{ comment.submit_date|elapsed_time }}</span>
       </div>
     </div>
   </li>
