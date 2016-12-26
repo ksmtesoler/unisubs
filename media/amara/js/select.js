@@ -73,10 +73,15 @@ function initSelect(select) {
 function languageChoiceData(select) {
     var data = [];
     var enabledSelections = select.data('languageOptions').split(" ");
-    var initial = select.data('initial').split(':');
     var exclude = select.data('exclude');
     var limitTo = select.data('limitTo');
     var choiceMaker = new LanguageChoiceMaker(initial, exclude, limitTo);
+
+    if(select.data('initial')) {
+        var initial = select.data('initial').split(':');
+    } else {
+        var initial = [];
+    }
 
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
