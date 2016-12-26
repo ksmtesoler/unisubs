@@ -44,8 +44,12 @@ def elapsed_time(dt, comparison=None):
     if delta.seconds < 60:
         return _('now')
     elif delta.days < 1:
-        return fmt(_('%(count)s minutes ago'), count=delta.minutes)
+        minutes = int(round(delta.seconds / 60.0))
+        return fmt(_('%(count)s minutes ago'), count=minutes)
     elif delta.days < 7:
-        return fmt(_('%(count)s days ago'), count=delta.days)
+        days = delta.days
+        if delta.minutes > 12 * 60:
+            days += 1
+        return fmt(_('%(count)s days ago'), count=days)
     else:
         return date(dt)
