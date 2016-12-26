@@ -113,7 +113,7 @@ class ProjectField(AmaraChoiceField):
                     projects.remove(main_project)
                     projects.insert(0, main_project)
                     if initial is None:
-                        initial = main_project
+                        initial = main_project.slug
             choices = []
             if not self.required:
                 choices.append(('', self.null_label))
