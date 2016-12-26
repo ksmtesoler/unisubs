@@ -1347,13 +1347,13 @@ ORIGIN_WEB_EDITOR = 'web-editor'
 
 SUBTITLE_VERSION_ORIGINS = (
     (ORIGIN_API, _("API")),
-    (ORIGIN_LEGACY_EDITOR, _("Subtitle Editor")),
+    (ORIGIN_LEGACY_EDITOR, _("Edited (legacy editor)")),
     (ORIGIN_IMPORTED, _("Imported")),
     (ORIGIN_ROLLBACK, _("Rollback")),
     (ORIGIN_SCRIPTED, _("Scripted")),
     (ORIGIN_TERN, _("Tern")),
     (ORIGIN_UPLOAD, _("Uploaded")),
-    (ORIGIN_WEB_EDITOR, _("Through web editor")),
+    (ORIGIN_WEB_EDITOR, _("Edited")),
 )
 
 class SubtitleVersion(models.Model):

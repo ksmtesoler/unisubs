@@ -120,7 +120,7 @@
                   {{ revision.author }}
                 </div>
                 <div class="col-xs-5 end-xs">
-                  <strong>{% trans "Edited" %}</strong>
+                  <strong>{{ revision.get_origin_display }}</strong>
                   <br>
                   {{ revision.created|elapsed_time }}
                 </div>
