@@ -21,12 +21,12 @@
         </p>
         <button  ng-class="{disabled:!workflow.canCompleteStage('syncing')}"
             ng-click="workflow.canCompleteStage('syncing') && workflow.completeStage('syncing')">
-            {% trans "Start review" %}
+            {% trans "Start edit and complete" %}
         </button>
     </li>
 
     <li ng-class="workflow.stageCSSClass('review')">
-        <h3>{% trans "Review and complete" %}</h3>
+        <h3>{% trans "Edit and complete" %}</h3>
         <p>{% trans "Watch the video again and verify that the subtitles are complete and correct." %}<br>
         <a class="edit-metadata" href="#" ng-click="onEditTitleClicked($event)">{% trans "Edit title and description." %}</a>
         </p>
