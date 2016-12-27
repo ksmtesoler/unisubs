@@ -107,7 +107,7 @@
             </header>
             <ul>
               {% for revision in all_subtitle_versions %}
-              <li class="row condensed{% if revision == subtitle_version %} currentRevision{% endif %}">
+              <li class="row condensed hangingLinks{% if revision == subtitle_version %} currentRevision{% endif %}">
                 <div class="col-xs-1">
                   <div class="checkbox">
                     <input type="checkbox" id="revision-{{revision.id}}" data-id="{{ revision.id }}">
@@ -115,7 +115,7 @@
                   </div>
                 </div>
                 <div class="col-xs-6">
-                  <a href="{{ revision.get_absolute_url }}"><strong>{% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}</strong></a>
+                  <a class="text" href="{{ revision.get_absolute_url }}"><strong>{% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}</strong></a>
                   <br>
                   {{ revision.author }}
                 </div>
@@ -124,6 +124,9 @@
                   <br>
                   {{ revision.created|elapsed_time }}
                 </div>
+                {% if enable_edit_in_admin %}
+                <a class="hangingLinks-link" href="{% url "admin:subtitles_subtitleversion_change" revision.id %}" target="_blank"><i class="icon icon-edit"></i></a>
+                {% endif %}
               </li>
               {%  endfor %}
             </ul>
@@ -132,13 +135,13 @@
           <section class="videoSubtitles-revisions">
             <header>
               <h3>{% trans "Revisions" %}</h3>
-              <div class="header-actions"><a href="#" class="disabled" title="{% trans "Compare revisions" %}">{% trans "Compare revisions" %}</a></div>
+              <div class="header-actions"><a href="#" class="disabled text" title="{% trans "Compare revisions" %}">{% trans "Compare revisions" %}</a></div>
             </header>
             <ul>
               {% for revision in all_subtitle_versions %}
-              <li class="row condensed{% if revision == subtitle_version %} currentRevision{% endif %}">
+              <li class="row condensed hangingLinks{% if revision == subtitle_version %} currentRevision{% endif %}">
                 <div class="col-xs-7">
-                  <a href="{{ revision.get_absolute_url }}"><strong>{% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}</strong></a>
+                  <a class="text" href="{{ revision.get_absolute_url }}"><strong>{% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}</strong></a>
                   <br>
                   {{ revision.author }}
                 </div>
@@ -147,6 +150,9 @@
                   <br>
                   {{ revision.created|elapsed_time }}
                 </div>
+                {% if enable_edit_in_admin %}
+                <a class="hangingLinks-link" href="{% url "admin:subtitles_subtitleversion_change" revision.id %}" target="_blank"><i class="icon icon-edit"></i></a>
+                {% endif %}
               </li>
               {%  endfor %}
             </ul>

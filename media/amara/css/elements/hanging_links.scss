@@ -1,0 +1,33 @@
+// Hanging links
+//
+// Put a link off to the side of a table or list.  The links should contain a single icon.  Used for auxiliary actions for a row.
+//
+//
+// <ul class="pull-left">
+//   <li class="hangingLinks"><h1>Cats</h1> <a class="hangingLinks-link"><i class="icon icon-check"></i></a></li>
+//   <li class="hangingLinks"><h1>Dogs</h1> <a class="hangingLinks-link"><i class="icon icon-check"></i></a></li>
+//   <li class="hangingLinks"><h1>Birds</h1> <a class="hangingLinks-link"><i class="icon icon-check"></i></a></li>
+// </ul>
+// Styleguide hangingLinks
+.hangingLinks {
+  position: relative;
+}
+.hangingLinks-link {
+    position: absolute;
+    width: 30px;
+    height: 100%;
+    line-height: 40px;
+    right: -30px;
+    top: 0;
+    background-color: $teal;
+    color: #fff;
+    text-align: center;
+    display: none;
+    &:hover {
+      color: #fff;
+    }
+    .hangingLinks:hover & {
+      display: block;
+    }
+}
+

@@ -527,6 +527,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
                      .filter(language_code=lang))[:8],
         'comments': Comment.get_for_object(subtitle_language),
         'comment_form': comment_form,
+        'enable_edit_in_admin': request.user.is_superuser,
         'steps': customization.steps,
         'action_button': customization.action_button,
         'can_edit': workflow.user_can_edit_subtitles(

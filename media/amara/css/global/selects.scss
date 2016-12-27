@@ -44,6 +44,24 @@
 // </div>
 // 
 // Example:
+// <div class="selectWrapper">
+//   <select class="select" name="" id="" placeholder="Option Groups">
+//    <optgroup label="Available">
+//       <option>Option 1</option>
+//       <option>Option 2</option>
+//       <option>Option 3</option>
+//       <option>Option 4</option>
+//     </optgroup>
+//     <optgroup label="Assigned">
+//       <option>Option 1</option>
+//       <option>Option 2</option>
+//       <option>Option 3</option>
+//       <option>Option 4</option>
+//     </optgroup>
+//   </select>
+// </div>
+// 
+// Example:
 // <div class="selectWrapper-language">
 //   <select name="" id="" class="select" data-language-options="popular any" placeholder="Select Language"></select>
 // </div>

@@ -17,11 +17,6 @@ header {
     border-bottom: none;
   }
   h1, h2, h3, h4 { margin: 0; }
-  .header-actions {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
 }
 
 a {
@@ -41,6 +36,9 @@ a {
     cursor: default;
     color: $gray-light;
     pointer-events: none;
+  }
+  &.text {
+    color: inherit;
   }
 }
 

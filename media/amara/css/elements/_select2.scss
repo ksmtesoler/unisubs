@@ -41,7 +41,7 @@
     .select2-selection--multiple {
 
       .select2-search--inline {
-        width: 100%;
+        // width: 100%;
         .select2-search__field {
           width: 100% !important;
         }
@@ -64,6 +64,7 @@
     font-weight: 400;
     background-color: $gray-lighter;
     color: $gray-darker;
+    font-style: italic;
   }
 
 

@@ -16,6 +16,7 @@
         width: 2rem;
         height: 2rem;
         left: 5px;
+        top: 10px;
         display: flex;
         flex: none;
         align-items: center;
@@ -65,6 +66,15 @@
 
   }
 
+  .header-actions {
+    position: relative;
+    top: 0;
+    right: 0;
+    button {
+      padding: 0;
+    }
+  }
+
   .dropdown {
     .dropdown-menu {
       left: -60px;
@@ -73,32 +83,12 @@
 }
 .videoSubtitles-revisions {
   li {
-    position: relative;
     margin: 0 0 5px 0;
     &.currentRevision {
       border: 1px solid $gray-light;
     }
     &.private {
       color: $lime-green;
-    }
-    a { color: inherit; }
-    &:hover {
-      background-color: rgba(0,0,0,0.05);
-      &:after {
-        font-family: 'amara' !important;
-        content: "\e907";
-        display: block;
-        position: absolute;
-        width: 30px;
-        height: 100%;
-        line-height: 40px;
-        right: -30px;
-        top: 0;
-        background-color: $teal;
-        color: #fff;
-        text-align: center;
-        cursor: pointer;
-      }
     }
   }
 }
