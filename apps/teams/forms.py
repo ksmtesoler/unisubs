@@ -295,6 +295,7 @@ class AddTeamVideoForm(forms.ModelForm):
 
     def setup_video(self, video, video_url):
         video.is_public = self.team.is_visible
+        video.primary_audio_language_code = self.cleaned_data['language']
         self.saved_team_video = TeamVideo.objects.create(
             video=video, team=self.team, project=self.cleaned_data['project'],
             added_by=self.user)
