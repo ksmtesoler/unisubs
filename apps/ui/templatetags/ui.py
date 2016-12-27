@@ -17,6 +17,7 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 from django import template
+from django.utils.translation import ungettext
 from django.utils.translation import ugettext as _
 
 from utils.dates import now
@@ -45,11 +46,14 @@ def elapsed_time(dt, comparison=None):
         return _('now')
     elif delta.days < 1:
         minutes = int(round(delta.seconds / 60.0))
-        return fmt(_('%(count)s minutes ago'), count=minutes)
+        return fmt(ungettext(u'%(count)s minute ago',
+                             u'%(count)s minutes ago',
+                             minutes),
+                   count=minutes)
     elif delta.days < 7:
-        days = delta.days
-        if delta.minutes > 12 * 60:
-            days += 1
-        return fmt(_('%(count)s days ago'), count=days)
+        days = int(round(delta.days + delta.seconds / 60 / 60 / 24))
+        return fmt(ungettext('%(count)s day ago',
+                             '%(count)s days ago',
+                             days), count=days)
     else:
         return date(dt)
