@@ -19,6 +19,8 @@
 from collections import OrderedDict
 
 from django import forms
+from django.contrib import messages
+from django.utils.translation import ungettext
 from django.utils.translation import ugettext_lazy as _
 
 from utils.text import fmt
@@ -114,6 +116,23 @@ class ManagementForm(forms.Form):
     def single_selection(self):
         return len(self.selection) == 1
 
+    def ungettext(self, single_selection, singular, plural, count):
+        """ungettext version for management forms.
+
+        Often when we want to display text, we want to differentiate the
+        single select case.  For example, suppose you have a form that updates
+        videos but there can be errors when updating the videos.  Then you
+        probably want to split the error text into 3 cases:
+
+        - single select: "Video was not updated"
+        - multiple select, singular count: "1 video was not updated"
+        - multiple select, plural count: "XX videos were not updated"
+        """
+        if self.single_selection():
+            return single_selection
+        else:
+            return ungettext(singular, plural, count)
+
     def get_first_object(self):
         return self.queryset.get(id=self.selection[0])
 
@@ -159,7 +178,19 @@ class ManagementForm(forms.Form):
 
     def message(self):
         """Success message after the form is submitted."""
-        raise NotImplementedError()
+        return None
+
+    def error_messages(self):
+        """Error message(s) after the form is submitted."""
+        return []
+
+    def add_messages(self, request):
+        """Add success and error messages to a request."""
+        message = self.message()
+        if message:
+            messages.success(request, message)
+        for error in self.error_messages():
+            messages.error(request, error)
 
 class ManagementFormList(object):
     """Handle a list of Managment forms

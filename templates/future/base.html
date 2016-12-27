@@ -19,13 +19,11 @@
     <main id="page-content">
       {% if messages %}
       <div id="messages" class="container">
-        {% for message in messages %}
-        <div class="row content">
-          <div class="col-xs">
-            <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div>
-          </div>
+        <div class="content">
+          {% for message in messages %}
+              <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
       {% endif %}
       {% block content %}{% endblock %}

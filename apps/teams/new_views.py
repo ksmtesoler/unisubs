@@ -1,4 +1,4 @@
-#Get the main project for a team Amara, universalsubtitles.org
+# Get the main project for a team Amara, universalsubtitles.org
 #
 # Copyright (C) 2013 Participatory Culture Foundation
 #
@@ -678,7 +678,7 @@ def manage_videos_form(request, team, form_name, videos):
                          data=request.POST, files=request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, form.message())
+            form.add_messages(request)
             response_renderer.reload_page()
             return response_renderer.render()
     else:
