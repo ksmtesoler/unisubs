@@ -1476,6 +1476,8 @@ class DeleteVideosForm(VideoManagementForm):
         help_text=_('Delete videos rather than moving them to the '
                     'public area'))
 
+    permissions_check = staticmethod(permissions.new_can_remove_videos)
+
     def setup_fields(self):
         if not permissions.can_delete_video_in_team(self.team, self.user):
             del self.fields['delete']
@@ -1505,7 +1507,7 @@ class MoveVideosForm(VideoManagementForm):
 
     @staticmethod
     def permissions_check(team, user):
-        return permissions.can_move_videos_to(team, user) > 0
+        return len(permissions.can_move_videos_to(team, user)) > 0
 
     def setup_fields(self):
         dest_teams = [self.team] + permissions.can_move_videos_to(

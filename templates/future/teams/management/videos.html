@@ -29,9 +29,11 @@
 
 {% block videos %}
 <nav class="nav-actions">
+  {% if enable_add_form %}
   <div class="pull-right">
     <a class="ajaxLink" href="?form=add-video">{% trans "Add video" %}</a>
   </div>
+  {% endif %}
   <div class="checkbox">
     <input id="selectAll" type="checkbox" value="" class="selectAll" data-field="videos">
     <label for="selectAll" class="text-gray"><span></span> {% trans "Select all" %}</label>

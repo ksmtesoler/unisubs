@@ -37,6 +37,7 @@ from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.core.exceptions import PermissionDenied
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseBadRequest, HttpResponseForbidden)
 from django.shortcuts import render, redirect, get_object_or_404
@@ -607,6 +608,8 @@ def welcome(request, team):
 
 @team_view
 def manage_videos(request, team):
+    if not permissions.can_view_management_tab(team, request.user):
+        return HttpResponseForbidden()
     filters_form = forms.ManagementVideoFiltersForm(team, request.GET,
                                                     auto_id="id_filters_%s")
     videos = filters_form.get_queryset().select_related('teamvideo',
@@ -627,6 +630,7 @@ def manage_videos(request, team):
         'filters_form': filters_form,
         'team_nav': 'management',
         'current_tab': 'videos',
+        'enable_add_form': permissions.can_add_video(team, request.user),
         'manage_forms': [
             (form.name, form.css_class, form.label)
             for form in all_video_management_forms(team, request.user)
@@ -698,6 +702,8 @@ def manage_videos_form(request, team, form_name, videos):
     return response_renderer.render()
 
 def add_video_form(request, team):
+    if not permissions.can_add_video(team, request.user):
+        return HttpResponseForbidden()
     response_renderer = AJAXResponseRenderer(request)
     if request.method == 'POST':
         form = forms.AddTeamVideoForm(team, request.user, data=request.POST)

@@ -455,6 +455,15 @@ def can_remove_videos(team, user):
 
     return role in _perms_equal_or_greater(role_required)
 
+# We used to allow any user who can add videos to remove them as well.
+# However, this doesn't seem like a great system, since removing videos is
+# much more dangerous than adding.  new-style teams should use this new
+# version.
+def new_can_remove_videos(team, user):
+    """Return whether the given user can remove the given team video."""
+
+    return team.user_is_admin(user)
+
 def can_delete_video(team_video, user):
     """Returns whether the give user can delete a team video from unisubs entirely.
 
