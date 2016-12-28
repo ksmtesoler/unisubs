@@ -107,7 +107,7 @@
             </header>
             <ul>
               {% for revision in all_subtitle_versions %}
-              <li class="row condensed hangingLinks{% if revision == subtitle_version %} currentRevision{% endif %}">
+              <li class="row condensed hangingLink{% if revision == subtitle_version %} currentRevision{% endif %}">
                 <div class="col-xs-1">
                   <div class="checkbox">
                     <input type="checkbox" id="revision-{{revision.id}}" data-id="{{ revision.id }}">
@@ -125,7 +125,7 @@
                   {{ revision.created|elapsed_time }}
                 </div>
                 {% if enable_edit_in_admin %}
-                <a class="hangingLinks-link" href="{% url "admin:subtitles_subtitleversion_change" revision.id %}" target="_blank"><i class="icon icon-edit"></i></a>
+                <a class="hangingLink-link" href="{% url "admin:subtitles_subtitleversion_change" revision.id %}" target="_blank"><i class="icon icon-edit"></i></a>
                 {% endif %}
               </li>
               {%  endfor %}
@@ -139,7 +139,7 @@
             </header>
             <ul>
               {% for revision in all_subtitle_versions %}
-              <li class="row condensed hangingLinks{% if revision == subtitle_version %} currentRevision{% endif %}">
+              <li class="row condensed hangingLink{% if revision == subtitle_version %} currentRevision{% endif %}">
                 <div class="col-xs-7">
                   <a class="text" href="{{ revision.get_absolute_url }}"><strong>{% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}</strong></a>
                   <br>
@@ -151,7 +151,7 @@
                   {{ revision.created|elapsed_time }}
                 </div>
                 {% if enable_edit_in_admin %}
-                <a class="hangingLinks-link" href="{% url "admin:subtitles_subtitleversion_change" revision.id %}" target="_blank"><i class="icon icon-edit"></i></a>
+                <a class="hangingLink-link" href="{% url "admin:subtitles_subtitleversion_change" revision.id %}" target="_blank"><i class="icon icon-edit"></i></a>
                 {% endif %}
               </li>
               {%  endfor %}

@@ -4,15 +4,15 @@
 //
 //
 // <ul class="pull-left">
-//   <li class="hangingLinks"><h1>Cats</h1> <a class="hangingLinks-link"><i class="icon icon-check"></i></a></li>
-//   <li class="hangingLinks"><h1>Dogs</h1> <a class="hangingLinks-link"><i class="icon icon-check"></i></a></li>
-//   <li class="hangingLinks"><h1>Birds</h1> <a class="hangingLinks-link"><i class="icon icon-check"></i></a></li>
+//   <li class="hangingLink"><h1>Cats</h1> <a class="hangingLink-link"><i class="icon icon-check"></i></a></li>
+//   <li class="hangingLink"><h1>Dogs</h1> <a class="hangingLink-link"><i class="icon icon-check"></i></a></li>
+//   <li class="hangingLink"><h1>Birds</h1> <a class="hangingLink-link"><i class="icon icon-check"></i></a></li>
 // </ul>
-// Styleguide hangingLinks
-.hangingLinks {
+// Styleguide hangingLink
+.hangingLink {
   position: relative;
 }
-.hangingLinks-link {
+.hangingLink-link {
     position: absolute;
     width: 30px;
     height: 100%;
@@ -26,7 +26,7 @@
     &:hover {
       color: #fff;
     }
-    .hangingLinks:hover & {
+    .hangingLink:hover & {
       display: block;
     }
 }
