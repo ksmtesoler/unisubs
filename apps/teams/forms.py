@@ -136,7 +136,6 @@ class ProjectField(AmaraChoiceField):
             value = Project.DEFAULT_NAME
         return Project.objects.get(team=self.team, slug=value)
 
-
 class EditTeamVideoForm(forms.ModelForm):
     author = forms.CharField(max_length=255, required=False)
     creation_date = forms.DateField(required=False, input_formats=['%Y-%m-%d'],

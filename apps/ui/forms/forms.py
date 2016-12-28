@@ -52,7 +52,7 @@ class FiltersForm(forms.Form):
             return self._get_queryset(self.cleaned_data)
         else:
             return self._get_queryset({
-                name: self.initial.get(name, field.initial)
+                name: field.clean(self.initial.get(name, field.initial))
                 for name, field in self.fields.items()
             })
 
