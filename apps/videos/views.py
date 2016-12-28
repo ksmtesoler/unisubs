@@ -523,6 +523,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'metadata': video.get_metadata().convert_for_display(),
         'subtitle_language': subtitle_language,
         'subtitle_version': version,
+        'show_rollback': version and not version.is_tip(public=False),
         'all_subtitle_versions': all_subtitle_versions,
         'enabled_compare': len(all_subtitle_versions) >= 2,
         'has_private_version': any(v.is_private() for v in

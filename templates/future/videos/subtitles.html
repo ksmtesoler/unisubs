@@ -26,9 +26,17 @@
             <div id="subtitles_list" class="tab-pane active">
               <nav class="tab-actions">
                 {% if can_edit %}
-                <a class="button small" href="{{ subtitle_language.editor_url }}">{% trans "Edit subtitles" %}</a>
+                  {% if show_rollback %}
+                  <a class="button small" href="{% url "videos:rollback" subtitle_version.pk %}">{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
+                  {% else %}
+                  <a class="button small" href="">{% trans "Edit subtitles" %}</a>
+                  {% endif %}
                 {% else %}
-                <a class="button small disabled" href="#">{% trans "Edit subtitles" %}</a>
+                  {% if show_rollback %}
+                  <a class="button small disabled" href="#">{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
+                  {% else %}
+                  <a class="button small disabled" href="#">{% trans "Edit subtitles" %}</a>
+                  {% endif %}
                 {% endif %}
               </nav>
               {% if subtitle_version and subtitle_version.has_subtitles %}
