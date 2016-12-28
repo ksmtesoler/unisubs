@@ -45,6 +45,10 @@ a {
 em {
   color: $teal;
   font-style: normal;
+  &.italic {
+    color: inherit;
+    font-style: italic;
+  }
 }
 
 ul, ol {

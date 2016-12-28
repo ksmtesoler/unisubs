@@ -513,6 +513,9 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         comment_form = None
     customization = behaviors.subtitles_page_customize(
         request, video, subtitle_language)
+    all_subtitle_versions = subtitle_language.versions_for_user(
+            request.user).order_by('-version_number')
+
 
     return render(request, 'future/videos/subtitles.html', {
         'video': video,
@@ -520,8 +523,10 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'metadata': video.get_metadata().convert_for_display(),
         'subtitle_language': subtitle_language,
         'subtitle_version': version,
-        'all_subtitle_versions': subtitle_language.versions_for_user(
-            request.user).order_by('-version_number'),
+        'all_subtitle_versions': all_subtitle_versions,
+        'enabled_compare': len(all_subtitle_versions) >= 2,
+        'has_private_version': any(v.is_private() for v in
+                                   all_subtitle_versions),
         'downloadable_formats': downloadable_formats(request.user),
         'activity': (ActivityRecord.objects.for_video(video)
                      .filter(language_code=lang))[:8],
