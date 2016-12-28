@@ -83,6 +83,7 @@ button {
   &.disabled {
     background-color: $gray-light;
     border-color: $gray-light;
+    color: #fff;
     cursor: default;
   }
   &.cta {

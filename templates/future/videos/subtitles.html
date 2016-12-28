@@ -24,11 +24,13 @@
           </ul>
           <div class="tab-content">
             <div id="subtitles_list" class="tab-pane active">
-              {% if can_edit %}
               <nav class="tab-actions">
+                {% if can_edit %}
                 <a class="button small" href="{{ subtitle_language.editor_url }}">{% trans "Edit subtitles" %}</a>
+                {% else %}
+                <a class="button small disabled" href="#">{% trans "Edit subtitles" %}</a>
+                {% endif %}
               </nav>
-              {% endif %}
               {% if subtitle_version and subtitle_version.has_subtitles %}
               {{ subtitle_version|render_subtitles }}
               {% else %}
