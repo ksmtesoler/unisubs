@@ -175,8 +175,7 @@ class TestMoveVideosForm(TeamVideoManagementFormBase):
                            [self.team.id, self.other_team.id])
         assert_items_equal([c[0] for c in form.fields['project'].choices],
                            ['', self.project.id, self.other_project.id])
-        assert_items_equal([(c[0], c[2]) for c in form.project_options], [
-            ('', 0),
-            (self.project.id, self.team.id),
-            (self.other_project.id, self.other_team.id),
-        ])
+        assert_equal(form.project_map, {
+            self.team.id: ['', self.project.id],
+            self.other_team.id: ['', self.other_project.id],
+        })
