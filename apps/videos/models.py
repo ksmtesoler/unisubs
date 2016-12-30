@@ -143,6 +143,9 @@ class VideoManager(models.Manager):
     def public(self):
         return self.filter(is_public=True)
 
+    def search(self, text):
+        return self.all().search(text)
+
 class VideoQueryset(query.QuerySet):
     def select_has_public_version(self):
         """Add a subquery to check if there is a public version for this video
