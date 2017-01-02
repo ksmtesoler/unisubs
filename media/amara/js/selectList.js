@@ -54,12 +54,12 @@
     function selectList(list) {
         list = $(list);
         var actionBar = $(list.data('target'));
+        var selection = $('.selectList-selection', actionBar);
         var checkboxes = list.find('input[type="checkbox"]');
 
         checkboxes.on('change', function() {
             checkboxes.is(':checked') ? actionBar.addClass('open') : actionBar.removeClass('open');
-            actionBar.data('selection', getSelection());
-            // window.console.log(actionBar.data('selection'));
+            selection.val(getSelection());
         });
 
         function getSelection() {
