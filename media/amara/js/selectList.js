@@ -26,18 +26,40 @@
 
 (function($) {
     $.behaviors('.selectList', selectList);
+    $.behaviors('.selectAll', selectAll);
+    $.behaviors('.deselectAll', deselectAll);
 
-    function selectList(container) {
-        var actionBar = $($(container).data('target'));
-        var selection = $('.selectList-selection', actionBar);
-        var checkboxes = $('.selectList-checkbox', container);
-        checkboxes.change(function() {
-            if(checkboxes.is(':checked')) {
-                actionBar.addClass('open');
-            } else {
-                actionBar.removeClass('open');
-            }
-            selection.val(getSelection().join('-'));
+    function selectAll(checkbox) {
+        checkbox = $(checkbox);
+        var target = checkbox.data('target');
+        var inputs = $(target).find('input[type="checkbox"]');
+
+        checkbox.change(function() {
+            checkbox.prop('checked') ?  inputs.prop('checked', true) : inputs.prop('checked', false);
+            inputs.trigger('change');
+        });
+    }
+
+    function deselectAll(button) {
+        button = $(button);
+        var target = button.data('target');
+        var inputs = $(target).find('input[type="checkbox"]');
+
+        button.click(function() {
+            inputs.prop('checked', false);
+            inputs.trigger('change');
+        });
+    }
+
+    function selectList(list) {
+        list = $(list);
+        var actionBar = $(list.data('target'));
+        var checkboxes = list.find('input[type="checkbox"]');
+
+        checkboxes.on('change', function() {
+            checkboxes.is(':checked') ? actionBar.addClass('open') : actionBar.removeClass('open');
+            actionBar.data('selection', getSelection());
+            // window.console.log(actionBar.data('selection'));
         });
 
         function getSelection() {
