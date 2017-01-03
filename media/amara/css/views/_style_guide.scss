@@ -113,5 +113,41 @@
   .type-raleway {
     font-family: $headings-font-family;
   }
+
+  // Icons
+  ul.iconList {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    li {
+      display: block;
+      width: 20%;
+      height: 120px;
+      padding: 10px;
+      margin: 10px;
+      background-color: $gray-lighter;
+      color: $gray;
+      text-align: center;
+      i {
+        display: block;
+        font-size: 30px;
+        padding: 10px;
+        &:before {
+          color: $gray-dark !important;
+        }
+      }
+      span {
+        display: block;
+        width: 100%;
+        clear: both;
+      }
+      &:hover {
+        background-color: $teal;
+        color: #fff;
+        i::before { color: #fff !important; } 
+      }
+    }
+  }
 }
 

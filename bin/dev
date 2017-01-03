@@ -322,12 +322,26 @@ class Design(Command):
     def pull(self):
         for unisubs_path, design_path in self.iter_paths():
             self.sync(design_path, unisubs_path)
+        # pull in the fonts as well.  We can't include this in the PATHS
+        # variable because we have some extra fonts there.  This shouldn't be
+        # an issue in practice since occupop is the only one to change these
+        # files
+        self.sync_fonts()
 
     def sync(self, src, dest):
         if os.path.isdir(src):
             subprocess.check_call(['rsync', '-a', '--delete', src, dest])
         else:
             shutil.copyfile(src, dest)
+
+    def sync_fonts(self):
+        dest_dir = os.path.join(unisubs_root(), 'media/fonts')
+        src_dir = os.path.join(self.design_path, 'src/fonts')
+        for filename in os.listdir(src_dir):
+            src = os.path.join(src_dir, filename)
+            dest = os.path.join(dest_dir, filename)
+            if os.path.isfile(src):
+                shutil.copyfile(src, dest)
 
 class PrepDeploy(Command):
     """Start docker containers."""

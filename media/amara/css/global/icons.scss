@@ -1,3 +1,102 @@
+// Icons
+//
+// Icons are implemented via a custom font-family. The basic syntax is `<i class="icon icon-filename">`.
+// 
+// <ul class="iconList">
+//   <li>
+//     <i class="icon icon-approve"></i>
+//     <span>icon-approve</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-approve_outline"></i>
+//     <span>icon-approve_outline</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-complete"></i>
+//     <span>icon-complete</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-deny"></i>
+//     <span>icon-deny</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-evaluate"></i>
+//     <span>icon-evaluate</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-review"></i>
+//     <span>icon-review</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-transcribe"></i>
+//     <span>icon-transcribe</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-translate"></i>
+//     <span>icon-translate</span>
+//   </li>
+// </ul>
+// <ul class="iconList">
+//   <li>
+//     <i class="icon icon-clock"></i>
+//     <span>icon-clock</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-mail"></i>
+//     <span>icon-mail</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-search"></i>
+//     <span>icon-search</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-star"></i>
+//     <span>icon-star</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-trash"></i>
+//     <span>icon-trash</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-arrow"></i>
+//     <span>icon-arrow</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-forward"></i>
+//     <span>icon-forward</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-back"></i>
+//     <span>icon-back</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-up"></i>
+//     <span>icon-up</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-down"></i>
+//     <span>icon-down</span>
+//   </li>
+// </ul>
+// <hr>
+// <ul class="iconList">
+//   <li>
+//     <i class="icon icon-check"></i>
+//     <span>icon-check</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-close"></i>
+//     <span>icon-close</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-edit"></i>
+//     <span>icon-edit</span>
+//   </li>
+// </ul>
+// 
+//
+// Styleguide icons
+
 @font-face {
     font-family: 'amara';
     src:    url("../fonts/amara.eot");
@@ -26,23 +125,55 @@ i {
     -moz-osx-font-smoothing: grayscale;
 }
 
+
+///////////////////////////
+
+.icon-approve:before {
+  content: "\e900";
+}
 .icon-approve_outline:before {
   content: "\e909";
 }
-.icon-approve:before {
-  content: "\e909";
+.icon-complete:before {
+  content: "\e90c";
 }
-
-.icon-check:before {
-  content: "\e900";
-}
-
 .icon-deny:before {
   content: "\e90a";
 }
-.icon-close:before {
-  content: "\e90a";
+.icon-evaluate:before {
+  content: "\e90b";
 }
+.icon-review:before {
+  content: "\e904";
+}
+.icon-transcribe:before {
+  content: "\e907";
+}
+.icon-translate:before {
+  content: "\e908";
+}
+
+
+
+
+
+.icon-clock:before {
+  content: "\e902";
+}
+.icon-mail:before {
+  content: "\e903";
+  color: $teal !important;
+}
+.icon-search:before {
+  content: "\e905";
+}
+.icon-star:before {
+  content: "\e906";
+}
+.icon-trash:before {
+  content: "\e910";
+}
+
 
 
 
@@ -62,42 +193,30 @@ i {
 .icon-up:before {
   content: "\e901";
   display: inline-block;
-  transform: rotate(90deg);
+  transform: rotate(-90deg);
 }
 .icon-down:before {
   content: "\e901";
   display: inline-block;
-  transform: rotate(-90deg);
+  transform: rotate(90deg);
 }
 
 
-.icon-clock:before {
-  content: "\e902";
-}
-.icon-mail:before {
-  content: "\e903";
-  color: $teal !important;
-}
-.icon-review:before {
-  content: "\e904";
-}
-.icon-search:before {
-  content: "\e905";
-}
-.icon-star:before {
-  content: "\e906";
-}
-.icon-transcribe:before {
-  content: "\e907";
-}
-.icon-translate:before {
-  content: "\e908";
+///////////////////////////
+// Using the same icon in a different context. 
+// These may need to be removed or refactored at some point to avoid confusion
+
+.icon-check:before {
+  content: "\e900";
 }
 
-.icon-trash:before {
-  content: "\e910";
+.icon-close:before {
+  content: "\e90a";
 }
 
 .icon-edit:before {
   content: "\e907";
 }
+
+
+

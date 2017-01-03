@@ -12,6 +12,7 @@
   - indicators
   - scrollBars
   - avatars
+  - icons
   # - grid
   # - utilities
 
@@ -46,7 +47,6 @@
   - selectList
   - hangingLink
   # - select2
-  # - avatars
   # - comments
 
 # - - Charts

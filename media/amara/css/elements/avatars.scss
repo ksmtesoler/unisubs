@@ -1,29 +1,152 @@
 // Avatars
-//
+// 
+// Avatars are implemented using the font-family as a default avatar fallback and a wrapping element with the `.avatar` selector. Sizes are `.avatar-md`, `.avatar-lg`, `.avatar-xl`.
+// Team Avatars require a `.avatar-team` selector.
+// 
 // Example:
-// <img src="media/images/styleguide/fpo_avatar.png" class="avatar">
+// <ul class="inline">
+//   <li>
+//     <span class="avatar avatar-xl"></span><br>
+//     Default
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-inverse"></span><br>
+//     .avatar-inverse
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-teal"></span><br>
+//     .avatar-teal
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-plum"></span><br>
+//     .avatar-plum
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-lime-green"></span><br>
+//     .avatar-lime-green
+//   </li>
+// </ul>
+// 
+// Example:
+// <ul class="inline">
+//   <li>
+//     <span class="avatar avatar-xl avatar-team"></span><br>
+//     Default
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-team avatar-inverse"></span><br>
+//     .avatar-inverse
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-team avatar-teal"></span><br>
+//     .avatar-teal
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-team avatar-plum"></span><br>
+//     .avatar-plum
+//   </li>
+//   <li>
+//     <span class="avatar avatar-xl avatar-team avatar-lime-green"></span><br>
+//     .avatar-lime-green
+//   </li>
+// </ul>
+// Example:
+// <span class="avatar"></span>
 // <p>Standard Size: 30x30</p>
-// <img src="media/images/styleguide/fpo_avatar.png" class="avatar avatar-md">
+// <span class="avatar avatar-md"></span>
 // <p>Medium Size: 50x50</p>
-// <img src="media/images/styleguide/fpo_avatar.png" class="avatar avatar-lg">
+// <span class="avatar avatar-lg"></span>
 // <p>Large Size: 60x60</p>
-// <img src="media/images/styleguide/fpo_avatar.png" class="avatar avatar-xl">
+// <span class="avatar avatar-xl"></span>
 // <p>X-Large Size: 110x110</p>
+// 
+// Example:
+// <span class="avatar avatar-xl">
+//   <img src="media/images/styleguide/fpo_avatar.png">
+// </span>
+// <p>Custom Avatar</p>
 //
 // Styleguide avatars
 
 .avatar {
+  position: relative;
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'amara' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: middle;
+
   width: 30px;
-  height: auto;
+  height: 30px;
+  font-size: 30px;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Default color palette */
+  color: $gray-base;
+  background-color: #cccccc;
+
+  &:before {
+    content: "\e90e";
+  }
+
+  // Sizes
   &.avatar-md {
     width: 50px;
+    height: 50px;
     margin: 0 10px 0 0;
+    font-size: 50px;
   }
   &.avatar-lg {
     width: 60px;
+    height: 60px;
     margin: 0 10px 0 0;
+    font-size: 60px;
   }
   &.avatar-xl {
     width: 110px;
+    height: 110px;
+    font-size: 110px;
+  }
+
+  // Colors
+  &.avatar-teal {
+    color: $teal;
+    background-color: $turquoise;
+  }
+  &.avatar-plum {
+    color: $magenta;
+    background-color: $plum;
+  }
+  &.avatar-lime-green {
+    color: $teal;
+    background-color: $lime-green;
+  }
+  &.avatar-inverse {
+    color: #cccccc;
+    background-color: $gray-base;
+  }
+
+  // Team
+  &.avatar-team {
+    &:before {
+      content: "\e90d";
+    }
+  }
+
+  // Child avatar image
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 }
+

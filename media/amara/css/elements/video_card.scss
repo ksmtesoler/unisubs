@@ -111,8 +111,6 @@
   display: inline-block;
   height: 31px;
   line-height: 31px;
-  margin-top: -1px;
-  margin-left: -1px;
   padding: 0 10px;
   background-color: $magenta;
   border-radius: $border-radius-base 0 0 0;
@@ -128,6 +126,8 @@
 .videoCard-thumbnail {
   position: relative;
   display: block;
+  border-left: 1px solid $gray-light;
+  border-right: 1px solid $gray-light;
 }
 
 .videoCard-caption {
