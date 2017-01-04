@@ -35,6 +35,10 @@
 //     <i class="icon icon-translate"></i>
 //     <span>icon-translate</span>
 //   </li>
+//   <li>
+//     <i class="icon icon-initial-work"></i>
+//     <span>icon-initial-work</span>
+//   </li>
 // </ul>
 // <ul class="iconList">
 //   <li>
@@ -152,9 +156,11 @@ i {
 .icon-translate:before {
   content: "\e908";
 }
-
-
-
+.icon-initial-work:before {
+// This is still to be implemented.  Let's use the transcribe icon as a
+// placeholder
+  content: "\e907";
+}
 
 
 .icon-clock:before {
