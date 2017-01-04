@@ -2746,6 +2746,9 @@ class SettingManager(models.Manager):
     def features(self):
         return self.get_query_set().filter(key__in=Setting.FEATURE_KEYS)
 
+    def special_team_settings(self):
+        return self.get_query_set().filter(key__in=Setting.SPECIAL_KEYS)
+
     def localized_messages(self):
         """Return a QS of settings related to team messages."""
         keys = [key for key, name in Setting.KEY_CHOICES
@@ -2776,10 +2779,14 @@ class Setting(models.Model):
         (309, 'block_approved_message'),
         (310, 'block_new_video_message'),
         (311, 'block_new_collab_assignments_message'),
-        # 400 is for text displayed on web pages
+        # 400s is for text displayed on web pages
         (401, 'pagetext_welcome_heading'),
-        # 500 is to enable features
+        # 500s is to enable features
         (501, 'enable_require_translated_metadata'),
+        # 600s is reserved to certain teams
+        (601, 'special_assignment_deadline_reviewing'),
+        (602, 'special_assignment_deadline_subtitling'),
+        (603, 'special_assignment_deadline_approving'),
     )
     KEY_NAMES = dict(KEY_CHOICES)
     KEY_IDS = dict([choice[::-1] for choice in KEY_CHOICES])
@@ -2799,6 +2806,10 @@ class Setting(models.Model):
     FEATURE_KEYS = [
         key for key, name in KEY_CHOICES
         if name.startswith('enable_')
+    ]
+    SPECIAL_KEYS = [
+        key for key, name in KEY_CHOICES
+        if name.startswith('special_')
     ]
     key = models.PositiveIntegerField(choices=KEY_CHOICES)
     data = models.TextField(blank=True)
