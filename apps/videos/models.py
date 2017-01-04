@@ -932,8 +932,15 @@ class Video(models.Model):
         """Return all SubtitleLanguages for this video with the given language code."""
         return self.newsubtitlelanguage_set.filter(language_code=language_code)
 
-    def completed_languages(self):
-        return self.newsubtitlelanguage_set.filter(subtitles_complete=True)
+    def incomplete_languages(self):
+        return [
+            l for l in self.all_subtitle_languages() if not l.subtitles_complete
+        ]
+
+    def complete_languages(self):
+        return [
+            l for l in self.all_subtitle_languages() if l.subtitles_complete
+        ]
 
     def get_merged_dfxp(self):
         """Get a DFXP file containing subtitles for all languages."""

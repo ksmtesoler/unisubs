@@ -43,13 +43,12 @@
         </div>
       </div>
       <div class="col-xs-12 col-sm-4">
-        {% if sidebar_extra %}
-        <div class="content content-right">
-          {{ sidebar_extra }}
-        </div>
-        {% endif %}
-        <div class="content content-right">
-          {% if completed_languages %}
+        {% if custom_sidebar %}
+        {{ custom_sidebar }}
+        {% else %}
+        {% with completed_languages=video.completed_languages incomplete_languages=video.incomplete_languages %}
+        {% if completed_languages %}
+        <div class="content">
           <h1>{% blocktrans with count=completed_languages|length %}Completed subtitles (<span class="total">{{ count }}</span>){% endblocktrans %}</h1>
           <hr/>
           <ul class="nav nav-stacked">
@@ -59,8 +58,23 @@
             </li>
             {% endfor %}
           </ul>
-          {% endif %}
         </div>
+        {% endif %}
+        {% if incomplete_languages %}
+        <div class="content">
+          <h1>{% blocktrans with count=incomplete_languages|length %}Incomplete subtitles (<span class="total">{{ count }}</span>){% endblocktrans %}</h1>
+          <hr/>
+          <ul class="nav nav-stacked">
+            {% for subtitle_language in incomplete_languages %}
+            <li>
+              <h6><a href="{{ subtitle_language.get_absolute_url }}{{ subtitle_link_query }}">{{ subtitle_language.get_language_code_display }}</a></h6>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% endif %}
       </div>
     </div>
   </div>

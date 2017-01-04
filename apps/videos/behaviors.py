@@ -25,7 +25,7 @@ def get_video_subtitle(video, metadata):
     return metadata.get('speaker-name')
 
 VideoPageCustomization = namedtuple('VideoPageCustomization',
-                                    'sidebar_extra header')
+                                    'sidebar header')
 @behavior
 def video_page_customize(request, video):
     """Customize the video page.

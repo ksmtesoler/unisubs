@@ -276,7 +276,6 @@ def video(request, video_id, video_url=None, title=None):
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
-        'completed_languages': video.completed_languages(),
         'team_video': video.get_team_video(),
         'tab': request.GET.get('tab', 'info'),
         'allow_delete': allow_delete,
@@ -287,7 +286,7 @@ def video(request, video_id, video_url=None, title=None):
         'comments': Comment.get_for_object(video),
         'activity': ActivityRecord.objects.for_video(video)[:8],
         'metadata': video.get_metadata().convert_for_display(),
-        'sidebar_extra': customization.sidebar_extra,
+        'custom_sidebar': customization.sidebar,
         'subtitle_link_query': subtitle_link_query,
         'header': customization.header,
     })
