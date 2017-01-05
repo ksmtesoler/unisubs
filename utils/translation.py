@@ -60,6 +60,7 @@ POPULAR_LANGUAGES = [
     'th',
 ]
 POPULAR_LANGUAGES.sort()
+POPULAR_LANGUAGE_SET = set(POPULAR_LANGUAGES)
 
 def _only_supported_languages(language_codes):
     """Filter the given list of language codes to contain only codes we support."""

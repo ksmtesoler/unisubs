@@ -81,7 +81,7 @@
                 <span class="col-xs-6">{{ step.label }}</span>
                 <span class="col-xs-6">
                   {% if step.user %}
-                  {% include "future/user-icon.html" with user=step.user %}
+                  {% include "future/users/icon.html" with user=step.user %}
                   {% else %}
                   <i class="icon {{ step.icon}}"></i>
                   {% endif %}

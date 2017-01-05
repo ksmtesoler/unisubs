@@ -21,8 +21,14 @@
 This module contains a few utility classes that's used by the views code.
 """
 
+from __future__ import absolute_import
+
 from collections import namedtuple
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
+
+from utils.text import fmt
 
 class Link(object):
     def __init__(self, label, view_name, *args, **kwargs):
@@ -33,3 +39,18 @@ class Tab(Link):
     def __init__(self, name, label, view_name, *args, **kwargs):
         self.name = name
         super(Tab, self).__init__(label, view_name, *args, **kwargs)
+
+class SectionWithCount(list):
+    """Section that contains a list of things with a count in the header
+    """
+    header_template = _('%(header)s <span class="count">(%(count)s)</span>')
+    def __init__(self, header_text):
+        self.header_text = header_text
+
+    def header(self):
+        return mark_safe(fmt(self.header_template, header=self.header_text,
+                             count=len(self)))
+
+__all__ = [
+    'Link', 'Tab', 'SectionWithCount',
+]

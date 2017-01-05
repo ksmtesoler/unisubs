@@ -24,8 +24,10 @@ from utils.behaviors import behavior
 def get_video_subtitle(video, metadata):
     return metadata.get('speaker-name')
 
-VideoPageCustomization = namedtuple('VideoPageCustomization',
-                                    'sidebar header')
+class VideoPageCustomization(object):
+    def __init__(self, sidebar, header):
+        self.sidebar = sidebar
+        self.header = header
 @behavior
 def video_page_customize(request, video):
     """Customize the video page.
