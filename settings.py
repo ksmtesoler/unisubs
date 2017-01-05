@@ -781,7 +781,7 @@ if DEBUG:
             'SHOW_TOOLBAR_CALLBACK': 'settings.custom_show_toolbar',
             'EXTRA_SIGNALS': [],
             'HIDE_DJANGO_SQL': False,
-            'TAG': 'div',
+            'INSERT_BEFORE': '</body>',
         }
 
 optionalapps.exec_repository_scripts('settings_extra.py', globals(), locals())
