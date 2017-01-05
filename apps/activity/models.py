@@ -433,7 +433,8 @@ class ActivityManager(models.Manager):
     use_for_related_fields = True
 
     def get_query_set(self):
-        return ActivityQueryset(self.model, using=self._db)
+        return (ActivityQueryset(self.model, using=self._db)
+                .select_related('user', 'team', 'video'))
 
     def original(self):
         return self.get_query_set().original()
