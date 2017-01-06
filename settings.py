@@ -165,6 +165,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'utils.context_processors.user_languages',
     'utils.context_processors.run_locally',
     'utils.context_processors.experiments',
+    'utils.context_processors.query_string',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.i18n',
     'staticmedia.context_processors.staticmedia',
