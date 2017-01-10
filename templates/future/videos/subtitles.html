@@ -107,9 +107,7 @@
               {% endif %}
             </ol>
             {% endif %}
-            {% if action_button %}
-            <p class="text-center"><a href="{{ action_button.url }}" class="button cta">{{ action_button.label|safe }}</a></p>
-            {% endif %}
+            {% if cta %}{{ cta }}{% endif %}
           </section>
           {% if all_subtitle_versions %}
           <section class="videoSubtitles-revisions">

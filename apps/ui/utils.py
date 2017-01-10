@@ -33,12 +33,46 @@ from utils.text import fmt
 class Link(object):
     def __init__(self, label, view_name, *args, **kwargs):
         self.label = label
-        self.url = reverse(view_name, args=args, kwargs=kwargs)
+        if '/' in view_name:
+            # URL path passed in, don't try to reverse it
+            self.url = view_name
+        else:
+            self.url = reverse(view_name, args=args, kwargs=kwargs)
+
+    def __unicode__(self):
+        return mark_safe(u'<a href="{}">{}</a>'.format(self.url, self.label))
+
+    def __eq__(self, other):
+        return (isinstance(other, Link) and
+                self.label == other.label and
+                self.url == other.url)
+
+class CTA(Link):
+    def __init__(self, label, icon, view_name, *args, **kwargs):
+        super(CTA, self).__init__(label, view_name, *args, **kwargs)
+        self.icon = icon
+
+    def __unicode__(self):
+        return mark_safe(u'<a href="{}" class="button cta">'
+                         u'<i class="icon {}"></i> {}</a>'.format(
+                             self.url, self.icon, self.label))
+
+    def __eq__(self, other):
+        return (isinstance(other, Link) and
+                self.label == other.label and
+                self.icon == other.icon and
+                self.url == other.url)
 
 class Tab(Link):
     def __init__(self, name, label, view_name, *args, **kwargs):
         self.name = name
         super(Tab, self).__init__(label, view_name, *args, **kwargs)
+
+    def __eq__(self, other):
+        return (isinstance(other, Tab) and
+                self.name == other.name and
+                self.label == other.label and
+                self.url == other.url)
 
 class SectionWithCount(list):
     """Section that contains a list of things with a count in the header
