@@ -46,6 +46,7 @@
   - actionBar
   - selectList
   - hangingLink
+  - constrainContent
   # - select2
   # - comments
 

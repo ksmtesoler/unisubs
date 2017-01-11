@@ -47,13 +47,17 @@
         }
       }
       .select2-selection__choice__remove {
+        height: 20px;
+        line-height: 20px;
         float: right;
         margin-right: 0;
         margin-left: 5px;
+        padding: 0 8px;
         color: lighten($gray, 15%);
+        font-size: 18px;
       }
       .select2-selection__choice {
-        padding: 3px 6px;
+        padding: 3px 0px 3px 6px;
         border: 1px solid lighten($gray, 15%);
         background-color: $gray-lighter;
       }
@@ -65,6 +69,9 @@
     background-color: $gray-lighter;
     color: $gray-darker;
     font-style: italic;
+    + .select2-results__options {
+      text-indent: 15px;
+    }
   }
 
 
@@ -97,4 +104,5 @@
   @include transition();
   pointer-events: none;
 }
+
 

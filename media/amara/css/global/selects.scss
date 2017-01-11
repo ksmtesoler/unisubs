@@ -56,7 +56,9 @@
 // Example:
 // <div class="selectWrapper">
 //   <select class="select" name="" id="" placeholder="Option Groups">
-//    <optgroup label="Available">
+//     <option>In progress</option>
+//     <option>Complete</option>
+//     <optgroup label="Available">
 //       <option>Option 1</option>
 //       <option>Option 2</option>
 //       <option>Option 3</option>
@@ -81,6 +83,10 @@
 
 .select {
   width: 100%;
+  select {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 .selectWrapper {
   position: relative;

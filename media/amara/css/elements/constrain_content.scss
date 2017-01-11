@@ -1,0 +1,135 @@
+// Constrained content
+// 
+// Implementing content constraining / clamping requires a `.lineClamp` or `.lineConstrain` class selector. Customization is possible on predefined screen sizes using a naming convention that follows the grid pattern. `.lineClamp .clamp-xs-[#lines]`. The maximum number of lines is currently 20.
+//
+// Example:
+// <div class="lineConstrain constrain-xs-2 constrain-md-5">
+//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+// </div>
+// 
+// Example:
+// <div class="lineClamp clamp-xs-2 clamp-sm-1">
+//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+// </div>
+// 
+// Styleguide constrainContent
+
+
+// Shared variables
+$line-height: 1.2em;
+$max-lines: 20;
+$name: xs;
+
+// LINE CONSTRAIN
+.lineConstrain {
+  height: $line-height * 3 ; // Calculate based on class selector.
+  line-height: $line-height;
+  overflow: hidden;
+  position: relative;
+  &.constrained {
+    &:after {
+      content: 'more >>';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width:100%;
+      background: #fff;
+      background: linear-gradient(transparent, rgba(255,255,255,.5), #fff, #fff);
+      padding-top: $line-height * 2;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  }
+  &.opened {
+    max-height: none;
+    height: auto;
+    padding-bottom: 1.5em;
+    &:after {
+      background: transparent;
+      content: '<< less';
+    }
+  }
+}
+
+@for $num from 1 through $max-lines {
+  .constrain-#{$name}-#{$num} {
+    height: $line-height * $num + 2;
+  }
+}
+
+@each $breakpoint in $breakpoints {
+  $name: nth($breakpoint, 1);
+  $size: nth($breakpoint, 2);
+  $container: nth($breakpoint, 3);
+
+  @media only screen and (min-width: $size) {
+    @for $num from 1 through $max-lines {
+      .constrain-#{$name}-#{$num} {
+        height: $line-height * $num + 2;
+      }
+    }
+  }
+}
+
+
+// LINE CLAMPS
+
+.lineClamp {
+  display: block;
+  display: -webkit-box;
+  position: relative;
+
+  height: $line-height;
+  line-height: $line-height;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 !important;
+
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+$name: xs;
+@for $num from 1 through $max-lines {
+  .clamp-#{$name}-#{$num} {
+    height: $line-height * $num;
+    -webkit-line-clamp: $num;
+  }
+}
+
+@each $breakpoint in $breakpoints {
+  $name: nth($breakpoint, 1);
+  $size: nth($breakpoint, 2);
+  $container: nth($breakpoint, 3);
+
+  @media only screen and (min-width: $size) {
+    @for $num from 1 through $max-lines {
+      .clamp-#{$name}-#{$num} {
+        height: $line-height * $num;
+        -webkit-line-clamp: $num;
+      }
+    }
+  }
+}
