@@ -26,13 +26,7 @@
         counter-increment: step-counter;
         content: "" counter(step-counter) "";
       }
-      span {
-        display: block;
-        margin: 5px auto;
-        &:first-child {
-          padding-left: 2.65rem;
-        }
-      }
+      padding: 10px 5px 10px 2.65rem;
       i {
         display: inline-block;
         width: 30px;
