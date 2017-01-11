@@ -97,4 +97,4 @@ def due_date(dt, comparison=None):
                              'Due in %(count)s days',
                              days), count=days)
     else:
-        return fmt(ugettext(u'Due %(date)s'), date=date(dt))
+        return fmt(_(u'Due %(date)s'), date=date(dt))
