@@ -73,11 +73,14 @@
 
 .navIcons {
   .navIcons-item {
-    padding:5px 20px 5px 0;
     i {
       font-size: 20px;
       color: $gray;
     }
+  }
+
+  &.extraPadding .navIcons-item {
+    padding:5px 20px 5px 0;
   }
 }
 
