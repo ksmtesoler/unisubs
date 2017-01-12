@@ -35,7 +35,7 @@
   </div>
   {% endif %}
   <div class="checkbox">
-    <input id="selectAll" type="checkbox" value="" class="selectAll" data-field="videos">
+    <input id="selectAll" type="checkbox" value="" class="selectAll" data-target="#video-list">
     <label for="selectAll" class="text-gray"><span></span> {% trans "Select all" %}</label>
   </div>
 </nav>
@@ -50,7 +50,7 @@
     {% for name, css_class, label in manage_forms %}
     <button class="button {{ css_class }}" type="submit" name="form" value="{{ name }}">{{ label }}</button>
     {% endfor %}
-    <button class="button inline deselectAll" data-field="videos">{% trans "Deselect" %}</button>
+    <button class="button inline deselectAll" data-target="#video-list">{% trans "Deselect" %}</button>
   </form>
 </div>
 {% endif %}

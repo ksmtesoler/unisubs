@@ -428,7 +428,6 @@ MEDIA_BUNDLES = {
             'amara/js/select.js',
             'amara/js/scrollBars.js',
             'amara/js/querystring.js',
-            'amara/js/selectAll.js',
             'amara/js/selectList.js',
             'amara/js/videoPage.js',
             'amara/js/videoSubtitles.js',

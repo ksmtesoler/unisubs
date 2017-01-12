@@ -32,22 +32,27 @@
     function selectAll(checkbox) {
         checkbox = $(checkbox);
         var target = checkbox.data('target');
-        var inputs = $(target).find('input[type="checkbox"]');
+        var inputs = $(target).find('.selectList-checkbox');
 
         checkbox.change(function() {
             checkbox.prop('checked') ?  inputs.prop('checked', true) : inputs.prop('checked', false);
             inputs.trigger('change');
+        });
+        inputs.change(function() {
+            var allChecked = inputs.filter(':checked').length == inputs.length;
+            checkbox.prop('checked', allChecked);
         });
     }
 
     function deselectAll(button) {
         button = $(button);
         var target = button.data('target');
-        var inputs = $(target).find('input[type="checkbox"]');
+        var inputs = $(target).find('.selectList-checkbox');
 
         button.click(function() {
             inputs.prop('checked', false);
             inputs.trigger('change');
+            return false;
         });
     }
 
@@ -55,11 +60,11 @@
         list = $(list);
         var actionBar = $(list.data('target'));
         var selection = $('.selectList-selection', actionBar);
-        var checkboxes = list.find('input[type="checkbox"]');
+        var checkboxes = list.find('.selectList-checkbox');
 
         checkboxes.on('change', function() {
             checkboxes.is(':checked') ? actionBar.addClass('open') : actionBar.removeClass('open');
-            selection.val(getSelection());
+            selection.val(getSelection().join('-'));
         });
 
         function getSelection() {

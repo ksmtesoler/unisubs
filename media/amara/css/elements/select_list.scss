@@ -10,7 +10,7 @@
 // <ul id="styleGuide-selectList" class="selectList" data-target="#styleGuide-selectList-actionBar">
 //   <li class="row condensed">
 //     <div class="checkbox">
-//       <input id="styleGuide_item_1" type="checkbox" value="item_1">
+//       <input id="styleGuide_item_1" type="checkbox" class="selectList-checkbox" value="item_1">
 //       <label for="styleGuide_item_1"><span></span></label>
 //     </div>
 //     <div class="col-xs-11">
@@ -36,7 +36,7 @@
 //   </li>
 //   <li class="row condensed">
 //     <div class="checkbox">
-//       <input id="styleGuide_item_2" type="checkbox" value="item_2">
+//       <input id="styleGuide_item_2" type="checkbox" class="selectList-checkbox" value="item_2">
 //       <label for="styleGuide_item_2"><span></span></label>
 //     </div>
 //     <div class="col-xs-11">
@@ -62,7 +62,7 @@
 //   </li>
 //   <li class="row condensed">
 //     <div class="checkbox">
-//       <input id="styleGuide_item_3" type="checkbox" value="item_3">
+//       <input id="styleGuide_item_3" type="checkbox" class="selectList-checkbox" value="item_3">
 //       <label for="styleGuide_item_3"><span></span></label>
 //     </div>
 //     <div class="col-xs-11">
@@ -104,7 +104,7 @@
 //       </div>
 //       <form class="text-center">
 //         <div class="checkbox">
-//           <input id="" type="checkbox" value="">
+//           <input id="" type="checkbox" class="selectList-checkbox" value="">
 //           <label for=""><span></span>Include all XX filtered videos</label>
 //         </div>
 //         <button class="button cta" type="submit">Delete</button>
