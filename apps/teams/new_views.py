@@ -609,7 +609,7 @@ def welcome(request, team):
 @team_view
 def manage_videos(request, team):
     if not permissions.can_view_management_tab(team, request.user):
-        return HttpResponseForbidden()
+        raise PermissionDenied()
     filters_form = forms.ManagementVideoFiltersForm(team, request.GET,
                                                     auto_id="id_filters_%s")
     videos = filters_form.get_queryset().select_related('teamvideo',
