@@ -75,13 +75,14 @@ function languageChoiceData(select) {
     var enabledSelections = select.data('languageOptions').split(" ");
     var exclude = select.data('exclude');
     var limitTo = select.data('limitTo');
-    var choiceMaker = new LanguageChoiceMaker(initial, exclude, limitTo);
 
     if(select.data('initial')) {
         var initial = select.data('initial').split(':');
     } else {
         var initial = [];
     }
+
+    var choiceMaker = new LanguageChoiceMaker(initial, exclude, limitTo);
 
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
@@ -138,12 +139,14 @@ LanguageChoiceMaker.prototype = {
                 (self.limitToEnabled && !self.limitTo[code])) {
                 return;
             }
-
-            choices.push({
+            var choice = {
                 id: code,
-                text: getLanguageName(code),
-                selected: _.contains(self.initial, code)
-            });
+                text: getLanguageName(code)
+            };
+            if(_.contains(self.initial, code)) {
+                choice.selected = 'selected';
+            }
+            choices.push(choice);
             self.alreadyAdded[code] = true;
         });
         return choices;
