@@ -414,9 +414,9 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         if self.preferred_language:
             return self.preferred_language
 
-        user_languages = list(self.userlanguage_set.all())
+        user_languages = self.get_languages()
         if user_languages:
-            return user_languages[0].language
+            return user_languages[0]
 
         if request:
             languages = translation.get_user_languages_from_request(request)
