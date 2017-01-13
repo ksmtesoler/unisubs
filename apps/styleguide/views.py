@@ -20,6 +20,8 @@ from __future__ import absolute_import
 
 from django.shortcuts import render
 from django.conf import settings
+from django.http import HttpResponse
+import json
 
 from styleguide.styleguide import StyleGuide
 
@@ -34,3 +36,31 @@ def styleguide(request):
     return render(request, 'styleguide/styleguide.html', {
         'styleguide': get_styleguide(),
     })
+
+def member_search(request):
+    query = request.GET.get('q').lower()
+    data = {
+        'results': [
+            {
+                "id": 1,
+                "avatar": '<span class="avatar avatar-teal"></span>',
+                "text": "Jianfeng Fan",
+            },
+            {
+                "id": 2,
+                "avatar": '<span class="avatar avatar-default"></span>',
+                "text": "Anton Hikov",
+            },
+            {
+                "id": 3,
+                "avatar": '<span class="avatar avatar-plum"></span>',
+                "text": "Joost van der Borg",
+            },
+            {
+                "id": 4,
+                "avatar": '<span class="avatar avatar-inverse"></span>',
+                "text": "Hacker mc Hack Hack <script>alert('hi');</script>"
+            }
+        ]
+    }
+    return HttpResponse(json.dumps(data), 'application/json')

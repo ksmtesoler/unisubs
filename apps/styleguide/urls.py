@@ -22,4 +22,5 @@ from django.conf.urls import *
 urlpatterns = patterns(
     'styleguide.views',
     url(r'^$', 'styleguide', name='styleguide'),
+    url(r'^member-search$', 'member_search', name='member_search'),
 )

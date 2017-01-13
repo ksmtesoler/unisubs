@@ -426,7 +426,6 @@ MEDIA_BUNDLES = {
             'amara/js/proxyField.js',
             'amara/js/dependentSelect.js',
             'amara/js/select.js',
-            'amara/js/searchbar.js',
             'amara/js/scrollBars.js',
             'amara/js/querystring.js',
             'amara/js/selectList.js',

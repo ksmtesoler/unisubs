@@ -12,6 +12,8 @@
 //
 // Normally the width is auto-selected to be 100%.  However, this doesn't always work.  If it doesn't work (like in this styleguide), add an
 // inline style for 100% width.
+//
+// Use the data-ajax attribute to load the data from an ajax call
 // 
 // Example:
 //   <select class="select" name="" id="" placeholder="Select an option">
@@ -36,7 +38,6 @@
 //     <option>Option 3</option>
 //     <option>Option 4</option>
 //   </select>
-// 
 // Example:
 //   <select class="select" name="" id="" placeholder="+ Add option" multiple="multiple">
 //     <option>Option 1</option>
@@ -64,6 +65,8 @@
 //   </select>
 // 
 // Example:
+//   <select name="" id="" class="select" data-ajax="member-search" placeholder="Search members"></select>
+// Example:
 //   <select name="" id="" class="select" data-language-options="popular any" placeholder="Select Language"></select>
 //
 // Styleguide selects
@@ -80,7 +83,7 @@
   position: relative;
   padding: 9px 10px 6px 10px;
 
-  .select.border + & {
+  &.border {
       border-radius: 4px;
       border: 1px solid lighten($gray, 15%);
 
@@ -99,7 +102,7 @@
       }
   }
 
-  .select[multiple] + & {
+  &.multiple, &.searchbar {
       .select2-selection__rendered:after { display: none; }
   }
 }

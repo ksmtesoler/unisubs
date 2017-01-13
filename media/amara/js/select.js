@@ -37,7 +37,10 @@ function hasEmptyValue(select) {
 function initSelect(select) {
     select = $(select);
     var options = {
-        theme: "bootstrap"
+        theme: "bootstrap",
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        templateResult: templateResult,
+        templateSelection: templateSelection
     };
 
     if (select.attr('placeholder')) {
@@ -60,6 +63,10 @@ function initSelect(select) {
         }
     }
 
+    if(select.data('ajax')) {
+        _.extend(options, ajaxOptions(select));
+    }
+
     select.select2(options);
     // Workaround to prevent clicking the clear button from opening the dialog (see
     // http://stackoverflow.com/questions/29618382/disable-dropdown-opening-on-select2-clear#29688626)
@@ -71,6 +78,51 @@ function initSelect(select) {
             e.preventDefault();
         }
     });
+
+    addContainerClasses(select, options);
+}
+
+function addContainerClasses(select, options) {
+    var container = select.data('select2').$container;
+    if(select.attr('multiple')) {
+        container.addClass('multiple');
+    }
+    if(select.hasClass('border') || options.ajax) {
+        container.addClass('border');
+    }
+    if(options.ajax) {
+        container.addClass('searchbar');
+    }
+}
+
+function templateResult(data) {
+    var text = _.escape(data.text);
+    if(data.avatar) {
+        return data.avatar + text;
+    } else {
+        return text;
+    }
+}
+
+function templateSelection(data) {
+    var text = _.escape(data.text);
+    return text;
+}
+function ajaxOptions(select) {
+    return {
+        ajax: {
+          url: select.data('ajax'),
+          dataType: 'json',
+          delay: 250,
+          data: function (params) {
+            return {
+              q: params.term, // search term
+            };
+          },
+          cache: true
+        },
+        minimumInputLength: 2,
+    };
 }
 
 function languageChoiceData(select) {

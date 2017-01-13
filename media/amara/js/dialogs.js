@@ -34,7 +34,7 @@
         if(currentModal) {
             currentModal.empty().append(content);
         } else {
-            currentModal = $('<div class="modal fade" tabindex="-1" role="dialog"></div>').append(content);
+            currentModal = $('<div class="modal fade" role="dialog"></div>').append(content);
             currentModal.append(content);
             $(document.body).append(currentModal);
             currentModal.modal().on('hidden.bs.modal', function() {
