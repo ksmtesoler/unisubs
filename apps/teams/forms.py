@@ -1460,8 +1460,8 @@ class EditVideosForm(VideoManagementForm):
                 team_video.video.s3_thumbnail.save(thumbnail.name, thumbnail)
 
     def message(self):
-        msg = ungettext('Video has been edited.',
-                        '%(count)s videos have been edited.',
+        msg = ungettext('Video has been edited',
+                        '%(count)s videos have been edited',
                         self.count)
         return fmt(msg, count=self.count)
 
@@ -1577,26 +1577,26 @@ class MoveVideosForm(VideoManagementForm):
         if new_team == self.team:
             if project.is_default_project:
                 msg = ungettext(
-                    'Video has been removed from project.',
-                    '%(count)s videos have been removed from projects.',
+                    'Video has been removed from project',
+                    '%(count)s videos have been removed from projects',
                     self.count)
             else:
                 msg = ungettext(
-                    'Video has been moved to project %(project)s.',
-                    '%(count)s videos have been moved to project %(project)s.',
+                    'Video has been moved to project %(project)s',
+                    '%(count)s videos have been moved to project %(project)s',
                     self.count)
         else:
             if project.is_default_project:
                 msg = ungettext(
-                    'Video has been moved to %(team_link)s.',
-                    '%(count)s videos have been moved to %(team_link)s.',
+                    'Video has been moved to %(team_link)s',
+                    '%(count)s videos have been moved to %(team_link)s',
                     self.count)
             else:
                 msg = ungettext(
                     'Video has been moved to %(team_link)s '
-                    '(project %(project)s).',
+                    '(project %(project)s)',
                     '%(count)s videos have been moved to %(team_link)s '
-                    '(project %(project)s).',
+                    '(project %(project)s)',
                     self.count)
         team_link = '<a href="{}">{}</a>.'.format(
             reverse('teams:dashboard', args=(new_team.slug,)),
