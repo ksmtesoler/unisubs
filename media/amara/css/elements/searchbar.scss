@@ -1,0 +1,40 @@
+// Searchbar
+//
+// Example:
+// <div class="selectWrapper-border searchbar">
+//   <select name="" id="" placeholder="Search for members">
+//   </select>
+// </div>
+//
+// Styleguide searchbar
+
+.searchbar {
+  position: relative;
+  &:after {
+    content: "\e905";
+    display: block;
+    position: absolute;
+    right: $base-line-height/2;
+    top: 0;
+    font-family: 'amara' !important;
+    speak: none;
+    text-transform: none;
+    font-size: 1.4325rem;
+    line-height: 22px;
+    padding-top: 9px;
+    color: $gray;
+  }
+
+  .select2-selection__rendered:after {
+    display: none;
+    // content: "\e901";
+    // display: inline-block;
+    // margin-left: 5px;
+    // position: relative;
+    // font-family: 'amara' !important;
+    // speak: none;
+    // transform: rotate(90deg);
+    // @include transition();
+    // pointer-events: none;
+  }
+}

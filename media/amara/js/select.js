@@ -40,6 +40,9 @@ function initSelect(select) {
         theme: "bootstrap",
     };
 
+    if (select.attr('placeholder')) {
+        options.placeholder = select.attr('placeholder');
+    }
     if(select.attr('multiple') || hasEmptyValue(select)) {
         options.allowClear = true;
     }

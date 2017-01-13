@@ -85,33 +85,6 @@ select {
   color: $gray-dark;
 }
 
-// Searchbar
-//
-// Example:
-// <div class="form-group searchbar">
-//   <label class="sr-only">Search</label>
-//   <input id="field_id" type="text" placeholder="Search for members">
-// </div>
-//
-// Styleguide searchbar
-
-.searchbar {
-  position: relative;
-  &:after {
-    content: "\e905";
-    display: block;
-    position: absolute;
-    right: $base-line-height/2;
-    top: 0;
-    font-family: 'amara' !important;
-    speak: none;
-    text-transform: none;
-    font-size: 1.4325rem;
-    line-height: 22px;
-    padding-top: 9px;
-    color: $gray;
-  }
-}
 
 // File Uploads
 //
