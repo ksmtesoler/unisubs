@@ -37,7 +37,7 @@ function hasEmptyValue(select) {
 function initSelect(select) {
     select = $(select);
     var options = {
-        theme: "bootstrap",
+        theme: "bootstrap"
     };
 
     if (select.attr('placeholder')) {

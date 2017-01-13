@@ -14,47 +14,38 @@
 // inline style for 100% width.
 // 
 // Example:
-// <div class="selectWrapper">
 //   <select class="select" name="" id="" placeholder="Select an option">
 //     <option>Option 1</option>
 //     <option>Option 2</option>
 //     <option>Option 3</option>
 //     <option>Option 4</option>
 //   </select>
-// </div>
 //
 // Example:
-// <div class="selectWrapper">
 //   <select class="select" name="" id="" placeholder="Select an option" disabled>
 //     <option selected>Option 1</option>
 //     <option>Option 2</option>
 //     <option>Option 3</option>
 //     <option>Option 4</option>
 //   </select>
-// </div>
 // 
 // Example:
-// <div class="selectWrapper-border">
-//   <select class="select" name="" id="" placeholder="+ add option">
+//   <select class="select border" name="" id="" placeholder="+ add option">
 //     <option>Option 1</option>
 //     <option>Option 2</option>
 //     <option>Option 3</option>
 //     <option>Option 4</option>
 //   </select>
-// </div>
 // 
 // Example:
-// <div class="selectWrapper-multiple">
 //   <select class="select" name="" id="" placeholder="+ Add option" multiple="multiple">
 //     <option>Option 1</option>
 //     <option>Option 2</option>
 //     <option>Option 3</option>
 //     <option>Option 4</option>
 //   </select>
-// </div>
 // 
 // Example:
-// <div class="selectWrapper">
 //   <select class="select" name="" id="" placeholder="Option Groups">
 //     <option>In progress</option>
 //     <option>Complete</option>
@@ -71,12 +62,9 @@
 //       <option>Option 4</option>
 //     </optgroup>
 //   </select>
-// </div>
 // 
 // Example:
-// <div class="selectWrapper-language">
 //   <select name="" id="" class="select" data-language-options="popular any" placeholder="Select Language"></select>
-// </div>
 //
 // Styleguide selects
 
@@ -88,35 +76,30 @@
     visibility: hidden;
   }
 }
-.selectWrapper {
+.select2-container {
   position: relative;
   padding: 9px 10px 6px 10px;
-}
-.selectWrapper-border {
-  position: relative;
-  padding: 9px 10px 6px 10px;
-  border-radius: 4px;
-  border: 1px solid lighten($gray, 15%);
-  // .select2-container--bootstrap.select2-container .select2-selection--single .select2-selection__rendered:after
-  .select2-selection__rendered:after {
-    content: "\e901";
-    display: inline-block;
-    margin-left: 5px;
-    position: absolute;
-    top: 0px; right: 0;
-    font-family: 'amara' !important;
-    speak: none;
-    transform: rotate(90deg);
-    @include transition();
-    pointer-events: none;
 
+  .select.border + & {
+      border-radius: 4px;
+      border: 1px solid lighten($gray, 15%);
+
+      .select2-selection__rendered:after {
+          content: "\e901";
+          display: inline-block;
+          margin-left: 5px;
+          position: absolute;
+          top: 9px; right: 10px;
+          font-family: 'amara' !important;
+          speak: none;
+          transform: rotate(90deg);
+          @include transition();
+          pointer-events: none;
+
+      }
+  }
+
+  .select[multiple] + & {
+      .select2-selection__rendered:after { display: none; }
   }
 }
-.selectWrapper-multiple {
-  .select2-selection__rendered:after { display: none; }
-}
-.selectWrapper-language { }
-
-
-
-

@@ -4,10 +4,6 @@
 <div class="form-group{% if field.errors %} has-error{% endif %}">
   {% if widget_type == "checkbox" %}
   <div class="checkbox">{{ field }}<label for="{{ field.auto_id }}"><span></span>{{ field.label }}</label></div>
-  {% elif widget_type == "select" %}
-  {% if field.label %}{{ field.label_tag }}{% endif %}<div class="selectWrapper{% if field.field.border %}-border{% endif %}">{{ field }}</div>
-  {% elif widget_type == "select-multiple" %}
-  {% if field.label %}{{ field.label_tag }}{% endif %}<div class="selectWrapper-multiple">{{ field }}</div>
   {% else %}
   {% if field.label %}{{ field.label_tag }}{% endif %}{{ field }}
   {% endif %}

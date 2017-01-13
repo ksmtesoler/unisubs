@@ -1,4 +1,2 @@
 {% load i18n %}
-<div class="selectWrapper">
-  <select {% if name %}name="{{ name }}" {% endif %}class="select" data-language-options="{% if options %}{{ options }}{% else %}null my popular all{% endif %}" data-placeholder="{% trans "Select language" %}"></select>
-</div>
+<select {% if name %}name="{{ name }}" {% endif %}class="select" data-language-options="{% if options %}{{ options }}{% else %}null my popular all{% endif %}" data-placeholder="{% trans "Select language" %}"></select>

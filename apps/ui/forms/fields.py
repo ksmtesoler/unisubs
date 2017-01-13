@@ -27,8 +27,8 @@ from ui.forms import widgets
 class AmaraChoiceFieldMixin(object):
     def __init__(self, allow_search=True, border=False, max_choices=None,
                  *args, **kwargs):
-        super(AmaraChoiceFieldMixin, self).__init__(*args, **kwargs)
         self.border = border
+        super(AmaraChoiceFieldMixin, self).__init__(*args, **kwargs)
         if not allow_search:
             self.set_select_data('nosearchbox')
         if max_choices:
@@ -61,7 +61,10 @@ class AmaraChoiceFieldMixin(object):
 
     def widget_attrs(self, widget):
         if isinstance(widget, forms.Select):
-            return { 'class': 'select' }
+            if self.border:
+                return { 'class': 'select border' }
+            else:
+                return { 'class': 'select' }
         else:
             return {}
 
