@@ -34,9 +34,11 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db import models
 from django.db import transaction
+from django.db.models import Q
 from django.db.models.loading import get_model
 from django.db.models.signals import post_save
 from django.utils.http import urlquote
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _, ugettext
 from tastypie.models import ApiKey
 
@@ -92,6 +94,22 @@ class CustomUserManager(UserManager):
                                                 string.digits)
                                   for i in xrange(6))
             yield '{}{}{}'.format(part1, rand_string, part2)
+
+    def search(self, query):
+        qs = self.all()
+        valid_term = False
+        for term in [term.strip() for term in query.split()]:
+            if len(term) >= 2:
+                valid_term = True
+                qs = qs.filter(Q(first_name__icontains=term)
+                               | Q(last_name__icontains=term)
+                               | Q(email__icontains=term)
+                               | Q(username__icontains=term)
+                               | Q(biography__icontains=term))
+        if valid_term:
+            return qs
+        else:
+            return self.none()
 
 class CustomUser(BaseUser, secureid.SecureIDMixin):
     AUTOPLAY_ON_BROWSER = 1
@@ -391,11 +409,19 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
             return self.picture.thumb_url(size, size)
         else:
             return self._get_gravatar(size)
+
     def avatar(self):
         return self._get_avatar_by_size(100)
 
     def small_avatar(self):
         return self._get_avatar_by_size(50)
+
+    def avatar_tag(self):
+        avatar = self.small_avatar()
+        if avatar:
+            return mark_safe('<img class="avatar" src="{}">'.format(avatar))
+        else:
+            return ''
 
     @models.permalink
     def get_absolute_url(self):

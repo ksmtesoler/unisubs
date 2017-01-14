@@ -998,3 +998,20 @@ def video_durations(request, team):
         'projects': projects,
         'totals': totals,
     })
+
+@team_view
+def ajax_member_search(request, team):
+    query = request.GET.get('q', '')
+    qs = User.objects.search(query).filter(team_members__team=team)
+    data = {
+        'results': [
+            {
+                'id': user.secure_id(),
+                'avatar': user.avatar_tag(),
+                'text': unicode(user)
+            }
+            for user in qs[:8]
+        ]
+    }
+
+    return HttpResponse(json.dumps(data), 'application/json')

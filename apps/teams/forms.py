@@ -76,24 +76,42 @@ from videos.types import video_type_registrar, VideoTypeError
 
 logger = logging.getLogger(__name__)
 
-class TeamMemberField(UserField):
+class TeamMemberField(AmaraChoiceField):
     default_error_messages = {
-        'not-team-member': _(u'Not a team member'),
+        'invalid': _(u'Invalid user'),
     }
+    def get_initial(self):
+        return self._initial
 
-    def __init__(self, **kwargs):
-        super(TeamMemberField, self).__init__(**kwargs)
-        self.team = None
+    def set_initial(self, user):
+        print self, user
+        if user:
+            self._initial = user.secure_id()
+            self.choices = [
+                (user.secure_id(), unicode(user))
+            ]
+        else:
+            self._initial = None
+    initial = property(get_initial, set_initial)
 
     def setup(self, team):
         self.team = team
+        self.set_select_data('ajax', reverse('teams:ajax-member-search',
+                                             args=(team.slug,)))
 
-    def validate(self, value):
-        if value not in EMPTY_VALUES:
-            if self.team and not self.team.user_is_member(value):
-                raise forms.ValidationError(
-                    self.error_messages['not-team-member']
-                )
+    def to_python(self, value):
+        if value in EMPTY_VALUES:
+            return None
+        if isinstance(value, User):
+            return value
+        try:
+            return User.lookup_by_secure_id(value)
+        except User.DoesNotExist:
+            raise forms.ValidationError(self.error_messages['invalid'])
+
+    def validate(self, user):
+        if user and not self.team.user_is_member(user):
+            raise forms.ValidationError(self.error_messages['invalid'])
 
 class ProjectField(AmaraChoiceField):
     def __init__(self, *args, **kwargs):
