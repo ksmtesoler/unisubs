@@ -38,7 +38,6 @@ def styleguide(request):
     })
 
 def member_search(request):
-    query = request.GET.get('q').lower()
     data = {
         'results': [
             {
