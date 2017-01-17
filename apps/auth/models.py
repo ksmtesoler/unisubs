@@ -99,7 +99,7 @@ class CustomUserManager(UserManager):
         qs = self.all()
         valid_term = False
         for term in [term.strip() for term in query.split()]:
-            if len(term) >= 2:
+            if term:
                 valid_term = True
                 qs = qs.filter(Q(first_name__icontains=term)
                                | Q(last_name__icontains=term)

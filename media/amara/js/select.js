@@ -18,9 +18,20 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-(function($) {
+$.fn.select2.amd.require([
+    'jquery',
+    'select2/data/ajax',
+    'select2/utils',
+    'select2/data/minimumInputLength',
+    'select2/dropdown',
+    'select2/dropdown/search',
+    'select2/dropdown/closeOnSelect',
+    'select2/dropdown/attachBody',
+], function($, AjaxData, Utils, MinimumInputLength, Dropdown, DropdownSearch, CloseOnSelect, AttachBody) {
 
-$.behaviors('.select', initSelect);
+$(function() {
+    $.behaviors('.select', initSelect);
+});
 
 function arrayToMap(array) {
     var map = {};
@@ -40,7 +51,13 @@ function initSelect(select) {
         theme: "bootstrap",
         escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
         templateResult: templateResult,
-        templateSelection: templateSelection
+        templateSelection: templateSelection,
+        language: {
+            searching: function() { return gettext('Searching…');},
+            loadingMore: function () { return gettext('Loading more results…'); },
+            noResults: function () { return gettext('No results found');},
+            inputTooShort: function (args) { return gettext('Start typing to search')}
+        }
     };
 
     if (select.attr('placeholder')) {
@@ -52,7 +69,7 @@ function initSelect(select) {
 
     if(select.data('nosearchbox')) {
         options.minimumResultsForSearch = Infinity;
-    } else {
+    } else if(!select.data('ajax')) {
         options.minimumResultsForSearch = 8;
     }
 
@@ -109,6 +126,11 @@ function templateSelection(data) {
     return text;
 }
 function ajaxOptions(select) {
+    var dropdownAdapter = Utils.Decorate(Dropdown, DropdownSearch);
+    dropdownAdapter = Utils.Decorate(dropdownAdapter, DropdownExtraOptions);
+    dropdownAdapter = Utils.Decorate(dropdownAdapter, CloseOnSelect);
+    dropdownAdapter = Utils.Decorate(dropdownAdapter, AttachBody);
+
     return {
         ajax: {
           url: select.data('ajax'),
@@ -119,10 +141,69 @@ function ajaxOptions(select) {
               q: params.term, // search term
             };
           },
+          processResults: function(data, params) {
+              return data
+          },
           cache: true
         },
-        minimumInputLength: 2,
+        dropdownAdapter: dropdownAdapter,
+        minimumInputLength: 1
     };
+}
+
+function DropdownExtraOptions(decorated, element, options) {
+    this.extraOptions = element.data('extraOptions');
+    this.element = element;
+    decorated.call(this, element, options);
+}
+
+DropdownExtraOptions.prototype.render = function (decorated) {
+    var rendered = decorated.call(this);
+    var results = $('.select2-results', rendered);
+    var choices = results.wrap('<span class="select2-choices">').parent();
+    if(this.extraOptions) {
+        choices.append(this.makeExtraOptions());
+    }
+    return rendered;
+}
+
+DropdownExtraOptions.prototype.makeExtraOptions = function (decorated) {
+    var self = this;
+    var select = this.element;
+    var extraOptions = $('<ul>', {
+        "class": "select2-extraoptions",
+        "role": "tree",
+        "aria-hidden": false,
+        "aria-expanded": true,
+    });
+    var currentValue = select.val();
+    _.each(this.extraOptions, function(option) {
+        var data = {
+            id: option[0],
+            text: option[1]
+        };
+        var li = $('<li>', {
+            "class": "select2-extraoptions__option",
+            "role": "treeitem",
+            "aria-live": "assertive",
+            "aria-selected": data.id == currentValue
+        }).html(templateResult(data));
+        extraOptions.append(li);
+        li.hover(function() {
+            li.addClass("select2-extraoptions__option--highlighted");
+        }, function() {
+            li.removeClass("select2-extraoptions__option--highlighted");
+        }).on('click', function() {
+            select.val(data.id);
+            self.trigger('select', {
+                data: data
+            });
+        });
+        select.on('change', function() {
+            li.attr('aria-selected', select.val() == data.id);
+        });
+    });
+    return extraOptions;
 }
 
 function languageChoiceData(select) {
@@ -212,4 +293,4 @@ function languageChoice(code) {
     return { id: code, text: getLanguageName(code), selected: code == this };
 }
 
-})(jQuery);
+});
