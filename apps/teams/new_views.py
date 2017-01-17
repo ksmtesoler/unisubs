@@ -1006,7 +1006,7 @@ def ajax_member_search(request, team):
     data = {
         'results': [
             {
-                'id': user.secure_id(),
+                'id': user.username,
                 'avatar': user.avatar_tag(),
                 'text': unicode(user)
             }

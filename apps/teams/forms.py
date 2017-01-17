@@ -80,19 +80,10 @@ class TeamMemberField(AmaraChoiceField):
     default_error_messages = {
         'invalid': _(u'Invalid user'),
     }
-    def get_initial(self):
-        return self._initial
-
-    def set_initial(self, user):
-        print self, user
-        if user:
-            self._initial = user.secure_id()
-            self.choices = [
-                (user.secure_id(), unicode(user))
-            ]
-        else:
-            self._initial = None
-    initial = property(get_initial, set_initial)
+    def set_initial_choice(self, value):
+        if isinstance(value, User):
+            value = (value.username, unicode(value))
+        super(TeamMemberField, self).set_initial_choice(value)
 
     def setup(self, team):
         self.team = team
@@ -105,7 +96,7 @@ class TeamMemberField(AmaraChoiceField):
         if isinstance(value, User):
             return value
         try:
-            return User.lookup_by_secure_id(value)
+            return User.objects.get(username=value)
         except User.DoesNotExist:
             raise forms.ValidationError(self.error_messages['invalid'])
 

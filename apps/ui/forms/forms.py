@@ -101,6 +101,8 @@ class ManagementForm(forms.Form):
         self.setup_fields()
         if self.single_selection():
             self.setup_single_selection(self.get_first_object())
+        else:
+            self.setup_multiple_selection()
 
     @staticmethod
     def permissions_check():
@@ -166,6 +168,12 @@ class ManagementForm(forms.Form):
 
     def setup_single_selection(self, obj):
         """Override this if you alter the form when 1 object is selected."""
+        pass
+
+    def setup_multiple_selection(self):
+        """
+        Override this if you alter the form when multiple objects are selected.
+        """
         pass
 
     def perform_save(self, qs):
