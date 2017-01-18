@@ -17,6 +17,12 @@
   }
 }
 
+.break-50 { max-width: 50%; }
+.break-60 { max-width: 60%; }
+.break-70 { max-width: 70%; }
+.break-80 { max-width: 80%; }
+.break-90 { max-width: 90%; }
+
 .total {
   font-family: $font-family-sans-serif;
 }
@@ -84,4 +90,12 @@
     width: 100%;
     height: 100%;
   }
+}
+
+@media(max-width: 767px) {
+  .break-50, 
+  .break-60,
+  .break-70,
+  .break-80,
+  .break-90 { max-width: 100%; }
 }

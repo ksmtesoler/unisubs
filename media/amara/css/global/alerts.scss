@@ -21,7 +21,10 @@
 // Styleguide alerts
 
 .alert {
-  // Blah
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
   &.alert-success {
     background-image: none;
     background-color: $state-success-bg;
@@ -45,5 +48,13 @@
     background-color: $state-danger-bg;
     border-color: $state-danger-border;
     color: $state-danger-text;
+  }
+}
+
+// Page-wide messages
+#messages {
+  .alert {
+    margin: 10px;
+    margin-bottom: 0;
   }
 }

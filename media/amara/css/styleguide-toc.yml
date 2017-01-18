@@ -45,6 +45,7 @@
   - filterList
   - actionBar
   - selectList
+  - pagination
   - hangingLink
   - constrainContent
   # - select2
