@@ -223,7 +223,7 @@ function languageChoiceData(select) {
     function sectionEnabled(name) {
         return enabledSelections.indexOf(name) > -1;
     }
-    if(sectionEnabled('null')) {
+    if(sectionEnabled('null') && !select.attr('multiple')) {
         data.push({
             id: '',
             selected: _.contains(initial, '')
