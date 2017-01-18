@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
 import json
+import os
 import time
 
 from django.conf import settings
@@ -14,6 +15,8 @@ import babel
 import pyuca
 
 from unilangs import get_language_name_mapping, LanguageCode
+
+from utils.memoize import memoize
 
 collator = pyuca.Collator()
 
