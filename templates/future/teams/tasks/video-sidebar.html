@@ -1,0 +1,8 @@
+{% load i18n %}
+{% load url from future %}
+<div class="content">
+  <h1>{% trans "Contribute" %}</h1>
+  <hr>
+  <a href="{% url "teams:team_tasks" team.slug %}?team_video={{ team_video.id }}"><i class="icon icon-transcribe"></i> {% trans "View tasks for this video" %}</a>
+</div>
+{% include "future/videos/video-sidebar.html" %}
