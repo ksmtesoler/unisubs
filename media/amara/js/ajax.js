@@ -72,7 +72,7 @@
                             window.location.pathname + '?' + form.formSerialize());
                 }
                 if(form.hasClass('copyQuery')) {
-                    _.each(getQueryParams(), function(name, value) {
+                    _.each(getQueryParams(), function(value, name) {
                         data.push({ name: name, value: value });
                     });
                 }
