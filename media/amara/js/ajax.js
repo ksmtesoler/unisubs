@@ -50,10 +50,16 @@
                     break;
 
                 case 'reloadPage':
+                    $(window).on('beforeunload', scrollAfterReload);
                     window.location.reload();
                     break;
             }
         });
+    }
+
+    function scrollAfterReload() {
+        $(window).scrollTop(0);
+        $(window).off('beforeunload', scrollAfterReload);
     }
 
     function ajaxForm(form) {
