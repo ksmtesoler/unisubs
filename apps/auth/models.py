@@ -52,6 +52,10 @@ from utils.tasks import send_templated_email_async
 ALL_LANGUAGES = [(val, _(name))for val, name in settings.ALL_LANGUAGES]
 EMAIL_CONFIRMATION_DAYS = getattr(settings, 'EMAIL_CONFIRMATION_DAYS', 3)
 
+DEFAULT_AVATAR_URL = ('https://s3.amazonaws.com/'
+                      's3.www.universalsubtitles.org/'
+                      'gravatar/default-{size}.png')
+
 class AnonymousUserCacheGroup(CacheGroup):
     def __init__(self):
         super(AnonymousUserCacheGroup, self).__init__('user:anon',
@@ -399,11 +403,12 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         from teams.models import Task
         return Task.objects.incomplete().filter(assignee=self)
 
-    def _get_gravatar(self, size):
+    def _get_gravatar(self, size, default='mm'):
         url = "http://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
-        url += urllib.urlencode({'d': 'mm', 's':str(size)})
+        url += urllib.urlencode({'d': default, 's':str(size)})
         return url
 
+    # old UI avatars
     def _get_avatar_by_size(self, size):
         if self.picture:
             return self.picture.thumb_url(size, size)
@@ -416,12 +421,21 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def small_avatar(self):
         return self._get_avatar_by_size(50)
 
-    def avatar_tag(self):
-        avatar = self.small_avatar()
-        if avatar:
-            return mark_safe('<img class="avatar" src="{}">'.format(avatar))
+    # future UI avatag
+    def _get_avatar(self, size):
+        if self.picture:
+            return self.picture.thumb_url(size, size)
         else:
-            return ''
+            return self._get_gravatar(
+                size, default=DEFAULT_AVATAR_URL.format(size=size))
+
+    def avatar_tag(self):
+        avatar = self._get_avatar(30)
+        return mark_safe('<img class="avatar" src="{}">'.format(avatar))
+
+    def avatar_tag_medium(self):
+        avatar = self._get_avatar(50)
+        return mark_safe('<img class="avatar avatar-md" src="{}">'.format(avatar))
 
     @models.permalink
     def get_absolute_url(self):

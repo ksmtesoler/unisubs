@@ -4,7 +4,7 @@
   {% for comment in comments %}
   <li class="row">
     <div class="col-xs-4">
-      <a href="{{ user.get_absolute_url }}" class="pull-left"><img class="avatar avatar-md" src="{{ user.small_avatar }}" /></a>
+      <a href="{{ user.get_absolute_url }}" class="pull-left">{{ user.avatar_tag_medium }}</a>
       <p>
         <span class="memberName"><a href="{{ user.get_absolute_url }}">{{ comment.user }}</a></span>
       </p>
@@ -20,7 +20,7 @@
   {% if comment_form %}
   <li class="row addComment">
     <div class="col-xs">
-      <a href="{{ user.get_absolute_url }}" class="pull-left"><img class="avatar avatar-md" src="{{ user.small_avatar }}" /></a>
+      <a href="{{ user.get_absolute_url }}" class="pull-left">{{ user.avatar_tag_medium }}</a>
       <form id="comments-form" action="" class="ajaxForm" method="post">
         {% csrf_token %}
         <input type="hidden" name="form" value="comment">
