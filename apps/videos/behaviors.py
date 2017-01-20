@@ -28,6 +28,7 @@ class VideoPageCustomization(object):
     def __init__(self, sidebar, header):
         self.sidebar = sidebar
         self.header = header
+
 @behavior
 def video_page_customize(request, video):
     """Customize the video page.

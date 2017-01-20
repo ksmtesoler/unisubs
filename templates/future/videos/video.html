@@ -46,13 +46,13 @@
         {% if custom_sidebar %}
         {{ custom_sidebar }}
         {% else %}
-        {% with completed_languages=video.completed_languages incomplete_languages=video.incomplete_languages %}
-        {% if completed_languages %}
+        {% with complete_languages=video.complete_languages incomplete_languages=video.incomplete_languages %}
+        {% if complete_languages %}
         <div class="content">
-          <h1>{% blocktrans with count=completed_languages|length %}Completed subtitles (<span class="total">{{ count }}</span>){% endblocktrans %}</h1>
+          <h1>{% blocktrans with count=complete_languages|length %}Completed subtitles (<span class="total">{{ count }}</span>){% endblocktrans %}</h1>
           <hr/>
           <ul class="nav nav-stacked">
-            {% for subtitle_language in completed_languages %}
+            {% for subtitle_language in complete_languages %}
             <li>
               <h6><a href="{{ subtitle_language.get_absolute_url }}{{ QUERY_STRING }}">{{ subtitle_language.get_language_code_display }}</a></h6>
             </li>
