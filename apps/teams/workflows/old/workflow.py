@@ -66,7 +66,8 @@ class OldTeamWorkflow(TeamWorkflow):
         return options
 
     def video_page_customize(self, request, video):
-        if not self.team.is_tasks_team():
+        if not (self.team.is_tasks_team() and
+                self.team.user_is_member(request.user)):
             return DONT_OVERRIDE
         sidebar = render_to_string('future/teams/tasks/video-sidebar.html', {
             'video': video,
