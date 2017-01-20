@@ -1602,10 +1602,10 @@ class MoveVideosForm(VideoManagementForm):
                     self.count)
             else:
                 msg = ungettext(
-                    'Video has been moved to %(team_link)s '
-                    '(project %(project)s)',
-                    '%(count)s videos have been moved to %(team_link)s '
-                    '(project %(project)s)',
+                    'Video has been moved to %(team_link)s, '
+                    'project %(project)s',
+                    '%(count)s videos have been moved to %(team_link)s, '
+                    'project %(project)s',
                     self.count)
         team_link = '<a href="{}">{}</a>.'.format(
             reverse('teams:dashboard', args=(new_team.slug,)),
