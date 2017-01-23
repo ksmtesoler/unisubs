@@ -45,6 +45,7 @@ from subtitles import signals
 from utils import dates
 from utils.compress import compress, decompress
 from utils.subtitles import create_new_subtitles
+from utils.text import fmt
 from utils import translation
 
 WRITELOCK_EXPIRATION = 30 # 30 seconds
@@ -1613,6 +1614,11 @@ class SubtitleVersion(models.Model):
             return 'rtl'
         else:
             return 'ltr'
+
+    def get_version_display(self):
+        return fmt(ugettext(u'%(subtitle_language)s (version %(number)s)'),
+                   subtitle_language=self.get_language_code_display(),
+                   number=self.version_number)
 
     def get_ancestors(self):
         """Return all ancestors of this version.  WARNING: MAY EAT YOUR DB!

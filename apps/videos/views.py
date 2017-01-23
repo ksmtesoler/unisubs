@@ -601,23 +601,24 @@ def _widget_params(request, video, version_no=None, language=None, video_url=Non
 @login_required
 @get_video_revision
 def rollback(request, version):
-    is_writelocked = version.subtitle_language.is_writelocked
-    if not user_can_edit_subtitles(request.user, version.video,
-                                   version.subtitle_language.language_code):
-        messages.error(request, _(u"You don't have permission to rollback "
-                                  "this language"))
-    elif is_writelocked:
-        messages.error(request, u'Can not rollback now, because someone is editing subtitles.')
-    elif not version.next_version():
-        messages.error(request, message=u'Can not rollback to the last version')
-    else:
-        messages.success(request, message=u'Rollback successful')
-        version = rollback_to(version.video,
-                version.subtitle_language.language_code,
-                version_number=version.version_number,
-                rollback_author=request.user)
-        video_changed_tasks.delay(version.video.id, version.id)
-        return redirect(version.subtitle_language.get_absolute_url()+'#revisions')
+    if request.method == 'POST':
+        is_writelocked = version.subtitle_language.is_writelocked
+        if not user_can_edit_subtitles(request.user, version.video,
+                                       version.subtitle_language.language_code):
+            messages.error(request, _(u"You don't have permission to rollback "
+                                      "this language"))
+        elif is_writelocked:
+            messages.error(request, u'Can not rollback now, because someone is editing subtitles.')
+        elif not version.next_version():
+            messages.error(request, message=u'Can not rollback to the last version')
+        else:
+            messages.success(request, message=u'Rollback successful')
+            version = rollback_to(version.video,
+                    version.subtitle_language.language_code,
+                    version_number=version.version_number,
+                    rollback_author=request.user)
+            video_changed_tasks.delay(version.video.id, version.id)
+            return redirect(version.subtitle_language.get_absolute_url()+'#revisions')
     return redirect(version)
 
 @get_video_revision
