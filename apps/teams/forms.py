@@ -1498,7 +1498,7 @@ class DeleteVideosForm(VideoManagementForm):
             team_video = video.teamvideo
             team_video.remove(self.user)
             if delete:
-                video.delete()
+                video.delete(self.user)
 
     def message(self):
         msg = ungettext('Video has been deleted.',
