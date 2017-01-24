@@ -226,30 +226,6 @@ class TestViews(WebUseTest):
         new_version = self.video.version()
         self.assertEqual(last_version.version_no+1, new_version.version_no)
 
-    def test_model_rollback(self):
-        video = get_video()
-
-        sl_en = make_subtitle_language(video, 'en')
-        en1 = make_subtitle_version(sl_en, [])
-        en2 = make_subtitle_version(sl_en, [(1, 2, "foo")])
-
-        self._login()
-
-        def _assert_tip_subs(subs):
-            sl_en.clear_tip_cache()
-            self.assertEqual([(start, end, txt) for start, end, txt, meta in
-                              list(sl_en.get_tip().get_subtitles())],
-                             subs)
-
-        # Ensure the rollback works through the view.
-        self.client.get(reverse('videos:rollback', args=[en1.id]))
-        _assert_tip_subs([])
-
-        self.client.get(reverse('videos:rollback', args=[en2.id]))
-        _assert_tip_subs([(1, 2, 'foo')])
-
-        self.assertEqual(sl_en.subtitleversion_set.full().count(), 4)
-
     def test_search(self):
         self._simple_test('search:index')
 

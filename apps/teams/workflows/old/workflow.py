@@ -28,6 +28,7 @@ from teams import views
 from teams.workflows import TeamWorkflow
 from .subtitleworkflows import (TaskTeamSubtitlesWorkflow,
                                 NonTaskTeamSubtitlesWorkflow)
+from utils.behaviors import DONT_OVERRIDE
 from videos.behaviors import VideoPageCustomization
 
 class OldTeamWorkflow(TeamWorkflow):
