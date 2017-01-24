@@ -26,7 +26,7 @@
             <div id="subtitles_list" class="tab-pane active">
               <nav class="tab-actions">
                 {% if show_rollback %}
-                <a {% if can_edit %}class="button small" data-toggle="modal" data-target="#rollback-dialog"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
+                <a {% if can_edit %}class="button small ajaxLink" href="?form=rollback"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
                 {% else %}
                 <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}"{% else %}class="button small disabled{% endif %}>{% trans "Edit subtitles" %}</a>
                 {% endif %}
@@ -157,31 +157,4 @@
     </div>
   </div>
 </section>
-{% endblock %}
-
-{% block bottom %}
-
-{% if show_rollback %}
-<div class="modal fade" id="rollback-dialog">
-  <div class="modal-dialog modal-md">
-    <div class="modal-content">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-      <header class="dialogHeader">
-        <h4 class="dialogTitle">{% trans "Rolling back subtitles" %}</h4>
-        <h5 class="dialogSubTitle">{{ subtitle_version.get_version_display }}</h5>
-      </header>
-      <form action="{% url "videos:rollback" subtitle_version.pk %}" method="POST">
-        {% csrf_token %}
-        <p>{% blocktrans with number=subtitle_version.version_number %}Roll subtitles back to version {{ number }}{% endblocktrans %}</p>
-        <div class="text-right">
-          <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</a>
-          <button class="button cta" type="submit">{% trans "Rollback" %}</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-{% endif %}
 {% endblock %}

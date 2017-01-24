@@ -398,17 +398,42 @@ class SubtitlesUploadForm(forms.Form):
             output[key] = '\n'.join([force_unicode(i) for i in value])
         return output
 
-class DeleteSubtitlesForm(forms.Form):
-    VERIFY_STRING = _(u'Yes, I want to delete this language')
-    verify = forms.CharField(label=_(u'Are you sure?'), required=False)
+class SubtitlesForm(forms.Form):
+    """Form that operates on a video's subtitles.
 
-    def __init__(self, user, video, subtitle_language, version, *args, **kwargs):
-        super(DeleteSubtitlesForm, self).__init__(*args, **kwargs)
+    This is the base class for forms on the video subtitles page.
+    """
+    def __init__(self, user, video, subtitle_language, subtitle_version, *args, **kwargs):
+        super(SubtitlesForm, self).__init__(*args, **kwargs)
 
         self.user = user
         self.video = video
         self.subtitle_language = subtitle_language
+        self.subtitle_version = subtitle_version
         self.language_code = subtitle_language.language_code
+        self.setup_fields()
+
+    def setup_fields(self):
+        pass
+
+    def check_permissions(self):
+        """Check the user has permission to use the form."""
+        raise NotImplementedError()
+
+    def submit(self, request):
+        """Handle form submission."""
+        with transaction.commit_on_success():
+            if self.subtitle_language.is_writelocked:
+                messages.error(request, _(u'Subtitles are currently being edited'))
+                return
+            self.do_submit(request)
+        video_changed_tasks.delay(self.video.pk)
+
+class DeleteSubtitlesForm(SubtitlesForm):
+    VERIFY_STRING = _(u'Yes, I want to delete this language')
+    verify = forms.CharField(label=_(u'Are you sure?'), required=False)
+
+    def setup_fields(self):
         self.fields['verify'].help_text = fmt(
             ugettext(
                 _(u'Type "%(words)s" if you are sure you wish to continue')),
@@ -434,11 +459,23 @@ class DeleteSubtitlesForm(forms.Form):
             )
         return self.cleaned_data
 
-    def submit(self, request):
-        with transaction.commit_on_success():
-            if self.subtitle_language.is_writelocked:
-                messages.error(request, _(u'Subtitles are currently being edited'))
-                return
-            self.subtitle_language.nuke_language()
-        video_changed_tasks.delay(self.video.pk)
+    def do_submit(self, request):
+        self.subtitle_language.nuke_language()
         messages.success(request, _(u'Subtitles deleted'))
+
+class RollbackSubtitlesForm(SubtitlesForm):
+    def check_permissions(self):
+        workflow = self.video.get_workflow()
+        return workflow.user_can_edit_subtitles(
+            self.user, self.language_code)
+
+    def do_submit(self, request):
+        if self.subtitle_version.next_version():
+            pipeline.rollback_to(
+                self.video, self.language_code,
+                version_number=self.subtitle_version.version_number,
+                rollback_author=self.user)
+            messages.success(request, ugettext(u'Rollback successful'))
+        else:
+            messages.error(request,
+                           ugettext(u'Can not rollback to the last version'))

@@ -1,0 +1,20 @@
+{% load forms i18n %}
+<div class="modal-dialog modal-md">
+  <div class="modal-content">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <header class="dialogHeader">
+      <h4 class="dialogTitle">{% trans "Rolling back subtitles" %}</h4>
+      <h5 class="dialogSubTitle">{{ version.get_version_display }}</h5>
+    </header>
+    <form class="ajaxForm" action="?form=rollback" method="POST">
+      {% csrf_token %}
+      <p>{% blocktrans with number=version.version_number %}Roll subtitles back to version {{ number }}{% endblocktrans %}</p>
+      <div class="text-right">
+        <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</a>
+        <button class="button cta" type="submit">{% trans "Rollback" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
