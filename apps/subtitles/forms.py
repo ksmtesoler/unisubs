@@ -21,8 +21,11 @@ from itertools import izip
 
 import babelsubs
 from django import forms
+from django.contrib import messages
+from django.db import transaction
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 
 from subtitles import pipeline
 from subtitles.shims import is_dependent
@@ -395,3 +398,47 @@ class SubtitlesUploadForm(forms.Form):
             output[key] = '\n'.join([force_unicode(i) for i in value])
         return output
 
+class DeleteSubtitlesForm(forms.Form):
+    VERIFY_STRING = _(u'Yes, I want to delete this language')
+    verify = forms.CharField(label=_(u'Are you sure?'), required=False)
+
+    def __init__(self, user, video, subtitle_language, version, *args, **kwargs):
+        super(DeleteSubtitlesForm, self).__init__(*args, **kwargs)
+
+        self.user = user
+        self.video = video
+        self.subtitle_language = subtitle_language
+        self.language_code = subtitle_language.language_code
+        self.fields['verify'].help_text = fmt(
+            ugettext(
+                _(u'Type "%(words)s" if you are sure you wish to continue')),
+            words=self.VERIFY_STRING)
+
+    def bullets(self):
+        workflow = self.video.get_workflow()
+        return workflow.delete_subtitles_bullets(self.language_code)
+
+    def check_permissions(self):
+        workflow = self.video.get_workflow()
+        return workflow.user_can_delete_subtitles(
+            self.user, self.language_code)
+
+    def clean_verify(self):
+        if self.cleaned_data['verify'] != self.VERIFY_STRING:
+            raise forms.ValidationError(self.fields['verify'].help_text)
+
+    def clean(self):
+        if not self.check_permissions():
+            raise forms.ValidationError(
+                ugettext(u'You do not have permission to delete the subtitles')
+            )
+        return self.cleaned_data
+
+    def submit(self, request):
+        with transaction.commit_on_success():
+            if self.subtitle_language.is_writelocked:
+                messages.error(request, _(u'Subtitles are currently being edited'))
+                return
+            self.subtitle_language.nuke_language()
+        video_changed_tasks.delay(self.video.pk)
+        messages.success(request, _(u'Subtitles deleted'))

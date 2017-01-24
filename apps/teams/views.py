@@ -51,10 +51,9 @@ from teams.forms import (
     AddTeamVideosFromFeedForm, TaskAssignForm, SettingsForm, TaskCreateForm,
     PermissionsForm, WorkflowForm, InviteForm, TaskDeleteForm,
     GuidelinesMessagesForm, RenameableSettingsForm, ProjectForm, LanguagesForm,
-    DeleteLanguageForm, MoveTeamVideoForm, TaskUploadForm,
-    make_billing_report_form, TaskCreateSubtitlesForm,
-    TeamMultiVideoCreateSubtitlesForm, OldMoveVideosForm, AddVideoToTeamForm,
-    GuidelinesLangMessagesForm,
+    MoveTeamVideoForm, TaskUploadForm, make_billing_report_form,
+    TaskCreateSubtitlesForm, TeamMultiVideoCreateSubtitlesForm,
+    OldMoveVideosForm, AddVideoToTeamForm, GuidelinesLangMessagesForm,
 )
 from teams.models import (
     Team, TeamMember, Invite, Application, TeamVideo, Task, Project, Workflow,
@@ -2259,56 +2258,6 @@ def _writelock_languages_for_delete(request, subtitle_language):
             return False, locked
 
     return True, locked
-
-def delete_language(request, slug, lang_id):
-    team = get_object_or_404(Team, slug=slug)
-    language = get_object_or_404(SubtitleLanguage, pk=lang_id)
-    workflow = language.video.get_workflow()
-    if not workflow.user_can_delete_subtitles(request.user,
-                                              language.language_code):
-        return redirect_to_login(reverse("teams:delete-language",
-                                         kwargs={"slug": team.slug,
-                                                 "lang_id": lang_id}))
-    next_url = request.POST.get('next', language.video.get_absolute_url())
-    team_video = language.video.get_team_video()
-    if team_video.team.pk != team.pk:
-        raise Http404()
-
-    if request.method == 'POST':
-        form = DeleteLanguageForm(request.user, team, language, request.POST)
-
-        if form.is_valid():
-            could_lock, locked = _writelock_languages_for_delete(request,
-                                                                 language)
-            try:
-                if could_lock:
-                    for sublang in form.languages_to_fork():
-                        sublang.is_forked = True
-                        sublang.save()
-
-                    language.nuke_language()
-
-                    metadata_manager.update_metadata(language.video.pk)
-
-                    messages.success(request,
-                                     _(u'Successfully deleted language.'))
-                    return HttpResponseRedirect(next_url)
-            finally:
-                for sl in locked:
-                    # We need to get a fresh copy of the SL here so that the
-                    # save() in release_writelock doesn't overwrite any other
-                    # changes we've made in the try block.  ORMs are fun.
-                    SubtitleLanguage.objects.get(pk=sl.pk).release_writelock()
-        else:
-            for e in flatten_errorlists(form.errors):
-                messages.error(request, e)
-    else:
-        form = DeleteLanguageForm(request.user, team, language)
-
-    return render_to_response('teams/delete-language.html', {
-        'form': form,
-        'language': language,
-    }, RequestContext(request))
 
 @login_required
 def auto_captions_status(request, slug):

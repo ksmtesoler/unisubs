@@ -57,7 +57,7 @@ from comments.forms import CommentForm
 from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
                                    user_can_edit_subtitles)
-from subtitles.forms import SubtitlesUploadForm
+from subtitles.forms import SubtitlesUploadForm, DeleteSubtitlesForm
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
@@ -497,6 +497,9 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     except ObjectDoesNotExist:
         raise Http404()
 
+    # TODO: combine the form code
+    if 'form' in request.GET:
+        return subtitles_ajax_form(request, video, subtitle_language, version)
     if request.method == 'POST':
         return subtitles_form(request, video, version)
     workflow = video.get_workflow()
@@ -509,13 +512,14 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     all_subtitle_versions = subtitle_language.versions_for_user(
             request.user).order_by('-version_number')
 
-
     return render(request, 'future/videos/subtitles.html', {
         'video': video,
         'team_video': video.get_team_video(),
         'metadata': video.get_metadata().convert_for_display(),
         'subtitle_language': subtitle_language,
         'subtitle_version': version,
+        'enable_delete_subtitles': workflow.user_can_delete_subtitles(
+                request.user, subtitle_language.language_code),
         'show_rollback': version and not version.is_tip(public=False),
         'all_subtitle_versions': all_subtitle_versions,
         'enabled_compare': len(all_subtitle_versions) >= 2,
@@ -578,6 +582,40 @@ def subtitles_form(request, video, version):
                              '#subtitles_comments')
     else:
         return redirect(video.get_absolute_url())
+
+subtitles_form_map = {
+    'delete': DeleteSubtitlesForm,
+    # TODO: make the revert form use this code
+}
+
+def subtitles_ajax_form(request, video, subtitle_language, version):
+    try:
+        form_name = request.GET['form']
+        FormClass = subtitles_form_map[form_name]
+    except KeyError:
+        raise Http404()
+    form = FormClass(request.user, video, subtitle_language, version,
+                     data=request.POST if request.method == 'POST' else None)
+    if not form.check_permissions():
+        raise PermissionDenied()
+
+    if request.is_ajax():
+        response_renderer = AJAXResponseRenderer(request)
+        if form.is_bound and form.is_valid():
+            form.submit(request)
+            response_renderer.reload_page()
+        else:
+            template = 'future/videos/subtitles-forms/delete.html'
+            response_renderer.show_modal(template, {
+                'video': video,
+                'subtitle_language': subtitle_language,
+                'version': version,
+                'form': form,
+            })
+        return response_renderer.render()
+    else:
+        # TODO implement the not-AJAX case
+        return redirect(request.get_full_path())
 
 def _widget_params(request, video, version_no=None, language=None, video_url=None, size=None):
     primary_url = video_url or video.get_video_url()

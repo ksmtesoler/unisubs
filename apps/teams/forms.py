@@ -872,69 +872,6 @@ class RemoveLanguageManagerForm(forms.Form):
         member = self.cleaned_data['member']
         member.remove_language_manager(self.language_code)
 
-class DeleteLanguageVerifyField(forms.CharField):
-    def __init__(self):
-        help_text=_('Type "Yes I want to delete this language" if you are '
-                    'sure you wish to continue')
-        forms.CharField.__init__(self, label=_(u'Are you sure?'),
-                                 help_text=help_text)
-
-    def clean(self, value):
-        # check text against a translated version of the confirmation string,
-        # so when help_text gets translated things still work.
-        if value != _(u'Yes I want to delete this language'):
-            raise forms.ValidationError(_(u"Confirmation text doesn't match"))
-
-class DeleteLanguageForm(forms.Form):
-    verify_text = DeleteLanguageVerifyField()
-
-    def __init__(self, user, team, language, *args, **kwargs):
-        super(DeleteLanguageForm, self).__init__(*args, **kwargs)
-
-        self.user = user
-        self.team = team
-        self.language = language
-
-        # generate boolean fields for deleting languages (rather than forking
-        # them).
-        for sublanguage in self.language.get_dependent_subtitle_languages():
-            key = self.key_for_sublanguage_delete(sublanguage)
-            label = sublanguage.get_language_code_display()
-            field = forms.BooleanField(label=label, required=False)
-            field.widget.attrs['class'] = 'checkbox'
-            self.fields[key] = field
-
-    def clean(self):
-        team_video = self.language.video.get_team_video()
-
-        if not team_video:
-            raise forms.ValidationError(_(
-                u"These subtitles are not under a team's control."))
-
-        workflow = self.language.video.get_workflow()
-        if not workflow.user_can_delete_subtitles(self.user,
-                                                  self.language.language_code):
-            raise forms.ValidationError(_(
-                u'You do not have permission to delete this language.'))
-
-        return self.cleaned_data
-
-    def key_for_sublanguage_delete(self, sublanguage):
-        return 'delete_' + sublanguage.language_code
-
-    def sublanguage_fields(self):
-        return [self[key] for key in self.fields.keys()
-                if key.startswith('delete_')]
-
-    def languages_to_fork(self):
-        assert self.is_bound
-        rv = []
-        for sublanguage in self.language.get_dependent_subtitle_languages():
-            key = self.key_for_sublanguage_delete(sublanguage)
-            if not self.cleaned_data.get(key):
-                rv.append(sublanguage)
-        return rv
-
 class TaskUploadForm(SubtitlesUploadForm):
     task = forms.ModelChoiceField(Task.objects, required=True)
 

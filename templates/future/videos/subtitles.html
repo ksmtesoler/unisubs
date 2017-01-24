@@ -143,6 +143,9 @@
             {% if has_private_version %}
             <p><em class="italic">{% trans "Private revisions are in italics." %}</em></p>
             {% endif %}
+            {% if enable_delete_subtitles %}
+            <p class="text-right"><a class="ajaxLink" href="?form=delete">{% trans "Delete subititles" %}</a></p>
+            {% endif %}
             </section>
           {% else %}
           <section class="videoSubtitles-revisions">
@@ -160,7 +163,7 @@
 
 {% if show_rollback %}
 <div class="modal fade" id="rollback-dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-md">
     <div class="modal-content">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>

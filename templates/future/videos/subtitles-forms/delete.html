@@ -1,0 +1,25 @@
+{% load forms i18n %}
+<div class="modal-dialog modal-md">
+  <div class="modal-content">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <header class="dialogHeader">
+      <h4 class="dialogTitle">{% trans "Deleting subtitles" %}</h4>
+      <h5 class="dialogSubTitle">{{ video.title_display }} - {{ subtitle_language.get_language_code_display }}</h5>
+    </header>
+    <form action="?form=delete" class="ajaxForm" method="POST">
+      {% csrf_token %}
+      <ul>
+        {% for bullet in form.bullets %}
+        <li>{{ bullet }}</li>
+        {% endfor %}
+      </ul>
+      {{  form.verify|render_field  }}
+      <div class="text-right">
+        <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</a>
+        <button class="button cta" type="submit">{% trans "Delete subtitles" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
