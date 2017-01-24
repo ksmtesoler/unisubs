@@ -942,6 +942,20 @@ class Video(models.Model):
             l for l in self.all_subtitle_languages() if l.subtitles_complete
         ]
 
+    def incomplete_languages_with_public_versions(self):
+        self.prefetch_languages(with_public_tips=True)
+        return [
+            l for l in self.all_subtitle_languages()
+            if not l.subtitles_complete and l.get_public_tip() is not None
+        ]
+
+    def complete_languages_with_public_versions(self):
+        self.prefetch_languages(with_public_tips=True)
+        return [
+            l for l in self.all_subtitle_languages()
+            if l.subtitles_complete and l.get_public_tip() is not None
+        ]
+
     def get_merged_dfxp(self):
         """Get a DFXP file containing subtitles for all languages."""
         self.prefetch_languages(with_public_tips=True)

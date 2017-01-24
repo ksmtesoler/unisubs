@@ -21,6 +21,7 @@ TeamWorkflow classes for old-style teams
 """
 
 from __future__ import absolute_import
+from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 
@@ -74,7 +75,7 @@ class OldTeamWorkflow(TeamWorkflow):
             'video': video,
             'team': self.team,
             'team_video': video.get_team_video(),
-        })
+        }, RequestContext(request))
         return VideoPageCustomization(sidebar, None)
 
     def get_subtitle_workflow(self, team_video):
