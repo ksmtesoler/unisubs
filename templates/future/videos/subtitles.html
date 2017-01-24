@@ -28,7 +28,7 @@
                 {% if show_rollback %}
                 <a {% if can_edit %}class="button small ajaxLink" href="?form=rollback"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
                 {% else %}
-                <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}"{% else %}class="button small disabled{% endif %}>{% trans "Edit subtitles" %}</a>
+                <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}"{% else %}class="button small disabled"{% endif %}>{% trans "Edit subtitles" %}</a>
                 {% endif %}
               </nav>
               {% if subtitle_version and subtitle_version.has_subtitles %}
