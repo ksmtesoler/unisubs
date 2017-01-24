@@ -1544,7 +1544,7 @@ class MoveVideosForm(VideoManagementForm):
                     '%(count)s videos have been moved to %(team_link)s, '
                     'project %(project)s',
                     self.count)
-        team_link = '<a href="{}">{}</a>.'.format(
+        team_link = '<a href="{}">{}</a>'.format(
             reverse('teams:dashboard', args=(new_team.slug,)),
             new_team)
         return fmt(msg, team_link=team_link, project=project.name,
