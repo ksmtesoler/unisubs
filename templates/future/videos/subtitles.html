@@ -121,7 +121,7 @@
                 {% else %}
                 <div class="col-xs-7">
                 {% endif %}
-                <a class="text" href="{{ revision.get_absolute_url }}">
+                <a class="text" href="{{ revision.get_absolute_url }}{{ QUERY_STRING }}">
                   {% if revision.is_private %}<em class="italic">{% else %}<strong>{% endif %}
                       {% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}
                   {% if revision.is_private %}</em>{% else %}</strong>{% endif %}
