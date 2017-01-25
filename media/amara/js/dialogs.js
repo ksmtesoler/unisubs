@@ -44,6 +44,34 @@
         }
         return currentModal;
     }
+
+    closeCurrentModal = function() {
+        if(currentModal) {
+            currentModal.modal('hide');
+        }
+    }
+
+
+    // Show a progress bar on the current modal dialog
+    showModalProgress = function(progress, label) {
+        if(!currentModal) {
+            console.log("showModalProgress(), no current modal");
+            return;
+        }
+        var footer = $('.modal-footer', currentModal);
+        footer.empty().append(makeProgressBar(progress, label));
+    }
+
+    var progressBarTemplate = _.template('<div class="progressBar teal"><div class="progressBar-progress" role="progressbar" style="width: <%- percent %>;"><span class="sr-only"><%- percentLabel %></span></div></div><p class="progressBar-label teal"><%- label %></p>');
+    function makeProgressBar(progress, label) {
+        var percent = (progress * 100) + '%';
+        return $(progressBarTemplate({
+            percent: percent,
+            percentLabel: interpolate(gettext('%(percent)s complete'), {percent: percent}),
+            label: label
+        }));
+    }
+
 })(jQuery);
 
 

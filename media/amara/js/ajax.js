@@ -45,6 +45,18 @@
                     showModal(change[1]).updateBehaviors();
                     break;
 
+                case 'showModalProgress':
+                    showModalProgress(change[1], change[2]);
+                    break;
+
+                case 'performRequest':
+                    setTimeout(function() {
+                        $.ajax(change[1], {
+                            success: processAjaxResponse
+                        });
+                    }, change[2]);
+                    break;
+
                 case 'clearForm':
                     $(change[1]).clearForm();
                     break;
@@ -82,6 +94,9 @@
                         data.push({ name: name, value: value });
                     });
                 }
+                if(form.hasClass('disableInputsOnSubmit')) {
+                    $(':input', form).prop('disabled', true);
+                }
             },
             complete: function() {
                 submitting = false;
@@ -90,10 +105,10 @@
                     form.submit();
                 }
             },
-            success: function(data, statusText, xhr) {
-                if(data) {
-                    processAjaxResponse(data);
-                }
+            success: processAjaxResponse,
+            error: function() {
+                alert(gettext('Error submitting form'));
+                closeCurrentModal();
             }
         });
 
@@ -117,9 +132,7 @@
 
         link.click(function() {
             $.ajax(link.attr('href'), {
-                success: function(data) {
-                    processAjaxResponse(data);
-                }
+                success: processAjaxResponse
             });
             return false;
         });

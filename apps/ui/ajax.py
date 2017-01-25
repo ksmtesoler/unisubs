@@ -73,6 +73,24 @@ class AJAXResponseRenderer(object):
         content = render_to_string(template, context, self.request_context)
         self.add_change('showModal', content)
 
+    def show_modal_progress(self, progress, label):
+        """Show a progress bar on the current modal
+
+        Args:
+            progress: current progress (0.0 - 1.0)
+            label: label to show under the progress bar
+        """
+        self.add_change('showModalProgress', progress, label)
+
+    def perform_request(self, url, delay):
+        """Perform another AJAX request after a delay
+
+        Args:
+            url: URL to load
+            delay: delay in seconds to wait
+        """
+        self.add_change('performRequest', url, int(delay * 1000))
+
     def clear_form(self, selector):
         """Clear all inputs in a form
 
