@@ -61,6 +61,7 @@ from subtitles.models import SubtitleLanguage
 from teams.workflows import TeamWorkflow
 from ui.ajax import AJAXResponseRenderer
 from ui.forms import ManagementFormList
+from ui.views import render_management_form_submit
 from utils.breadcrumbs import BreadCrumb
 from utils.decorators import staff_member_required
 from utils.pagination import AmaraPaginator, AmaraPaginatorFuture
@@ -675,19 +676,16 @@ def manage_videos_form(request, team, form_name, videos):
         raise Http404()
 
     all_selected = len(selection) >= VIDEOS_PER_PAGE_MANAGEMENT
-    response_renderer = AJAXResponseRenderer(request)
 
     if request.method == 'POST':
         form = FormClass(team, request.user, videos, selection, all_selected,
                          data=request.POST, files=request.FILES)
         if form.is_valid():
-            form.save()
-            form.add_messages(request)
-            response_renderer.reload_page()
-            return response_renderer.render()
+            return render_management_form_submit(request, form)
     else:
         form = FormClass(team, request.user, videos, selection, all_selected)
 
+    response_renderer = AJAXResponseRenderer(request)
     first_video = Video.objects.get(id=selection[0])
     template_name = 'future/teams/management/video-forms/{}.html'.format(
         form_name)

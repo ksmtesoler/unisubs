@@ -39,15 +39,15 @@ class TeamVideoManagementFormBase(TestCase):
         return TeamFactory(owner=self.user)
 
     def build_form(self, form_class, selected_videos, all_selected=False,
-                   data=None, files=None, skip_save=False):
+                   data=None, files=None, skip_submit=False):
         form = form_class(self.team, self.user, self.team.videos.all(),
                           [v.id for v in selected_videos], all_selected,
                           data=data, files=files)
         if data is not None:
             if form.errors:
                 print form.errors.as_text()
-            if not skip_save:
-                form.save()
+            if not skip_submit:
+                form.submit()
         return form
 
 class TestEditVideosForm(TeamVideoManagementFormBase):

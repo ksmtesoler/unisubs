@@ -1350,17 +1350,38 @@ class TeamVideoCSVForm(forms.Form):
 class VideoManagementForm(ManagementForm):
     """Base class for forms on the video management page."""
 
-    save_queryset_select_related = ('teamvideo', 'teamvideo__project')
+    iter_objects_select_related = ('teamvideo', 'teamvideo__project')
 
     @staticmethod
     def permissions_check(team, user):
         """Check if we should enable the form for a given user."""
         return True
 
-    def __init__(self, team, user, *args, **kwargs):
+    def __init__(self, team, user, queryset, selection, all_selected,
+                 data=None, files=None):
         self.team = team
         self.user = user
-        super(VideoManagementForm, self).__init__(*args, **kwargs)
+        super(VideoManagementForm, self).__init__(
+            queryset, selection, all_selected, data=data, files=files)
+
+    def get_pickle_state(self):
+        return (
+            self.team.id,
+            self.user.id,
+            self.queryset.query,
+            self.selection,
+            self.all_selected,
+            self.data,
+            self.files,
+        )
+
+    @classmethod
+    def restore_from_pickle_state(cls, state):
+        team = Team.objects.get(id=state[0])
+        user = User.objects.get(id=state[1])
+        queryset = Video.objects.all()
+        queryset.query = state[2]
+        return cls(team, user, queryset, *state[3:])
 
 class EditVideosForm(VideoManagementForm):
     name = 'edit'
@@ -1385,7 +1406,7 @@ class EditVideosForm(VideoManagementForm):
         self.fields['language'].set_placeholder(_('No language set'))
         self.fields['language'].initial = video.primary_audio_language_code
 
-    def perform_save(self, qs):
+    def perform_submit(self, qs):
         project = self.cleaned_data.get('project')
         language = self.cleaned_data['language']
         thumbnail = self.cleaned_data['thumbnail']
@@ -1428,7 +1449,7 @@ class DeleteVideosForm(VideoManagementForm):
         if not permissions.can_delete_video_in_team(self.team, self.user):
             del self.fields['delete']
 
-    def perform_save(self, qs):
+    def perform_submit(self, qs):
         delete = self.cleaned_data.get('delete', False)
 
         for video in qs:
@@ -1510,7 +1531,7 @@ class MoveVideosForm(VideoManagementForm):
             return None
         return Team.objects.get(id=self.cleaned_data['new_team'])
 
-    def perform_save(self, qs):
+    def perform_submit(self, qs):
         for video in qs:
             team_video = video.teamvideo
             team_video.move_to(self.cleaned_data['new_team'],

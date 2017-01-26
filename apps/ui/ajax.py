@@ -20,6 +20,7 @@
 
 import json
 
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -82,13 +83,14 @@ class AJAXResponseRenderer(object):
         """
         self.add_change('showModalProgress', progress, label)
 
-    def perform_request(self, url, delay):
+    def perform_request(self, delay, view_name, *args, **kwargs):
         """Perform another AJAX request after a delay
 
         Args:
             url: URL to load
             delay: delay in seconds to wait
         """
+        url = reverse(view_name, args=args, kwargs=kwargs)
         self.add_change('performRequest', url, int(delay * 1000))
 
     def clear_form(self, selector):

@@ -19,10 +19,12 @@
 from collections import OrderedDict
 
 from django import forms
+from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.utils.translation import ungettext
 from django.utils.translation import ugettext_lazy as _
 
+from utils.memoize import memoize
 from utils.text import fmt
 
 class FiltersForm(forms.Form):
@@ -66,7 +68,7 @@ class ManagementForm(forms.Form):
 
     Management forms operated inside a paginated list of objects, where each
     object on the current page can be selected.  The team video management
-    page is a good example of this.  When the save() method is called, we
+    page is a good example of this.  When the submit() method is called, we
     operate on all selected objects.  There is an include all checkbox, which
     if checked, changes this so we operate on all objects on all pages.
 
@@ -83,21 +85,27 @@ class ManagementForm(forms.Form):
 
     include_all = forms.BooleanField(label='', required=False)
     include_all_label = _('Select all %(count)s results')
-    save_queryset_select_related = None
+    iter_objects_select_related = None
 
-    def __init__(self, queryset, selection, all_selected,
-                 *args, **kwargs):
+    # Number of items needed to process the form in a worker task
+    WORKER_PROCESS_THRESHOLD = 20
+
+    def __init__(self, queryset, selection, all_selected, data=None,
+                 files=None):
         """Create a ManagementForm
 
         Args:
             queryset: queryset of all possible objects
             selection: list of ids for selected objects
             all_selected: are all objects on the page selected.
+            data: form data
+            files: form file data
         """
-        super(ManagementForm, self).__init__(*args, **kwargs)
+        super(ManagementForm, self).__init__(data=data, files=files)
         self.queryset = queryset
         self.selection = selection
-        self.setup_include_all(queryset, selection, all_selected)
+        self.all_selected = all_selected
+        self.setup_include_all(selection, all_selected)
         self.setup_fields()
         if self.single_selection():
             self.setup_single_selection(self.get_first_object())
@@ -112,8 +120,20 @@ class ManagementForm(forms.Form):
         """
         return True
 
-    def save(self):
-        self.perform_save(self.get_save_queryset())
+    def submit(self, progress_callback=None):
+        """Submit this form.
+
+        Args:
+            progress_callback: function to be called to track the progress.
+                After we process each object, we call progress_callback and
+                pass it the tuple (current, total) where current is the
+                current number of objects processed and total is the total
+                number of objects.  We also call progress_callback with (0,
+                total) before starting any work.
+        """
+        self.perform_submit(self.iter_objects(progress_callback))
+        if progress_callback:
+            progress_callback(self.count, self.count)
 
     def single_selection(self):
         return len(self.selection) == 1
@@ -138,24 +158,42 @@ class ManagementForm(forms.Form):
     def get_first_object(self):
         return self.queryset.get(id=self.selection[0])
 
-    def get_save_queryset(self):
-        """Get a queryset of objects to save.
-
-        This queryset will be passed to perform_save() 
-        """
+    @memoize
+    def get_selected_queryset(self):
+        """Get a queryset of selected objects."""
         qs = self.queryset
         if not self.cleaned_data.get('include_all'):
-            qs = qs.filter(id__in=self.selection)
-        self.count = qs.count()
-        if self.save_queryset_select_related:
-            qs = qs.select_related(*self.save_queryset_select_related)
+            qs = self.filter_by_selection(qs)
+        if self.iter_objects_select_related:
+            qs = qs.select_related(*self.iter_objects_select_related)
         return qs
 
-    def setup_include_all(self, queryset, selection, all_selected):
+    def filter_by_selection(self, qs):
+        return qs.filter(id__in=self.selection)
+
+    def should_process_in_task(self):
+        # Pickling files is tricky and not supported yet
+        return self.count > self.WORKER_PROCESS_THRESHOLD and not self.files
+
+    @property
+    def count(self):
+        return self.get_selected_queryset().count()
+
+    def iter_objects(self, progress_callback=None):
+        """Iterate over objects to operate on
+
+        This queryset will be passed to perform_submit()
+        """
+        for i, obj in enumerate(self.get_selected_queryset()):
+            if progress_callback:
+                progress_callback(i, self.count)
+            yield obj
+
+    def setup_include_all(self, selection, all_selected):
         if not all_selected:
             del self.fields['include_all']
         else:
-            total_objects = queryset.count()
+            total_objects = self.queryset.count()
             if total_objects <= len(selection):
                 del self.fields['include_all']
             else:
@@ -176,8 +214,8 @@ class ManagementForm(forms.Form):
         """
         pass
 
-    def perform_save(self, qs):
-        """Does the work for the save() method.
+    def perform_submit(self, qs):
+        """Does the work for the submit() method.
 
         Args:
             qs -- queryset of objects that should be operated on.
@@ -199,6 +237,20 @@ class ManagementForm(forms.Form):
             messages.success(request, message)
         for error in self.error_messages():
             messages.error(request, error)
+
+    # Pickling/Unpiclking
+    #
+    # When we process forms in the background state, we need to pickle them.
+    # Subclasses must implement these methods to efficiently pickle themselves
+
+    def get_pickle_state(self):
+        """Get the data needed to pickle this form."""
+        raise NotImplementedError()
+
+    @classmethod
+    def restore_from_pickle_state(cls, state):
+        """Reverse get_pickle_state."""
+        raise NotImplementedError()
 
 class ManagementFormList(object):
     """Handle a list of Managment forms

@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from nose.tools import *
+import mock
 
 from ui.forms import ManagementForm
 from utils.factories import *
@@ -20,14 +21,14 @@ class TestVideoManagementForm(TestCase):
                 raise ValidationError()
         return form
 
-    def test_get_save_queryset(self):
+    def test_iter_objects(self):
         form = self.build_form(self.videos[0:4], data={})
-        assert_items_equal(form.get_save_queryset(), self.videos[0:4])
+        assert_items_equal(form.iter_objects(), self.videos[0:4])
 
-    def test_get_save_queryset_include_all(self):
+    def test_iter_objects_include_all(self):
         form = self.build_form(self.videos[0:4], all_selected=True,
                                data={'include_all': True})
-        assert_items_equal(form.get_save_queryset(), self.videos)
+        assert_items_equal(form.iter_objects(), self.videos)
 
     def test_enable_include_all_logic(self):
         # enabled it if all objects on the page are selected
@@ -39,3 +40,21 @@ class TestVideoManagementForm(TestCase):
         # disabled it if all objects are not selected
         form = self.build_form(self.videos[0:4], all_selected=False)
         assert_false('include_all' in form.fields)
+
+    def tets_submit(self):
+        form = self.build_form(self.videos[0:4], data={})
+        def perform_submit(objects):
+            assert_equal(list(objects), self.videos[0:4])
+        form.perform_submit = perform_submit
+        form.submit()
+
+    def test_submit_with_progress_callback(self):
+        form = self.build_form(self.videos[0:4], data={})
+        progress_callback = mock.Mock()
+        def perform_submit(objects):
+            for i, obj in enumerate(objects):
+                assert_equal(obj, self.videos[i])
+                assert_equal(progress_callback.call_args, mock.call(i, 4))
+        form.perform_submit = perform_submit
+        form.submit(progress_callback)
+        assert_equal(progress_callback.call_args, mock.call(4, 4))

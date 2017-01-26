@@ -33,7 +33,7 @@ ALL_LANGUAGE_CHOICES = list(sorted(_all_languages_map.items(),
 
 # Top 24 popular languages, taken from:
 # https://en.wikipedia.org/wiki/Languages_used_on_the_Internet
-POPULAR_LANGUAGES = [
+POPULAR_LANGUAGES_ORDERED = [
     'en',
     'ru',
     'de',
@@ -62,7 +62,7 @@ POPULAR_LANGUAGES = [
     'da',
     'th',
 ]
-POPULAR_LANGUAGES.sort()
+POPULAR_LANGUAGES = sorted(POPULAR_LANGUAGES_ORDERED)
 POPULAR_LANGUAGE_SET = set(POPULAR_LANGUAGES)
 
 def _only_supported_languages(language_codes):

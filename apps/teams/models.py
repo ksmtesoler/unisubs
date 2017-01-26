@@ -871,6 +871,8 @@ class ProjectManager(models.Manager):
             team = Team.objects.get(pk=team_identifier)
         elif isinstance(team_identifier, str):
             team = Team.objects.get(slug=team_identifier)
+        else:
+            raise TypeError("Bad team_identifier: {}".format(team_identifier))
         return Project.objects.filter(team=team).exclude(name=Project.DEFAULT_NAME)
 
 class Project(models.Model):
