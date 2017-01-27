@@ -92,10 +92,6 @@
   color: $gray-base;
   background-color: #cccccc;
 
-  &:before {
-    content: "\e90e";
-  }
-
   // Sizes
   &.avatar-md {
     width: 50px;
