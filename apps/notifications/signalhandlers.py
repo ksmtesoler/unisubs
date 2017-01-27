@@ -63,8 +63,8 @@ def on_subtitles_published(sender, **kwargs):
     call_event_handler_for_video(video, 'on_subtitles_published', video,
                                  subtitle_language)
 
-@receiver(subtitles.signals.language_deleted)
-def on_language_deleted(sender, **kwargs):
+@receiver(subtitles.signals.subtitles_deleted)
+def on_subtitles_deleted(sender, **kwargs):
     subtitle_language = sender
     video = subtitle_language.video
     call_event_handler_for_video(video, 'on_subtitles_deleted', video,

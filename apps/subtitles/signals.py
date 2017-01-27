@@ -19,7 +19,7 @@
 """Signals for the subtitles app.  """
 from django import dispatch
 
-language_deleted = dispatch.Signal()
+subtitles_deleted = dispatch.Signal()
 # Called whenever a new version is added
 subtitles_added = dispatch.Signal(providing_args=['version'])
 # Called when when subtitles are "completed".

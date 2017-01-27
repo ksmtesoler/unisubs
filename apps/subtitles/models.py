@@ -884,7 +884,7 @@ EXISTS(
         for lang in languages:
             for sv in lang.subtitleversion_set.extant().all():
                 sv.unpublish(delete=True, signal=False)
-            signals.language_deleted.send(lang)
+            signals.subtitles_deleted.send(lang)
             from teams.signals import api_language_deleted
             api_language_deleted.send(lang)
         Video.cache.invalidate_by_pk(self.video_id)
@@ -1941,7 +1941,7 @@ class SubtitleVersion(models.Model):
         :param delete: when set, flag the languages as deleted rather than
         private
         :param signal: when set we will emit the public_tip_changed() or
-        language_deleted signal
+        subtitles_deleted signal
         """
         if signal:
             was_tip = self.is_tip()
@@ -1952,7 +1952,7 @@ class SubtitleVersion(models.Model):
             self.subtitle_language.clear_tip_cache()
             new_tip = version=self.subtitle_language.get_tip(public=True)
             if new_tip is None:
-                signals.language_deleted.send(self.subtitle_language)
+                signals.subtitles_deleted.send(self.subtitle_language)
 
     @models.permalink
     def get_absolute_url(self):
