@@ -23,7 +23,7 @@ from celery.task import task
 
 logger = logging.getLogger(__name__)
 
-@task
+@task(queue='priority')
 def process_management_form(FormClass, pickle_state):
     def progress_callback(current, total):
         current_task.update_state(state='PROGRESS', meta={
