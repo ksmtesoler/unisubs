@@ -49,6 +49,11 @@
     border-color: $state-danger-border;
     color: $state-danger-text;
   }
+  &.alert-dismissable {
+    .close {
+      right: 0;
+    }
+  }
 }
 
 // Page-wide messages

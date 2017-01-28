@@ -25,6 +25,7 @@
 
 - - Forms
   - fields
+  - fileUpload
   - checkboxes
   - switch
   - searchbar
