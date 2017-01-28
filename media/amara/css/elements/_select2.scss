@@ -73,6 +73,9 @@
         border: 1px solid lighten($gray, 15%);
         background-color: $gray-lighter;
       }
+      .select2-selection__clear {
+        margin-bottom: 10px;
+      }
     }
   }
   .select2-results__group {
