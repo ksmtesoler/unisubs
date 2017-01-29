@@ -427,6 +427,9 @@ class Video(models.Model):
         self.monitor.on_save(self, creating)
 
     def delete(self, user=None):
+        team_video = self.get_team_video()
+        if team_video:
+            team_video.delete()
         signals.video_deleted.send(sender=self, user=user)
         super(Video, self).delete()
 
