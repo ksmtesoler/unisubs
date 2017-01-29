@@ -648,3 +648,29 @@ class AddVideoUrlTest(TestCase):
         assert_equal(on_video_url_added.call_args, mock.call(
             signal=signals.video_url_added, sender=video_url,
             video=self.video, new_video=False))
+
+class DeleteVideoTest(TestCase):
+    def setUp(self):
+        self.url = 'http://example.com/video.mp4'
+        self.video = VideoFactory(video_url__url=self.url)
+        self.video_url = self.video.get_primary_videourl_obj()
+        self.user = UserFactory()
+
+    def test_delete_video(self):
+        video_pk = self.video.pk
+        video_url_pk = self.video_url.pk
+        self.video.delete(user=self.user)
+        assert_false(Video.objects.filter(pk=video_pk).exists())
+        assert_false(VideoUrl.objects.filter(pk=video_url_pk).exists())
+
+    def test_delete_team_video(self):
+        from teams.models import TeamVideo
+        video_pk = self.video.pk
+        video_url_pk = self.video_url.pk
+        team = TeamFactory()
+        team_video = TeamVideoFactory(team=team, video=self.video, added_by=self.user)
+        team_video_pk = team_video.pk
+        self.video.delete(user=self.user)
+        assert_false(Video.objects.filter(pk=video_pk).exists())
+        assert_false(VideoUrl.objects.filter(pk=video_url_pk).exists())
+        assert_false(TeamVideo.objects.filter(pk=team_video_pk).exists())
