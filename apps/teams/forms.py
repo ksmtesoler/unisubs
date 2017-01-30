@@ -104,6 +104,28 @@ class TeamMemberField(AmaraChoiceField):
         if user and not self.team.user_is_member(user):
             raise forms.ValidationError(self.error_messages['invalid'])
 
+class TeamField(AmaraChoiceField):
+    default_error_messages = {
+        'invalid': _(u'Invalid Team'),
+    }
+
+    def to_python(self, value):
+        if value in EMPTY_VALUES:
+            return None
+        if isinstance(value, Team):
+            return value
+        try:
+            return Team.objects.get(slug=value)
+        except Team.DoesNotExist:
+            raise forms.ValidationError(self.error_messages['invalid'])
+
+    def validate(self, team):
+        if isinstance(team, Team):
+            for choice in self.choices:
+                if choice[0] == team.slug:
+                    return
+            raise forms.ValidationError(self.error_messages['invalid'])
+
 class ProjectField(AmaraChoiceField):
     def __init__(self, *args, **kwargs):
         self.null_label = kwargs.pop('null_label', _('Any'))
