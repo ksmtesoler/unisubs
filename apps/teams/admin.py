@@ -45,10 +45,11 @@ class LanguageManagerInline(admin.TabularInline):
 
 class TeamAdmin(admin.ModelAdmin):
     search_fields = ('name'),
-    list_display = ('name', 'membership_policy', 'video_policy', 'is_visible',
-            'highlight', 'last_notification_time', 'thumbnail', 'partner')
+    list_display = ('name', 'not_deleted', 'membership_policy', 'video_policy',
+                    'is_visible', 'highlight', 'last_notification_time',
+                    'thumbnail', 'partner')
     list_filter = ('highlight', 'is_visible')
-    actions = ['highlight', 'unhighlight', 'send_message']
+    actions = ['delete_selected', 'highlight', 'unhighlight', 'send_message']
     raw_id_fields = ['video', 'users', 'videos', 'applicants']
     exclude = ('users', 'applicants','videos')
 
@@ -71,6 +72,11 @@ class TeamAdmin(admin.ModelAdmin):
             self.message_user(request, _("Fill all fields please."))
     send_message.short_description = _('Send message')
 
+    def not_deleted(self, team):
+        return not team.deleted
+    not_deleted.boolean = True
+    not_deleted.short_description = _('Not deleted')
+
     def highlight(self, request, queryset):
         queryset.update(highlight=True)
     highlight.short_description = _('Feature teams')
@@ -78,6 +84,21 @@ class TeamAdmin(admin.ModelAdmin):
     def unhighlight(self, request, queryset):
         queryset.update(highlight=False)
     unhighlight.short_description = _('Unfeature teams')
+
+    def delete_selected(self, request, queryset):
+        queryset.update(deleted=True)
+
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        qs = Team.all_objects.all()
+        # TODO: this should be handled by some parameter to the ChangeList.
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
 
 class TeamMemberChangeList(ChangeList):
     # This class is a bit of a hack.
