@@ -114,6 +114,9 @@ class TeamField(AmaraChoiceField):
             return None
         if isinstance(value, Team):
             return value
+        # Like for UserField, we use "$" for special values
+        if isinstance(value, basestring) and value.startswith("$"):
+            return value
         try:
             return Team.objects.get(slug=value)
         except Team.DoesNotExist:
