@@ -30,7 +30,7 @@ function styleGuide(container) {
         $('.active', container).removeClass('active');
         // Add new active classes
         link.addClass('active');
-        $(link.attr('href')).addClass('active');
+        $(link.attr('href')).addClass('active').updateBehaviors();
 
         // TODO - refactor the use of a global contentUpdate event
         $(document).trigger("contentUpdate");

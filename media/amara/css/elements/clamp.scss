@@ -1,0 +1,133 @@
+// Constrained content
+// 
+// Use the `lineClamp` class to clamp text content.  Use the `listClamp` class
+// to clamp text content.  Customization is possible on predefined screen sizes
+// using a naming convention that follows the grid pattern. `.lineClamp
+// .clamp-xs-[#lines]`. The maximum number of lines is currently 20.
+//
+// To allow users to toggle the content, use the clamp-toggle class on a link.
+// The data-target attribute specifies the clamped element and the
+// data-alt-text specifies the text to display after the link is clicked.
+//
+// Example:
+// <div class="lineClamp clamp-sm-3 clamp-xs-2" id="line-clamp-example">
+//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+// </div>
+// <a class="clamp-toggle" data-target="#line-clamp-example" data-alt-text="&laquo; less">more &raquo;</a>
+//
+// Example:
+//
+// <ul class="listClamp clamp-sm-3 clamp-xs-2" id="list-clamp-example">
+//   <li>One</li>
+//   <li>Two</li>
+//   <li>Three</li>
+//   <li>Four</li>
+//   <li>Five</li>
+// </ul>
+// <a class="clamp-toggle" data-target="#list-clamp-example" data-alt-text="&laquo; less">more &raquo;</a>
+// Styleguide constrainContent
+
+
+// Shared variables
+$line-height: 1.2em;
+$max-lines: 10;
+
+.lineClamp {
+  position: relative;
+
+  height: $line-height;
+  line-height: $line-height;
+  overflow: hidden;
+  padding: 0 !important;
+
+  p {
+    // Make the margin be exactly one line, so we don't end up cutting off between lines
+    margin-bottom: $line-height;
+  }
+
+  &.overflowing:after {
+    content: "";
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 80px;
+    height: $line-height;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%);
+  }
+
+  @for $num from 1 through $max-lines {
+    &.clamp-xs-#{$num} {
+      height: $line-height * $num;
+    }
+  }
+
+  @each $breakpoint in $breakpoints {
+    $name: nth($breakpoint, 1);
+    $size: nth($breakpoint, 2);
+
+    @media only screen and (min-width: $size) {
+      @for $num from 1 through $max-lines {
+        &.clamp-#{$name}-#{$num} {
+          height: $line-height * $num;
+        }
+      }
+    }
+  }
+
+  &.expanded {
+    height: auto;
+  }
+}
+
+.listClamp {
+  li {
+    display: none;
+  }
+
+  @for $num from 1 through $max-lines {
+    &.clamp-xs-#{$num} {
+      $selector: "li:nth-child(1)";
+      @for $i from 2 through $num {
+        $selector: "#{$selector}, li:nth-child(#{$i})";
+      }
+      #{$selector} {
+        display: block;
+      }
+    }
+  }
+
+  @each $breakpoint in $breakpoints {
+    $name: nth($breakpoint, 1);
+    $size: nth($breakpoint, 2);
+
+    @media only screen and (min-width: $size) {
+      @for $num from 1 through $max-lines {
+        &.clamp-#{$name}-#{$num} {
+          $selector: "li:nth-child(1)";
+          @for $i from 2 through $num {
+            $selector: "#{$selector}, li:nth-child(#{$i})";
+          }
+          #{$selector} {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+
+  &.expanded li {
+    display: block;
+  }
+}

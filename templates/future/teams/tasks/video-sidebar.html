@@ -9,27 +9,14 @@
 {% if complete_languages %}
 <div class="content">
   <h1>{% blocktrans with count=complete_languages|length %}Completed subtitles (<span class="total">{{ count }}</span>){% endblocktrans %}</h1>
-  <hr/>
-  <ul class="nav nav-stacked">
-    {% for subtitle_language in complete_languages %}
-    <li>
-      <h6><a href="{{ subtitle_language.get_absolute_url }}{{ QUERY_STRING }}">{{ subtitle_language.get_language_code_display }}</a></h6>
-    </li>
-    {% endfor %}
-  </ul>
+  {% include "future/videos/video-subtitles-list.html" with subtitles=complete_languages id="complete-subtitles" %}
 </div>
 {% endif %}
 {% if incomplete_languages %}
 <div class="content">
   <h1>{% blocktrans with count=incomplete_languages|length %}Incomplete subtitles (<span class="total">{{ count }}</span>){% endblocktrans %}</h1>
   <hr/>
-  <ul class="nav nav-stacked">
-    {% for subtitle_language in incomplete_languages %}
-    <li>
-      <h6><a href="{{ subtitle_language.get_absolute_url }}{{ QUERY_STRING }}">{{ subtitle_language.get_language_code_display }}</a></h6>
-    </li>
-    {% endfor %}
-  </ul>
+  {% include "future/videos/video-subtitles-list.html" with subtitles=incomplete_languages id="incomplete-subtitles" %}
 </div>
 {% endif %}
 {% endwith %}

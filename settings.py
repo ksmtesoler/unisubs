@@ -443,6 +443,7 @@ MEDIA_BUNDLES = {
             'amara/js/videoPage.js',
             'amara/js/videoSubtitles.js',
             'amara/js/fileUpload.js',
+            'amara/js/lineClamp.js',
             'amara/js/main.js',
             'amara/js/styleGuide.js',
         ],

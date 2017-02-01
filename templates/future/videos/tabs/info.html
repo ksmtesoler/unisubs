@@ -10,7 +10,10 @@
 
   {% if video.description %}
   <dt>{% trans "Description:" %}</dt>
-  <dd class="constrain">{{ video.description|linebreaks }}</dd>
+  <dd>
+    <div id="video-description" class="lineClamp clamp-xs-5">{{ video.description|linebreaks }}</div>
+    {% include "future/clamp-toggle.html" with target="#video-description" %}
+  </dd>
   {% endif %}
 
   {% if video.primary_audio_language_code %}
