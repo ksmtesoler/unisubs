@@ -1,9 +1,6 @@
 {% load forms i18n %}
 <div class="modal-dialog modal-md">
   <div class="modal-content">
-    <button type="button" class="dialogButton-closeModal" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
     <header class="dialogHeader">
       <h4 class="dialogTitle">{% trans "Rolling back subtitles" %}</h4>
       <h5 class="dialogSubTitle">{{ version.get_version_display }}</h5>
