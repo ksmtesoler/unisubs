@@ -1,41 +1,69 @@
 // Constrained content
 // 
-// Use the `lineClamp` class to clamp text content.  Use the `listClamp` class
-// to clamp text content.  Customization is possible on predefined screen sizes
-// using a naming convention that follows the grid pattern. `.lineClamp
-// .clamp-xs-[#lines]`. The maximum number of lines is currently 20.
+// Use the `clamp` class to clamp content.  If there is a element with the
+// clamp-lines class inside, then we clamp using line count.  If there is a
+// ul/ol element with the clamp-list class, then we clamp by list items.
+// Customization is possible on predefined screen sizes using a naming
+// convention that follows the grid pattern. `.clamp-lines .clamp-xs-[#lines]`.
+// The maximum number of lines is currently 20.
 //
-// To allow users to toggle the content, use the clamp-toggle class on a link.
-// The data-target attribute specifies the clamped element and the
-// data-alt-text specifies the text to display after the link is clicked.
+// To allow users to expand/collapse the content, use the clamp-expand and
+// clamp-collapse classes on a link.
 //
 // Example:
-// <div class="lineClamp clamp-sm-3 clamp-xs-2" id="line-clamp-example">
-//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-//   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-//     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-//     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-//     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-//     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-//     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+// <div class="clamp">
+//   <div class="clamp-lines clamp-sm-3 clamp-xs-2">
+//     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//       quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//       consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//       cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//       proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+//     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+//       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//       quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//       consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+//       cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+//       proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+//   </div>
+//   <a class="clamp-expand">more &raquo;</a>
+//   <a class="clamp-collapse">&laquo; less</a>
 // </div>
-// <a class="clamp-toggle" data-target="#line-clamp-example" data-alt-text="&laquo; less">more &raquo;</a>
+//
+// Example:
+// <div class="clamp">
+//   <div class="clamp-lines clamp-sm-3 clamp-xs-2">
+//     <p>No clamp needed</p>
+//   </div>
+//   <a class="clamp-expand">more &raquo;</a>
+//   <a class="clamp-collapse">&laquo; less</a>
+// </div>
+//
+//
+// Example:
+// <div class="clamp">
+//   <ul class="clamp-list clamp-sm-3 clamp-xs-2">
+//     <li>One</li>
+//     <li>Two</li>
+//     <li>Three</li>
+//     <li>Four</li>
+//     <li>Five</li>
+//   </ul>
+//   <a class="clamp-expand">more &raquo;</a>
+//   <a class="clamp-collapse">&laquo; less</a>
+// </div>
 //
 // Example:
 //
-// <ul class="listClamp clamp-sm-3 clamp-xs-2" id="list-clamp-example">
-//   <li>One</li>
-//   <li>Two</li>
-//   <li>Three</li>
-//   <li>Four</li>
-//   <li>Five</li>
-// </ul>
-// <a class="clamp-toggle" data-target="#list-clamp-example" data-alt-text="&laquo; less">more &raquo;</a>
+// <div class="clamp">
+//   <ul class="clamp-list clamp-xs-2">
+//     <li>No clamp</li>
+//     <li>Needed</li>
+//   </ul>
+//   <a class="clamp-expand">more &raquo;</a>
+//   <a class="clamp-collapse">&laquo; less</a>
+// </div>
+//
 // Styleguide constrainContent
 
 
@@ -43,7 +71,7 @@
 $line-height: 1.2em;
 $max-lines: 10;
 
-.lineClamp {
+.clamp-lines {
   position: relative;
 
   height: $line-height;
@@ -56,7 +84,7 @@ $max-lines: 10;
     margin-bottom: $line-height;
   }
 
-  &.overflowing:after {
+  .clamp.overflowing &:after {
     content: "";
     text-align: right;
     position: absolute;
@@ -67,9 +95,18 @@ $max-lines: 10;
     background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%);
   }
 
+  @mixin clamp-lines-height($num) {
+    // Do some extra work to try to avoid rounding errors where you see 1 or 2 px of the following line.
+    // This effectively cuts off the text bottom of the font's height on the
+    // last line -- no extra space for the line height.  Then we use
+    // margin-bottom to add the extra height at the end.
+    height: $line-height * ($num - 1) + 1;
+    margin-bottom: $line-height - 1;
+  }
+
   @for $num from 1 through $max-lines {
     &.clamp-xs-#{$num} {
-      height: $line-height * $num;
+      @include clamp-lines-height($num);
     }
   }
 
@@ -80,18 +117,18 @@ $max-lines: 10;
     @media only screen and (min-width: $size) {
       @for $num from 1 through $max-lines {
         &.clamp-#{$name}-#{$num} {
-          height: $line-height * $num;
+          @include clamp-lines-height($num);
         }
       }
     }
   }
 
-  &.expanded {
+  .clamp.expanded & {
     height: auto;
   }
 }
 
-.listClamp {
+.clamp-list {
   li {
     display: none;
   }
@@ -127,7 +164,25 @@ $max-lines: 10;
     }
   }
 
-  &.expanded li {
+  .clamp.expanded & li {
     display: block;
+  }
+}
+
+.clamp-expand, .clamp-collapse {
+  display: none;
+}
+.clamp.overflowing {
+  .clamp-expand {
+    display: inline;
+  }
+
+  &.expanded {
+    .clamp-expand {
+      display: none;
+    }
+    .clamp-collapse {
+      display: inline;
+    }
   }
 }

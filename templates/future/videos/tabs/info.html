@@ -10,9 +10,9 @@
 
   {% if video.description %}
   <dt>{% trans "Description:" %}</dt>
-  <dd>
-    <div id="video-description" class="lineClamp clamp-xs-5">{{ video.description|linebreaks }}</div>
-    {% include "future/clamp-toggle.html" with target="#video-description" %}
+  <dd class="clamp">
+    <div class="clamp-lines clamp-xs-5">{{ video.description|linebreaks }}</div>
+    {% include "future/clamp-toggle.html" %}
   </dd>
   {% endif %}
 

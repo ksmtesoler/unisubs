@@ -1,8 +1,10 @@
-<ul id="{{ id }}" class="listClamp clamp-xs-10">
-  {% for subtitle_language in subtitles %}
-  <li>
-    <h6><a href="{{ subtitle_language.get_absolute_url }}{{ QUERY_STRING }}">{{ subtitle_language.get_language_code_display }}</a></h6>
-  </li>
-  {% endfor %}
-</ul>
-{% include "future/clamp-toggle.html" with target="#"|add:id %}
+<div class="clamp">
+  <ul class="nav nav-stacked clamp-list clamp-xs-10">
+    {% for subtitle_language in subtitles %}
+    <li>
+      <h6><a href="{{ subtitle_language.get_absolute_url }}{{ QUERY_STRING }}">{{ subtitle_language.get_language_code_display }}</a></h6>
+    </li>
+    {% endfor %}
+  </ul>
+  {% include "future/clamp-toggle.html" with target="#"|add:id %}
+</div>

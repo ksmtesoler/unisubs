@@ -1,1 +1,3 @@
-<a class="clamp-toggle" data-target="{{ target }}" data-alt-text="&laquo; less">more &raquo;</a>
+{% load i18n %}
+<a class="clamp-expand">{% trans "more" %} &raquo;</a>
+<a class="clamp-collapse">&laquo; {% trans "less" %}</a>
