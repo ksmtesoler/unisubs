@@ -787,7 +787,10 @@ def add_video(request, slug):
     team = get_team_for_view(slug, request.user)
 
     project_id = request.GET.get('project') or request.POST.get('project') or None
-    project = Project.objects.get(team=team, slug=project_id) if project_id else team.default_project
+    if project_id and project_id != 'none':
+        project = Project.objects.get(team=team, slug=project_id)
+    else:
+        project = team.default_project
 
     if request.POST and not can_add_video(team, request.user, project):
         messages.error(request, _(u"You can't add that video to this team/project."))
