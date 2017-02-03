@@ -55,6 +55,7 @@ from teams.forms import (
     TaskCreateSubtitlesForm, TeamMultiVideoCreateSubtitlesForm,
     OldMoveVideosForm, AddVideoToTeamForm, GuidelinesLangMessagesForm,
 )
+from teams.oldforms import DeleteLanguageForm
 from teams.models import (
     Team, TeamMember, Invite, Application, TeamVideo, Task, Project, Workflow,
     Setting, TeamLanguagePreference, InviteExpiredException, BillingReport,

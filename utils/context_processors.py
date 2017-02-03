@@ -51,12 +51,3 @@ def user_languages(request):
     return {
         'USER_LANGUAGES': get_user_languages_from_request(request)
     }
-
-def query_string(request):
-    if request.META['QUERY_STRING']:
-        query_string = '?' + request.META['QUERY_STRING']
-    else:
-        query_string = ''
-    return {
-        'QUERY_STRING': query_string,
-    }

@@ -1,5 +1,5 @@
 {% extends "future/base.html" %}
-{% load i18n new_subtitles_tags ui %}
+{% load i18n new_subtitles_tags ui query_string %}
 {% load url from future %}
 
 {% block head-extra %}
@@ -12,7 +12,7 @@
 <section>
   <div class="container">
     <div class="row">
-      <div class="col-xs-12 col-sm-8"><a href="{{video.get_absolute_url}}{{ QUERY_STRING }}"><i class="icon icon-back"></i>{% trans "Return to Video" %}</a>
+      <div class="col-xs-12 col-sm-8"><a href="{{video.get_absolute_url}}{% query_string %}"><i class="icon icon-back"></i>{% trans "Return to Video" %}</a>
         <div class="content">
           {% include "future/videos/embed.html" with width=848 height=477 url=video.get_video_url %}
           <h2>{{video.title_display}}</h2>
@@ -26,7 +26,7 @@
             <div id="subtitles_list" class="tab-pane active">
               <nav class="tab-actions">
                 {% if show_rollback %}
-                <a {% if can_edit %}class="button small ajaxLink" href="?form=rollback"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
+                <a {% if can_edit %}class="button small ajaxLink" href="{% query_string form=rollback %}"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
                 {% else %}
                 <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}"{% else %}class="button small disabled"{% endif %}>{% trans "Edit subtitles" %}</a>
                 {% endif %}
@@ -121,7 +121,7 @@
                 {% else %}
                 <div class="col-xs-7">
                 {% endif %}
-                <a class="text" href="{{ revision.get_absolute_url }}{{ QUERY_STRING }}">
+                <a class="text" href="{{ revision.get_absolute_url }}{% query_string %}">
                   {% if revision.is_private %}<em class="italic">{% else %}<strong>{% endif %}
                       {% blocktrans with number=revision.version_number %}Revision {{ number }}{% endblocktrans %}
                   {% if revision.is_private %}</em>{% else %}</strong>{% endif %}
@@ -144,7 +144,7 @@
             <p><em class="italic">{% trans "Private revisions are in italics." %}</em></p>
             {% endif %}
             {% if enable_delete_subtitles %}
-            <p class="text-right"><a class="ajaxLink" href="?form=delete">{% trans "Delete subititles" %}</a></p>
+            <p class="text-right"><a class="ajaxLink" href="{% query_string form=delete %}">{% trans "Delete subititles" %}</a></p>
             {% endif %}
             </section>
           {% else %}
