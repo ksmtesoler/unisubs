@@ -210,7 +210,9 @@ class NewCreateVideoUrlForm(forms.Form):
             self.video_url = self.video.add_url( self.cleaned_data['url'],
                 self.user)
         except Video.UrlAlreadyAdded, e:
-            raise forms.ValidationError(self.already_added_message(e.video))
+            self._errors['url'] = self.error_class([
+                self.already_added_message(e.video)
+            ])
 
     def already_added_message(self, video):
         if video == self.video:

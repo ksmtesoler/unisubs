@@ -83,6 +83,12 @@ class AJAXResponseRenderer(object):
         """
         self.add_change('showModalProgress', progress, label)
 
+    def hide_modal(self, selector=None):
+        if selector:
+            self.add_change('hideModal', selector)
+        else:
+            self.add_change('hideModal')
+
     def perform_request(self, delay, view_name, *args, **kwargs):
         """Perform another AJAX request after a delay
 

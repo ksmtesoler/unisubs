@@ -3,6 +3,7 @@
 <form method="post" class="ajaxForm" action="">
   {% csrf_token %}
   <input type="hidden" name="form" value="add-url" />
+  {% include "future/forms/non-field-errors.html" with form=create_url_form %}
   <div class="form-group">
     {{ create_url_form.url|render_field }}
   </div>

@@ -338,6 +338,11 @@ def video_add_url_form(request, video):
         response_renderer.clear_form('#add-url-form form')
         response_renderer.replace(*urls_tab_replacement_data(request, video))
         response_renderer.hide_modal('#add-url-dialog')
+    else:
+        response_renderer.replace(
+            '#add-url-form', "future/videos/forms/create-url.html", {
+                'create_url_form': create_url_form,
+            })
 
     return response_renderer.render()
 
