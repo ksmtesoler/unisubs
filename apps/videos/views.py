@@ -648,7 +648,9 @@ def _widget_params(request, video, version_no=None, language=None, video_url=Non
 @login_required
 @get_video_revision
 def rollback(request, version):
-    if request.method == 'POST':
+    # Normally, we only accept POST methods, but the old template code uses
+    # GET, so we allow that too.
+    if should_use_old_view(request) or request.method == 'POST':
         is_writelocked = version.subtitle_language.is_writelocked
         if not user_can_edit_subtitles(request.user, version.video,
                                        version.subtitle_language.language_code):
