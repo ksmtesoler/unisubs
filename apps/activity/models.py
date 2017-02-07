@@ -424,7 +424,7 @@ class ActivityManager(models.Manager):
             created=version.created)
 
     def create_for_video_url_added(self, video_url):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             url_edit = URLEdit.objects.create(new_url=video_url.url)
             return self.create_for_video('video-url-added', video_url.video,
                                          user=video_url.added_by,
@@ -466,7 +466,7 @@ class ActivityManager(models.Manager):
                            user=member.user, created=dates.now())
 
     def create_for_video_deleted(self, video, user):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             team_video = video.get_team_video()
             team_id = team_video.team_id if team_video else None
             url = video.get_video_url()
@@ -478,7 +478,7 @@ class ActivityManager(models.Manager):
                                related_obj_id=video_deletion.id)
 
     def create_for_video_url_made_primary(self, video_url, old_url, user):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             url_edit = URLEdit.objects.create(old_url=old_url.url,
                                               new_url=video_url.url)
             return self.create_for_video('video-url-edited', video_url.video,
@@ -486,14 +486,14 @@ class ActivityManager(models.Manager):
                                          related_obj_id=url_edit.id)
 
     def create_for_video_url_deleted(self, video_url, user):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             url_edit = URLEdit.objects.create(old_url=video_url.url)
             return self.create_for_video('video-url-deleted', video_url.video,
                                          user=user, created=dates.now(),
                                          related_obj_id=url_edit.id)
 
     def create_for_video_moved(self, video, user, from_team=None, to_team=None):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             if from_team is not None:
                 if to_team is not None:
                     to_team_id = to_team.id
@@ -587,7 +587,7 @@ class ActivityRecord(models.Model):
         return [ (code.slug, code.label) for code in code_list if code.active ]
 
     def move_to_team(self, new_team):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             # Make a copy of the record for our current team
             if self.team is not None:
                 self.make_copy()

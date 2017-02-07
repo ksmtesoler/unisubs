@@ -528,7 +528,7 @@ def add_subtitles(video, language_code, subtitles,
                                             complete, action)
     if action:
         visibility = action.subtitle_visibility
-    with transaction.commit_on_success():
+    with transaction.atomic():
         subtitle_language = _get_language(video, language_code)
         subtitle_language.freeze()
         version = _add_subtitles(video, subtitle_language, subtitles, title,
@@ -580,7 +580,7 @@ def rollback_to(video, language_code, version_number,
     subtitle_language = SubtitleLanguage.objects.get(video=video,
                                                      language_code=language_code)
     subtitle_language.freeze()
-    with transaction.commit_on_success():
+    with transaction.atomic():
         version = _rollback_to(video, subtitle_language, version_number,
                                rollback_author)
     video.cache.invalidate()

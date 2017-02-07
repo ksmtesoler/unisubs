@@ -325,7 +325,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         return list(self.userlanguage_set.order_by("priority").values_list('language', flat=True))
 
     def set_languages(self, languages):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             self.userlanguage_set.all().delete()
             self.userlanguage_set = [
                 UserLanguage(language=l["language"],

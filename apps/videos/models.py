@@ -689,7 +689,7 @@ class Video(models.Model):
         Returns:
             (video, video_url) tuple
         """
-        with transaction.commit_on_success():
+        with transaction.atomic():
             # We need to be a little careful when creating the VideoUrl
             # because it has a foreign key to Video.  We want to call
             # get_or_create(), and we need to pass the Video to that.
@@ -1214,7 +1214,7 @@ class VideoIndex(models.Model):
         # deadlocking.  For example, if we need to wait on a table lock to
         # update the row in the index table, we don't want to have a bunch of
         # innodb locks still open.
-        with transaction.commit_on_success():
+        with transaction.atomic():
             text = cls.calc_text(video, max_length=cls.MAX_TEXT_LENGTH)
         index, created = cls.objects.get_or_create(video=video,
                                                    defaults={'text': text})
