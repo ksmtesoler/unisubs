@@ -179,3 +179,6 @@ def call_event_handler_for_video(video, name, *args, **kwargs):
     team_video = video.get_team_video()
     if team_video:
         call_event_handler(team_video.team, name, *args, **kwargs)
+
+def call_event_handler_for_team(team, name, *args, **kwargs):
+    call_event_handler(team, name, *args, **kwargs)
