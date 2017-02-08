@@ -46,6 +46,7 @@ class NotificationHandlerBase(object):
     def __init__(self, notification_settings):
         self.notification_settings = notification_settings
         self.team = notification_settings.team
+        self.extra_teams = notification_settings.extra_teams
         self.url = notification_settings.url
         self.headers = notification_settings.get_headers()
         self.auth_username = notification_settings.auth_username
@@ -63,6 +64,9 @@ class NotificationHandlerBase(object):
         """
         do_http_post.delay(self.team.id, self.url, data, self.headers,
                            self.auth_username, self.auth_password)
+        for team in self.extra_teams:
+            do_http_post.delay(team.id, self.url, data, self.headers,
+                               self.auth_username, self.auth_password)
 
     def on_video_added(self, video, old_team):
         pass

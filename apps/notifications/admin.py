@@ -22,6 +22,10 @@ from django.contrib import admin
 from notifications import handlers
 from notifications.models import TeamNotificationSettings, TeamNotification
 
+class ExtraTeamsInline(admin.TabularInline):
+    model = TeamNotificationSettings.extra_teams.through
+    verbose_name_plural = 'Extra teams to notify:'
+
 class TeamNotificationSettingsForm(forms.ModelForm):
     type = forms.ChoiceField(required=True)
 
@@ -37,6 +41,9 @@ class TeamNotificationSettingsForm(forms.ModelForm):
 class TeamNotificationSettingsAdmin(admin.ModelAdmin):
     list_display = ('team', 'type', 'url',)
     form = TeamNotificationSettingsForm
+    inlines = [
+        ExtraTeamsInline,
+    ]
 
 class TeamNotificationAdmin(admin.ModelAdmin):
     list_display = ('team', 'number', 'url', 'timestamp', 'error_message')
