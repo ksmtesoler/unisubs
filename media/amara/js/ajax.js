@@ -21,8 +21,7 @@
 //
 // ajax.js -- Amara AJAX functionality
 
-
-(function($) {
+define(['jquery', 'jquery-behaviors', 'jquery-form'], function($) {
     $.behaviors('.ajaxForm', ajaxForm);
     $.behaviors('.ajaxLink', ajaxLink);
 
@@ -137,6 +136,4 @@
             return false;
         });
     }
-
-})(jQuery);
-
+});

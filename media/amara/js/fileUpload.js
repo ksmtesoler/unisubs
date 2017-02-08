@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-(function($) {
+define(['jquery', 'jquery-behaviors'], function($) {
 
 $.behaviors('.fileUpload', fileUpload);
 
@@ -38,4 +38,4 @@ function fileUpload(select) {
     });
 }
 
-})(jQuery);
+});

@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-(function($) {
+define(['jquery', 'jquery-behaviors'], function($) {
 
 $.behaviors('.styleGuide', styleGuide);
 
@@ -40,5 +40,4 @@ function styleGuide(container) {
     $('.styleGuide-navLink', container).filter(':first').click();
 }
 
-})(jQuery);
-
+});

@@ -31,13 +31,7 @@ register = template.Library()
 @register.simple_tag
 def media_bundle(bundle_name):
     bundle = bundles.get_bundle(bundle_name)
-    url = bundle.get_url()
-    if isinstance(bundle, bundles.CSSBundle):
-        return '<link href="%s" rel="stylesheet" type="text/css" />' % url
-    elif isinstance(bundle, bundles.JavascriptBundle):
-        return '<script src="%s"></script>' % url
-    else:
-        raise TypeError("Unknown bundle type: %s" % bundle)
+    return bundle.get_html()
 
 @register.simple_tag
 def url_for(bundle_name):

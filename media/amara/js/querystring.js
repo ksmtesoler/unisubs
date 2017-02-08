@@ -16,7 +16,8 @@
  * along with this program.  If not, see
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
-(function() {
+
+define([], function() {
 
 getQueryParams = function() {
     var queryString = window.location.search.substr(1);
@@ -29,5 +30,4 @@ getQueryParams = function() {
     return params;
 }
 
-})();
-
+});

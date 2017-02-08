@@ -1,19 +1,28 @@
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip();
-  $('[data-toggle="popover"]').popover();
-});
-
-$(document).on('ready', function(){
-
-  // Collapsible / Constrained content
-  $('.constrain').on('click', function() {
-    $(this).addClass('opened');
-  });
-
-  $('[data-href]').on('click', function(e) {
-    e.preventDefault();
-    var href = $(this).attr('data-href');
-    window.location.href = href;
-  });
-
-});
+require([
+    // Third party libraries
+    'underscore',
+    'jquery',
+    'jquery-behaviors',
+    'jquery-form',
+    'bootstrap',
+    'jScrollPane',
+    'jScrollPane.mousewheel',
+    'select2',
+    'chartist',
+    'chartist-plugin-tooltip',
+    // Amara modules
+    'ajax',
+    'dialogs',
+    'proxyField',
+    'dependentSelect',
+    'select',
+    'scrollBars',
+    'querystring',
+    'selectList',
+    'videoPage',
+    'videoSubtitles',
+    'fileUpload',
+    'clamp',
+    'main',
+    'styleGuide',
+]);

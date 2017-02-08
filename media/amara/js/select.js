@@ -18,6 +18,9 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
+
+define(['jquery', 'jquery-behaviors', 'select2'], function($) {
+
 $.fn.select2.amd.require([
     'jquery',
     'select2/data/ajax',
@@ -292,5 +295,7 @@ LanguageChoiceMaker.prototype = {
 function languageChoice(code) {
     return { id: code, text: getLanguageName(code), selected: code == this };
 }
+
+});
 
 });

@@ -23,7 +23,9 @@
     "jquery": "~2.2.4",
     "jquery-behaviors": "tiff/jquery-behaviors",
     "jquery-form": "^3.46.0",
-    "jScrollPane": "^2.0.23"
+    "jScrollPane": "^2.0.23",
+    "rjs": "^2.3.2",
+    "almond": "^0.3.3"
   },
   "overrides": {
     "jquery-behaviors": {

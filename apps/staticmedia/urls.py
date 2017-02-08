@@ -31,8 +31,13 @@ else:
     # mimic the S3 directory structure using views from the local server
     urlpatterns = patterns(
         'staticmedia.views',
+        # Special case requirejs since we might want to use it for different
+        # JS bundles
+        url(r'^js/require.js$', 'requirejs', name='requirejs'),
         url(r'^css/(?P<bundle_name>[\w\.-]+)$', 'css_bundle', name='css_bundle'),
         url(r'^js/(?P<bundle_name>[\w\.-]+)$', 'js_bundle', name='js_bundle'),
+        url(r'^js/(?P<bundle_name>[\w\.-]+)/(?P<path>.*)$',
+            'js_bundle_with_path', name='js_bundle_with_path'),
         url(r'^jsi18catalog/(?P<locale>[\w-]+)\.js$', 'js_i18n_catalog',
             name='js_i18n_catalog'),
         url(r'^jslanguagedata/(?P<locale>[\w-]+)\.js$',

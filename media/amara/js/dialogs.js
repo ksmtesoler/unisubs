@@ -21,8 +21,7 @@
 //
 // dialags.js -- Dialog code
 
-
-(function($) {
+define(['jquery', 'underscore'], function($, _) {
     var currentModal = null;
 
     // FIXME: Currently we expose a global function, but should we use a JS
@@ -72,6 +71,4 @@
         }));
     }
 
-})(jQuery);
-
-
+});

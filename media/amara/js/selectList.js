@@ -23,8 +23,7 @@
  * When one of the buttons on the actionBar is clicked, then we pop up a modal dialog.
  */
 
-
-(function($) {
+define(['jquery', 'jquery-behaviors'], function($) {
     $.behaviors('.selectList', selectList);
     $.behaviors('.selectAll', selectAll);
     $.behaviors('.deselectAll', deselectAll);
@@ -75,4 +74,4 @@
             return selection;
         }
     }
-})(jQuery);
+});
