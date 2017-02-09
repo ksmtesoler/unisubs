@@ -7,7 +7,7 @@
     </header>
     <form action="?form=delete" class="ajaxForm" method="POST">
       {% csrf_token %}
-      <ul>
+      <ul class="bullets">
         {% for bullet in form.bullets %}
         <li>{{ bullet }}</li>
         {% endfor %}
