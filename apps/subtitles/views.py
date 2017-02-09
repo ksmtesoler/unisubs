@@ -132,6 +132,8 @@ class SubtitleEditorBase(View):
     def get_redirect_url(self):
         if 'return_url' in self.request.GET:
             return self.request.GET['return_url']
+        elif 'HTTP_REFERER' in self.request.META:
+            return self.request.META['HTTP_REFERER']
         else:
             return self.video.get_absolute_url()
 
