@@ -28,7 +28,9 @@
             {% if team|can_view_management_tab:request.user %}
             <li class="mainNav-nav-item{% if team_nav == "management" %} active{% endif %}"><a href="{{ team|management_page_default:request }}">{% trans "Management" %}</a></li>
             {% endif %}
-            <li class="mainNav-nav-item{% if team_nav == "resources" %} active{% endif %}"><a href="">{% trans "Resources" %}</a></li>
+            {% if team|can_view_settings_tab:user %}
+            <li class="mainNav-nav-item{% if team_nav == "settings" %} active{% endif %}"><a href="{% url "teams:settings_basic" slug=team.slug %}">{% trans "Settings" %}</a></li>
+            {% endif %}
           </ul>
         </div>
       </nav>
