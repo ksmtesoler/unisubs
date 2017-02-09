@@ -12,9 +12,6 @@
 // <div id="modal_baseline" class="modal fade">
 //   <div class="modal-dialog modal-md">
 //     <div class="modal-content">
-//       <button type="button" class="dialogButton-closeModal" data-dismiss="modal">
-//         <span>&times;</span>
-//       </button>
 //       <header class="dialogHeader">
 //         <h4 class="dialogTitle">Modal Title</h4>
 //         <h5 class="dialogSubTitle">Modal Subtitle</h5>
@@ -35,6 +32,45 @@
 //
 // Styleguide modalbaseline
 
+// Tabbed Content in Modal
+// 
+//
+// Example:
+// <!-- Trigger -->
+// <button type="button" class="button cta" data-toggle="modal" data-target="#modal_tabbed">
+//   Launch baseline example
+// </button>
+// 
+// <!-- Modal -->
+// <div id="modal_tabbed" class="modal fade">
+//   <div class="modal-dialog modal-md">
+//     <div class="modal-content">
+//       <header class="dialogHeader">
+//         <h4 class="dialogTitle">Modal Title</h4>
+//         <h5 class="dialogSubTitle">Modal Subtitle</h5>
+//       </header>
+//       <ul class="nav nav-tabs">
+//         <li class="active"><a href="#modal_tab_one" data-toggle="tab">Tab One</a></li>
+//         <li><a href="#modal_tab_two" data-toggle="tab">Tab Two</a></li>
+//         <li><a href="#modal_tab_three" data-toggle="tab">Tab Three</a></li>
+//       </ul>
+//       <div class="tab-content">
+//         <div id="modal_tab_one" class="tab-pane active">
+//           Tab One Content...
+//         </div>
+//         <div id="modal_tab_two" class="tab-pane">
+//           Tab Two Content...
+//         </div>
+//         <div id="modal_tab_three" class="tab-pane">
+//           Tab Three Content...
+//         </div>
+//       </div>
+//     </div>
+//   </div>
+// </div>
+//
+// Styleguide modaltabbed
+
 // Messaging / Validation
 // 
 // Example:
@@ -47,16 +83,12 @@
 // <div id="modal_message" class="modal fade">
 //   <div class="modal-dialog modal-md">
 //     <div class="modal-content">
-//       <button type="button" class="dialogButton-closeModal" data-dismiss="modal">
-//         <span>&times;</span>
-//       </button>
 //       <header class="dialogHeader">
 //         <h4 class="dialogTitle">Modal Title</h4>
 //         <h5 class="dialogSubTitle">Modal Subtitle</h5>
 //       </header>
 //       <form>
-//         <div class="alert alert-danger alert-dismissible" role="alert">
-//           <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+//         <div class="alert alert-error role="alert">
 //           <strong>Error!</strong> You're not too happy now.
 //         </div>
 //         <div class="form-group has-error">
@@ -88,9 +120,6 @@
 // <div id="dialog_confirmation" class="modal fade">
 //   <div class="modal-dialog modal-sm">
 //     <div class="modal-content">
-//       <button type="button" class="dialogButton-closeModal" data-dismiss="modal">
-//         <span>&times;</span>
-//       </button>
 //       <div class="dialogHeader text-center">
 //         <h4 class="dialogTitle">Are you sure that you want to delete selected subtitle videos?</h4>
 //       </div>

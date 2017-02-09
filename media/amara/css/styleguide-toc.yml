@@ -7,12 +7,14 @@
 - - Global
   - palette
   - typography
+  - lists
   - alerts
   - progressbars
   - indicators
   - scrollBars
   - avatars
   - icons
+  - tabs
   # - grid
   # - utilities
 
@@ -36,6 +38,7 @@
   - modalbaseline
   - dialogconfirmation
   - modalvalidation
+  - modaltabbed
 
 - - Utility Classes
   # - text

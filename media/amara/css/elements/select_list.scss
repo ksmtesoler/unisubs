@@ -13,6 +13,18 @@
 //       <input id="styleGuide_item_1" type="checkbox" class="selectList-checkbox" value="item_1">
 //       <label for="styleGuide_item_1"><span></span></label>
 //     </div>
+//     <div class="context-menu">
+//       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>
+//       <ul class="dropdown-menu">
+//         <li><a href="#">Menu Item</a></li>
+//         <li class="divider"></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li class="divider"></li>
+//         <li><a href="#">Menu Item</a></li>
+//       </ul>
+//     </div>
 //     <div class="col-xs-11">
 //       <div class="selectList-thumb">
 //         <div class="thumbWrapper">
@@ -39,6 +51,18 @@
 //       <input id="styleGuide_item_2" type="checkbox" class="selectList-checkbox" value="item_2">
 //       <label for="styleGuide_item_2"><span></span></label>
 //     </div>
+//     <div class="context-menu">
+//       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>
+//       <ul class="dropdown-menu">
+//         <li><a href="#">Menu Item</a></li>
+//         <li class="divider"></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li class="divider"></li>
+//         <li><a href="#">Menu Item</a></li>
+//       </ul>
+//     </div>
 //     <div class="col-xs-11">
 //       <div class="selectList-thumb">
 //         <div class="thumbWrapper">
@@ -64,6 +88,18 @@
 //     <div class="checkbox">
 //       <input id="styleGuide_item_3" type="checkbox" class="selectList-checkbox" value="item_3">
 //       <label for="styleGuide_item_3"><span></span></label>
+//     </div>
+//     <div class="context-menu">
+//       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>
+//       <ul class="dropdown-menu">
+//         <li><a href="#">Menu Item</a></li>
+//         <li class="divider"></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li><a href="#">Menu Item</a></li>
+//         <li class="divider"></li>
+//         <li><a href="#">Menu Item</a></li>
+//       </ul>
 //     </div>
 //     <div class="col-xs-11">
 //       <div class="selectList-thumb">
@@ -127,6 +163,11 @@ ul.selectList {
     margin-bottom: 30px;
     font-weight: 200;
     color: $gray;
+    &:hover {
+      .context-menu {
+        display: block;
+      }
+    }
   }
   h3 {
     font-family: $headings-font-family;
@@ -190,6 +231,58 @@ ul.selectList {
     width: 220px;
     float: left;
     margin-right: 20px;
+  }
+  .context-menu {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 10px;
+    .dropdown-toggle {
+      width: 20px;
+      height: 20px;
+      background-color: $teal;
+      display: block;
+      text-align: center;
+      line-height: 20px;
+      .caret {
+        margin: 0;
+        color: #ffffff;
+      }
+    }
+    >.dropdown-menu {
+      width: auto;
+      left: auto;
+      right: -5px;
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      &:before, &:after {
+        content: '';
+        position: absolute;
+        display: block;
+        top: -9px;
+        right: 6px;
+        left: auto;
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 8px solid #d9d9d9;
+      }
+      &:before {
+        left: auto;
+        right: 7px;
+      }
+      &:after {
+        top: -8px;
+        border-bottom-color: #fff;
+      }
+      li {
+        a {
+          color: #7e7f80;
+        }
+      }
+    }
   }
 }
 

@@ -16,6 +16,10 @@
 //     <span>icon-complete</span>
 //   </li>
 //   <li>
+//     <i class="icon icon-incomplete"></i>
+//     <span>icon-incomplete</span>
+//   </li>
+//   <li>
 //     <i class="icon icon-deny"></i>
 //     <span>icon-deny</span>
 //   </li>
@@ -137,6 +141,9 @@ i {
 }
 .icon-approve_outline:before {
   content: "\e909";
+}
+.icon-incomplete:before {
+  content: "\e911";
 }
 .icon-complete:before {
   content: "\e90c";

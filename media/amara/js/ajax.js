@@ -49,14 +49,6 @@
                     showModalProgress(change[1], change[2]);
                     break;
 
-                case 'hideModal':
-                    if(change[1]) {
-                        $(change[1]).modal('hide');
-                    } else {
-                        closeCurrentModal();
-                    }
-                    break;
-
                 case 'performRequest':
                     setTimeout(function() {
                         $.ajax(change[1], {

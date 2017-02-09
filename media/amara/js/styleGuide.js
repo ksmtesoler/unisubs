@@ -27,7 +27,7 @@ function styleGuide(container) {
     $('.styleGuide-navLink', container).click(function(evt) {
         var link = $(this);
         // Remove old active classes
-        $('.active', container).removeClass('active');
+        $('.styleGuide-navLink.active, .styleGuide-section.active', container).removeClass('active');
         // Add new active classes
         link.addClass('active');
         $(link.attr('href')).addClass('active').updateBehaviors();

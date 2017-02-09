@@ -1,5 +1,24 @@
 // Lists
-
+// 
+// Example:
+// <dl>
+//   <dt>First Item</dt>
+//   <dd>Here is a short description of this item</dd>
+//   <dt>Second Item</dt>
+//   <dd>Here is a short description of this item</dd>
+//   <dt>Third Item</dt>
+//   <dd>Here is a short description of this item</dd>
+// </dl>
+// 
+// Example:
+// <ul class="bullets">
+//   <li>List item One</li>
+//   <li>List item Two</li>
+//   <li>List item Three</li>
+//   <li>List item Four</li>
+// </ul>
+// 
+// Styleguide lists
 dl {
   margin: 0;
   &.inline {
@@ -66,5 +85,10 @@ ul {
         font-weight: 300;
         color: $gray-darker;
       }
+  }
+  &.bullets {
+    padding-left: 20px;
+    list-style-type: disc; 
+    list-style-position: outside;
   }
 }

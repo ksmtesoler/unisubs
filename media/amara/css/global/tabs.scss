@@ -1,3 +1,24 @@
+// Tabs
+//
+// Example:
+// <ul class="nav nav-tabs">
+//   <li class="active"><a href="#tab_one" data-toggle="tab">Tab One</a></li>
+//   <li><a href="#tab_two" data-toggle="tab">Tab Two</a></li>
+//   <li><a href="#tab_three" data-toggle="tab">Tab Three</a></li>
+// </ul>
+// <div class="tab-content">
+//   <div id="tab_one" class="tab-pane active">
+//     Tab One Content...
+//   </div>
+//   <div id="tab_two" class="tab-pane">
+//     Tab Two Content...
+//   </div>
+//   <div id="tab_three" class="tab-pane">
+//     Tab Three Content...
+//   </div>
+// </div>
+//
+// Styleguide tabs
 ul.nav-tabs {
   list-style: none;
   border-bottom: none;
@@ -16,7 +37,8 @@ ul.nav-tabs {
       border-bottom: 2px solid transparent;
       font-weight: 300;
       color: $teal;
-      &:hover {
+      background-color: transparent;
+      &:hover, &:focus {
         background-color: transparent;
         border-bottom: 2px solid transparent;
       }
@@ -28,12 +50,14 @@ ul.nav-tabs {
         outline: none;
         color: $teal;
         font-weight: 600;
+        background-color: transparent;
         &:hover, &:focus, &:active {
           color: $turquoise;
           font-weight: 600;
           border: none;
           border-bottom: 2px solid $teal;
-        }  
+          background-color: transparent;
+        }
       }
     }
   }
