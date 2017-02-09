@@ -46,6 +46,9 @@ class TeamNotificationSettings(models.Model):
         try:
             return TeamNotificationSettings.objects.get(team=team)
         except TeamNotificationSettings.DoesNotExist:
+            teams = TeamNotificationSettings.objects.filter(extra_teams=team)
+            if teams.exists():
+                return teams[0]
             return None
 
     def get_headers(self):
