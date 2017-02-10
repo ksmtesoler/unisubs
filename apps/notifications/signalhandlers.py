@@ -101,4 +101,4 @@ def on_team_member_delete(sender, instance, **kwargs):
 def on_user_save(sender, **kwargs):
     user = sender
     for team in user.teams.all():
-        call_event_handler(team, 'on_user_info_updated', user, member.team)
+        call_event_handler(team, 'on_user_info_updated', user, team)

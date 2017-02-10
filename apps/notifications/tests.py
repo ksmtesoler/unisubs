@@ -216,7 +216,7 @@ class TestNotificationHandlerLookup(TestCase):
         with self.patch_handler_lookup() as mock_handler:
             member = TeamMemberFactory(team=self.team)
         assert_equal(mock_handler.on_user_added.call_args,
-                     mock.call(member.user))
+                     mock.call(member.user, self.team))
         # A second save shouldn't cause the handler to be called again
         with self.patch_handler_lookup(False) as mock_handler:
             member.save()
@@ -227,7 +227,7 @@ class TestNotificationHandlerLookup(TestCase):
         with self.patch_handler_lookup() as mock_handler:
             member.delete()
         assert_equal(mock_handler.on_user_removed.call_args,
-                     mock.call(member.user))
+                     mock.call(member.user, self.team))
 
     def test_on_user_info_updated(self):
         member = TeamMemberFactory(team=self.team)
@@ -236,7 +236,7 @@ class TestNotificationHandlerLookup(TestCase):
             member.user.last_name = 'name'
             member.user.save()
         assert_equal(mock_handler.on_user_info_updated.call_args,
-                     mock.call(member.user))
+                     mock.call(member.user, self.team))
 
     def test_exception_in_handler(self):
         with self.patch_handler_lookup() as mock_handler:
