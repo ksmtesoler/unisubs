@@ -24,7 +24,8 @@ define(['jquery', 'jquery-behaviors', 'jScrollPane'], function($) {
     function addScrollBars(el) {
         var settings = {
             showArrows: false,
-            maintainPosition: false
+            maintainPosition: false,
+            contentWidth: '0px'
         }
         $(el).jScrollPane(settings);
 
