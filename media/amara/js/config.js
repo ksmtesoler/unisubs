@@ -7,7 +7,9 @@ require.config({
         'bootstrap': 'lib/bootstrap/dist/js/bootstrap',
         'jScrollPane': 'lib/jScrollPane/script/jquery.jscrollpane',
         'jScrollPane.mousewheel': 'lib/jScrollPane/script/jquery.mousewheel',
-        'select2': 'lib/select2/dist/js/select2',
+        'select2': 'lib/select2/src/js/select2',
+        'jquery-select2': 'lib/select2/src/js/jquery.select2',
+        'jquery-mousewheel': 'lib/select2/src/js/jquery.mousewheel.shim',
         'chartist': 'lib/chartist/dist/chartist',
         'chartist-plugin-tooltip': 'lib/chartist-plugin-tooltip/dist/chartist-plugin-tooltip',
     },
@@ -17,6 +19,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jScrollPane': ['jquery'],
         'jScrollPane.mousewheel': ['jquery'],
-        'select2': ['jquery'],
+        'jquery-select2': ['jquery'],
     }
 });

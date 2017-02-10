@@ -3,7 +3,7 @@ require([
     'jquery',
     'jquery-behaviors',
     'jquery-form',
-    'select2',
+    'jquery-select2',
     'jScrollPane',
     'jScrollPane.mousewheel',
 ], function() {

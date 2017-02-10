@@ -18,22 +18,15 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-define(['jquery', 'underscore'], function($, _) {
-
-$.fn.select2.amd.require([
+define([
     'jquery',
-    'select2/data/ajax',
+    'underscore',
     'select2/utils',
-    'select2/data/minimumInputLength',
     'select2/dropdown',
     'select2/dropdown/search',
     'select2/dropdown/closeOnSelect',
-    'select2/dropdown/attachBody',
-], function($, AjaxData, Utils, MinimumInputLength, Dropdown, DropdownSearch, CloseOnSelect, AttachBody) {
-
-$(function() {
-    $.behaviors('.select', initSelect);
-});
+    'select2/dropdown/attachBody'
+], function($, _, Utils, Dropdown, DropdownSearch, CloseOnSelect, AttachBody) {
 
 function arrayToMap(array) {
     var map = {};
@@ -295,6 +288,6 @@ function languageChoice(code) {
     return { id: code, text: getLanguageName(code), selected: code == this };
 }
 
-});
+$.behaviors('.select', initSelect);
 
 });
