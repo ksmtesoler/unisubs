@@ -89,13 +89,13 @@ class NotificationHandlerBase(object):
     def on_subtitles_deleted(self, video, subtitle_language):
         pass
 
-    def on_user_added(self, user):
+    def on_user_added(self, user, team):
         pass
 
-    def on_user_removed(self, user):
+    def on_user_removed(self, user, team):
         pass
 
-    def on_user_info_updated(self, user):
+    def on_user_info_updated(self, user, team):
         pass
 
 @task
