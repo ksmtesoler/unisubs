@@ -21,7 +21,7 @@
 //
 // ajax.js -- Amara AJAX functionality
 
-define(['jquery'], function($) {
+define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
     $.behaviors('.ajaxForm', ajaxForm);
     $.behaviors('.ajaxLink', ajaxLink);
 
@@ -41,11 +41,11 @@ define(['jquery'], function($) {
                     break;
 
                 case 'showModal':
-                    showModal(change[1]).updateBehaviors();
+                    dialogs.showModal(change[1]).updateBehaviors();
                     break;
 
                 case 'showModalProgress':
-                    showModalProgress(change[1], change[2]);
+                    dialogs.showModalProgress(change[1], change[2]);
                     break;
 
                 case 'performRequest':
@@ -89,7 +89,7 @@ define(['jquery'], function($) {
                             window.location.pathname + '?' + form.formSerialize());
                 }
                 if(form.hasClass('copyQuery')) {
-                    _.each(getQueryParams(), function(value, name) {
+                    _.each(querystring.parse(), function(value, name) {
                         data.push({ name: name, value: value });
                     });
                 }
@@ -107,7 +107,7 @@ define(['jquery'], function($) {
             success: processAjaxResponse,
             error: function() {
                 alert(gettext('Error submitting form'));
-                closeCurrentModal();
+                dialogs.closeCurrentModal();
             }
         });
 

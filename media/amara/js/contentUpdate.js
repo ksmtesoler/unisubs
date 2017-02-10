@@ -1,6 +1,7 @@
-/* Amara, universalsubtitles.org
+/*
+ * Amara, universalsubtitles.org
  *
- * Copyright (C) 2015 Participatory Culture Foundation
+ * Copyright (C) 2017 Participatory Culture Foundation
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,20 +19,15 @@
  */
 
 //
-// querystring -- querystring paramater code
+// contentUpdate -- event that fires when we update the DOM in some way
+//
+// It uses the jquery Callbacks() object which has the following methods:
+//
+//    - add(): add a callback
+//    - remove(): remove a callback
+//    - fire(): fire callbacks
 //
 
-define([], function() {
-    return {
-        parse: function() {
-            var queryString = window.location.search.substr(1);
-            var params = {};
-            $.each(queryString.split('&'), function(i, pair) {
-                if (pair === "") return;
-                var parts = pair.split("=");
-                params[parts[0]] = parts[1] && decodeURIComponent(parts[1].replace(/\+/g, " "));
-            });
-            return params;
-        }
-    };
+define(['jquery'], function($) {
+    return $.Callbacks();
 });

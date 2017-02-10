@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-define(['jquery'], function($) {
+define(['jquery', 'contentUpdate'], function($, contentUpdate) {
 
 $.behaviors('.clamp', clamp);
 
@@ -26,7 +26,7 @@ function clamp(container) {
     container = $(container);
 
     $(window).resize(checkOverflow);
-    $(document).on("contentUpdate", checkOverflow);
+    contentUpdate.add(checkOverflow);
     checkOverflow();
 
     $('.clamp-expand', container).click(function() {

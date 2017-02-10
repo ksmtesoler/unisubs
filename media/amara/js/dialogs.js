@@ -19,48 +19,11 @@
  */
 
 //
-// dialags.js -- Dialog code
+// dialogs.js -- Dialog code
+// 
 
 define(['jquery', 'underscore'], function($, _) {
     var currentModal = null;
-
-    // FIXME: Currently we expose a global function, but should we use a JS
-    // module instead like JQuery/underscore?
-
-    // show/replace the our modal dialog
-    showModal = function(content) {
-        content = $(content);
-        if(currentModal) {
-            currentModal.empty().append(content);
-        } else {
-            currentModal = $('<div class="modal fade" role="dialog"></div>').append(content);
-            currentModal.append(content);
-            $(document.body).append(currentModal);
-            currentModal.modal().on('hidden.bs.modal', function() {
-                currentModal.remove();
-                currentModal = null;
-            });
-        }
-        return currentModal;
-    }
-
-    closeCurrentModal = function() {
-        if(currentModal) {
-            currentModal.modal('hide');
-        }
-    }
-
-
-    // Show a progress bar on the current modal dialog
-    showModalProgress = function(progress, label) {
-        if(!currentModal) {
-            console.log("showModalProgress(), no current modal");
-            return;
-        }
-        var footer = $('.modal-footer', currentModal);
-        footer.empty().append(makeProgressBar(progress, label));
-    }
-
     var progressBarTemplate = _.template('<div class="progressBar teal"><div class="progressBar-progress" role="progressbar" style="width: <%- percent %>;"><span class="sr-only"><%- percentLabel %></span></div></div><p class="progressBar-label teal"><%- label %></p>');
     function makeProgressBar(progress, label) {
         var percent = (progress * 100) + '%';
@@ -71,4 +34,36 @@ define(['jquery', 'underscore'], function($, _) {
         }));
     }
 
+    return {
+        // show/replace the our modal dialog
+        showModal: function(content) {
+            content = $(content);
+            if(currentModal) {
+                currentModal.empty().append(content);
+            } else {
+                currentModal = $('<div class="modal fade" role="dialog"></div>').append(content);
+                currentModal.append(content);
+                $(document.body).append(currentModal);
+                currentModal.modal().on('hidden.bs.modal', function() {
+                    currentModal.remove();
+                    currentModal = null;
+                });
+            }
+            return currentModal;
+        },
+        closeCurrentModal: function() {
+            if(currentModal) {
+                currentModal.modal('hide');
+            }
+        },
+        // Show a progress bar on the current modal dialog
+        showModalProgress: function(progress, label) {
+            if(!currentModal) {
+                console.log("showModalProgress(), no current modal");
+                return;
+            }
+            var footer = $('.modal-footer', currentModal);
+            footer.empty().append(makeProgressBar(progress, label));
+        }
+    };
 });

@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-define(['jquery'], function($) {
+define(['jquery', 'contentUpdate'], function($, contentUpdate) {
     $.behaviors('.scrollBars', addScrollBars);
 
     function addScrollBars(el) {
@@ -29,8 +29,7 @@ define(['jquery'], function($) {
         }
         $(el).jScrollPane(settings);
 
-        // TODO - refactor the use of a global contentUpdate event
-        $(document).on("contentUpdate", function() {
+        contentUpdate.add(function() {
             $(el).jScrollPane(settings);
         });
 

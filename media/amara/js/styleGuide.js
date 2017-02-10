@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-define(['jquery'], function($) {
+define(['jquery', 'contentUpdate'], function($, contentUpdate) {
 
 $.behaviors('.styleGuide', styleGuide);
 
@@ -32,8 +32,7 @@ function styleGuide(container) {
         link.addClass('active');
         $(link.attr('href')).addClass('active').updateBehaviors();
 
-        // TODO - refactor the use of a global contentUpdate event
-        $(document).trigger("contentUpdate");
+        contentUpdate.fire();
 
         evt.preventDefault();
     });
