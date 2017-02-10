@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-define(['jquery'], function($) {
+define(['jquery', 'underscore'], function($, _) {
 
 $.fn.select2.amd.require([
     'jquery',

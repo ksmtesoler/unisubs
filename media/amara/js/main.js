@@ -10,7 +10,6 @@ require([
     // require all the other modules
     require([
         // Third party libraries
-        'underscore',
         'bootstrap',
         'chartist',
         'chartist-plugin-tooltip',
@@ -21,13 +20,11 @@ require([
         'dependentSelect',
         'select',
         'scrollBars',
-        'querystring',
         'selectList',
         'videoPage',
         'videoSubtitles',
         'fileUpload',
         'clamp',
-        'main',
         'styleGuide',
     ]);
 });
