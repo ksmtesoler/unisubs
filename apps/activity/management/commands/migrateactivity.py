@@ -18,7 +18,7 @@ class Command(BaseCommand):
         self.batch_size = options['batch_size']
         progress = self.get_progress()
         while True:
-            with transaction.commit_on_success():
+            with transaction.atomic():
                 last_migrated_id = self.process_rows(progress.last_migrated_id)
                 if last_migrated_id is None:
                     return
