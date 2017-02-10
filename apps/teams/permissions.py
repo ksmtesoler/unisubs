@@ -471,7 +471,7 @@ def can_delete_video_in_team(team, user):
     """
     role = get_role_for_target(user, team)
 
-    return role in [ROLE_OWNER]
+    return role in [ROLE_OWNER, ROLE_ADMIN]
 
 def can_edit_video(team_video, user):
     """Return whether the given user can edit the given video."""
