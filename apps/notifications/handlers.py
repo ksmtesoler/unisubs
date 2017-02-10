@@ -97,6 +97,9 @@ class NotificationHandlerBase(object):
     def on_user_info_updated(self, user):
         pass
 
+    def on_status_changed(self, video, data):
+        pass
+
 @task
 def do_http_post(team_id, url, data, headers, auth_username, auth_password):
     """Handle the HTTP POST for a notifaction
