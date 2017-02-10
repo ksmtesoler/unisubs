@@ -21,7 +21,7 @@
 //
 // ajax.js -- Amara AJAX functionality
 
-define(['jquery', 'jquery-behaviors', 'jquery-form'], function($) {
+define(['jquery'], function($) {
     $.behaviors('.ajaxForm', ajaxForm);
     $.behaviors('.ajaxLink', ajaxLink);
 

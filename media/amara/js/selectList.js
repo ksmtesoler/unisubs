@@ -23,7 +23,7 @@
  * When one of the buttons on the actionBar is clicked, then we pop up a modal dialog.
  */
 
-define(['jquery', 'jquery-behaviors'], function($) {
+define(['jquery'], function($) {
     $.behaviors('.selectList', selectList);
     $.behaviors('.selectAll', selectAll);
     $.behaviors('.deselectAll', deselectAll);

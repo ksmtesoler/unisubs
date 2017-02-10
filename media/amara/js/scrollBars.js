@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-define(['jquery', 'jquery-behaviors', 'jScrollPane'], function($) {
+define(['jquery'], function($) {
     $.behaviors('.scrollBars', addScrollBars);
 
     function addScrollBars(el) {

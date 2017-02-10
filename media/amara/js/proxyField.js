@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-define(['jquery', 'jquery-behaviors'], function($) {
+define(['jquery'], function($) {
     $.behaviors('.proxyField', proxyField);
 
     function proxyField(container) {

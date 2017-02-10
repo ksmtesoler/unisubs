@@ -18,8 +18,7 @@
  * http://www.gnu.org/licenses/agpl-3.0.html.
  */
 
-
-define(['jquery', 'jquery-behaviors', 'select2'], function($) {
+define(['jquery'], function($) {
 
 $.fn.select2.amd.require([
     'jquery',
