@@ -90,15 +90,15 @@ def on_language_deleted(sender, **kwargs):
 def on_team_member_save(sender, instance, created, **kwargs):
     member = instance
     if created:
-        call_event_handler(member.team, 'on_user_added', member.user)
+        call_event_handler(member.team, 'on_user_added', member.user, member.team)
 
 @receiver(pre_delete, sender=TeamMember)
 def on_team_member_delete(sender, instance, **kwargs):
     member = instance
-    call_event_handler(member.team, 'on_user_removed', member.user)
+    call_event_handler(member.team, 'on_user_removed', member.user, member.team)
 
 @receiver(auth.signals.user_profile_changed)
 def on_user_save(sender, **kwargs):
     user = sender
     for team in user.teams.all():
-        call_event_handler(team, 'on_user_info_updated', user)
+        call_event_handler(team, 'on_user_info_updated', user, team)

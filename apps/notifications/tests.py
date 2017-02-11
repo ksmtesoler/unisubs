@@ -43,6 +43,55 @@ class TestNotificationHandlerLookup(TestCase):
         self.team = TeamFactory(admin=self.user)
         self.url = 'http://example.com'
 
+    def test_extra_teams_lookup(self):
+        team = TeamFactory()
+        team_extra_1 = TeamFactory()
+        team_extra_2 = TeamFactory()
+        team_extra_3 = TeamFactory()
+        settings = TeamNotificationSettings(team=team,
+                                            type='mock-type',
+                                            url='http://example.com/')
+        settings.save()
+        settings.extra_teams.add(team_extra_1)
+        settings.extra_teams.add(team_extra_2)
+        assert_equal(TeamNotificationSettings.lookup(team), settings)
+        assert_equal(TeamNotificationSettings.lookup(team_extra_1), settings)
+        assert_equal(TeamNotificationSettings.lookup(team_extra_2), settings)
+        assert_equal(TeamNotificationSettings.lookup(team_extra_3), None)
+
+    def test_extra_teams_lookup_primary_first(self):
+        team_1 = TeamFactory()
+        team_2 = TeamFactory()
+        team_3 = TeamFactory()
+        settings_1 = TeamNotificationSettings(team=team_1,
+                                            type='mock-type',
+                                            url='http://example.com/')
+        settings_2 = TeamNotificationSettings(team=team_2,
+                                            type='mock-type',
+                                            url='http://example.com/')
+        settings_1.save()
+        settings_2.save()
+        settings_1.extra_teams.add(team_2)
+        settings_1.extra_teams.add(team_3)
+        assert_equal(TeamNotificationSettings.lookup(team_1), settings_1)
+        assert_equal(TeamNotificationSettings.lookup(team_2), settings_2)
+        assert_equal(TeamNotificationSettings.lookup(team_3), settings_1)
+
+    def test_extra_teams_lookup_duplicate_teams(self):
+        team = TeamFactory()
+        team_extra_1 = TeamFactory()
+        team_extra_2 = TeamFactory()
+        settings = TeamNotificationSettings(team=team,
+                                            type='mock-type',
+                                            url='http://example.com/')
+        settings.save()
+        settings.extra_teams.add(team_extra_1)
+        settings.extra_teams.add(team_extra_2)
+        settings.extra_teams.add(team_extra_1)
+        assert_equal(TeamNotificationSettings.lookup(team), settings)
+        assert_equal(TeamNotificationSettings.lookup(team_extra_1), settings)
+        assert_equal(TeamNotificationSettings.lookup(team_extra_2), settings)
+
     @contextmanager
     def patch_handler_lookup(self, call_expected=True):
         mock_settings = mock.Mock(
@@ -167,7 +216,7 @@ class TestNotificationHandlerLookup(TestCase):
         with self.patch_handler_lookup() as mock_handler:
             member = TeamMemberFactory(team=self.team)
         assert_equal(mock_handler.on_user_added.call_args,
-                     mock.call(member.user))
+                     mock.call(member.user, self.team))
         # A second save shouldn't cause the handler to be called again
         with self.patch_handler_lookup(False) as mock_handler:
             member.save()
@@ -178,7 +227,7 @@ class TestNotificationHandlerLookup(TestCase):
         with self.patch_handler_lookup() as mock_handler:
             member.delete()
         assert_equal(mock_handler.on_user_removed.call_args,
-                     mock.call(member.user))
+                     mock.call(member.user, self.team))
 
     def test_on_user_info_updated(self):
         member = TeamMemberFactory(team=self.team)
@@ -187,7 +236,7 @@ class TestNotificationHandlerLookup(TestCase):
             member.user.last_name = 'name'
             member.user.save()
         assert_equal(mock_handler.on_user_info_updated.call_args,
-                     mock.call(member.user))
+                     mock.call(member.user, self.team))
 
     def test_exception_in_handler(self):
         with self.patch_handler_lookup() as mock_handler:
@@ -259,6 +308,7 @@ class TestSendNotification(TestCase):
         settings = TeamNotificationSettings(team=team,
                                             type='mock-type',
                                             url='http://example.com/')
+        settings.save()
         handler = handlers.NotificationHandlerBase(settings)
         data = {'foo': 'bar'}
         handler.send_notification(data)

@@ -20,12 +20,16 @@ import json
 
 from django.db import models, IntegrityError
 from django.db.models import Max
+from django.utils.translation import ugettext_lazy as _, ugettext
 
 from utils import dates
 from teams.models import Team
 
 class TeamNotificationSettings(models.Model):
     team = models.OneToOneField(Team)
+    extra_teams = models.ManyToManyField(Team,
+                                         related_name="team_settings_extra",
+                                         verbose_name=_('Extra teams to notify'))
     type = models.CharField(max_length=30)
     url = models.URLField(max_length=512)
     auth_username = models.CharField(max_length=128, blank=True)
@@ -42,6 +46,9 @@ class TeamNotificationSettings(models.Model):
         try:
             return TeamNotificationSettings.objects.get(team=team)
         except TeamNotificationSettings.DoesNotExist:
+            team_settings = TeamNotificationSettings.objects.filter(extra_teams=team)
+            if team_settings.exists():
+                return team_settings[0]
             return None
 
     def get_headers(self):
@@ -52,6 +59,10 @@ class TeamNotificationSettings(models.Model):
                 key, value = header.split(':', 1)
                 headers[key.strip()] = value.strip()
         return headers
+
+class ExtraTeamNotification(models.Model):
+    team = models.ForeignKey(Team)
+    team_notification_setting = models.ForeignKey(TeamNotificationSettings)
 
 class TeamNotification(models.Model):
     """Records a sent notication."""
