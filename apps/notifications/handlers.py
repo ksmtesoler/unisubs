@@ -98,7 +98,8 @@ class NotificationHandlerBase(object):
     def on_user_info_updated(self, user, team):
         pass
 
-    def on_status_changed(self, video, data):
+    def on_status_changed(self, video, user, team,
+                          subtitles_language_code, status, extra):
         pass
 
 @task
