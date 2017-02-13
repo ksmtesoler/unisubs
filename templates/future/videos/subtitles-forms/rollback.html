@@ -1,11 +1,11 @@
-{% load forms i18n %}
+{% load forms i18n query_string %}
 <div class="modal-dialog modal-md">
   <div class="modal-content">
     <header class="dialogHeader">
       <h4 class="dialogTitle">{% trans "Rolling back subtitles" %}</h4>
       <h5 class="dialogSubTitle">{{ version.get_version_display }}</h5>
     </header>
-    <form class="ajaxForm" action="?form=rollback" method="POST">
+    <form class="ajaxForm" action="{% query_string form=rollback %}" method="POST">
       {% csrf_token %}
       <p>{% blocktrans with number=version.version_number %}Roll subtitles back to version {{ number }}{% endblocktrans %}</p>
       <div class="text-right">

@@ -1,11 +1,11 @@
-{% load forms i18n %}
+{% load forms i18n query_string %}
 <div class="modal-dialog modal-md">
   <div class="modal-content">
     <header class="dialogHeader">
       <h4 class="dialogTitle">{% trans "Deleting subtitles" %}</h4>
       <h5 class="dialogSubTitle">{{ video.title_display }} - {{ subtitle_language.get_language_code_display }}</h5>
     </header>
-    <form action="?form=delete" class="ajaxForm" method="POST">
+    <form action="{% query_string form=delete %}" class="ajaxForm" method="POST">
       {% csrf_token %}
       <ul class="bullets">
         {% for bullet in form.bullets %}
