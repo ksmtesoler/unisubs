@@ -25,9 +25,10 @@ def get_video_subtitle(video, metadata):
     return metadata.get('speaker-name')
 
 class VideoPageCustomization(object):
-    def __init__(self, sidebar, header):
+    def __init__(self, sidebar, header, team):
         self.sidebar = sidebar
         self.header = header
+        self.team = team
 
 @behavior
 def video_page_customize(request, video):
@@ -36,7 +37,7 @@ def video_page_customize(request, video):
     Note: this is already overridden by the team.workflows package.  If you
     want to override the page by team, then check out the TeamWorkflow class.
     """
-    return VideoPageCustomization(None, None)
+    return VideoPageCustomization(None, None, None)
 
 class SubtitlesPageCustomization(object):
     """
@@ -53,11 +54,14 @@ class SubtitlesPageCustomization(object):
             section
         cta: CTA object to display underneath the steps
         header: HTML to display in the header
+        team: team context to show.  We include activity private to this team
+            when showing activity records
     """
     def __init__(self):
         self.steps = None
         self.cta = None
         self.header = None
+        self.team = None
 
 @behavior
 def subtitles_page_customize(request, video, subtitle_language):

@@ -275,6 +275,8 @@ def video(request, video_id, video_url=None, title=None):
         allow_delete = allow_make_primary = False
 
     customization = behaviors.video_page_customize(request, video)
+    activity = ActivityRecord.objects.for_video(
+        video, customization.team)[:8]
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
@@ -286,7 +288,7 @@ def video(request, video_id, video_url=None, title=None):
         'comment_form': comment_form,
         'create_url_form': create_url_form,
         'comments': Comment.get_for_object(video),
-        'activity': ActivityRecord.objects.for_video(video)[:8],
+        'activity': activity,
         'metadata': video.get_metadata().convert_for_display(),
         'custom_sidebar': customization.sidebar,
         'header': customization.header,
@@ -527,6 +529,8 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         request, video, subtitle_language)
     all_subtitle_versions = subtitle_language.versions_for_user(
             request.user).order_by('-version_number')
+    activity = (ActivityRecord.objects.for_video(video, customization.team)
+                .filter(language_code=lang))[:8]
 
     return render(request, 'future/videos/subtitles.html', {
         'video': video,
@@ -542,8 +546,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'has_private_version': any(v.is_private() for v in
                                    all_subtitle_versions),
         'downloadable_formats': downloadable_formats(request.user),
-        'activity': (ActivityRecord.objects.for_video(video)
-                     .filter(language_code=lang))[:8],
+        'activity': activity,
         'comments': Comment.get_for_object(subtitle_language),
         'comment_form': comment_form,
         'enable_edit_in_admin': request.user.is_superuser,
