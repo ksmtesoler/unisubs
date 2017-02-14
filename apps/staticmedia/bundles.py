@@ -268,6 +268,7 @@ class RequireJSBundle(Bundle):
             'baseUrl': build_dir,
             'mainConfigFile': os.path.join(build_dir,
                                            self.config_module() + '.js'),
+            'findNestedDependencies': True,
             'name': os.path.join(settings.STATIC_ROOT,
                                  "bower/almond/almond.js"),
             'include': [self.main_module()] + self.extension_modules(),
