@@ -35,6 +35,6 @@ class Command(BaseCommand):
     help = u'Create data for testing preview/dev builds'
 
     def handle(self, *args, **kwargs):
-        with transaction.commit_on_success():
+        with transaction.atomic():
             setup_admin()
             signal.send(sender=None)

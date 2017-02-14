@@ -46,6 +46,7 @@ class NotificationHandlerBase(object):
     def __init__(self, notification_settings):
         self.notification_settings = notification_settings
         self.team = notification_settings.team
+        self.extra_teams = notification_settings.extra_teams.all()
         self.url = notification_settings.url
         self.headers = notification_settings.get_headers()
         self.auth_username = notification_settings.auth_username
@@ -88,13 +89,16 @@ class NotificationHandlerBase(object):
     def on_subtitles_deleted(self, video, subtitle_language):
         pass
 
-    def on_user_added(self, user):
+    def on_user_added(self, user, team):
         pass
 
-    def on_user_removed(self, user):
+    def on_user_removed(self, user, team):
         pass
 
-    def on_user_info_updated(self, user):
+    def on_user_info_updated(self, user, team):
+        pass
+
+    def on_status_changed(self, video, data):
         pass
 
 @task
@@ -179,3 +183,6 @@ def call_event_handler_for_video(video, name, *args, **kwargs):
     team_video = video.get_team_video()
     if team_video:
         call_event_handler(team_video.team, name, *args, **kwargs)
+
+def call_event_handler_for_team(team, name, *args, **kwargs):
+    call_event_handler(team, name, *args, **kwargs)

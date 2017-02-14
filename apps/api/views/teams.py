@@ -1086,7 +1086,7 @@ class TeamLanguageView(TeamSubviewMixin, APIView):
             if code not in ALL_LANGUAGE_CODES:
                 raise serializers.ValidationError(
                     "Invalid language code: {}".format(code))
-        with transaction.commit_on_success():
+        with transaction.atomic():
             self.add_languages(request.data)
             self.remove_languages(request.data)
         return Response(sorted(request.data))

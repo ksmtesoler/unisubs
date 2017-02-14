@@ -125,7 +125,7 @@ def _create_team_videos(team, videos, users):
         tvs.append(team_video)
     return tvs
 
-@transaction.commit_on_success
+@transaction.atomic
 def _do_it(video_data_url=None):
     team, created = Team.objects.get_or_create(slug="unisubs-test-team")
     team.name = "Unisubs test"

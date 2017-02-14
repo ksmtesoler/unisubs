@@ -1,6 +1,6 @@
 # Amara, universalsubtitles.org
 #
-# Copyright (C) 2016 Participatory Culture Foundation
+# Copyright (C) 2017 Participatory Culture Foundation
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,10 +16,8 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-from django.conf.urls import *
+from django.db import transaction
+from utils.compat import xact
 
-urlpatterns = patterns(
-    'styleguide.views',
-    url(r'^$', 'styleguide', name='styleguide'),
-    url(r'^member-search$', 'member_search', name='member_search'),
-)
+def monkeypatch_old_code():
+    transaction.atomic = xact.xact

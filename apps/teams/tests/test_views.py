@@ -177,8 +177,8 @@ class ViewsTests(TestCase):
             self.assertFalse(TeamVideo.objects.filter(pk=tv.pk).exists())
             self.assertTrue(VideoUrl.objects.get(url=video_url).video)
 
-        # Only owners can delete videos entirely.
-        for role in [owner]:
+        # Owners and admins can delete videos entirely.
+        for role in [owner, admin]:
             self.client.login(username=role.user.username,
                               password='password')
             tv = create_team_video()
@@ -191,7 +191,7 @@ class ViewsTests(TestCase):
             self.assertFalse(TeamVideo.objects.filter(pk=tv.pk).exists())
             self.assertFalse(VideoUrl.objects.filter(url=video_url).exists())
 
-        for role in [contributor, manager, admin]:
+        for role in [contributor, manager]:
             self.client.login(username=role.user.username,
                               password='password')
             tv = create_team_video()
