@@ -60,10 +60,6 @@ class TeamNotificationSettings(models.Model):
                 headers[key.strip()] = value.strip()
         return headers
 
-class ExtraTeamNotification(models.Model):
-    team = models.ForeignKey(Team)
-    team_notification_setting = models.ForeignKey(TeamNotificationSettings)
-
 class TeamNotification(models.Model):
     """Records a sent notication."""
     team = models.ForeignKey(Team)
