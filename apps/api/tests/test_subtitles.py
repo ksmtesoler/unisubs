@@ -35,7 +35,7 @@ from api.views.subtitles import (SubtitleLanguageSerializer,
                                  SubtitlesView)
 from subtitles import compat
 from subtitles import pipeline
-from subtitles.models import ORIGIN_API, ORIGIN_WEB_EDITOR
+from subtitles.models import ORIGIN_API, ORIGIN_WEB_EDITOR, ORIGIN_UPLOAD
 from utils import test_utils
 from utils.factories import *
 
@@ -396,9 +396,16 @@ class SubtitlesSerializerTest(TestCase):
     def test_from_editor(self):
         version = self.run_create({
             'subtitles': SubtitleSetFactory().to_xml(),
-            'from_editor': True
+            'origin': 'editor',
         })
         assert_equal(version.origin, ORIGIN_WEB_EDITOR)
+
+    def test_uploaded(self):
+        version = self.run_create({
+            'subtitles': SubtitleSetFactory().to_xml(),
+            'origin': 'upload',
+        })
+        assert_equal(version.origin, ORIGIN_UPLOAD)
 
     def test_sub_format(self):
         subtitles = SubtitleSetFactory(num_subs=2)
