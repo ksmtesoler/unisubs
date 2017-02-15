@@ -37,7 +37,7 @@ def convert_language_code(lc):
     Convert from a YouTube language code to an Amara one
     """
     try:
-        return unilangs.LanguageCode(lc, 'youtube_with_mapping').encode('unisubs')
+        return unilangs.LanguageCode(lc, 'youtube_with_mapping').encode('internal')
     except KeyError:
         # Error looking up the youtube language code.  Return none and we'll
         # skip importing the subtitles.
