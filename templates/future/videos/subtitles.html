@@ -21,6 +21,9 @@
             <li><a href="#subtitles_info" data-toggle="tab" aria-expanded="false">{% trans "Subtitles info" %}</a></li>
             <li><a href="#subtitles_activity" data-toggle="tab">{% trans "Activity" %}</a></li>
             <li><a href="#subtitles_comments" data-toggle="tab">{% trans "Comments" %}</a></li>
+            {% if show_sync_history %}
+            <li><a href="#subtitles_sync_history" data-toggle="tab">{% trans "Sync History" %}</a></li>
+            {% endif %}
           </ul>
           <div class="tab-content">
             <div id="subtitles_list" class="tab-pane active">
@@ -46,6 +49,11 @@
             <div id="subtitles_comments" class="tab-pane">
               {% include "future/videos/tabs/comments.html" %}
             </div>
+            {% if show_sync_history %}
+            <div id="subtitles_sync_history" class="tab-pane">
+              {% include "future/videos/tabs/sync-history.html" %}
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>

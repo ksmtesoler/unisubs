@@ -532,7 +532,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     activity = (ActivityRecord.objects.for_video(video, customization.team)
                 .filter(language_code=lang))[:8]
 
-    return render(request, 'future/videos/subtitles.html', {
+    context = {
         'video': video,
         'team_video': video.get_team_video(),
         'metadata': video.get_metadata().convert_for_display(),
@@ -555,7 +555,14 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'can_edit': workflow.user_can_edit_subtitles(
             request.user, subtitle_language.language_code),
         'header': customization.header,
-    })
+    }
+    if permissions.can_user_resync(video, request.user):
+        context['show_sync_history'] = True
+        context.update(sync_history_context(video, subtitle_language))
+    else:
+        context['show_sync_history'] = False
+    context['show_sync_history'] = True
+    return render(request, 'future/videos/subtitles.html', context)
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
                                    version_id):
@@ -585,6 +592,30 @@ def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
         version.video = language.video = video
 
     return video, language, version
+
+def sync_history_context(video, subtitle_language):
+    context = {}
+    context['sync_history'] = (subtitle_language.synchistory_set
+                            .select_related('version')
+                            .fetch_with_accounts())
+    context['current_version'] = subtitle_language.get_public_tip()
+    synced_versions = []
+    for video_url in video.get_video_urls():
+        if not can_sync_videourl(video_url):
+            continue
+        try:
+            version = (subtitle_language.syncedsubtitleversion_set.
+                       select_related('version').
+                       get(video_url=video_url)).version
+        except ObjectDoesNotExist:
+            version = None
+        synced_versions.append({
+            'video_url': video_url,
+            'version': version,
+            'syncable': get_sync_account(video, video_url),
+        })
+    context['synced_versions'] = synced_versions
+    return context
 
 def downloadable_formats(user):
     downloadable_formats = AVAILABLE_SUBTITLE_FORMATS_FOR_DISPLAY
