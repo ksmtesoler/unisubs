@@ -60,9 +60,20 @@ define(['jquery'], function($) {
         var actionBar = $(list.data('target'));
         var selection = $('.selectList-selection', actionBar);
         var checkboxes = list.find('.selectList-checkbox');
+        var checkboxesFromOtherLists = $('.selectList-checkbox').not(checkboxes);
 
         checkboxes.on('change', function() {
-            checkboxes.is(':checked') ? actionBar.addClass('open') : actionBar.removeClass('open');
+            if(checkboxes.is(':checked')) {
+                actionBar.addClass('open');
+                checkboxesFromOtherLists.prop('disabled', true);
+                // Need to set the title on the parent, since mouse events
+                // don't fire for disabled inputs.
+                checkboxesFromOtherLists.parent().attr('title', gettext('You can only select from one list at once'));
+            } else {
+                actionBar.removeClass('open');
+                checkboxesFromOtherLists.prop('disabled', null);
+                checkboxesFromOtherLists.parent().attr('title', null);
+            }
             selection.val(getSelection().join('-'));
         });
 
