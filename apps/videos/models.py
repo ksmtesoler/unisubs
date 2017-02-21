@@ -138,7 +138,7 @@ class VideoManager(models.Manager):
         return self.filter(featured__isnull=False).order_by('-featured')
 
     def latest(self):
-        return self.public().order_by('-created')
+        return self.public().order_by('-id')
 
     def public(self):
         return self.filter(is_public=True)
