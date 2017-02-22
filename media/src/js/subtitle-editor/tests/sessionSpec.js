@@ -55,7 +55,7 @@ describe('The SessionBackend', function() {
             $scope.timeline.duration / 1000,
             $scope.workingSubtitles.description,
             $scope.workingSubtitles.metadata,
-            null, 'action');
+            null, 'action', 'dfxp', false);
     });
 
     if('updates the version number after saving', function() {
