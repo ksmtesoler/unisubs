@@ -176,7 +176,7 @@ class LanguageList(object):
 def index(request):
     return render_to_response('index.html', {},
                               context_instance=RequestContext(request))
-
+@login_required
 def watch_page(request):
     context = {
         'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
@@ -184,11 +184,11 @@ def watch_page(request):
     }
     return render_to_response('videos/watch.html', context,
                               context_instance=RequestContext(request))
-
+@login_required
 def featured_videos(request):
     return render_to_response('videos/featured_videos.html', {},
                               context_instance=RequestContext(request))
-
+@login_required
 def latest_videos(request):
     return render_to_response('videos/latest_videos.html', {},
                               context_instance=RequestContext(request))
