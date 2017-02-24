@@ -65,6 +65,10 @@
 //           Tab Three Content...
 //         </div>
 //       </div>
+//       <div class="text-right">
+//         <button class="button borderless" data-dismiss="modal">Cancel</a>
+//         <button class="button cta" type="submit">Save</button>
+//       </div>
 //     </div>
 //   </div>
 // </div>
@@ -88,7 +92,8 @@
 //         <h5 class="dialogSubTitle">Modal Subtitle</h5>
 //       </header>
 //       <form>
-//         <div class="alert alert-error role="alert">
+//         <div class="alert alert-error alert-dismissible" role="alert">
+//           <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 //           <strong>Error!</strong> You're not too happy now.
 //         </div>
 //         <div class="form-group has-error">
@@ -128,8 +133,8 @@
 //           <input id="" type="checkbox" value="">
 //           <label for=""><span></span>Include all XX filtered videos</label>
 //         </div>
-//         <button class="button cta" type="submit">Delete</button>
 //         <button class="button cta-reverse" data-dismiss="modal">Cancel</a>
+//         <button class="button cta" type="submit">Delete</button>
 //       </form>
 //     </div>
 //   </div>

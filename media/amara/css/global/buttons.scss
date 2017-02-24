@@ -118,6 +118,9 @@ button {
     background-color: transparent;
     border-color: transparent;
     font-weight: inherit;
+    &.inline {
+      margin: 0 10px;
+    }
   }
   i {
     margin-right: 9px;
