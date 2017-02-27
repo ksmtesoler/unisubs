@@ -116,6 +116,16 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
             $('input[type=text]', form).keyup(submitIfChanged);
         }
 
+        if(form.hasClass('updatePeriodically') &&
+                $.isNumeric(form.data('period'))) {
+            var delay = form.data('period') * 1000;
+            function periodicUpdate() {
+                form.submit();
+                setTimeout(periodicUpdate, delay);
+            }
+            setTimeout(periodicUpdate, delay);
+        }
+
         var lastSerialize = form.formSerialize();
         function submitIfChanged() {
             var newSerialize = form.formSerialize();
