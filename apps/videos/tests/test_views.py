@@ -250,9 +250,6 @@ class TestViews(WebUseTest):
 
         self.assertEqual(sl_en.subtitleversion_set.full().count(), 4)
 
-    def test_search(self):
-        self._simple_test('search:index')
-
     def test_opensubtitles2010_page(self):
         self._simple_test('opensubtitles2010_page')
 
