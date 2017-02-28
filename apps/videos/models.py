@@ -18,6 +18,7 @@
 
 from collections import defaultdict
 from datetime import datetime, date, timedelta
+import hashlib
 import logging
 import json
 import string
@@ -138,7 +139,7 @@ class VideoManager(models.Manager):
         return self.filter(featured__isnull=False).order_by('-featured')
 
     def latest(self):
-        return self.public().order_by('-created')
+        return self.public().order_by('-id')
 
     def public(self):
         return self.filter(is_public=True)
@@ -2112,6 +2113,7 @@ class VideoUrl(models.Model):
     # app.
     type = models.CharField(max_length=2)
     url = models.URLField(max_length=512)
+    url_hash = models.CharField(max_length=32)
     videoid = models.CharField(max_length=50, blank=True)
     primary = models.BooleanField(default=False)
     original = models.BooleanField(default=False)
@@ -2248,6 +2250,7 @@ class VideoUrl(models.Model):
         assert self.type != '', "Can't set an empty type"
         if updates_timestamp:
             self.created = datetime.now()
+        self.url_hash = hashlib.md5(self.url).hexdigest()
         super(VideoUrl, self).save(*args, **kwargs)
 
 def video_url_remove_handler(sender, instance, **kwargs):

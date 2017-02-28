@@ -25,7 +25,8 @@ from nose.tools import *
 
 from utils import test_utils
 from utils.subtitles import load_subtitles
-from externalsites import google
+from externalsites import google, subfetch
+from externalsites.syncing.youtube import convert_language_code
 import isodate
 
 @override_settings(YOUTUBE_API_KEY='test-youtube-api-key')
@@ -287,3 +288,33 @@ class TestTimeParsing(TestCase):
 
     def test_invalid(self):
         self.assertRaises(Exception, isodate.parse_duration, 'foo')
+
+class TestYoutubeMapping(TestCase):
+    def test_mapping_from_youtube(self):
+        self.assertEqual(subfetch.convert_language_code('en'), 'en')
+        self.assertEqual(subfetch.convert_language_code('fr-CA'), 'fr-ca')
+        self.assertEqual(subfetch.convert_language_code('pt-PT'), 'pt')
+        self.assertEqual(subfetch.convert_language_code('zh-Hant'), 'zh-tw')
+        self.assertEqual(subfetch.convert_language_code('fr-ca'), None)
+        self.assertEqual(subfetch.convert_language_code('zz'), None)
+        self.assertEqual(subfetch.convert_language_code('zz-zz'), None)
+        self.assertEqual(subfetch.convert_language_code('es-419'), 'es-419')
+        self.assertEqual(subfetch.convert_language_code('en-IN'), 'en-in')
+        self.assertEqual(subfetch.convert_language_code('en-AU'), 'en-au')
+
+    def test_mapping_to_youtube(self):
+        self.assertEqual(convert_language_code('en', True), 'en')
+        self.assertEqual(convert_language_code('fr-ca', True), 'fr-CA')
+        self.assertEqual(convert_language_code('pt', True), 'pt-PT')
+        self.assertEqual(convert_language_code('zh-tw', True), 'zh-Hant')
+        self.assertEqual(convert_language_code('es-419', True), 'es-419')
+        self.assertEqual(convert_language_code('en-in', True), 'en-IN')
+        self.assertEqual(convert_language_code('en-au', True), 'en-AU')
+        self.assertEqual(convert_language_code('en', False), 'en')
+        self.assertEqual(convert_language_code('fr-ca', False), 'fr-CA')
+        self.assertEqual(convert_language_code('pt', False), 'pt')
+        self.assertEqual(convert_language_code('zh-tw', False), 'zh-TW')
+        self.assertEqual(convert_language_code('es-419', False), 'es-419')
+        self.assertEqual(convert_language_code('en-in', False), 'en-IN')
+        self.assertEqual(convert_language_code('en-au', False), 'en-AU')
+

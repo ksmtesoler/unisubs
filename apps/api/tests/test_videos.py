@@ -24,6 +24,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APIRequestFactory
 import mock
+import unittest
 
 from api.tests.utils import format_datetime_field
 from api.views.videos import VideoSerializer, VideoViewSet
@@ -760,6 +761,7 @@ class VideoViewTestCase(TestCase):
             'video_id': self.video.video_id,
         })
 
+    @unittest.skip("waiting on amara-enterprise#1115")
     def test_delete_video(self):
         video_pk = self.video.pk
         response = self.client.delete(self.url)

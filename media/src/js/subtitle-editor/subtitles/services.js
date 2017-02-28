@@ -231,10 +231,15 @@ var angular = angular || null;
                 return promise;
 
             },
-            saveSubtitles: function(subString, title, duration, description, metadata, isComplete, action, sub_format) {
+            saveSubtitles: function(subString, title, duration, description, metadata, isComplete, action, sub_format, upload) {
                 var videoID = EditorData.video.id;
                 var languageCode = EditorData.editingVersion.languageCode;
-                var sub_format = (typeof sub_format !== 'undefined') ?  sub_format : 'dfxp';
+
+                if(upload) {
+                    var origin = 'upload';
+                } else {
+                    var origin = 'editor';
+                }
 
                 var url = getSubtitlesAPIURL(videoID, languageCode);
                 // if isComplete is not specified as true or false, we send
@@ -253,7 +258,7 @@ var angular = angular || null;
                         sub_format: sub_format,
                         title: title,
                         description: description,
-                        from_editor: true,
+                        origin: origin,
                         metadata: metadata,
                         action: action,
                         duration: duration,
