@@ -2211,7 +2211,7 @@ class VideoUrl(models.Model):
         assert self.type != '', "Can't set an empty type"
         if updates_timestamp:
             self.created = datetime.now()
-        self.url_hash = hashlib.md5(self.url).hexdigest()
+        self.url_hash = hashlib.md5(self.url.encode("utf-8")).hexdigest()
         super(VideoUrl, self).save(*args, **kwargs)
 
 def video_url_remove_handler(sender, instance, **kwargs):
