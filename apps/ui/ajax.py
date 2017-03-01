@@ -24,6 +24,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.utils.cache import patch_cache_control
 
 class AJAXResponseRenderer(object):
     """Render a AJAX response
@@ -115,4 +116,7 @@ class AJAXResponseRenderer(object):
                                 content_type='application/json')
         for name, value in self.headers:
             response[name] = value
+        # Don't cache AJAX responses (#1107)
+        patch_cache_control(response, no_cache=True, no_store=True,
+                            must_revalidate=True, max_age=0)
         return response
