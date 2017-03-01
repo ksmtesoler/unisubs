@@ -272,6 +272,7 @@ class RequireJSBundle(Bundle):
             'name': os.path.join(settings.STATIC_ROOT,
                                  "bower/almond/almond.js"),
             'include': [self.main_module()] + self.extension_modules(),
+            'insertRequire': self.extension_modules(),
             'optimize': optimize,
             'logLevel': 4,
         }
