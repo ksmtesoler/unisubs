@@ -16,8 +16,14 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-from django.db import transaction
+import django.db.transaction
+import django.utils.html
+import django.template.defaultfilters
+
 from utils.compat import xact
+from utils.compat import html as newer_html
 
 def monkeypatch_old_code():
-    transaction.atomic = xact.xact
+    django.db.transaction.atomic = xact.xact
+    django.utils.html.urlize = newer_html.urlize
+    django.template.defaultfilters.urlize_impl = newer_html.urlize
