@@ -43,7 +43,7 @@
     border-color: $state-warning-border;
     color: $state-warning-text;
   }
-  &.alert-error {
+  &.alert-error, &.alert-danger {
     background-image: none;
     background-color: $state-danger-bg;
     border-color: $state-danger-border;
