@@ -58,6 +58,12 @@ class TestVideoUrl(TestCase):
         with assert_raises(IntegrityError):
             self.primary_url.remove(self.user)
 
+    def test_unicode_url(self):
+        unicode_url = u"http://\u2014.com"
+        self.primary_url.url = unicode_url
+        self.primary_url.save()
+        self.assertEqual(unicode_url, self.primary_url.url)
+
 class TestVideo(TestCase):
     def setUp(self):
         self.user = UserFactory()

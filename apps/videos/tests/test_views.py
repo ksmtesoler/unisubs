@@ -226,9 +226,6 @@ class TestViews(WebUseTest):
         new_version = self.video.version()
         self.assertEqual(last_version.version_no+1, new_version.version_no)
 
-    def test_search(self):
-        self._simple_test('search:index')
-
     def test_opensubtitles2010_page(self):
         self._simple_test('opensubtitles2010_page')
 
