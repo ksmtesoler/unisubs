@@ -1458,8 +1458,8 @@ class EditVideosForm(VideoManagementForm):
         return fmt(msg, count=self.count)
 
 class DeleteVideosForm(VideoManagementForm):
-    name = 'delete'
-    label = _('Delete')
+    name = 'remove'
+    label = _('Remove')
     permissions_check = staticmethod(permissions.can_remove_videos)
     css_class = 'cta-reverse'
 

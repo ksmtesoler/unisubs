@@ -649,13 +649,11 @@ def manage_videos(request, team):
 # Functions to handle the forms on the videos pages
 def get_video_management_forms(team):
     form_list = ManagementFormList([
-        forms.EditVideosForm,
+        forms.DeleteVideosForm,
         forms.MoveVideosForm,
+        forms.EditVideosForm,
     ])
     signals.build_video_management_forms.send(sender=team, form_list=form_list)
-    form_list.extend([
-        forms.DeleteVideosForm
-    ])
     return form_list
 
 def all_video_management_forms(team, user):
