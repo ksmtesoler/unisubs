@@ -142,6 +142,13 @@
 //
 // Styleguide dialogconfirmation
 
+.modal {
+  z-index: $z-index-modal;
+}
+
+.modal-backdrop {
+  z-index: $z-index-overlay;
+}
 
 .modal-dialog {
   &.modal-sm { width: 300px; }
