@@ -287,6 +287,16 @@ class Workflow(object):
         """
         raise NotImplementedError()
 
+    # Right now these are both tied to the edit permissions, but we might
+    # change that at some point
+    def user_can_view_notes(self, user, language_code):
+        """Check if a user can view editor notes."""
+        return self.user_can_edit_subtitles(user, language_code)
+
+    def user_can_post_notes(self, user, language_code):
+        """Check if a user can post editor notes."""
+        return self.user_can_edit_subtitles(user, language_code)
+
     def editor_data(self, user, language_code):
         """Get data to pass to the editor for this workflow."""
         data = {
@@ -452,6 +462,16 @@ class VideoWorkflow(object):
         return (self.get_language_workflow(language_code)
                 .user_can_edit_subtitles(user))
 
+    def user_can_view_notes(self, user, language_code):
+        """Check if a user can view editor notes."""
+        return (self.get_language_workflow(language_code)
+                .user_can_view_notes(user))
+
+    def user_can_post_notes(self, user, language_code):
+        """Check if a user can post editor notes."""
+        return (self.get_language_workflow(language_code)
+                .user_can_post_notes(user))
+
     def editor_data(self, user, language_code):
         return self.get_language_workflow(language_code).editor_data(user)
 
@@ -567,6 +587,14 @@ class LanguageWorkflow(object):
             True/False
         """
         raise NotImplementedError()
+
+    def user_can_view_notes(self, user):
+        """Check if a user can view the editor notes."""
+        return self.user_can_edit_subtitles(user)
+
+    def user_can_post_notes(self, user):
+        """Check if a user can post editor notes."""
+        return self.user_can_edit_subtitles(user)
 
     def editor_data(self, user):
         """Get data to pass to the editor for this workflow."""

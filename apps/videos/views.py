@@ -58,7 +58,7 @@ from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
                                    user_can_edit_subtitles)
 from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
-                             RollbackSubtitlesForm)
+                             RollbackSubtitlesForm, SubtitlesNotesForm)
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
@@ -518,7 +518,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         return subtitles_ajax_form(request, video, subtitle_language, version)
     elif request.POST.get('form') == 'comment':
         # TODO: merge the comments form code with the other forms
-        return comments_form(request, version.subtitle_language,
+        return comments_form(request, subtitle_language,
                              '#subtitles_comments')
     workflow = video.get_workflow()
     if request.user.is_authenticated():
@@ -556,6 +556,16 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
             request.user, subtitle_language.language_code),
         'header': customization.header,
     }
+    if workflow.user_can_view_notes(request.user, subtitle_language.language_code):
+        context['show_notes'] = True
+        context['notes'] = (workflow
+                            .get_editor_notes(request.user, subtitle_language.language_code)
+                            .fetch_notes())
+        if workflow.user_can_post_notes(request.user, subtitle_language.language_code):
+            context['notes_form'] = SubtitlesNotesForm(
+                request.user, video, subtitle_language, version)
+    else:
+        context['show_notes'] = False
     if permissions.can_user_resync(video, request.user):
         context['show_sync_history'] = True
         context.update(sync_history_context(video, subtitle_language))
@@ -628,6 +638,7 @@ def downloadable_formats(user):
 subtitles_form_map = {
     'delete': DeleteSubtitlesForm,
     'rollback': RollbackSubtitlesForm,
+    'notes': SubtitlesNotesForm,
 }
 
 def subtitles_ajax_form(request, video, subtitle_language, version):
@@ -642,23 +653,40 @@ def subtitles_ajax_form(request, video, subtitle_language, version):
         raise PermissionDenied()
 
     if request.is_ajax():
-        response_renderer = AJAXResponseRenderer(request)
         if form.is_bound and form.is_valid():
             form.submit(request)
-            response_renderer.reload_page()
-        else:
-            template = 'future/videos/subtitles-forms/{}.html'.format(
-                form_name)
-            response_renderer.show_modal(template, {
-                'video': video,
-                'subtitle_language': subtitle_language,
-                'version': version,
-                'form': form,
-            })
+            return handle_subtitles_ajax_form_success(
+                request, video, subtitle_language, version, form_name, form)
+        response_renderer = AJAXResponseRenderer(request)
+        template = 'future/videos/subtitles-forms/{}.html'.format(
+            form_name)
+        response_renderer.show_modal(template, {
+            'video': video,
+            'subtitle_language': subtitle_language,
+            'version': version,
+            'form': form,
+        })
         return response_renderer.render()
     else:
         # TODO implement the not-AJAX case
         return redirect(request.get_full_path())
+
+def handle_subtitles_ajax_form_success(request, video, subtitle_language,
+                                       version, form_name, form):
+    response_renderer = AJAXResponseRenderer(request)
+    if form_name == 'notes':
+        notes = (video.get_workflow()
+                 .get_editor_notes(request.user, subtitle_language.language_code)
+                 .fetch_notes())
+        response_renderer.replace(
+            '#subtitles_notes', 'future/videos/tabs/notes.html', {
+                'notes': notes,
+                'notes_form': SubtitlesNotesForm(
+                    request.user, video, subtitle_language, version)
+            })
+    else:
+        response_renderer.reload_page()
+    return response_renderer.render()
 
 def _widget_params(request, video, version_no=None, language=None, video_url=None, size=None):
     primary_url = video_url or video.get_video_url()

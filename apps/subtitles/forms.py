@@ -479,3 +479,19 @@ class RollbackSubtitlesForm(SubtitlesForm):
         else:
             messages.error(request,
                            ugettext(u'Can not rollback to the last version'))
+
+class SubtitlesNotesForm(SubtitlesForm):
+    body = forms.CharField(label='', required=True,
+                           widget=forms.Textarea(attrs={
+                               'placeholder': _("Post new note"),
+                               'rows': 3,
+                           }))
+
+    def check_permissions(self):
+        workflow = self.video.get_workflow()
+        return workflow.user_can_post_notes(self.user, self.language_code)
+
+    def do_submit(self, request):
+        notes = self.video.get_workflow().get_editor_notes(self.user,
+                                                           self.language_code)
+        notes.post(self.user, self.cleaned_data['body'])
