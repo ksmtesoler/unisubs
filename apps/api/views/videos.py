@@ -173,6 +173,8 @@ List URLs for a video
     :>json boolean primary: is this the primary URL for the video?
     :>json boolean original: was this the URL that was created with the video?
     :>json uri resource_uri: Video URL Resource
+    :>json string videoid: ID on the Hosting platform
+    :>json string type: Video type (Youtube, Vimeo, HTML5, etc.)
     :>json integer id: Internal ID for the object **(deprecated, use
       resource_uri rather than trying to construct API URLs yourself)**.
 
@@ -648,12 +650,18 @@ class VideoURLSerializer(serializers.Serializer):
     original = serializers.BooleanField(required=False)
     id = serializers.IntegerField(read_only=True)
     resource_uri = serializers.SerializerMethodField()
+    videoid = serializers.CharField(read_only=True)
+    type = serializers.SerializerMethodField(read_only=True)
 
     def get_resource_uri(self, video_url):
         return reverse('api:video-url-detail', kwargs={
             'video_id': self.context['video'].video_id,
             'pk': video_url.id,
         }, request=self.context['request'])
+
+    def get_type(self, video_url):
+        vt = video_type_registrar[video_url.type]
+        return vt.name
 
     def create(self, validated_data):
         vt = video_type_registrar.video_type_for_url(validated_data['url'])
