@@ -4,9 +4,9 @@
   {% for comment in comments %}
   <li class="row">
     <div class="col-xs-4">
-      <a href="{{ user.get_absolute_url }}" class="pull-left">{{ user.avatar_tag_medium }}</a>
+      <a href="{{ comment.user.get_absolute_url }}" class="pull-left">{{ comment.user.avatar_tag_medium }}</a>
       <p>
-        <span class="memberName"><a href="{{ user.get_absolute_url }}">{{ comment.user }}</a></span>
+        <span class="memberName"><a href="{{ comment.user.get_absolute_url }}">{{ comment.user }}</a></span>
       </p>
     </div>
     <div class="col-xs-8">
