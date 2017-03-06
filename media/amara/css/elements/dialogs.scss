@@ -182,6 +182,11 @@
         .select2-selection__rendered:after { float: right; color: $gray-light; }
       }
     }
+    .button {
+      &.cta-reverse{
+        margin-right: 5px;
+      }
+    }
   }
   .dialogHeader {
     margin-bottom: 10px;
