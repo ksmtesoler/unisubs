@@ -37,7 +37,7 @@ Get a list of teams
         - ``collaboration`` -- collaboration team
 
     :>json string description: Team description
-    :>json boolean is_visible: Should this team's videos be publicly visible?
+    :>json boolean is_visible: Should this team's videos be publicly visible (False by default)?
     :>json string membership_policy: Team membership policy. One of:
 
         - ``Open``
