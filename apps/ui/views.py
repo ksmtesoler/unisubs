@@ -61,7 +61,7 @@ def add_task_messages(request, task):
         for message in task.result.get('messages', []):
             messages.success(request, message)
         for message in task.result.get('error_messages', []):
-            messages.error(request, error)
+            messages.error(request, message)
 
 def render_management_form_submit(request, form):
     response_renderer = AJAXResponseRenderer(request)
