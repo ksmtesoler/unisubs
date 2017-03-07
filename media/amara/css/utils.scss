@@ -51,7 +51,10 @@
   float: right;
 }
 
-
+.due-date {
+  padding: 5px 0;
+  display: block;
+}
 // Text
 //
 // TODO - Please add documentation here...
@@ -78,6 +81,7 @@
 //
 // <div class="thumbWrapper">
 //   <img src="/media/images/styleguide/placehold4.3.png" alt="Placeholder Image">
+//   <div class="duration">7:04</div>      
 // </div>
 //
 // Styleguide thumbWrapper
@@ -96,6 +100,17 @@
     left: 0;
     width: 100%;
     height: 100%;
+  }
+  .duration {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: black;
+    padding: 1px 3px;
+    border-radius: $border-radius-base;
+    font-size: 11px;
+    color: #fff;
+    font-weight: 600;
   }
 }
 
