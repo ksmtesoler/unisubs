@@ -37,13 +37,14 @@
 //         <li><strong>Source:</strong> English</li>
 //         <li><strong>Target:</strong> Dutch</li>
 //       </ul>
-//       <nav class="nav-icons">
-//         <a role="button" class="completed" data-toggle="popover" data-container="body" data-placement="top" title="Transcription Complete" data-content="Naiara Pérez de Villarreal Amilburu">
-//           <img src="media/images/styleguide/fpo_avatar.png" class="avatar">
-//         </a> 
-//         <a href="#"><i class='icon icon-review'></i></a>
-//         <a href="#"><i class='icon icon-approve'></i></a> 
-//       </nav>
+//       <ul class="stepList wide">
+//         <li data-toggle="tooltip" data-placement="top" data-content="Transcriber: Naiara Pérez de Villarreal Amilburu">
+//           <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png" class="avatar">
+//         </li>
+//         <li><i class='icon icon-review'></i></li>
+//         <li><i class='icon icon-approve'></i></li>
+//       </ul>
+//       <p>Review due in 2 days</p>
 //     </div>
 //   </li>
 //   <li class="row condensed">
@@ -75,13 +76,14 @@
 //         <li><strong>Source:</strong> English</li>
 //         <li><strong>Target:</strong> Dutch</li>
 //       </ul>
-//       <nav class="nav-icons">
-//         <a role="button" class="completed" data-toggle="popover" data-container="body" data-placement="top" title="Transcription Complete" data-content="Naiara Pérez de Villarreal Amilburu">
-//           <img src="media/images/styleguide/fpo_avatar.png" class="avatar">
-//         </a> 
-//         <a href="#"><i class='icon icon-review'></i></a>
-//         <a href="#"><i class='icon icon-approve'></i></a> 
-//       </nav>
+//       <ul class="stepList wide">
+//         <li data-toggle="tooltip" data-placement="top" data-content="Transcriber: Naiara Pérez de Villarreal Amilburu">
+//           <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png" class="avatar">
+//         </li>
+//         <li><i class='icon icon-review'></i></li>
+//         <li><i class='icon icon-approve'></i></li>
+//       </ul>
+//       <p>Review due in 2 days</p>
 //     </div>
 //   </li>
 //   <li class="row condensed">
@@ -113,13 +115,14 @@
 //         <li><strong>Source:</strong> English</li>
 //         <li><strong>Target:</strong> Dutch</li>
 //       </ul>
-//       <nav class="nav-icons">
-//         <a role="button" class="completed" data-toggle="popover" data-container="body" data-placement="top" title="Transcription Complete" data-content="Naiara Pérez de Villarreal Amilburu">
-//           <img src="media/images/styleguide/fpo_avatar.png" class="avatar">
-//         </a> 
-//         <a href="#"><i class='icon icon-review'></i></a>
-//         <a href="#"><i class='icon icon-approve'></i></a> 
-//       </nav>
+//       <ul class="stepList wide">
+//         <li data-toggle="tooltip" data-placement="top" data-content="Transcriber: Naiara Pérez de Villarreal Amilburu">
+//           <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png" class="avatar">
+//         </li>
+//         <li><i class='icon icon-review'></i></li>
+//         <li><i class='icon icon-approve'></i></li>
+//       </ul>
+//       <p>Review due in 2 days</p>
 //     </div>
 //   </li>
 // </ul>
@@ -161,8 +164,7 @@ ul.selectList {
     flex-direction: row;
     width: 100%;
     margin-bottom: 30px;
-    font-weight: 200;
-    color: $gray;
+    color: $gray-dark;
     &:hover {
       .context-menu {
         display: block;

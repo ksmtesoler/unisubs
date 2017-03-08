@@ -2,7 +2,7 @@
 //
 // Icons are implemented via a custom font-family. The basic syntax is `<i class="icon icon-filename">`.
 // 
-// <ul class="iconList">
+// <ul class="styleGuide-iconList">
 //   <li>
 //     <i class="icon icon-approve"></i>
 //     <span>icon-approve</span>
@@ -43,8 +43,6 @@
 //     <i class="icon icon-initial-work"></i>
 //     <span>icon-initial-work</span>
 //   </li>
-// </ul>
-// <ul class="iconList">
 //   <li>
 //     <i class="icon icon-clock"></i>
 //     <span>icon-clock</span>
@@ -85,9 +83,6 @@
 //     <i class="icon icon-down"></i>
 //     <span>icon-down</span>
 //   </li>
-// </ul>
-// <hr>
-// <ul class="iconList">
 //   <li>
 //     <i class="icon icon-check"></i>
 //     <span>icon-check</span>
@@ -104,7 +99,6 @@
 // 
 //
 // Styleguide icons
-
 @font-face {
     font-family: 'amara';
     src:    url("../fonts/amara.eot");
@@ -233,6 +227,3 @@ i {
 .icon-edit:before {
   content: "\e907";
 }
-
-
-

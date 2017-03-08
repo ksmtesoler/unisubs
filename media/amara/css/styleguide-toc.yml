@@ -12,12 +12,15 @@
   - progressbars
   - indicators
   - scrollBars
-  - avatars
-  - icons
   - tabs
   - tables
   # - grid
   # - utilities
+
+- - Avatars, Icons, Steps
+  - avatars
+  - icons
+  - stepList
 
 - - Buttons
   - buttonTags
