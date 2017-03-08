@@ -518,7 +518,7 @@ class VideoViewSetTest(TestCase):
         assert_items_equal([v1], self.viewset.get_queryset())
 
     def test_team_filter(self):
-        team = TeamFactory()
+        team = TeamFactory(is_visible=True)
         v1 = VideoFactory(title='correct team')
         v2 = VideoFactory(title='wrong team')
         v3 = VideoFactory(title='not in team')
@@ -528,7 +528,7 @@ class VideoViewSetTest(TestCase):
         assert_items_equal([v1], self.viewset.get_queryset())
 
     def test_project_filter(self):
-        team = TeamFactory()
+        team = TeamFactory(is_visible=True)
         project = ProjectFactory(team=team, slug='project')
         other_project = ProjectFactory(team=team, slug='wrong-project')
         v1 = VideoFactory(title='correct project')
@@ -544,7 +544,7 @@ class VideoViewSetTest(TestCase):
         assert_items_equal([v1], self.viewset.get_queryset())
 
     def test_default_project_filter(self):
-        team = TeamFactory()
+        team = TeamFactory(is_visible=True)
         project = ProjectFactory(team=team, slug='project-slug')
         v1 = VideoFactory(title='in default project')
         v2 = VideoFactory(title='not in default project')
