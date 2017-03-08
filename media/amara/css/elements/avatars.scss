@@ -6,23 +6,33 @@
 // Example:
 // <ul class="inline">
 //   <li>
-//     <span class="avatar avatar-xl"></span><br>
+//     <span class="avatar">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//     </span><br>
 //     Default
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-inverse"></span><br>
+//     <span class="avatar avatar-inverse">
+//      <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//     </span><br>
 //     .avatar-inverse
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-teal"></span><br>
+//     <span class="avatar avatar-teal">
+//      <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//     </span><br>
 //     .avatar-teal
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-plum"></span><br>
+//     <span class="avatar avatar-plum">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//     </span><br>
 //     .avatar-plum
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-lime-green"></span><br>
+//     <span class="avatar avatar-lime-green">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//     </span><br>
 //     .avatar-lime-green
 //   </li>
 // </ul>
@@ -70,7 +80,7 @@
 // 
 // Example:
 // <span class="avatar avatar-xl">
-//   <img src="media/images/styleguide/fpo_avatar.png">
+//   <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
 // </span>
 // <p>Custom Avatar</p>
 //
@@ -87,7 +97,7 @@
   text-transform: none;
   line-height: 1;
   vertical-align: middle;
-
+  display: inline-block;
   width: 30px;
   height: 30px;
   font-size: 30px;
@@ -127,6 +137,10 @@
     font-size: 110px;
   }
 
+  &.avatar-img {
+    display: block;
+  }
+
   // Colors
   &.avatar-teal {
     color: $teal;
@@ -152,6 +166,8 @@
     }
   }
 
+
+
   // Child avatar image
   img {
     position: absolute;
@@ -159,6 +175,7 @@
     left: 0;
     width: 100%;
     height: 100%;
+    display: block;
   }
 }
 
