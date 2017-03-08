@@ -37,7 +37,10 @@ def getDurationFromStreams(streams):
         duration_m = re.match(r"duration=(\w+)", line)
         if duration_m and index:
             duration = duration_m.group(1)
-            data[index]["duration"]=int(float(duration))
+            try:
+                data[index]["duration"]=int(float(duration))
+            except ValueError:
+                pass
         codec_m = re.match(r"codec_name=(\w+)", line)
         if codec_m and index:
             codec = codec_m.group(1)
