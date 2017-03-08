@@ -2778,6 +2778,7 @@ class Setting(models.Model):
         (311, 'block_new_collab_assignments_message'),
         # 400 is for text displayed on web pages
         (401, 'pagetext_welcome_heading'),
+        (402, 'pagetext_warning_tasks'),
         # 500 is to enable features
         (501, 'enable_require_translated_metadata'),
     )
