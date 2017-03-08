@@ -16,7 +16,7 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-"""utils.frontend -- frontend-related classes
+"""ui.utils -- frontend-related classes
 
 This module contains a few utility classes that's used by the views code.
 """
@@ -86,5 +86,5 @@ class SectionWithCount(list):
                              count=len(self)))
 
 __all__ = [
-    'Link', 'Tab', 'SectionWithCount',
+    'Link', 'CTA', 'Tab', 'SectionWithCount',
 ]
