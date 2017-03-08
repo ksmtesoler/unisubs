@@ -48,14 +48,25 @@ class Link(object):
                 self.url == other.url)
 
 class CTA(Link):
-    def __init__(self, label, icon, view_name, *args, **kwargs):
+    def __init__(self, label, icon, view_name, block=False, *args, **kwargs):
         super(CTA, self).__init__(label, view_name, *args, **kwargs)
         self.icon = icon
+        self.block = block
 
     def __unicode__(self):
-        return mark_safe(u'<a href="{}" class="button cta">'
+        return self.render()
+
+    def as_block(self):
+        return self.render(block=True)
+
+    def render(self, block=False):
+        if block:
+            css_class = "button cta block"
+        else:
+            css_class = "button cta"
+        return mark_safe(u'<a href="{}" class="{}">'
                          u'<i class="icon {}"></i> {}</a>'.format(
-                             self.url, self.icon, self.label))
+                             self.url, css_class, self.icon, self.label))
 
     def __eq__(self, other):
         return (isinstance(other, Link) and

@@ -115,7 +115,8 @@
               {% endif %}
             </ol>
             {% endif %}
-            {% if cta %}<div class="text-center">{{ cta }}</div>{% endif %}
+            {% if cta %}<div class="videoSubtitles-cta">{{ cta.as_block }}</div>{% endif %}
+            {% if due_date %}<div>{{ due_date }}</div>{% endif %}
           </section>
           {% if all_subtitle_versions %}
           <section class="videoSubtitles-revisions">

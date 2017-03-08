@@ -552,6 +552,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'enable_edit_in_admin': request.user.is_superuser,
         'steps': customization.steps,
         'cta': customization.cta,
+        'due_date': customization.due_date,
         'can_edit': workflow.user_can_edit_subtitles(
             request.user, subtitle_language.language_code),
         'header': customization.header,
