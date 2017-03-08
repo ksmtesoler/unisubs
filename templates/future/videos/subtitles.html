@@ -174,3 +174,11 @@
   </div>
 </section>
 {% endblock %}
+{% block page-controls %}
+  {% if perms.subtitles.edit_subtitlelanguage %}
+  <li><a href="{% url "admin:subtitles_subtitlelanguage_change" subtitle_language.pk %}" target="blank">{% trans 'Edit SubtitleLanguage' %}</a></li>
+  {% endif %}
+  {% if subtitle_version and perms.subtitles.edit_subtitleversion %}
+  <li><a href="{% url "admin:subtitles_subtitleversion_change" subtitle_version.pk %}" target="blank">{% trans 'Edit SubtitleVersion' %}</a></li>
+  {% endif %}
+{% endblock %}
