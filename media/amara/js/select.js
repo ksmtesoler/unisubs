@@ -206,6 +206,7 @@ function languageChoiceData(select) {
     var enabledSelections = select.data('languageOptions').split(" ");
     var exclude = select.data('exclude');
     var limitTo = select.data('limitTo');
+    var flat = select.data('flat');
 
     if(select.data('initial')) {
         var initial = select.data('initial').split(':');
@@ -224,23 +225,27 @@ function languageChoiceData(select) {
             selected: _.contains(initial, '')
         });
     }
-    if(sectionEnabled('my')) {
-        data.push({
-            text: gettext('My Languages'),
-            children: choiceMaker.makeChoices(userLanguages)
-        });
-    }
-    if(sectionEnabled('popular')) {
-        data.push({
-            text: gettext('Popular Languages'),
-            children: choiceMaker.makeChoices(popularLanguages)
-        });
-    }
-    if(sectionEnabled('all')) {
-        data.push({
-            text: gettext('All Languages'),
-            children: choiceMaker.makeChoices(allLanguages)
-        });
+    if(flat) {
+        data = data.concat(choiceMaker.makeChoices(allLanguages));
+    } else {
+        if(sectionEnabled('my')) {
+            data.push({
+                text: gettext('My Languages'),
+                children: choiceMaker.makeChoices(userLanguages)
+            });
+        }
+        if(sectionEnabled('popular')) {
+            data.push({
+                text: gettext('Popular Languages'),
+                children: choiceMaker.makeChoices(popularLanguages)
+            });
+        }
+        if(sectionEnabled('all')) {
+            data.push({
+                text: gettext('All Languages'),
+                children: choiceMaker.makeChoices(allLanguages)
+            });
+        }
     }
     return data;
 }
@@ -252,9 +257,9 @@ function LanguageChoiceMaker(initial, exclude, limitTo) {
     }
     if(limitTo === undefined) {
         limitTo = [];
-        limitToEnabled = false;
+        this.limitToEnabled = false;
     } else {
-        limitToEnabled = true;
+        this.limitToEnabled = true;
     }
     this.exclude = arrayToMap(exclude);
     this.limitTo = arrayToMap(limitTo);

@@ -100,7 +100,7 @@ class AmaraMultipleChoiceField(AmaraChoiceFieldMixin,
 class LanguageFieldMixin(AmaraChoiceFieldMixin):
     def __init__(self, options="null my popular all",
                  placeholder=_("Select language"), *args, **kwargs):
-        kwargs['choices'] = translation.get_language_choices()
+        kwargs['choices'] = translation.get_language_choices(flat=True)
         super(LanguageFieldMixin, self).__init__(*args, **kwargs)
         self.set_select_data('language-options', options)
         if "null" in options:
@@ -117,6 +117,12 @@ class LanguageFieldMixin(AmaraChoiceFieldMixin):
         self.choices = [
             c for c in self.choices if c[0] in languages
         ]
+
+    def set_flat(self, enabled):
+        if enabled:
+            self.set_select_data('flat', 1)
+        else:
+            self.unset_select_data('flat')
 
     def set_placeholder(self, placeholder):
         self.set_select_data('placeholder', placeholder)
