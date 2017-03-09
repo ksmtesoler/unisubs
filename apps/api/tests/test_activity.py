@@ -16,7 +16,7 @@
 # with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.html.
 
 from __future__ import absolute_import
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 from django.test import TestCase
@@ -25,7 +25,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APIRequestFactory
 
-from api.tests.utils import format_datetime_field, user_field_data
+from api.tests.utils import format_datetime_field, format_datetime_field_as_date, user_field_data
 from comments.models import Comment
 from subtitles import pipeline
 from utils.factories import *
@@ -92,12 +92,32 @@ class ActivityTest(TestCase):
         self.check_list(url + '?type=video-added', record1)
         self.check_list(url + '?user=test-user', record3, record1)
         self.check_list(url + '?language=en', record2)
+        # We should accept filtering with or without time zone, date or datetime
         self.check_list(
             url + '?before=' + format_datetime_field(record2.created),
             record1)
         self.check_list(
+            url + '?before=' + record2.created.isoformat(),
+            record1)
+        self.check_list(
             url + '?after=' + format_datetime_field(record2.created),
             record3, record2)
+        self.check_list(
+            url + '?after=' + record2.created.isoformat(),
+            record3, record2)
+        self.check_list(
+            url + '?before=' + format_datetime_field_as_date(record2.created))
+        self.check_list(
+            url + '?after=' + format_datetime_field_as_date(record3.created),
+            record3, record2, record1)
+        tomorrow = record1.created + timedelta(days=1)
+        self.check_list(
+            url + '?before=' + format_datetime_field_as_date(tomorrow),
+            record3, record2, record1)
+        yesterday = record1.created - timedelta(days=1)
+        self.check_list(
+            url + '?after=' + format_datetime_field_as_date(yesterday),
+            record3, record2, record1)
         self.check_list(url + '?user=test-user&language=fr', record3)
 
     def test_user(self):
