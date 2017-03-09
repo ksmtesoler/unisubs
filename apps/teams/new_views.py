@@ -1011,3 +1011,27 @@ def ajax_member_search(request, team):
     }
 
     return HttpResponse(json.dumps(data), 'application/json')
+
+@team_view
+def ajax_video_search(request, team):
+    query = request.GET.get('q', '')
+    qs = Video.objects.search(query).filter(teamvideo__team=team)[:8]
+    title_set = set(v.title_display() for v in qs)
+    has_duplicate_title = len(title_set) != len(qs)
+    def get_title(video):
+        if has_duplicate_title:
+            return '{} ({})'.format(video.title_display(), video.video_id)
+        else:
+            return video.title_display()
+    data = {
+        'results': [
+            {
+                'id': video.video_id,
+                'text': get_title(video),
+                'primaryAudioLanguage': video.primary_audio_language_code,
+            }
+            for video in qs[:8]
+        ]
+    }
+
+    return HttpResponse(json.dumps(data), 'application/json')

@@ -104,6 +104,36 @@ class TeamMemberField(AmaraChoiceField):
         if user and not self.team.user_is_member(user):
             raise forms.ValidationError(self.error_messages['invalid'])
 
+class TeamVideoField(AmaraChoiceField):
+    default_error_messages = {
+        'invalid': _(u'Invalid video'),
+    }
+    def set_initial_choice(self, value):
+        if isinstance(value, Video):
+            value = (value.video_id, unicode(value.title_display()))
+        super(TeamVideoField, self).set_initial_choice(value)
+
+    def setup(self, team):
+        self.team = team
+        self.set_select_data('ajax', reverse('teams:ajax-video-search',
+                                             args=(team.slug,)))
+
+    def to_python(self, value):
+        if value in EMPTY_VALUES:
+            return None
+        if isinstance(value, Video):
+            return value
+        try:
+            return Video.objects.get(video_id=value)
+        except Video.DoesNotExist:
+            raise forms.ValidationError(self.error_messages['invalid'])
+
+    def validate(self, video):
+        if video:
+            team_video = video.get_team_video()
+            if not (team_video and team_video.team == self.team):
+                raise forms.ValidationError(self.error_messages['invalid'])
+
 class TeamField(AmaraChoiceField):
     default_error_messages = {
         'invalid': _(u'Invalid Team'),
