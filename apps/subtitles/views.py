@@ -133,10 +133,7 @@ class SubtitleEditorBase(View):
     def get_redirect_url(self):
         if 'return_url' in self.request.GET:
             return self.request.GET['return_url']
-        if self.editing_language.has_version():
-            url = self.editing_language.get_absolute_url()
-        else:
-            url = self.video.get_absolute_url()
+        url = self.editing_language.get_absolute_url()
         if 'team' in self.request.GET:
             url += '?{}'.format(urlencode({
                 'team': self.request.GET['team']
