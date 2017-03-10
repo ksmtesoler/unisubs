@@ -43,16 +43,6 @@ class AmaraChoiceFieldMixin(object):
 
     choices = property(_get_choices, _set_choices)
 
-    def set_initial_choice(self, choice):
-        """Set the initial value and add it as a choice.
-
-        This method both sets the initial value and adds a choice in one call.
-        It's useful for AJAX selects that don't usually have preset choices,
-        but sometimes have an initial value
-        """
-        self.initial = choice[0]
-        self.choices = [choice]
-
     def _setup_widget_choices(self, choices):
         null_choice = None
         widget_choices = []

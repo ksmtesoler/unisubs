@@ -80,11 +80,6 @@ class TeamMemberField(AmaraChoiceField):
     default_error_messages = {
         'invalid': _(u'Invalid user'),
     }
-    def set_initial_choice(self, value):
-        if isinstance(value, User):
-            value = (value.username, unicode(value))
-        super(TeamMemberField, self).set_initial_choice(value)
-
     def setup(self, team):
         self.team = team
         self.set_select_data('ajax', reverse('teams:ajax-member-search',
@@ -100,6 +95,29 @@ class TeamMemberField(AmaraChoiceField):
         except User.DoesNotExist:
             raise forms.ValidationError(self.error_messages['invalid'])
 
+    def prepare_value(self, value):
+        # Handles initial values and submitted data.  There are a few cases we
+        # need to handle:
+        #  - choice tuples
+        #  - User instances
+        #  - usernames
+        if isinstance(value, User):
+            value = self.choice_for_user(value)
+        elif isinstance(value, basestring):
+            try:
+                value = self.choice_for_user(
+                    User.objects.get(username=value))
+            except User.DoesNotExist:
+                return None
+        if value:
+            self.choices = [value]
+            return value[0]
+        else:
+            return None
+
+    def choice_for_user(self, user):
+        return (user.username, unicode(user))
+
     def validate(self, user):
         if user and not self.team.user_is_member(user):
             raise forms.ValidationError(self.error_messages['invalid'])
@@ -108,11 +126,6 @@ class TeamVideoField(AmaraChoiceField):
     default_error_messages = {
         'invalid': _(u'Invalid video'),
     }
-    def set_initial_choice(self, value):
-        if isinstance(value, Video):
-            value = (value.video_id, unicode(value.title_display()))
-        super(TeamVideoField, self).set_initial_choice(value)
-
     def setup(self, team):
         self.team = team
         self.set_select_data('ajax', reverse('teams:ajax-video-search',
@@ -127,6 +140,27 @@ class TeamVideoField(AmaraChoiceField):
             return Video.objects.get(video_id=value)
         except Video.DoesNotExist:
             raise forms.ValidationError(self.error_messages['invalid'])
+
+    def prepare_value(self, value):
+        # Handles initial values and submitted data.  There are a few cases we
+        # need to handle:
+        #  - choice tuples
+        #  - Video instances
+        #  - video ids
+        if isinstance(value, Video):
+            value = self.choice_for_video(value)
+        elif isinstance(value, basestring):
+            try:
+                value = self.choice_for_video(
+                    Video.objects.get(video_id=value,
+                                      teamvideo__team=self.team))
+            except Video.DoesNotExist:
+                return None
+        if value:
+            self.choices = [value]
+            return value[0]
+        else:
+            return None
 
     def validate(self, video):
         if video:
