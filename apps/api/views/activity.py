@@ -314,8 +314,12 @@ class ActivityFilterBackend(filters.BaseFilterBackend):
 
     def parse_value(self, name, value):
         if name in ('before', 'after'):
-            return timezone.make_naive(dateutil.parser.parse(value),
-                                       timezone.get_default_timezone())
+            try:
+                return timezone.make_naive(dateutil.parser.parse(value),
+                                           timezone.get_default_timezone())
+            except ValueError:
+                # Case where there is no time zone
+                return dateutil.parser.parse(value)
         else:
             return value
 

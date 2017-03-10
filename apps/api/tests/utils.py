@@ -27,6 +27,11 @@ def format_datetime_field(datetime):
     isoformat = tz.localize(datetime).astimezone(pytz.utc).isoformat()
     return isoformat.replace('+00:00', 'Z')
 
+def format_datetime_field_as_date(datetime):
+    if datetime is None:
+        return None
+    return datetime.date().isoformat()
+
 def user_field_data(user):
     if user:
         return {

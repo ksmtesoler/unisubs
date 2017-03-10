@@ -1530,6 +1530,9 @@ def old_dashboard(request, team):
         'videos': videos,
         'can_add_video': can_add_video(team, request.user),
         'create_subtitles_form': create_subtitles_form,
+        'team_messages': team.get_messages([
+            'pagetext_warning_tasks',
+        ]),
     }
 
     return context

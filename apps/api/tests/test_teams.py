@@ -123,6 +123,7 @@ class TeamAPITest(TeamAPITestBase):
                      response.content)
         team = Team.objects.get(slug='test-team')
         self.check_team_data(response.data, team)
+        assert_equal(team.is_visible, True)
         assert_equal(team.workflow_type, 'O')
         # check that we set the owner of the team to be the user who created
         # it

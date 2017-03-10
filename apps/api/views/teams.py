@@ -37,7 +37,7 @@ Get a list of teams
         - ``collaboration`` -- collaboration team
 
     :>json string description: Team description
-    :>json boolean is_visible: Should this team's videos be publicly visible?
+    :>json boolean is_visible: Should this team's videos be publicly visible (True by default)?
     :>json string membership_policy: Team membership policy. One of:
 
         - ``Open``
@@ -489,6 +489,7 @@ class TeamSerializer(serializers.ModelSerializer):
     tasks_uri = serializers.SerializerMethodField()
     languages_uri = serializers.SerializerMethodField()
     resource_uri = serializers.SerializerMethodField()
+    is_visible = serializers.BooleanField(default=True)
 
     def get_members_uri(self, team):
         return reverse('api:team-members-list', kwargs={

@@ -2793,7 +2793,6 @@ a.truncated-expand {
         clear: both;
         padding: 3em 10px 0;
         font-size: 13px;
-
         a {
             font-weight: normal;
             color: $lighter;
@@ -2808,6 +2807,16 @@ a.truncated-expand {
                 color: $usblue;
             }
         }
+    }
+
+    > h4 {
+        position: relative;
+        clear: both;
+        padding: 0 10px;
+        font-size: 11px;
+        &.warning {
+            color: $light;
+	}
     }
 
     .listing.yours {

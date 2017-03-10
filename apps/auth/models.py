@@ -650,8 +650,8 @@ class Announcement(models.Model):
         self.clear_cache()
 
     def delete(self, *args, **kwargs):
-        return super(Announcement, self).delete(*args, **kwargs)
         self.clear_cache()
+        return super(Announcement, self).delete(*args, **kwargs)
 
     @classmethod
     def last(cls, hidden_date=None):
