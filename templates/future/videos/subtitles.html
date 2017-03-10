@@ -20,7 +20,9 @@
             <li class="active"><a href="#subtitles_list" data-toggle="tab" aria-expanded="true">{% trans "Subtitles" %}</a></li>
             <li><a href="#subtitles_info" data-toggle="tab" aria-expanded="false">{% trans "Subtitles info" %}</a></li>
             <li><a href="#subtitles_activity" data-toggle="tab">{% trans "Activity" %}</a></li>
+            {% if comments %}
             <li><a href="#subtitles_comments" data-toggle="tab">{% trans "Comments" %}</a></li>
+            {% endif %}
             {% if show_notes %}
             <li><a href="#subtitles_notes" data-toggle="tab">{% trans "Subtitle Notes" %}</a></li>
             {% endif %}
@@ -49,9 +51,11 @@
             <div id="subtitles_activity" class="tab-pane">
               {% include "future/videos/tabs/activity.html" %}
             </div>
+            {% if comments %}
             <div id="subtitles_comments" class="tab-pane">
               {% include "future/videos/tabs/comments.html" %}
             </div>
+            {% endif %}
             {% if show_notes %}
             <div id="subtitles_notes" class="tab-pane">
               {% include "future/videos/tabs/notes.html" %}

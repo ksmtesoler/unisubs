@@ -514,14 +514,19 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     except ObjectDoesNotExist:
         raise Http404()
 
+    # Fetch the comments now.  We only support posting new comments if the
+    # subtitles already have comments on them
+    comments = Comment.get_for_object(subtitle_language)
+
     if 'form' in request.GET:
         return subtitles_ajax_form(request, video, subtitle_language, version)
-    elif request.POST.get('form') == 'comment':
-        # TODO: merge the comments form code with the other forms
+    elif request.POST.get('form') == 'comment' and comments:
+        # Handle the comments form specially, and only handle it if there are
+        # already comments on the video
         return comments_form(request, subtitle_language,
                              '#subtitles_comments')
     workflow = video.get_workflow()
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() and comments:
         comment_form = CommentForm(subtitle_language)
     else:
         comment_form = None
@@ -547,7 +552,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
                                    all_subtitle_versions),
         'downloadable_formats': downloadable_formats(request.user),
         'activity': activity,
-        'comments': Comment.get_for_object(subtitle_language),
+        'comments': comments,
         'comment_form': comment_form,
         'enable_edit_in_admin': request.user.is_superuser,
         'steps': customization.steps,
