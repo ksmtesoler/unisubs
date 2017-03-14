@@ -66,9 +66,10 @@ current status of work on the issue.  We use the following pipelines:
 Here's the workflow for a typical issue:
 
   - Someone creates a github issue to capture a bug/feature, and puts it in the Discovery pipeline for the current sprint (Sprint A)
-  - Product manager prioritizes with input from team, moves to Icebox or schedules for a future sprint in To Do (Sprint B)
-  - Developer reviews issue Friday before sprint B begins, adds hour estimates to issue
-  - Product manager reviews estimates, reorders prioritized issues in To Do pipeline before sprint B begins
+    - Product manager prioritizes with input from team, moves to Icebox or schedules for a future sprint in To Do (Sprint B)
+    - Developer reviews issue Friday before sprint B begins, adds hour estimates to issue
+    - Product manager reviews estimates, reorders prioritized issues in To Do pipeline before sprint B begins
+  
   - At beginning of sprint B, developer starts working top issue in To Do pipeline
 
      - Move the issue to the ``In progress`` pipeline
