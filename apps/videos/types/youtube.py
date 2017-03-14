@@ -39,6 +39,8 @@ class YoutubeVideoType(VideoType):
 
     CAN_IMPORT_SUBTITLES = True
 
+    VIDEOID_MAX_LENGTH = 11
+
     def __init__(self, url):
         self.url = url
         self.videoid = self._get_video_id(self.url)
@@ -104,5 +106,5 @@ class YoutubeVideoType(VideoType):
             match = pattern.search(video_url)
             video_id = match and match.group('video_id')
             if bool(video_id):
-                return video_id
+                return video_id[:YoutubeVideoType.VIDEOID_MAX_LENGTH]
         raise ValueError("Unknown video id")
