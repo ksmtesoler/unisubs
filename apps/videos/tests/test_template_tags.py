@@ -27,6 +27,7 @@ from videos.models import Video
 from videos.templatetags.subtitles_tags import language_url
 from videos.templatetags.videos_tags import shortlink_for_video
 from videos.tests.data import get_video, make_subtitle_language
+from videos.tests.videotestutils import WebUseTest
 
 class TestTemplateTags(TestCase):
     def test_language_url_for_empty_lang(self):
@@ -59,3 +60,23 @@ class ShortUrlTest(TestCase):
 
     def test_short_url_no_www(self):
         self.assertTrue(self.short_url.startswith('%s://amara.org' % settings.DEFAULT_PROTOCOL))
+
+class PaginatorTest(WebUseTest):
+    def setUp(self):
+        # TEAM_WORKFLOW_TYPE_COLLAB = 'EC'
+        self.team = TeamFactory(workflow_type='EC')
+        self.member = TeamMemberFactory(team=self.team)
+        self._login(user=self.member.user)
+        self.videos = [TeamVideoFactory(team=self.team) for
+                       x in range(0, 29)]
+
+        self.VIDEOS_PER_PAGE = 12
+
+    def test_paginator_object_counts(self):
+        response = self.client.get('/en/teams/{}/videos/'.format(self.team.slug))
+        self.assertContains(response, '{} out of {}'.format(self.VIDEOS_PER_PAGE, len(self.videos)))
+
+    def test_paginator_object_counts_last(self):
+        response = self.client.get('/en/teams/{}/videos/?page=999'.format(self.team.slug))
+        self.assertContains(response, '{} out of {}'.format(len(self.videos) % self.VIDEOS_PER_PAGE,
+                                                            len(self.videos)))
