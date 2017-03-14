@@ -18,8 +18,7 @@ bugfix" workflow.  Typically changes happen like this:
 
   - Someone creates a github issue that captures the bug/feature
   - A developer creates a branch to handle the issue.  Each feature branch
-    should be named after its issue number (e.g.  ``gh-1234`` would be a branch
-    for github issue 1234).  Changes for the issue always get commited to this
+    should be named after its repository and issue number (e.g.  ``gh-enterprise-1234`` or ``gh-unisubs-5678`` would be branches for github issue 1234 in the amara-enterprise repo and github issue 5678 in the unisubs repo, respectively).  Changes for the issue always get commited to this
     branch.
   - Once development on the issue is complete, we open a pull request from the
     topic branch to staging.  Another developer will review the code and merge
