@@ -1,5 +1,5 @@
-{% if paginator.num_pages > 1 %}
 <nav class="text-center">
+  {% if paginator.num_pages > 1 %}
   <ul class="pagination">
     <li>
       <a href="#" aria-label="Previous">
@@ -15,6 +15,8 @@
       </a>
     </li>
   </ul>
-  </p>{{ page.object_list|length }} out of {{ paginator.count }}</p>
+  </p>{{ page.start_index }}-{{ page.end_index }} out of {{ paginator.count }} videos</p>
+  {% else %}
+  </p>{{ page.object_list|length }} out of {{ paginator.count }} videos</p>
+  {% endif %}
 </nav>
-{% endif %}
