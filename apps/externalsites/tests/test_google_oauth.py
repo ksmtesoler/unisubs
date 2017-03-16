@@ -40,7 +40,7 @@ class TestRequestTokenURL(TestCase):
         state = {'foo': 'bar', 'baz': 3}
 
         correct_params = {
-            "client_id": settings.YOUTUBE_CLIENT_ID,
+            "client_id": settings.GOOGLE_CLIENT_ID,
             "redirect_uri": redirect_uri,
             "scope": "openid scope1 scope2",
             "state": json.dumps(state),
@@ -56,7 +56,7 @@ class TestRequestTokenURL(TestCase):
         assert_equal(token_url.netloc, 'accounts.google.com')
         assert_equal(token_url.path, '/o/oauth2/auth')
         assert_equal(urlparse.parse_qs(token_url.query), {
-            "client_id": [settings.YOUTUBE_CLIENT_ID],
+            "client_id": [settings.GOOGLE_CLIENT_ID],
             "redirect_uri": [redirect_uri],
             "scope": ["openid scope1 scope2"],
             "state": [json.dumps(state)],
@@ -75,7 +75,7 @@ class TestRequestTokenURL(TestCase):
         assert_equal(token_url.netloc, 'accounts.google.com')
         assert_equal(token_url.path, '/o/oauth2/auth')
         assert_equal(urlparse.parse_qs(token_url.query), {
-            "client_id": [settings.YOUTUBE_CLIENT_ID],
+            "client_id": [settings.GOOGLE_CLIENT_ID],
             "redirect_uri": [redirect_uri],
             "scope": ["openid scope1 scope2"],
             "state": [json.dumps(state)],
@@ -105,8 +105,8 @@ class OauthTokenMocker(RequestsMocker):
         self.expect_request(
             'post', "https://accounts.google.com/o/oauth2/token",
             data={
-                'client_id': settings.YOUTUBE_CLIENT_ID,
-                'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                'client_id': settings.GOOGLE_CLIENT_ID,
+                'client_secret': settings.GOOGLE_CLIENT_SECRET,
                 'code': 'test-authorization-code',
                 'grant_type': 'authorization_code',
                 'redirect_uri': self.redirect_uri,
@@ -172,8 +172,8 @@ class AccessTokenTest(TestCase):
         mocker = RequestsMocker()
         mocker.expect_request(
             'post', "https://accounts.google.com/o/oauth2/token", data={
-                'client_id': settings.YOUTUBE_CLIENT_ID,
-                'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                'client_id': settings.GOOGLE_CLIENT_ID,
+                'client_secret': settings.GOOGLE_CLIENT_SECRET,
                 'grant_type': 'refresh_token',
                 'refresh_token': 'test-refresh-token',
             }, headers={
@@ -192,8 +192,8 @@ class AccessTokenTest(TestCase):
         mocker = RequestsMocker()
         mocker.expect_request(
             'post', "https://accounts.google.com/o/oauth2/token", data={
-                'client_id': settings.YOUTUBE_CLIENT_ID,
-                'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                'client_id': settings.GOOGLE_CLIENT_ID,
+                'client_secret': settings.GOOGLE_CLIENT_SECRET,
                 'grant_type': 'refresh_token',
                 'refresh_token': 'test-refresh-token',
             }, headers={

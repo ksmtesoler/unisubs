@@ -81,7 +81,7 @@ def request_token_url(redirect_uri, access_type, state, extra_scopes=()):
     redirect_uri_parsed = urlparse.urlparse(redirect_uri)
 
     params = {
-        "client_id": settings.YOUTUBE_CLIENT_ID,
+        "client_id": settings.GOOGLE_CLIENT_ID,
         "redirect_uri": redirect_uri,
         "scope": ' '.join(scopes),
         "state": json.dumps(state),
@@ -97,8 +97,8 @@ def request_token_url(redirect_uri, access_type, state, extra_scopes=()):
             urllib.urlencode(params))
 
 def _oauth_token_post(**params):
-    params["client_id"] = settings.YOUTUBE_CLIENT_ID
-    params["client_secret"] = settings.YOUTUBE_CLIENT_SECRET
+    params["client_id"] = settings.GOOGLE_CLIENT_ID
+    params["client_secret"] = settings.GOOGLE_CLIENT_SECRET
 
     response = requests.post("https://accounts.google.com/o/oauth2/token",
                              data=params, headers={
@@ -223,7 +223,7 @@ def _make_api_request(method, access_token, url, **kwargs):
     else:
         if 'params' not in kwargs:
             kwargs['params'] = {}
-        kwargs['params']['key'] = settings.YOUTUBE_API_KEY
+        kwargs['params']['key'] = settings.GOOGLE_API_KEY
     response = requests.request(method, url, **kwargs)
     if method == 'delete':
         expected_status_code = 204
