@@ -128,7 +128,7 @@ class TeamManager(models.Manager):
         """Return a QS of all non-deleted teams."""
         return TeamQuerySet(Team).filter(deleted=False)
 
-    def for_user(self, user, exclude_private=False):
+    def for_user(self, user, exclude_private=False, new_style_only=False):
         """Return the teams visible for the given user.
 
         If exclude_private is True, then we will exclude private teams, even
@@ -142,7 +142,10 @@ class TeamManager(models.Manager):
         if user.is_authenticated():
             user_teams = TeamMember.objects.filter(user=user)
             q |= models.Q(id__in=user_teams.values('team_id'))
-        return self.get_query_set().filter(q)
+        teams = self.get_query_set().filter(q)
+        if new_style_only:
+            teams = teams.exclude(workflow_type='O')
+        return teams
 
     def with_recent_billing_record(self, day_range):
         """Find teams that have had a new video recently"""

@@ -37,12 +37,13 @@ from auth.models import CustomUser as User
 from profiles.forms import (EditUserForm, EditAccountForm, SendMessageForm,
                             EditAvatarForm, AdminProfileForm, EditNotificationsForm)
 from profiles.rpc import ProfileApiClass
+from profiles import new_views
 import externalsites.models
 from utils.objectlist import object_list
 from utils.orm import LoadRelatedQuerySet
 from utils.rpc import RpcRouter
 from utils.text import fmt
-from teams.models import Task
+from teams.models import Task, Team
 from subtitles.models import SubtitleLanguage
 from videos.models import (
     VideoUrl, Video, VIDEO_TYPE_YOUTUBE, VideoFeed
@@ -82,7 +83,9 @@ def profile(request, user_id):
             user = User.objects.get(id=user_id)
         except (User.DoesNotExist, ValueError):
             raise Http404
-
+    if len(Team.objects.for_user(user, new_style_only=True)) > 0:
+        logger.error("New style")
+        return new_views.profile(request, user)
     if request.user.is_staff:
         if request.method == 'POST':
             form = AdminProfileForm(instance=user, data=request.POST)
