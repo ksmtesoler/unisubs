@@ -134,3 +134,8 @@
 
 {% endblock %}
 
+{% block page-controls %}
+{% if perms.videos.edit_video %}
+<li><a href="{% url "admin:videos_video_change" video.pk %}" target="blank">{% trans 'Edit video' %}</a></li>
+{% endif %}
+{% endblock %}

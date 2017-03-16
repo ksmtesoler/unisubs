@@ -142,6 +142,13 @@
 //
 // Styleguide dialogconfirmation
 
+.modal {
+  z-index: $z-index-modal;
+}
+
+.modal-backdrop {
+  z-index: $z-index-overlay;
+}
 
 .modal-dialog {
   &.modal-sm { width: 300px; }
@@ -173,6 +180,11 @@
         &:after { display: none; }
         .select2-selection__rendered { display: block; color: $gray; }
         .select2-selection__rendered:after { float: right; color: $gray-light; }
+      }
+    }
+    .button {
+      &.cta-reverse{
+        margin-right: 5px;
       }
     }
   }

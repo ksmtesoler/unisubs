@@ -24,6 +24,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APIRequestFactory
 import mock
+import unittest
 
 from api.tests.utils import format_datetime_field
 from api.views.videos import VideoSerializer, VideoViewSet
@@ -517,7 +518,7 @@ class VideoViewSetTest(TestCase):
         assert_items_equal([v1], self.viewset.get_queryset())
 
     def test_team_filter(self):
-        team = TeamFactory()
+        team = TeamFactory(is_visible=True)
         v1 = VideoFactory(title='correct team')
         v2 = VideoFactory(title='wrong team')
         v3 = VideoFactory(title='not in team')
@@ -527,7 +528,7 @@ class VideoViewSetTest(TestCase):
         assert_items_equal([v1], self.viewset.get_queryset())
 
     def test_project_filter(self):
-        team = TeamFactory()
+        team = TeamFactory(is_visible=True)
         project = ProjectFactory(team=team, slug='project')
         other_project = ProjectFactory(team=team, slug='wrong-project')
         v1 = VideoFactory(title='correct project')
@@ -543,7 +544,7 @@ class VideoViewSetTest(TestCase):
         assert_items_equal([v1], self.viewset.get_queryset())
 
     def test_default_project_filter(self):
-        team = TeamFactory()
+        team = TeamFactory(is_visible=True)
         project = ProjectFactory(team=team, slug='project-slug')
         v1 = VideoFactory(title='in default project')
         v2 = VideoFactory(title='not in default project')
@@ -663,6 +664,8 @@ class VideoURLTestCase(TestCase):
             'original': video_url.original,
             'id': video_url.id,
             'resource_uri': self.detail_url(video_url),
+            'type': 'HTML5',
+            'videoid': '',
         }
 
     def test_list_urls(self):
@@ -676,7 +679,7 @@ class VideoURLTestCase(TestCase):
     def test_get_detail(self):
         response = self.client.get(self.detail_url(self.primary_url))
         assert_equal(response.status_code, status.HTTP_200_OK)
-        assert_items_equal(response.data, self.correct_data(self.primary_url))
+        assert_dict_contains_subset(response.data, self.correct_data(self.primary_url))
 
     def test_add_url(self):
         url = 'http://example.com/added-video.mp4'
@@ -760,6 +763,7 @@ class VideoViewTestCase(TestCase):
             'video_id': self.video.video_id,
         })
 
+    @unittest.skip("waiting on amara-enterprise#1115")
     def test_delete_video(self):
         video_pk = self.video.pk
         response = self.client.delete(self.url)

@@ -20,7 +20,12 @@
             <li class="active"><a href="#subtitles_list" data-toggle="tab" aria-expanded="true">{% trans "Subtitles" %}</a></li>
             <li><a href="#subtitles_info" data-toggle="tab" aria-expanded="false">{% trans "Subtitles info" %}</a></li>
             <li><a href="#subtitles_activity" data-toggle="tab">{% trans "Activity" %}</a></li>
+            {% if comments %}
             <li><a href="#subtitles_comments" data-toggle="tab">{% trans "Comments" %}</a></li>
+            {% endif %}
+            {% if show_notes %}
+            <li><a href="#subtitles_notes" data-toggle="tab">{% trans "Subtitle Notes" %}</a></li>
+            {% endif %}
             {% if show_sync_history %}
             <li><a href="#subtitles_sync_history" data-toggle="tab">{% trans "Sync History" %}</a></li>
             {% endif %}
@@ -31,7 +36,7 @@
                 {% if show_rollback %}
                 <a {% if can_edit %}class="button small ajaxLink" href="{% query_string form=rollback %}"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
                 {% else %}
-                <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}"{% else %}class="button small disabled"{% endif %}>{% trans "Edit subtitles" %}</a>
+                <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}{% query_string %}"{% else %}class="button small disabled"{% endif %}>{% trans "Edit subtitles" %}</a>
                 {% endif %}
               </nav>
               {% if subtitle_version and subtitle_version.has_subtitles %}
@@ -46,9 +51,16 @@
             <div id="subtitles_activity" class="tab-pane">
               {% include "future/videos/tabs/activity.html" %}
             </div>
+            {% if comments %}
             <div id="subtitles_comments" class="tab-pane">
               {% include "future/videos/tabs/comments.html" %}
             </div>
+            {% endif %}
+            {% if show_notes %}
+            <div id="subtitles_notes" class="tab-pane">
+              {% include "future/videos/tabs/notes.html" %}
+            </div>
+            {% endif %}
             {% if show_sync_history %}
             <div id="subtitles_sync_history" class="tab-pane">
               {% include "future/videos/tabs/sync-history.html" %}
@@ -107,7 +119,8 @@
               {% endif %}
             </ol>
             {% endif %}
-            {% if cta %}{{ cta }}{% endif %}
+            {% if cta %}<div class="videoSubtitles-cta">{{ cta.as_block }}</div>{% endif %}
+            {% if due_date %}<div>{{ due_date }}</div>{% endif %}
           </section>
           {% if all_subtitle_versions %}
           <section class="videoSubtitles-revisions">
@@ -165,4 +178,12 @@
     </div>
   </div>
 </section>
+{% endblock %}
+{% block page-controls %}
+  {% if perms.subtitles.edit_subtitlelanguage %}
+  <li><a href="{% url "admin:subtitles_subtitlelanguage_change" subtitle_language.pk %}" target="blank">{% trans 'Edit SubtitleLanguage' %}</a></li>
+  {% endif %}
+  {% if subtitle_version and perms.subtitles.edit_subtitleversion %}
+  <li><a href="{% url "admin:subtitles_subtitleversion_change" subtitle_version.pk %}" target="blank">{% trans 'Edit SubtitleVersion' %}</a></li>
+  {% endif %}
 {% endblock %}

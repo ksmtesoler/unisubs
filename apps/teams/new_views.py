@@ -649,13 +649,11 @@ def manage_videos(request, team):
 # Functions to handle the forms on the videos pages
 def get_video_management_forms(team):
     form_list = ManagementFormList([
-        forms.EditVideosForm,
+        forms.DeleteVideosForm,
         forms.MoveVideosForm,
+        forms.EditVideosForm,
     ])
     signals.build_video_management_forms.send(sender=team, form_list=form_list)
-    form_list.extend([
-        forms.DeleteVideosForm
-    ])
     return form_list
 
 def all_video_management_forms(team, user):
@@ -1009,6 +1007,30 @@ def ajax_member_search(request, team):
                 'text': unicode(user)
             }
             for user in qs[:8]
+        ]
+    }
+
+    return HttpResponse(json.dumps(data), 'application/json')
+
+@team_view
+def ajax_video_search(request, team):
+    query = request.GET.get('q', '')
+    qs = Video.objects.search(query).filter(teamvideo__team=team)[:8]
+    title_set = set(v.title_display() for v in qs)
+    has_duplicate_title = len(title_set) != len(qs)
+    def get_title(video):
+        if has_duplicate_title:
+            return '{} ({})'.format(video.title_display(), video.video_id)
+        else:
+            return video.title_display()
+    data = {
+        'results': [
+            {
+                'id': video.video_id,
+                'text': get_title(video),
+                'primaryAudioLanguage': video.primary_audio_language_code,
+            }
+            for video in qs[:8]
         ]
     }
 

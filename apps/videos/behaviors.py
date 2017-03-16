@@ -53,6 +53,7 @@ class SubtitlesPageCustomization(object):
         steps: list of SubtitlesStep objects to display in the top-right
             section
         cta: CTA object to display underneath the steps
+        due_date: Due date for the CTA
         header: HTML to display in the header
         team: team context to show.  We include activity private to this team
             when showing activity records
@@ -60,6 +61,7 @@ class SubtitlesPageCustomization(object):
     def __init__(self):
         self.steps = None
         self.cta = None
+        self.due_date = None
         self.header = None
         self.team = None
 

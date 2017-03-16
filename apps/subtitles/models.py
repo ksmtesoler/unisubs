@@ -635,6 +635,9 @@ class SubtitleLanguage(models.Model):
         else:
             return self.subtitleversion_set.extant()
 
+    def has_version(self, public=False, full=False):
+        return self.get_tip(public, full) is not None
+
     def get_versions(self, public=False, full=False, newest_first=False):
         """Get a list of versions for this subtitle language
 
@@ -1124,7 +1127,8 @@ LIMIT 1;""", (self.id, self.id))
                 [self.video.video_id, self.language_code or 'unknown', self.pk])
 
     @property
-    def has_version(self):
+    def old_has_version(self):
+        # FIXME: remove this once we get rid of the RPC code that uses it
         """
         http://amara.readthedocs.org/en/latest/model-refactor.html#id4
         """

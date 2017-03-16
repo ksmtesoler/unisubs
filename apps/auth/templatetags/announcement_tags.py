@@ -15,29 +15,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
-from datetime import datetime
-from urllib2 import unquote
 
 from django import template
 
 from auth.models import Announcement
 
-
 register = template.Library()
 
 @register.inclusion_tag('auth/_announcement.html', takes_context=True)
 def announcement(context):
-    try:
-        date_str = unquote(context['request'].COOKIES.get(Announcement.hide_cookie_name))
-        hidden_date = datetime.strptime(date_str, Announcement.cookie_date_format)
-    except (ValueError, TypeError, AttributeError):
-        hidden_date = None
-
-    ann = Announcement.last(hidden_date)
-    date = datetime.now().strftime(Announcement.cookie_date_format)
-
     return {
-        'obj': ann,
-        'cookie_name': Announcement.hide_cookie_name,
-        'date': date,
+        'announcement': Announcement.last()
     }

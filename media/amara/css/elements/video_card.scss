@@ -195,7 +195,7 @@
   width: 100%;
   bottom: 0;
   left: 0;
-  padding: 60px 30px 0 10px;
+  padding: 60px 30px 10px 10px;
   color: #ffffff;
   background: linear-gradient(rgba(0,0,0,0.0), rgba(0,0,0,0.7));
 }
@@ -205,4 +205,5 @@
 }
 .videoCardSimple-subtitle {
   margin-top: 3px;
+  margin-bottom: 0;
 }

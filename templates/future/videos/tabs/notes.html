@@ -1,0 +1,33 @@
+{% load i18n ui query_string %}
+{% load url from future %}
+<ul class="comments">
+  {% for note in notes %}
+  <li class="row">
+    <div class="col-xs-4">
+      <a href="{{ note.user.get_absolute_url }}" class="pull-left">{{ note.user.avatar_tag_medium }}</a>
+      <p>
+        <span class="memberName"><a href="{{ note.user.get_absolute_url }}">{{ note.user }}</a></span>
+      </p>
+    </div>
+    <div class="col-xs-8">
+      <div class="commentBody">
+        {{ note.body|linebreaks }}
+        <span>{{ note.created|elapsed_time }}</span>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+  {% if notes_form %}
+  <li class="row addComment">
+    <div class="col-xs">
+      <a href="{{ user.get_absolute_url }}" class="pull-left">{{ user.avatar_tag_medium }}</a>
+      <form action="{% query_string form=notes %}" class="ajaxForm" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form" value="notes">
+        {{ notes_form.body }}
+        <button type="submit" class="button small pull-right">{% trans "Post" %}</button>
+      </form>
+    </div>
+  </li>
+  {% endif %}
+</ul>

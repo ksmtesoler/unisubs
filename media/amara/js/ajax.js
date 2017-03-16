@@ -76,6 +76,7 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
     function ajaxForm(form) {
         var submitting = false;
         var sawSecondSubmit = false;
+        var inPeriodicSubmit = false;
         form = $(form);
         form.add('button', form).ajaxForm({
             beforeSubmit: function(data) {
@@ -97,23 +98,44 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
                     $(':input', form).prop('disabled', true);
                 }
             },
-            complete: function() {
+            complete: function(xhr, status) {
                 submitting = false;
                 if(sawSecondSubmit) {
                     sawSecondSubmit = false;
                     form.submit();
                 }
+                if(inPeriodicSubmit) {
+                    inPeriodicSubmit = false;
+                    if(status == 'success') {
+                        schedulePeriodicSubmit();
+                    }
+                }
             },
             success: processAjaxResponse,
             error: function() {
-                alert(gettext('Error submitting form'));
-                dialogs.closeCurrentModal();
+                if(!inPeriodicSubmit) {
+                    alert(gettext('Error submitting form'));
+                    dialogs.closeCurrentModal();
+                }
             }
         });
 
         if(form.hasClass('updateOnChange')) {
             $(':input', form).change(submitIfChanged);
             $('input[type=text]', form).keyup(submitIfChanged);
+        }
+
+        function schedulePeriodicSubmit() {
+            var delay = form.data('period') * 1000;
+            setTimeout(function() {
+                inPeriodicSubmit = true;
+                form.submit();
+            }, delay);
+        }
+
+        if(form.hasClass('updatePeriodically') &&
+                $.isNumeric(form.data('period'))) {
+            schedulePeriodicSubmit();
         }
 
         var lastSerialize = form.formSerialize();

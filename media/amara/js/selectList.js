@@ -75,7 +75,7 @@ define(['jquery'], function($) {
                 checkboxesFromOtherLists.parent().attr('title', null);
             }
             selection.val(getSelection().join('-'));
-        });
+        }).trigger('change');
 
         function getSelection() {
             var selection = [];

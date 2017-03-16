@@ -1,20 +1,21 @@
 
 function statusChangeCallback(response) {
     if (response.status === 'connected') {
-	if (document.getElementById('submit-proceed-to-create') != null) {
+	if (document.getElementById('submit-proceed-to-create-facebook') != null) {
 	    FB.api('/me?fields=first_name,last_name,email,picture', function(response) {
+		console.log("Done");
 		document.getElementById('id_avatar').value = response.picture.data.url;
 		document.getElementById('id_first_name').value = response.first_name;
 		document.getElementById('id_last_name').value = response.last_name;
-		document.getElementById("submit-proceed-to-create").disabled = false;
+		document.getElementById("submit-proceed-to-create-facebook").disabled = false;
 	    });
 	}
     }
 }
 
 window.fbAsyncInit = function() {
-    if (document.getElementById("submit-proceed-to-create") != null) {
-	document.getElementById("submit-proceed-to-create").disabled = true;
+    if (document.getElementById("submit-proceed-to-create-facebook") != null) {
+	document.getElementById("submit-proceed-to-create-facebook").disabled = true;
     }
     if (document.getElementById("facebook") != null) {
 	document.getElementById("facebook").onclick = doLogin;

@@ -32,36 +32,40 @@ Dashboard Sections
     }
   }
 }
-#my_assignments {
+#my_assignments, #available_assignments {
   .zero-state {
     height: 305px;
   }
 }
 #available_assignments {
   ul {
-    display: table;
+    
     width: 100%;
     padding: 0;
     list-style: none;
     border: 1px solid $gray-light;
     border-radius: $border-radius-base;
-    height: 305px;
+    height: 302px;
     li {
-      display: table-row;
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
+      display: table;
+      width: 100%;
+      a {
+        display: table-row;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        height: 60px;
+        color: #fff;
+      }
       span {
         display: table-cell;
         vertical-align: middle;
         padding: 0 0 0 20px;
         text-align: left;
         background-color: $turquoise;
-        a {
-          color: #fff;
-        }
         &.total{
+          width: 25%;
           padding: 0 10px;
           background-color: #fff;
           color: $text-color;
@@ -122,20 +126,9 @@ Dashboard Sections
           width: 120px;
           text-align: right;
 
-          i.icon {
-            display: inline-block;
-            width: 30px;
-            margin: 0;
-            text-align: center;
-          }
         }
       }
     }
-  }
-  i {
-    margin-left: 10px;
-    font-size: 18px;
-    color: $gray;
   }
 }
 

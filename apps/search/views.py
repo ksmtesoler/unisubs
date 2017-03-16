@@ -23,13 +23,14 @@ from search.forms import SearchForm
 from search.rpc import SearchApiClass
 from utils import render_to
 from utils.context_processors import current_site
+from django.contrib.auth.decorators import login_required
 from utils.rpc import RpcRouter
 
 
 rpc_router = RpcRouter('search:rpc_router', {
     'SearchApi': SearchApiClass()
 })
-
+@login_required
 @render_to('search/search.html')
 def index(request):
     if request.GET:

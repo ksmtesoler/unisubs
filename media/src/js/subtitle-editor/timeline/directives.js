@@ -177,7 +177,7 @@ var angular = angular || null;
                 visibleTimespan.positionDiv(bufferTimespan, canvas);
             };
             $(window).resize(function() {
-                containerWidth = container.width();
+                containerWidth = (container.width() || container.parent().width());
                 scope.redrawCanvas();
             });
             scope.$on('timeline-drag', function(evt, deltaMS) {
@@ -585,7 +585,7 @@ var angular = angular || null;
             timelineDiv.on('mousedown', handleMouseDownInTimeline);
             // Redraw the subtitles on window resize
             $(window).resize(function() {
-                containerWidth = container.width();
+                containerWidth = (container.width() || container.parent().width());
                 scope.redrawSubtitles();
             });
             // Redraw them now as well

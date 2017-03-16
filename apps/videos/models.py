@@ -18,6 +18,7 @@
 
 from collections import defaultdict
 from datetime import datetime, date, timedelta
+import hashlib
 import logging
 import json
 import string
@@ -138,7 +139,7 @@ class VideoManager(models.Manager):
         return self.filter(featured__isnull=False).order_by('-featured')
 
     def latest(self):
-        return self.public().order_by('-created')
+        return self.public().order_by('-id')
 
     def public(self):
         return self.filter(is_public=True)
@@ -2111,7 +2112,8 @@ class VideoUrl(models.Model):
     # type should be 2 chars long with the first char being unique for the
     # app.
     type = models.CharField(max_length=2)
-    url = models.URLField(max_length=512)
+    url = models.URLField(max_length=2048)
+    url_hash = models.CharField(max_length=32)
     videoid = models.CharField(max_length=50, blank=True)
     primary = models.BooleanField(default=False)
     original = models.BooleanField(default=False)
@@ -2123,19 +2125,7 @@ class VideoUrl(models.Model):
 
     class Meta:
         ordering = ("video", "-primary",)
-
-    def validate_unique(self, *args, **kwargs):
-        super(VideoUrl, self).validate_unique(*args, **kwargs)
-        qs = self.__class__.objects.filter(url=self.url, type=self.type)
-        if ((not self.id and qs.exists()) or
-        ((len(qs) == 1) and (qs.get().id != self.id))):
-            raise ValidationError(
-                {
-                    NON_FIELD_ERRORS: [
-                        _('Video already exist on Amara'),
-                    ],
-                }
-            )
+        unique_together = ("url_hash", "type",)
 
     def __unicode__(self):
         return self.url
@@ -2248,6 +2238,7 @@ class VideoUrl(models.Model):
         assert self.type != '', "Can't set an empty type"
         if updates_timestamp:
             self.created = datetime.now()
+        self.url_hash = hashlib.md5(self.url.encode("utf-8")).hexdigest()
         super(VideoUrl, self).save(*args, **kwargs)
 
 def video_url_remove_handler(sender, instance, **kwargs):

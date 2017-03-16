@@ -43,16 +43,6 @@ class AmaraChoiceFieldMixin(object):
 
     choices = property(_get_choices, _set_choices)
 
-    def set_initial_choice(self, choice):
-        """Set the initial value and add it as a choice.
-
-        This method both sets the initial value and adds a choice in one call.
-        It's useful for AJAX selects that don't usually have preset choices,
-        but sometimes have an initial value
-        """
-        self.initial = choice[0]
-        self.choices = [choice]
-
     def _setup_widget_choices(self, choices):
         null_choice = None
         widget_choices = []
@@ -100,7 +90,7 @@ class AmaraMultipleChoiceField(AmaraChoiceFieldMixin,
 class LanguageFieldMixin(AmaraChoiceFieldMixin):
     def __init__(self, options="null my popular all",
                  placeholder=_("Select language"), *args, **kwargs):
-        kwargs['choices'] = translation.get_language_choices()
+        kwargs['choices'] = translation.get_language_choices(flat=True)
         super(LanguageFieldMixin, self).__init__(*args, **kwargs)
         self.set_select_data('language-options', options)
         if "null" in options:
@@ -117,6 +107,12 @@ class LanguageFieldMixin(AmaraChoiceFieldMixin):
         self.choices = [
             c for c in self.choices if c[0] in languages
         ]
+
+    def set_flat(self, enabled):
+        if enabled:
+            self.set_select_data('flat', 1)
+        else:
+            self.unset_select_data('flat')
 
     def set_placeholder(self, placeholder):
         self.set_select_data('placeholder', placeholder)

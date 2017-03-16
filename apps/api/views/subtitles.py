@@ -295,7 +295,7 @@ from subtitles import compat
 from subtitles import pipeline
 from subtitles import workflows
 from subtitles.models import (SubtitleLanguage, SubtitleVersion,
-                              ORIGIN_WEB_EDITOR, ORIGIN_API)
+                              ORIGIN_UPLOAD, ORIGIN_WEB_EDITOR, ORIGIN_API)
 from subtitles.exceptions import ActionError
 from subtitles.permissions import user_can_access_subtitles_format
 from subtitles.types import SubtitleFormatList
@@ -588,6 +588,11 @@ class LanguageForSubtitlesSerializer(serializers.Serializer):
     dir = serializers.CharField()
 
 class SubtitlesSerializer(serializers.Serializer):
+    ORIGIN_CHOICES = [
+        ('api', _('API')),
+        ('editor', _('Subtitle editor')),
+        ('upload', _('Upload')),
+    ]
     version_number = serializers.IntegerField(read_only=True)
     sub_format = SubFormatField(required=False, default='dfxp', initial='dfxp')
     subtitles = SubtitlesField()
@@ -596,10 +601,9 @@ class SubtitlesSerializer(serializers.Serializer):
                                    allow_blank=True)
     is_complete = serializers.NullBooleanField(required=False,
                                                write_only=True)
-    from_editor = serializers.BooleanField(
+    origin = serializers.ChoiceField(
         required=False, write_only=True,
-        help_text=("Check to flag this version as coming from the "
-                   "amara editor."))
+        default='api', choices=ORIGIN_CHOICES)
     language = LanguageForSubtitlesSerializer(source='*', read_only=True)
     title = serializers.CharField(required=False, allow_blank=True)
     duration = serializers.IntegerField(required=False, write_only=True)
@@ -658,6 +662,16 @@ class SubtitlesSerializer(serializers.Serializer):
         return reverse('videos:subtitleversion_detail', kwargs=kwargs,
                        request=self.context['request'])
 
+    def validate_origin(self, value):
+        if not value or value == 'api':
+            return ORIGIN_API
+        elif value == 'editor':
+            return ORIGIN_WEB_EDITOR
+        elif value == 'upload':
+            return ORIGIN_UPLOAD
+        else:
+            raise ValidationError('invalid origin value: {}'.format(value))
+
     def to_representation(self, version):
         data = super(SubtitlesSerializer, self).to_representation(version)
         # copy a fields to deprecated names
@@ -679,10 +693,6 @@ class SubtitlesSerializer(serializers.Serializer):
         return super(SubtitlesSerializer, self).to_internal_value(data)
 
     def create(self, validated_data):
-        if validated_data.get('from_editor'):
-            origin = ORIGIN_WEB_EDITOR
-        else:
-            origin = ORIGIN_API
         action = complete = None
         if 'action' in validated_data:
             action = validated_data.get("action")
@@ -698,7 +708,7 @@ class SubtitlesSerializer(serializers.Serializer):
             metadata=validated_data.get('metadata'),
             author=self.context['user'],
             committer=self.context['user'],
-            origin=origin)
+            origin=validated_data.get('origin'))
 
 class SubtitlesView(generics.CreateAPIView):
     # Note that even though we only inherit from CreateAPIView, we support

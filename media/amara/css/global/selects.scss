@@ -15,7 +15,9 @@
 //
 // Use the data-ajax attribute to load the data from an ajax call.
 //
-// Use the data-extra options to display extra options in addition to the AJAX results.  It inputs a JSON array of [value, label] pairs.
+// Use the data-extra attribute to display extra options in addition to the AJAX results.  It inputs a JSON array of [value, label] pairs.
+//
+// Use the data-flat attribute to make the list flat -- without optgroups.
 // 
 // Example:
 //   <select class="select" name="" id="" placeholder="Select an option">

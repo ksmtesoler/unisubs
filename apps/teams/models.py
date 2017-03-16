@@ -225,7 +225,7 @@ class Team(models.Model):
                                       default='', blank=True,
                                       legacy_filenames=False,
                                       thumb_sizes=[(100, 100), (40, 40), (30, 30)])
-    is_visible = models.BooleanField(_(u'videos public?'), default=True)
+    is_visible = models.BooleanField(_(u'videos public?'), default=False)
     sync_metadata = models.BooleanField(_(u'Sync metadata when available (Youtube)?'), default=False)
     videos = models.ManyToManyField(Video, through='TeamVideo',  verbose_name=_('videos'))
     users = models.ManyToManyField(User, through='TeamMember', related_name='teams', verbose_name=_('users'))
@@ -2789,6 +2789,7 @@ class Setting(models.Model):
         (311, 'block_new_collab_assignments_message'),
         # 400 is for text displayed on web pages
         (401, 'pagetext_welcome_heading'),
+        (402, 'pagetext_warning_tasks'),
         # 500 is to enable features
         (501, 'enable_require_translated_metadata'),
     )

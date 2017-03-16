@@ -34,7 +34,7 @@ var angular = angular || null;
                     Math.floor($scope.timeline.duration / 1000),
                     $scope.workingSubtitles.description,
                     $scope.workingSubtitles.metadata,
-                    null, action).then(this.afterSaveSubtitles);
+                    null, action, 'dfxp', false).then(this.afterSaveSubtitles);
             },
             performAction: function(action) {
                 return SubtitleStorage.performAction(action);
