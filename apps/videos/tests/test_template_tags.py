@@ -74,7 +74,7 @@ class PaginatorTest(WebUseTest):
 
     def test_paginator_object_counts_single_page(self):
         response = self.client.get('/en/teams/{}/videos/'.format(self.team.slug))
-        self.assertContains(response, '{} out of {} videos'.format(len(self.videos), len(self.videos)))
+        self.assertContains(response, '{} out of {}'.format(len(self.videos), len(self.videos)))
 
     def test_paginator_object_counts(self):
         self.videos += [TeamVideoFactory(team=self.team) for x in range(0, 19)]
@@ -85,7 +85,7 @@ class PaginatorTest(WebUseTest):
             start = (page-1) * self.VIDEOS_PER_PAGE + 1
             end = start + self.VIDEOS_PER_PAGE - 1
             response = self.client.get('/en/teams/{}/videos/?page={}'.format(self.team.slug, page))
-            self.assertContains(response, '{}-{} out of {} videos'.format(start, end, len(self.videos)))
+            self.assertContains(response, '{}-{} out of {}'.format(start, end, len(self.videos)))
 
     def test_paginator_object_counts_last(self):
         self.videos += [TeamVideoFactory(team=self.team) for x in range(0, 19)]
@@ -93,4 +93,4 @@ class PaginatorTest(WebUseTest):
         page = len(self.videos)/self.VIDEOS_PER_PAGE + 1
         start = (page-1) * self.VIDEOS_PER_PAGE + 1
         end = start + (len(self.videos) % self.VIDEOS_PER_PAGE) - 1
-        self.assertContains(response, '{}-{} out of {} videos'.format(start, end, len(self.videos)))
+        self.assertContains(response, '{}-{} out of {}'.format(start, end, len(self.videos)))
