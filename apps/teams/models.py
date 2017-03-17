@@ -2240,7 +2240,7 @@ class Task(models.Model):
         video_urls = (VideoUrl.objects
                       .filter(video__teamvideo__id__in=team_video_pks)
                       .filter(primary=True))
-        video_url_map = dict((vu.video_id, vu.effective_url)
+        video_url_map = dict((vu.video_id, vu.url)
                              for vu in video_urls)
         for t in tasks:
             t.cached_video_url = video_url_map.get(t.team_video.video_id)
