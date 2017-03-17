@@ -22,10 +22,12 @@ import urlparse
 
 from django.conf import settings
 from django.test import TestCase
+from django.test.utils import override_settings
 from nose.tools import *
 import mock
 import jwt
 
+from utils import dates
 from utils.factories import *
 from utils.test_utils import *
 from externalsites import google
@@ -287,3 +289,62 @@ class OpenIDConnectAuthBackendTest(TestCase):
             first_name='Pat', last_name='Patterson')
         assert_equal(login_user.first_name, 'Sam')
         assert_equal(login_user.last_name, 'Patterson')
+
+class ServiceAccountTest(TestCase):
+    @override_settings(GOOGLE_SERVICE_ACCOUNT='test@example.com',
+                       GOOGLE_SERVICE_ACCOUNT_SECRET='test-secret')
+    @patch_for_test('jwt.encode')
+    @patch_for_test('time.time')
+    def test_get_access_token(self, mock_time, mock_encode):
+        mock_time.return_value = 123.4
+        now = 123
+        mock_encode.return_value = 'test-jwt-data'
+
+        mocker = RequestsMocker()
+        mocker.expect_request(
+            'post', "https://www.googleapis.com/oauth2/v4/token", data={
+                'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion': 'test-jwt-data',
+            }, headers={
+                "Content-Type": "application/x-www-form-urlencoded"
+            }, body=json.dumps({
+                'access_token': 'test-access-token',
+            }),
+        )
+        with mocker:
+            access_token = google.get_service_account_access_token('test-scope')
+        claim = {
+            'iss': 'test@example.com',
+            'scope': 'test-scope',
+            'aud': 'https://www.googleapis.com/oauth2/v4/token',
+            'exp': now + 3600,
+            'iat': now
+        }
+
+        assert_equal(mock_encode.call_args, mock.call(
+            claim, 'test-secret', 'RS256'))
+        assert_equal(access_token, 'test-access-token')
+
+    @override_settings(GOOGLE_SERVICE_ACCOUNT='test@example.com',
+                       GOOGLE_SERVICE_ACCOUNT_SECRET='test-secret')
+    @patch_for_test('jwt.encode')
+    @patch_for_test('time.time')
+    def test_get_access_token_error(self, mock_time, mock_encode):
+        mock_time.return_value = 123.4
+        now = 123
+        mock_encode.return_value = 'test-jwt-data'
+
+        mocker = RequestsMocker()
+        mocker.expect_request(
+            'post', "https://www.googleapis.com/oauth2/v4/token", data={
+                'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion': 'test-jwt-data',
+            }, headers={
+                "Content-Type": "application/x-www-form-urlencoded"
+            }, body=json.dumps({
+                'error': 'test error',
+            }),
+        )
+        with assert_raises(google.OAuthError):
+            with mocker:
+                access_token = google.get_service_account_access_token('test-scope')
