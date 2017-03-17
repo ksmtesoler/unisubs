@@ -51,17 +51,6 @@ class YoutubeVideoType(VideoType):
         return 'http://www.youtube.com/watch?v=%s' % self.video_id
 
     @classmethod
-    def video_url(cls, obj):
-        """
-        This method can be called with wither a VideoType object or
-        an actual VideoURL object, therefore the if statement
-        """
-        if obj.videoid:
-            return YoutubeVideoType.url_from_id(obj.videoid)
-        else:
-            return obj.url
-
-    @classmethod
     def matches_video_url(cls, url):
         hostname = urlparse(url).netloc
         return (hostname in YoutubeVideoType.HOSTNAMES and

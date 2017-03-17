@@ -39,10 +39,6 @@ class VideoType(object):
     def video_id(self):
         return
 
-    @classmethod 
-    def video_url(cls, obj):
-        return obj.url
-
     def get_audio_file(self):
         """
         Should return path to a mono audio track
