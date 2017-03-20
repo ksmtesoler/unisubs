@@ -19,7 +19,9 @@
 
 from django.contrib.sites.models import Site
 from django.conf import settings
+from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
+from django.template.loader import render_to_string
 from django.test import TestCase
 
 from utils.factories import *
@@ -63,34 +65,39 @@ class ShortUrlTest(TestCase):
 
 class PaginatorTest(WebUseTest):
     def setUp(self):
-        # TEAM_WORKFLOW_TYPE_COLLAB = 'EC'
-        self.team = TeamFactory(workflow_type='EC')
-        self.member = TeamMemberFactory(team=self.team)
-        self._login(user=self.member.user)
-        self.videos = [TeamVideoFactory(team=self.team) for
-                       x in range(0, 9)]
-
-        self.VIDEOS_PER_PAGE = 12
+        self.objects = list(range(0, 9))
+        self.ITEMS_PER_PAGE = 12
 
     def test_paginator_object_counts_single_page(self):
-        response = self.client.get('/en/teams/{}/videos/'.format(self.team.slug))
-        self.assertContains(response, '{} out of {}'.format(len(self.videos), len(self.videos)))
+        context = dict()
+        context['paginator'] = Paginator(self.objects, self.ITEMS_PER_PAGE)
+        context['page'] = context['paginator'].page(1)
+        response = render_to_string('future/paginator.html', context)
+
+        self.assertIn('{} out of {}'.format(len(self.objects), len(self.objects)), response)
 
     def test_paginator_object_counts(self):
-        self.videos += [TeamVideoFactory(team=self.team) for x in range(0, 19)]
-        pages = len(self.videos)/self.VIDEOS_PER_PAGE + 1
+        context = dict()
+        pages = len(self.objects)/self.ITEMS_PER_PAGE + 1
+        self.objects += list(range(9, 30))
+        context['paginator'] = Paginator(self.objects, self.ITEMS_PER_PAGE)
 
         # doesn't include last page
-        for page in range(1, pages):
-            start = (page-1) * self.VIDEOS_PER_PAGE + 1
-            end = start + self.VIDEOS_PER_PAGE - 1
-            response = self.client.get('/en/teams/{}/videos/?page={}'.format(self.team.slug, page))
-            self.assertContains(response, '{}-{} out of {}'.format(start, end, len(self.videos)))
+        for page_num in range(1, pages):
+            context['page'] = context['paginator'].page(page_num)
+            start = (page_num-1) * self.ITEMS_PER_PAGE + 1
+            end = start + self.ITEMS_PER_PAGE - 1
+            response = render_to_string('future/paginator.html', context)
+            self.assertIn('{}-{} out of {}'.format(start, end, len(self.objects)), response)
 
     def test_paginator_object_counts_last(self):
-        self.videos += [TeamVideoFactory(team=self.team) for x in range(0, 19)]
-        response = self.client.get('/en/teams/{}/videos/?page=999'.format(self.team.slug))
-        page = len(self.videos)/self.VIDEOS_PER_PAGE + 1
-        start = (page-1) * self.VIDEOS_PER_PAGE + 1
-        end = start + (len(self.videos) % self.VIDEOS_PER_PAGE) - 1
-        self.assertContains(response, '{}-{} out of {}'.format(start, end, len(self.videos)))
+        self.objects += list(range(9, 30))
+        context = dict()
+        page_num = len(self.objects)/self.ITEMS_PER_PAGE + 1
+        context['paginator'] = Paginator(self.objects, self.ITEMS_PER_PAGE)
+        context['page'] = context['paginator'].page(page_num)
+        response = render_to_string('future/paginator.html', context)
+
+        start = (page_num-1) * self.ITEMS_PER_PAGE + 1
+        end = start + (len(self.objects) % self.ITEMS_PER_PAGE) - 1
+        self.assertIn('{}-{} out of {}'.format(start, end, len(self.objects)), response)
