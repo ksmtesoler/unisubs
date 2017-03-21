@@ -723,6 +723,22 @@ class SyncHistoryManager(models.Manager):
                 seen.add(item.language)
         return keep
 
+    def get_sync_history_for_subtitle_language(self, language):
+        """
+        Get sync history for a particular subtitle language
+        """
+        qs = self
+        qs = qs.filter(language=language).order_by('-id')
+        keep = []
+        for item in qs:
+            keep.append({'account_type': item.get_account_type_display(),
+                         'id': item.id,
+                         'details': item.details,
+                         'success': 'Error' if (item.result == SyncHistory.RESULT_ERROR) else 'Success',
+                         'retry': item.retry,
+                         'date': item.datetime,})
+        return keep
+
     def get_attempt_to_resync(self):
         """Lookup failed sync attempt that we should retry.
 

@@ -58,7 +58,8 @@ from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
                                    user_can_edit_subtitles)
 from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
-                             RollbackSubtitlesForm, SubtitlesNotesForm)
+                             RollbackSubtitlesForm, SubtitlesNotesForm,
+                             ResyncSubtitlesForm)
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
@@ -82,7 +83,7 @@ from videos.rpc import VideosApiClass
 from videos import share_utils
 from videos.tasks import video_changed_tasks
 from widget.views import base_widget_params
-from externalsites.models import can_sync_videourl, get_sync_account
+from externalsites.models import can_sync_videourl, get_sync_account, SyncHistory
 from utils import send_templated_email
 from utils.basexconverter import base62
 from utils.decorators import never_in_prod
@@ -611,9 +612,7 @@ def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
 
 def sync_history_context(video, subtitle_language):
     context = {}
-    context['sync_history'] = (subtitle_language.synchistory_set
-                            .select_related('version')
-                            .fetch_with_accounts())
+    context['sync_history'] = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
     context['current_version'] = subtitle_language.get_public_tip()
     synced_versions = []
     for video_url in video.get_video_urls():
@@ -631,6 +630,7 @@ def sync_history_context(video, subtitle_language):
             'syncable': get_sync_account(video, video_url),
         })
     context['synced_versions'] = synced_versions
+    context['can_resync'] = len(synced_versions) > 0
     return context
 
 def downloadable_formats(user):
@@ -645,6 +645,7 @@ subtitles_form_map = {
     'delete': DeleteSubtitlesForm,
     'rollback': RollbackSubtitlesForm,
     'notes': SubtitlesNotesForm,
+    'resync': ResyncSubtitlesForm,
 }
 
 def subtitles_ajax_form(request, video, subtitle_language, version):

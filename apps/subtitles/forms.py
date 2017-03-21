@@ -480,6 +480,23 @@ class RollbackSubtitlesForm(SubtitlesForm):
             messages.error(request,
                            ugettext(u'Can not rollback to the last version'))
 
+class ResyncSubtitlesForm(SubtitlesForm):
+    def check_permissions(self):
+        workflow = self.video.get_workflow()
+        return workflow.user_can_edit_subtitles(
+            self.user, self.language_code)
+
+    def do_submit(self, request):
+        if self.subtitle_version.next_version():
+            pipeline.rollback_to(
+                self.video, self.language_code,
+                version_number=self.subtitle_version.version_number,
+                rollback_author=self.user)
+            messages.success(request, ugettext(u'Rollback successful'))
+        else:
+            messages.error(request,
+                           ugettext(u'Can not rollback to the last version'))
+
 class SubtitlesNotesForm(SubtitlesForm):
     body = forms.CharField(label='', required=True,
                            widget=forms.Textarea(attrs={
