@@ -209,7 +209,7 @@
             initialize: function() {
 
                 var video = this;
-                var apiURL = '/api/videos/?video_url=';
+                var apiURL = '/api/videos/?extra=player_urls&video_url=';
                 this.subtitles = new that.Subtitles();
                 // Make a call to the Amara API to get attributes like available languages,
                 // internal ID, description, etc.
@@ -387,7 +387,12 @@
                 // our amara-tools div won't be visible.
                 this.$el.height('auto');
                 // Init the Popcorn video.
-                this.pop = this.loadPopcorn();
+                this.pop = _Popcorn.amara(this.$popContainer.attr('id'),
+                        this.model.get('player_urls'),
+                        this.model.get('video_type'), {
+                            controls: true,
+                            frameAnimation: true
+                        });
 
                 this.pop.on('error', function() {
                     if (that.pop.error.code == window.MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
@@ -456,24 +461,6 @@
                 return this;
 
             },
-            loadPopcorn: function() {
-                var url = this.model.get('url');
-                // For youtube, we need to alter the URL to enable controls.
-                if(url.indexOf('youtube.com') != -1) {
-                    if(url.indexOf('?') == -1) {
-                        url += '?controls=1';
-                    } else {
-                        url += '&controls=1';
-                    }
-                }
-		if (this.model.get('video_type') == 'C')
-                    pop = _Popcorn.brightcove(this.$popContainer.attr('id'), url, {frameAnimation: true});
-		else
-                    pop = _Popcorn.smart(this.$popContainer.attr('id'), url, {frameAnimation: true});
-                pop.controls(true);
-                return pop;
-            },
-
             // View methods.
             mouseClicked: function(e) {
                 this.hideTranscriptContextMenu();

@@ -199,7 +199,6 @@ class SubtitleEditorBase(View):
                 'title': self.video.title,
                 'description': self.video.description,
                 'duration': self.video.duration,
-                'primaryVideoURL': self.video.get_video_url(),
                 'primaryVideoURLType': video_type_registrar.video_type_for_url(self.video.get_video_url()).abbreviation,
                 'videoURLs': self.get_video_urls(),
                 'metadata': self.video.get_metadata(),
