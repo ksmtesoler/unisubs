@@ -87,7 +87,11 @@ class GoogleDriveVideoType(VideoType):
         if not video_info.mime_type.startswith('video/'):
             logger.warn("{} is not a video file".format(self.file_id))
             return
-        video.title = video_info.title
-        video.description = video_info.description
-        video.duration = video_info.duration
-        video.thumbnail = video_info.thumbnail_url
+        if video_info.title is not None:
+            video.title = video_info.title
+        if video_info.description is not None:
+            video.description = video_info.description
+        if video_info.duration is not None:
+            video.duration = video_info.duration
+        if video_info.thumbnail_url is not None:
+            video.thumbnail = video_info.thumbnail_url
