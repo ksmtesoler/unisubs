@@ -7,31 +7,31 @@
 // <ul class="inline">
 //   <li>
 //     <span class="avatar">
-//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//       <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-50.png">
 //     </span><br>
 //     Default
 //   </li>
 //   <li>
 //     <span class="avatar avatar-inverse">
-//      <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-inverse-50.png">
 //     </span><br>
 //     .avatar-inverse
 //   </li>
 //   <li>
 //     <span class="avatar avatar-teal">
-//      <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//      <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-teal-50.png">
 //     </span><br>
 //     .avatar-teal
 //   </li>
 //   <li>
 //     <span class="avatar avatar-plum">
-//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-plum-50.png">
 //     </span><br>
 //     .avatar-plum
 //   </li>
 //   <li>
 //     <span class="avatar avatar-lime-green">
-//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-lime-50.png">
 //     </span><br>
 //     .avatar-lime-green
 //   </li>
@@ -40,43 +40,67 @@
 // Example:
 // <ul class="inline">
 //   <li>
-//     <span class="avatar avatar-xl avatar-team"></span><br>
+//     <span class="avatar avatar-lg avatar-team">
+//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-default-100.png">
+//     </span><br>
 //     Default
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-team avatar-inverse"></span><br>
+//     <span class="avatar avatar-lg avatar-team avatar-inverse">
+//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-inverse-100.png">
+//     </span><br>
 //     .avatar-inverse
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-team avatar-teal"></span><br>
+//     <span class="avatar avatar-lg avatar-team avatar-teal">
+//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-teal-100.png">
+//     </span><br>
 //     .avatar-teal
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-team avatar-plum"></span><br>
+//     <span class="avatar avatar-lg avatar-team avatar-plum">
+//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-plum-100.png">
+//     </span><br>
 //     .avatar-plum
 //   </li>
 //   <li>
-//     <span class="avatar avatar-xl avatar-team avatar-lime-green"></span><br>
+//     <span class="avatar avatar-lg avatar-team avatar-lime-green">
+//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-lime-100.png">
+//     </span><br>
 //     .avatar-lime-green
 //   </li>
 // </ul>
 // 
 // Example:
-// <span class="avatar"></span>
+// <span class="avatar">
+//  <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-30.png">
+// </span>
 // <p>Standard Size: 30x30</p>
-// <span class="avatar avatar-md"></span>
+// <span class="avatar avatar-md">
+//  <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-50.png">
+// </span>
 // <p>Medium Size: 50x50</p>
-// <span class="avatar avatar-lg"></span>
+// <span class="avatar avatar-lg">
+//  <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-100.png">
+// </span>
 // <p>Large Size: 60x60</p>
-// <span class="avatar avatar-xl"></span>
-// <p>X-Large Size: 110x110</p>
 // 
 // Example:
-// <span class="avatar avatar-md in-progress"></span>
-// <span class="avatar avatar-md avatar-inverse in-progress"></span>
-// <span class="avatar avatar-md avatar-teal in-progress"></span>
-// <span class="avatar avatar-md avatar-plum in-progress"></span>
-// <span class="avatar avatar-md avatar-lime-green in-progress"></span>
+// <span class="avatar avatar-md in-progress">
+//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-50.png">
+// </span>
+// <span class="avatar avatar-md avatar-inverse in-progress">
+//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-inverse-50.png">
+// </span>
+// <span class="avatar avatar-md avatar-teal in-progress">
+//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-teal-50.png">
+// </span>
+// <span class="avatar avatar-md avatar-plum in-progress">
+//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-plum-50.png">
+// </span>
+// <span class="avatar avatar-md avatar-lime-green in-progress">
+//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-lime-50.png">
+// </span>
 // 
 // Example:
 // <span class="avatar avatar-md">
@@ -134,8 +158,8 @@
     font-size: 50px;
   }
   &.avatar-lg {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
     margin: 0 10px 0 0;
     font-size: 60px;
   }

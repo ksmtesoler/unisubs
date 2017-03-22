@@ -4,6 +4,10 @@
 // 
 // <ul class="styleGuide-iconList">
 //   <li>
+//     <i class="icon icon-alert"></i>
+//     <span>icon-alert</span>
+//   </li>
+//   <li>
 //     <i class="icon icon-approve"></i>
 //     <span>icon-approve</span>
 //   </li>
@@ -129,7 +133,9 @@ i {
 
 
 ///////////////////////////
-
+.icon-alert:before {
+  content: "\e912";
+}
 .icon-approve:before {
   content: "\e900";
 }

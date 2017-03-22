@@ -99,7 +99,7 @@
 //         <div class="form-group has-error">
 //           <label class="control-label">Field Name</label>
 //           <input type="text" placeholder="Field" class="form-control">
-//           <span class="help-block">Error message</span>
+//           <span class="help-block"><i class="icon icon-alert"></i>Error message</span>
 //         </div>
 //         <div class="text-right">
 //           <button class="button borderless" data-dismiss="modal">Cancel</a>
@@ -141,6 +141,43 @@
 // </div>
 //
 // Styleguide dialogconfirmation
+
+// <button type="button" class="button cta" data-toggle="modal" data-target="#modal_remove_video">
+//   Launch Remove Video Example
+// </button>
+
+// <!-- Modal -->
+// <div id="modal_remove_video" class="modal fade">
+//   <div class="modal-dialog modal-md">
+//     <div class="modal-content">
+//       <header class="dialogHeader">
+//         <h4 class="dialogTitle">Remove Video</h4>
+//         <h5>You can choose to remove the video from the Jenny_testing_Amara team or to delete the video (and all of its subtitles) from the system entirely. What would you like to do?</h5>
+//       </header>
+//       <form>
+//         <p></p>
+//        <div class="form-group">
+//         <div class="radio">
+//           <input type="radio" id="=" value="">
+//           <label for=""><span></span>Just remove the video from the team.</label>
+//           <p><small>(It will remain on Amara but will no longer be subject to the team's permissions and workflows. Any outstanding tasks will be deleted.)</small></p>
+//         </div>
+//        </div> 
+//        <div class="form-group">
+//         <div class="radio">
+//           <input type="radio" id="=" value="">
+//           <label for=""><span></span>Delete the video entirely</label>
+//         </div>
+//        </div>
+//         <div class="text-right">
+//          <button class="button borderless" data-dismiss="modal">Cancel</button>
+//          <button class="button cta" type="submit">Remove</button>
+//        </div>
+//       </form>
+//     </div>
+//   </div>
+// </div>
+// Styleguide removevideo
 
 .modal {
   z-index: $z-index-modal;

@@ -309,6 +309,11 @@ select {
     label,
     .help-block,
     .input-control { border-color: $state-danger-border !important; color: $state-danger-text !important; }
+    .help-block {
+      i {
+        padding: 0 5px 0 0;
+      }
+    }
   }
 }
 
