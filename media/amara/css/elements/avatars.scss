@@ -1,73 +1,80 @@
 // Avatars
 // 
-// Avatars are implemented using the font-family as a default avatar fallback and a wrapping element with the `.avatar` selector. Sizes are `.avatar-md`, `.avatar-lg`, `.avatar-xl`.
-// Team Avatars require a `.avatar-team` selector.
+// Avatars are implemented by wrapping an img `.avatar` selector. Sizes are
+// `.avatar-md`, `.avatar-lg`, `.avatar-xl`.  Use `.in-progress` when
+// the avatar is for the current step of a subtitle request
 // 
 // Example:
 // <ul class="inline">
 //   <li>
-//     <span class="avatar">
-//       <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-50.png">
+//     <span class="avatar avatar-lg">
+//       <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-100.png">
 //     </span><br>
 //     Default
 //   </li>
 //   <li>
-//     <span class="avatar avatar-inverse">
-//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-inverse-50.png">
+//     <span class="avatar avatar-lg">
+//      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-inverse-100.png">
 //     </span><br>
-//     .avatar-inverse
+//     Inverse
 //   </li>
 //   <li>
-//     <span class="avatar avatar-teal">
-//      <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-teal-50.png">
+//     <span class="avatar avatar-lg">
+//      <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-teal-100.png">
 //     </span><br>
-//     .avatar-teal
+//     Teal
 //   </li>
 //   <li>
-//     <span class="avatar avatar-plum">
-//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-plum-50.png">
+//     <span class="avatar avatar-lg">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-plum-100.png">
 //     </span><br>
-//     .avatar-plum
+//     Plum
 //   </li>
 //   <li>
-//     <span class="avatar avatar-lime-green">
-//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-lime-50.png">
+//     <span class="avatar avatar-lg">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-lime-100.png">
 //     </span><br>
-//     .avatar-lime-green
+//     Lime green
+//   </li>
+//   <li>
+//     <span class="avatar avatar-lg in-progress">
+//       <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-100.png">
+//     </span><br>
+//     In progress
 //   </li>
 // </ul>
 // 
 // Example:
 // <ul class="inline">
 //   <li>
-//     <span class="avatar avatar-lg avatar-team">
+//     <span class="avatar avatar-lg">
 //      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-default-100.png">
 //     </span><br>
 //     Default
 //   </li>
 //   <li>
-//     <span class="avatar avatar-lg avatar-team avatar-inverse">
+//     <span class="avatar avatar-lg">
 //      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-inverse-100.png">
 //     </span><br>
-//     .avatar-inverse
+//     Inverse
 //   </li>
 //   <li>
-//     <span class="avatar avatar-lg avatar-team avatar-teal">
+//     <span class="avatar avatar-lg">
 //      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-teal-100.png">
 //     </span><br>
-//     .avatar-teal
+//     Teal
 //   </li>
 //   <li>
-//     <span class="avatar avatar-lg avatar-team avatar-plum">
+//     <span class="avatar avatar-lg">
 //      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-plum-100.png">
 //     </span><br>
-//     .avatar-plum
+//     Plum
 //   </li>
 //   <li>
-//     <span class="avatar avatar-lg avatar-team avatar-lime-green">
+//     <span class="avatar avatar-lg">
 //      <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-team-lime-100.png">
 //     </span><br>
-//     .avatar-lime-green
+//     Lime green
 //   </li>
 // </ul>
 // 
@@ -75,7 +82,7 @@
 // <span class="avatar">
 //  <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-30.png">
 // </span>
-// <p>Standard Size: 30x30</p>
+// <p>Defult Size: 30x30</p>
 // <span class="avatar avatar-md">
 //  <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-50.png">
 // </span>
@@ -83,38 +90,7 @@
 // <span class="avatar avatar-lg">
 //  <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-100.png">
 // </span>
-// <p>Large Size: 60x60</p>
-// 
-// Example:
-// <span class="avatar avatar-md in-progress">
-//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-50.png">
-// </span>
-// <span class="avatar avatar-md avatar-inverse in-progress">
-//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-inverse-50.png">
-// </span>
-// <span class="avatar avatar-md avatar-teal in-progress">
-//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-teal-50.png">
-// </span>
-// <span class="avatar avatar-md avatar-plum in-progress">
-//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-plum-50.png">
-// </span>
-// <span class="avatar avatar-md avatar-lime-green in-progress">
-//  <img src="https:s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-lime-50.png">
-// </span>
-// 
-// Example:
-// <span class="avatar avatar-md">
-//   <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-default-50.png">
-// </span>
-// <span class="avatar avatar-md">
-//   <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-inverse-50.png">
-// </span>
-// <span class="avatar avatar-md">
-//   <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-lime-50.png">
-// </span>
-// <span class="avatar avatar-md">
-//   <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/avatar-plum-50.png">
-// </span>
+// <p>Large Size: 100x100</p>
 //
 // Styleguide avatars
 
@@ -168,37 +144,6 @@
     height: 110px;
     font-size: 110px;
   }
-
-  &.avatar-img {
-    display: block;
-  }
-
-  // Colors
-  &.avatar-teal {
-    color: $teal;
-    background-color: $turquoise;
-  }
-  &.avatar-plum {
-    color: $magenta;
-    background-color: $plum;
-  }
-  &.avatar-lime-green {
-    color: $teal;
-    background-color: $lime-green;
-  }
-  &.avatar-inverse {
-    color: #cccccc;
-    background-color: $gray-base;
-  }
-
-  // Team
-  &.avatar-team {
-    &:before {
-      content: "\e90d";
-    }
-  }
-
-
 
   // Child avatar image
   img {
