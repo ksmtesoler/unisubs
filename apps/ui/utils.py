@@ -22,6 +22,8 @@ This module contains a few utility classes that's used by the views code.
 """
 
 from __future__ import absolute_import
+from collections import deque
+from urllib import urlencode
 
 from collections import namedtuple
 from django.core.urlresolvers import reverse
@@ -43,9 +45,19 @@ class Link(object):
         return mark_safe(u'<a href="{}">{}</a>'.format(self.url, self.label))
 
     def __eq__(self, other):
-        return (isinstance(other, Link) and
+        return (type(self) == type(other) and
                 self.label == other.label and
                 self.url == other.url)
+
+class AjaxLink(Link):
+    def __init__(self, label, **query_params):
+        # All of our ajax links hit the current page, adding some query
+        # parameters, so this constructor is optimized for that use.
+        self.label = label
+        self.url = '?' + urlencode(query_params)
+
+    def __unicode__(self):
+        return mark_safe(u'<a class="ajaxLink" href="{}">{}</a>'.format(self.url, self.label))
 
 class CTA(Link):
     def __init__(self, label, icon, view_name, block=False, *args, **kwargs):
@@ -96,6 +108,45 @@ class SectionWithCount(list):
         return mark_safe(fmt(self.header_template, header=self.header_text,
                              count=len(self)))
 
+class ContextMenu(object):
+    """Context menu
+
+    Each child of ContextMenu should be a Link or MenuSeparator item
+    """
+    def __init__(self, initial_items=None):
+        self.items = deque()
+        if initial_items:
+            self.extend(initial_items)
+
+    def append(self, item):
+        self.items.append(item)
+
+    def extend(self, items):
+        self.items.extend(items)
+
+    def prepend(self, item):
+        self.items.appendleft(item)
+
+    def prepend_list(self, items):
+        self.items.extendleft(reversed(items))
+
+    def __unicode__(self):
+        output = []
+        output.append(u'<div class="context-menu">')
+        output.append(u'<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>')
+        output.append(u'<ul class="dropdown-menu">')
+        for item in self.items:
+            if isinstance(item, MenuSeparator):
+                output.append(u'<li class="divider"></li>')
+            else:
+                output.append(u'<li>{}<li>'.format(unicode(item)))
+        output.append(u'</ul></div>')
+        return mark_safe(u'\n'.join(output))
+
+class MenuSeparator(object):
+    """Display a line to separate items in a ContextMenu."""
+
 __all__ = [
-    'Link', 'CTA', 'Tab', 'SectionWithCount',
+    'Link', 'AjaxLink', 'CTA', 'Tab', 'SectionWithCount', 'ContextMenu',
+    'MenuSeparator',
 ]
