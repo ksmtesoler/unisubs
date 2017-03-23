@@ -770,6 +770,15 @@ class SyncHistoryManager(models.Manager):
                 sh.retry = True
                 sh.save()
 
+    def force_retry_language_for_user(self, language, user):
+        items = self.filter(language=language).order_by('-id')
+        if items.exists():
+            item = items[0]
+            item.retry = True
+            item.save()
+            return True
+        return False
+
 class SyncHistory(models.Model):
     """History of all subtitle sync attempts."""
 
