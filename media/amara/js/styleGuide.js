@@ -37,6 +37,10 @@ function styleGuide(container) {
         evt.preventDefault();
     });
     $('.styleGuide-navLink', container).filter(':first').click();
+
+    $('.actionBar-open').on('click', function(){
+      $('#styleGuide-actionBar').toggleClass('open');
+    });
 }
 
 });

@@ -7,11 +7,18 @@
 Dashboard Sections
 ----------------------------------------- */
 #dashboard {
+  .dashboardContrasting {
+    background-color: #f8f8f8;
+    padding: 10px;
+  }
   .pageSection {
     &:nth-of-type(even) {
       background: #f8f8f8;
       border-top: 1px solid $gray-light;
       border-bottom: 1px solid $gray-light;
+      .dashboardContrasting {
+        background-color: #fff;
+      }
     }
   }
   .zero-state {
@@ -39,45 +46,43 @@ Dashboard Sections
 }
 #available_assignments {
   ul {
-    
     width: 100%;
     padding: 0;
     list-style: none;
     border: 1px solid $gray-light;
     border-radius: $border-radius-base;
-    height: 302px;
     li {
-      display: table;
       width: 100%;
       a {
-        display: table-row;
+        display: flex;
         color: #ffffff;
         font-size: 15px;
         font-weight: 600;
         cursor: pointer;
         height: 60px;
         color: #fff;
-      }
-      span {
-        display: table-cell;
-        vertical-align: middle;
-        padding: 0 0 0 20px;
-        text-align: left;
-        background-color: $turquoise;
-        &.total{
-          width: 25%;
-          padding: 0 10px;
-          background-color: #fff;
-          color: $text-color;
-          text-align: center;
-          font-size: 19px;
-          font-weight: 300;
+        span {
+          height: 60px;
+          line-height: 60px;
+          padding: 0 0 0 20px;
+          text-align: left;
+          background-color: $turquoise;
+          &.total{
+            width: 25%;
+            padding: 0 10px;
+            background-color: #fff;
+            color: $text-color;
+            text-align: center;
+            font-size: 19px;
+            font-weight: 300;
+          }
+          i {
+            margin-right: 10px;
+            font-size: 20px;
+          }
         }
-        i {
-          margin-right: 10px;
-          font-size: 20px;
-        }
       }
+      
       &:first-child {
         span {
           border-radius: 0 $border-radius-base 0 0;
@@ -97,9 +102,15 @@ Dashboard Sections
       &:nth-of-type(odd) {
         span {
           background-color: $teal;
+          width: 75%;
           &.total {
             background-color: $gray-lighter;
           }
+        }
+      }
+      &:nth-of-type(even) {
+        span {
+          width: 75%;
         }
       }
     }
