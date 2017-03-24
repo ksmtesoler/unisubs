@@ -195,6 +195,9 @@ class TeamWorkflow(object):
                     incomplete_count)
                 v.counts.append(mark_safe(fmt(msg, count=incomplete_count)))
 
+    def video_management_alter_context_menu(self, video, menu):
+        """Alter the context menu for the video management page."""
+
     def video_management_extra_forms(self):
         """Add extra forms to the video management page """
         return []

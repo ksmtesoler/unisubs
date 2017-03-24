@@ -3,7 +3,7 @@
   <div class="modal-content">
     <form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
       <header class="dialogHeader">
-        <h4 class="dialogTitle">{% blocktrans count count=selection_count %}Deleting Video{% plural %}Deleting Videos{% endblocktrans %}</h4>
+        <h4 class="dialogTitle">{% blocktrans count count=selection_count %}Removing Video{% plural %}Removing Videos{% endblocktrans %}</h4>
         <h5 class="dialogSubTitle">
           {% if single_selection %}
           {{ first_video.title_display }}
@@ -24,7 +24,7 @@
       </div>
       <div class="modal-footer">
         <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
-        <button class="button cta">{% trans "Delete" %}</button>
+        <button class="button cta">{% trans "Remove" %}</button>
       </div>
     </form>
   </div>
