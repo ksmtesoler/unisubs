@@ -487,10 +487,10 @@ class ResyncSubtitlesForm(SubtitlesForm):
 
     def do_submit(self, request):
         if SyncHistory.objects.force_retry_language_for_user(self.subtitle_language, self.user):
-            messages.success(request, ugettext(u'Resync successful'))
+            messages.success(request, ugettext(u'Resync started, this may take a few minutes'))
         else:
             messages.error(request,
-                           ugettext(u'Error while resyncing'))
+                           ugettext(u'Error while attempting to resync'))
 
 class SubtitlesNotesForm(SubtitlesForm):
     body = forms.CharField(label='', required=True,
