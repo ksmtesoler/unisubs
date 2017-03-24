@@ -44,8 +44,13 @@ class VideoSerializerTest(TestCase):
             duration=100,
             thumbnail='http://example.com/image.jpg',
         )
+        request = APIRequestFactory().get("/mock-url/")
+        # Add query_params which is available from django rest framework's
+        # Request object, but not when you use APIRequestFactory for some
+        # reason.
+        request.query_params = request.GET
         self.serializer_context = {
-            'request': APIRequestFactory().get("/mock-url/"),
+            'request': request,
             'user': self.user,
         }
 
