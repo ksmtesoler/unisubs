@@ -40,6 +40,7 @@
   li {
     position: relative;
     padding-left: 10px;
+    padding-right: 10px;
     &:hover {
       background-color: rgba(0,0,0,.05);
       cursor: pointer;
@@ -53,6 +54,16 @@
       font-family: 'amara';
       font-size: 17px;
       color: $turquoise;
+    }
+  }
+  &.languages {
+    height: 275px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    li {
+      &:after {
+        display: none;
+      }
     }
   }
   h1,h2,h3,h4,h5,h6 {

@@ -77,7 +77,7 @@ def elapsed_time(when):
     else:
         return date(dt)
 
-def due_date(deadline, when):
+def due_date(deadline, when, hypothetical=False):
     """Get text to display a due date
 
     Args:
@@ -86,6 +86,8 @@ def due_date(deadline, when):
         when (datetime/timedelta): time to display.  If this is a
             datetime, then we will display the time between now and it.  If
             it's a timedelta, then we use that directly
+        hypothetical: Use for a hypothetical due date.  We will display "would
+            be due" instead of "due"
     """
     if isinstance(when, timedelta):
         delta = when
@@ -95,29 +97,53 @@ def due_date(deadline, when):
         dt = when
     if delta.days < 0:
         count = None
-        msg = _('%(deadline)s due now')
+        if hypothetical:
+            msg = _('%(deadline)s would be due now')
+        else:
+            msg = _('%(deadline)s due now')
     elif delta.days < 1:
         if delta.seconds < 60:
             count = None
-            msg = _('%(deadline)s due now')
+            if hypothetical:
+                msg = _('%(deadline)s would be due now')
+            else:
+                msg = _('%(deadline)s due now')
         elif delta.seconds < 60 * 60:
             count = int(round(delta.seconds / 60.0))
-            msg = ungettext(u'%(deadline)s due in %(count)s minute',
-                            u'%(deadline)s due in %(count)s minutes',
-                            count)
+            if hypothetical:
+                msg = ungettext(u'%(deadline)s would be due in %(count)s minute',
+                                u'%(deadline)s would be due in %(count)s minutes',
+                                count)
+            else:
+                msg = ungettext(u'%(deadline)s due in %(count)s minute',
+                                u'%(deadline)s due in %(count)s minutes',
+                                count)
         else:
             count = int(round(delta.seconds / 60.0 / 60.0))
-            msg = ungettext(u'%(deadline)s due in %(count)s hours',
-                            u'%(deadline)s due in %(count)s hours',
-                            count)
+            if hypothetical:
+                msg = ungettext(u'%(deadline)s would be due in %(count)s hours',
+                                u'%(deadline)s would be due in %(count)s hours',
+                                count)
+            else:
+                msg = ungettext(u'%(deadline)s due in %(count)s hours',
+                                u'%(deadline)s due in %(count)s hours',
+                                count)
     elif delta.days < 7:
         count = int(round(delta.days + delta.seconds / SECONDS_IN_A_DAY))
-        msg = ungettext('%(deadline)s due in %(count)s day',
-                        '%(deadline)s due in %(count)s days',
+        if hypothetical:
+            msg = ungettext('%(deadline)s would be due in %(count)s day',
+                            '%(deadline)s would be due in %(count)s days',
+                            count)
+        else:
+            msg = ungettext('%(deadline)s due in %(count)s day',
+                            '%(deadline)s due in %(count)s days',
                         count)
     else:
         count = None
-        msg = _(u'%(deadline)s due %(date)s')
+        if hypothetical:
+            msg = _(u'%(deadline)s would be due %(date)s')
+        else:
+            msg = _(u'%(deadline)s due %(date)s')
     # Note: We're not sure where the deadline label will end up in the final
     # string, so we lowercase it, interplate the string, then capitalize the
     # whole thing.

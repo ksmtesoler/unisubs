@@ -59,9 +59,9 @@ from auth.models import CustomUser as User
 from messages import tasks as messages_tasks
 from subtitles.models import SubtitleLanguage
 from teams.workflows import TeamWorkflow
-from ui.ajax import AJAXResponseRenderer
-from ui.forms import ManagementFormList
-from ui.views import render_management_form_submit
+from ui import (
+    AJAXResponseRenderer, ManagementFormList, render_management_form_submit,
+    AjaxLink, ContextMenu)
 from utils.breadcrumbs import BreadCrumb
 from utils.decorators import staff_member_required
 from utils.pagination import AmaraPaginator, AmaraPaginatorFuture
@@ -621,9 +621,13 @@ def manage_videos(request, team):
             return add_video_form(request, team)
         else:
             return manage_videos_form(request, team, form_name, videos)
+    enabled_forms = all_video_management_forms(team, request.user)
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
     page = paginator.get_page(request)
     team.new_workflow.video_management_add_counts(list(page))
+    for video in page:
+        video.context_menu = manage_videos_context_menu(team, video,
+                                                        enabled_forms)
     context = {
         'team': team,
         'page': page,
@@ -634,7 +638,7 @@ def manage_videos(request, team):
         'enable_add_form': permissions.can_add_video(team, request.user),
         'manage_forms': [
             (form.name, form.css_class, form.label)
-            for form in all_video_management_forms(team, request.user)
+            for form in enabled_forms
         ],
     }
     if request.is_ajax():
@@ -645,6 +649,14 @@ def manage_videos(request, team):
         return response_renderer.render()
 
     return render(request, 'future/teams/management/videos.html', context)
+
+def manage_videos_context_menu(team, video, enabled_forms):
+    menu = ContextMenu([
+        AjaxLink(form.label, form=form.name, selection=video.id)
+        for form in enabled_forms
+    ])
+    team.new_workflow.video_management_alter_context_menu(video, menu)
+    return menu
 
 # Functions to handle the forms on the videos pages
 def get_video_management_forms(team):
