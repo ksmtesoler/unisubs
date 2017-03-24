@@ -66,7 +66,7 @@ def save_thumbnail_in_s3(video_id):
     except Video.DoesNotExist:
         return
 
-    if video.thumbnail and not video.s3_thumbnail:
+    if video.thumbnail:
         response = requests.get(video.thumbnail, timeout=15)
         content = ContentFile(response.content)
         video.s3_thumbnail.save(video.thumbnail.split('/')[-1], content)
