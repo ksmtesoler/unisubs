@@ -1139,6 +1139,7 @@ class VideoFiltersForm(FiltersForm):
 class ManagementVideoFiltersForm(VideoFiltersForm):
     language = NewLanguageField(label=_("Video language"),
                                 required=False,
+                                placeholder=_('All languages'),
                                 options="null popular all")
     completed_subtitles = NewLanguageField(label=_("Completed subtitles"),
                                            required=False,
