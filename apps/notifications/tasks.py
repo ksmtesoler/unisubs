@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 
 logger = logging.getLogger('notifications.tasks')
@@ -8,13 +8,14 @@ from django.db.models import Q, Max
 
 from notifications.models import TeamNotification
 from teams.models import Team
+import utils.dates
 
 REMOVE_AFTER = 90
 MIN_KEEP = 1000
 
 @task
 def prune_notification_history():
-    remove_after = datetime.now() - timedelta(days=REMOVE_AFTER)
+    remove_after = utils.dates.now() - timedelta(days=REMOVE_AFTER)
     team_list = Team.objects.all()
     for team in team_list:
         notification_list = TeamNotification.objects.filter(team=team)
