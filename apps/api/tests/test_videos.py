@@ -39,9 +39,11 @@ class VideoSerializerTest(TestCase):
     @test_utils.patch_for_test('videos.models.Video.get_wide_thumbnail')
     def setUp(self, get_wide_thumbnail):
         # The thumbnail field should use the return value from
-        # get_wide_thumbnail() which uses the S3 thumbnail if available
-        self.thumbnail_url = 'http://example.com/processed-thumb.jpg'
-        get_wide_thumbnail.return_value = self.thumbnail_url
+        # get_wide_thumbnail() which uses the S3 thumbnail if available.
+        # On staging/production, get_wide_thumbnail() returns the URL without
+        # a scheme.  We should make sure to add https in that case
+        get_wide_thumbnail.return_value = '//example.com/processed-thumb.jpg'
+        self.thumbnail_url = 'https://example.com/processed-thumb.jpg'
         self.user = UserFactory()
         self.video = VideoFactory(
             title='test-title',

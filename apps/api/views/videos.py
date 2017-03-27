@@ -222,6 +222,7 @@ Deleting Video URLs
 """
 
 from __future__ import absolute_import
+from urlparse import urljoin
 
 from django import http
 from django.db.models import Q
@@ -342,7 +343,9 @@ class VideoThumbnailField(serializers.URLField):
         return video
 
     def to_representation(self, video):
-        return video.get_wide_thumbnail()
+        # If the result of get_wide_thumbnail() doesn't include a scheme, use
+        # https
+        return urljoin('https:', video.get_wide_thumbnail())
 
     def to_internal_value(self, value):
         return value
