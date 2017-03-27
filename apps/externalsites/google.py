@@ -492,6 +492,9 @@ def get_service_account_access_token(scope):
     - GOOGLE_SERVICE_ACCOUNT: email address for the service account
     - GOOGLE_SERVICE_ACCOUNT_SECRET: RSA private key for the service account
     """
+    if (settings.GOOGLE_SERVICE_ACCOUNT is None or
+            settings.GOOGLE_SERVICE_ACCOUNT_SECRET is None):
+        raise APIError('Google service account not setup')
     url = 'https://www.googleapis.com/oauth2/v4/token'
     now = int(time.time())
     claim = {
