@@ -1085,7 +1085,8 @@ class OldMoveVideosForm(forms.Form):
 
 class VideoFiltersForm(FiltersForm):
     q = SearchField(label=_('Search for videos'), required=False)
-    language = NewLanguageField(label=_("Video language"), required=False)
+    language = NewLanguageField(label=_("Video language"), required=False,
+                                placeholder=_("All languages"))
     project = ProjectField(required=False, widget=AmaraRadioSelect)
     duration = VideoDurationField(required=False, widget=AmaraRadioSelect)
     sort = AmaraChoiceField(label="", border=True, choices=[
