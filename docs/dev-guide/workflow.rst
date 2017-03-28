@@ -17,12 +17,14 @@ Instead, Amara development tries to follow a "one branch per feature or
 bugfix" workflow.  Typically changes happen like this:
 
   - Someone creates a github issue that captures the bug/feature
+  - issue is prioritized and scheduled into a sprint
   - A developer creates a branch to handle the issue.  Each feature branch
     should be named after its repository and issue number (e.g.  ``gh-enterprise-1234`` or ``gh-unisubs-5678`` would be branches for github issue 1234 in the amara-enterprise repo and github issue 5678 in the unisubs repo, respectively).  Changes for the issue always get commited to this
     branch.
-  - Once development on the issue is complete, we open a pull request from the
-    topic branch to staging.  Another developer will review the code and merge
-    it once they think it's good to go.
+  - Once development on the issue is complete, move the issue to the ``Testing`` pipeline
+  - Tester tests the changes, and issue is moved between ``In progress`` and ``Testing`` as work continues.
+  - Tester creates a pull request from branch to staging once they think it's good to go.
+  - Another developer reviews the code and merges
   - Once we decide that staging is ready to be deployed to production, we will
     merge the staging branch to production then deploy.
 
