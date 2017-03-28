@@ -36,7 +36,14 @@ from videos.models import Video
 import teams.signals
 
 class VideoSerializerTest(TestCase):
-    def setUp(self):
+    @test_utils.patch_for_test('videos.models.Video.get_wide_thumbnail')
+    def setUp(self, get_wide_thumbnail):
+        # The thumbnail field should use the return value from
+        # get_wide_thumbnail() which uses the S3 thumbnail if available.
+        # On staging/production, get_wide_thumbnail() returns the URL without
+        # a scheme.  We should make sure to add https in that case
+        get_wide_thumbnail.return_value = '//example.com/processed-thumb.jpg'
+        self.thumbnail_url = 'https://example.com/processed-thumb.jpg'
         self.user = UserFactory()
         self.video = VideoFactory(
             title='test-title',
@@ -74,7 +81,7 @@ class VideoSerializerTest(TestCase):
         assert_equal(data['duration'], self.video.duration)
         assert_equal(data['created'],
                      format_datetime_field(self.video.created))
-        assert_equal(data['thumbnail'], self.video.thumbnail)
+        assert_equal(data['thumbnail'], self.thumbnail_url)
         assert_equal(data['resource_uri'],
                      'http://testserver/api/videos/{0}/'.format(
                          self.video.video_id))
@@ -225,6 +232,23 @@ class VideoSerializerTest(TestCase):
         assert_equal(result.description, data['description'])
         assert_equal(result.duration, 100)
         assert_equal(result.thumbnail, data['thumbnail'])
+
+    def test_save_thumbnail_in_s3(self):
+        # We should call save_thumbnail_in_s3 when the client POSTs a new
+        # thumbnail URL
+        result = self.run_update({
+            'thumbnail': 'http://example.com/new-thumbnail.png',
+        })
+        assert_true(test_utils.save_thumbnail_in_s3.delay.called)
+        assert_equal(test_utils.save_thumbnail_in_s3.delay.call_args,
+                     mock.call(self.video.id))
+        test_utils.save_thumbnail_in_s3.reset_mock()
+        # If thumbnail is not present, then no need to call
+        # save_thumbnail_in_s3
+        result = self.run_update({
+            'title': 'new-title',
+        })
+        assert_false(test_utils.save_thumbnail_in_s3.delay.called)
 
     def test_set_metadata(self):
         new_metadata = {

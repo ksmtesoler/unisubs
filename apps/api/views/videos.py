@@ -222,6 +222,7 @@ Deleting Video URLs
 """
 
 from __future__ import absolute_import
+from urlparse import urljoin
 
 from django import http
 from django.db.models import Q
@@ -337,6 +338,18 @@ class VideoListSerializer(serializers.ListSerializer):
         SubtitleLanguage.bulk_has_public_version(all_languages)
         return super(VideoListSerializer, self).to_representation(videos)
 
+class VideoThumbnailField(serializers.URLField):
+    def get_attribute(self, video):
+        return video
+
+    def to_representation(self, video):
+        # If the result of get_wide_thumbnail() doesn't include a scheme, use
+        # https
+        return urljoin('https:', video.get_wide_thumbnail())
+
+    def to_internal_value(self, value):
+        return value
+
 class VideoSerializer(serializers.Serializer):
     # Note we could try to use ModelSerializer, but we are so far from the
     # default implementation that it makes more sense to not inherit.
@@ -350,7 +363,7 @@ class VideoSerializer(serializers.Serializer):
     title = serializers.CharField(required=False, allow_blank=True)
     description = serializers.CharField(required=False, allow_blank=True)
     duration = serializers.IntegerField(required=False)
-    thumbnail = serializers.URLField(required=False, allow_blank=True)
+    thumbnail = VideoThumbnailField(required=False, allow_blank=True)
     created = TimezoneAwareDateTimeField(read_only=True)
     team = TeamSerializer(required=False, allow_null=True)
     project = ProjectSerializer(required=False, allow_null=True)
@@ -494,6 +507,8 @@ class VideoSerializer(serializers.Serializer):
             video.update_metadata(validated_data['metadata'], commit=True)
         self._update_team(video, validated_data)
         video.save()
+        if validated_data.get('thumbnail'):
+            videos.tasks.save_thumbnail_in_s3.delay(video.id)
         return video
 
     def _update_team(self, video, validated_data):
