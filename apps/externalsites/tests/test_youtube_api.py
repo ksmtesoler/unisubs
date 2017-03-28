@@ -29,7 +29,7 @@ from externalsites import google, subfetch
 from externalsites.syncing.youtube import convert_language_code
 import isodate
 
-@override_settings(YOUTUBE_API_KEY='test-youtube-api-key')
+@override_settings(GOOGLE_API_KEY='test-youtube-api-key')
 class YouTubeTestCase(TestCase):
     def test_get_user_info(self):
         mocker = test_utils.RequestsMocker()
@@ -168,7 +168,7 @@ class YouTubeTestCase(TestCase):
             'get', 'https://www.googleapis.com/youtube/v3/videos', params={
                 'part': 'snippet,contentDetails',
                 'id': 'test-video-id',
-                'key': settings.YOUTUBE_API_KEY,
+                'key': settings.GOOGLE_API_KEY,
             }, body=json.dumps({
                 'items': [
                     {
@@ -204,7 +204,7 @@ class YouTubeTestCase(TestCase):
             'get', 'https://www.googleapis.com/youtube/v3/videos', params={
                 'part': 'snippet,contentDetails',
                 'id': 'test-video-id',
-                'key': settings.YOUTUBE_API_KEY,
+                'key': settings.GOOGLE_API_KEY,
             }, body="Invalid body")
         google.get_video_info.run_original_for_test()
         with mocker:
@@ -217,7 +217,7 @@ class YouTubeTestCase(TestCase):
             'get', 'https://www.googleapis.com/youtube/v3/videos', params={
                 'part': 'snippet,contentDetails',
                 'id': 'test-video-id',
-                'key': settings.YOUTUBE_API_KEY,
+                'key': settings.GOOGLE_API_KEY,
             }, body=json.dumps({
                 'items': [
                 ]

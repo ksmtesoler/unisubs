@@ -96,7 +96,13 @@ video_changed_tasks = mock.Mock()
 test_video_info = externalsites.google.VideoInfo(
     'test-channel-id', 'test-title', 'test-description', 60,
     'http://example.com/youtube-thumb.png')
+test_drive_file_info = externalsites.google.DriveFileInfo(
+    'test-title', 'test-description', 'video/mp4', 1000,
+    'http://example.com/content-link',
+    'http://example.com/view-link',
+    'http://example.com/drive-file-thumb.png')
 youtube_get_video_info = mock.Mock(return_value=test_video_info)
+youtube_get_drive_file_info = mock.Mock(return_value=test_drive_file_info)
 youtube_get_user_info = mock.Mock(return_value=test_video_info)
 youtube_get_new_access_token = mock.Mock(return_value='test-access-token')
 youtube_revoke_auth_token = mock.Mock()
@@ -125,6 +131,7 @@ class MonkeyPatcher(object):
         ('videos.tasks.save_thumbnail_in_s3', save_thumbnail_in_s3),
         ('videos.tasks.video_changed_tasks', video_changed_tasks),
         ('externalsites.google.get_video_info', youtube_get_video_info),
+        ('externalsites.google.get_drive_file_info', youtube_get_drive_file_info),
         ('externalsites.google.get_youtube_user_info',
          youtube_get_user_info),
         ('externalsites.google.get_uploaded_video_ids',

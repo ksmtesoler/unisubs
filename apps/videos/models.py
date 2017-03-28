@@ -645,7 +645,7 @@ class Video(models.Model):
 
         """
         vurl = self.get_primary_videourl_obj()
-        return vurl.effective_url if vurl else None
+        return vurl.url if vurl else None
 
     def get_video_url_type_display(self):
         vurl = self.get_primary_videourl_obj()
@@ -2184,10 +2184,6 @@ class VideoUrl(models.Model):
         vt_class = self.get_video_type_class()
         self._video_type = vt_class(self.url)
         return self._video_type
-
-    @property
-    def effective_url(self):
-        return self.url
 
     def kaltura_id(self):
         if self.type == 'K':

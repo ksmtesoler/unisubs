@@ -79,7 +79,13 @@ class S3ImageFieldFile(FieldFile):
 
     def save(self, name, content, save=True):
         ext = name.split('.')[-1]
-        name = '%s.%s' % (self.generate_file_name(), ext)
+        # try to sanity check the extension a bit.  Some filenames have
+        # periods in random places which we don't want to interpret as a 100
+        # char extension.
+        if ext < 6:
+            name = '%s.%s' % (self.generate_file_name(), ext)
+        else:
+            name = self.generate_file_name()
         name = self.field.generate_filename(self.instance, name)
         self.name = self.storage.save(name, content)
         setattr(self.instance, self.field.name, self.name)

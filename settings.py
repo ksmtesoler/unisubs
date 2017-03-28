@@ -356,6 +356,13 @@ GOOGLE_ANALYTICS_NUMBER = 'UA-163840-22'
 EXPERIMENTS_CODE = "QL2-1BUpSyeABVHp9b6G8w"
 MIXPANEL_TOKEN = '44205f56e929f08b602ccc9b4605edc3'
 
+# API integration settings
+GOOGLE_CLIENT_ID = None
+GOOGLE_CLIENT_SECRET = None
+GOOGLE_API_KEY = None
+GOOGLE_SERVICE_ACCOUNT = None
+GOOGLE_SERVICE_ACCOUNT_SECRET = None
+
 try:
     from commit import LAST_COMMIT_GUID
 except ImportError:
@@ -564,7 +571,9 @@ MEDIA_BUNDLES = {
             'src/js/third-party/popcorn.js',
             'src/js/third-party/Blob.js',
             'src/js/third-party/FileSaver.js',
-            'src/js/third-party/popcorn.brightcove.js',
+            'src/js/popcorn/popcorn.brightcove.js',
+            'src/js/popcorn/popcorn.googledrive.js',
+            'src/js/popcorn/popcorn.amara.js',
             'src/js/third-party/modal-helper.js',
             'src/js/third-party/json2.min.js',
             'src/js/dfxp/dfxp.js',
@@ -606,11 +615,13 @@ MEDIA_BUNDLES = {
             'src/js/third-party/jquery-1.8.3.min.js',
             'src/js/third-party/backbone.min.js',
             'src/js/third-party/popcorn.js',
-            'src/js/third-party/popcorn.brightcove.js',
             'src/js/popcorn/popcorn.flash-fallback.js',
             'src/js/third-party/jquery.mCustomScrollbar.concat.min.js',
             'src/js/popcorn/popcorn.amaratranscript.js',
             'src/js/popcorn/popcorn.amarasubtitle.js',
+            'src/js/popcorn/popcorn.brightcove.js',
+            'src/js/popcorn/popcorn.googledrive.js',
+            'src/js/popcorn/popcorn.amara.js',
             'src/js/embedder/embedder.js'
         ),
         'add_amara_conf': True,

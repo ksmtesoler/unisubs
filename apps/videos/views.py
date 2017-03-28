@@ -206,14 +206,6 @@ def create(request):
         You can share the video with friends, or get an embed code for your site. To start
         new subtitles, click \"Add a new language!\" in the sidebar.'''))
 
-        url_obj = video.videourl_set.filter(primary=True).all()[:1].get()
-        if url_obj.type != 'Y':
-            # Check for all types except for Youtube
-            if not url_obj.effective_url.startswith('https'):
-                messages.warning(request, message=_(u'''You have submitted a video
-                that is served over http.  Your browser may display mixed
-                content warnings.'''))
-
         if video_form.created:
             messages.info(request, message=_(u'''Existing subtitles will be imported in a few minutes.'''))
         return redirect(video.get_absolute_url())
@@ -635,8 +627,8 @@ def language_subtitles(request, video, lang, lang_id, version_id=None):
 
 def _widget_params(request, video, version_no=None, language=None, video_url=None, size=None):
     primary_url = video_url or video.get_video_url()
-    alternate_urls = [vu.effective_url for vu in video.videourl_set.all()
-                      if vu.effective_url != primary_url]
+    alternate_urls = [vu.url for vu in video.videourl_set.all()
+                      if vu.url != primary_url]
     params = {'video_url': primary_url,
               'alternate_video_urls': alternate_urls,
               'base_state': {}}

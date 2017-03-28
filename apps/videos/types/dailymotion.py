@@ -48,10 +48,6 @@ class DailymotionVideoType(VideoType):
         return 'http://dailymotion.com/video/%s' % self.video_id
 
     @classmethod
-    def video_url(cls, obj):
-        return 'http://dailymotion.com/video/%s' % obj.videoid
-
-    @classmethod
     def matches_video_url(cls, url):
         return bool(cls.get_video_id(url))
 

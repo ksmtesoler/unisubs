@@ -240,6 +240,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 import json
 
+from api import extra
 from api.fields import LanguageCodeField, TimezoneAwareDateTimeField
 from api.views.apiswitcher import APISwitcherMixin
 from teams import permissions as team_perms
@@ -471,6 +472,7 @@ class VideoSerializer(serializers.Serializer):
         if video.primary_audio_language_code == '':
             data['primary_audio_language_code'] = None
             data['original_language'] = None
+        extra.video.add_data(self.context['request'], data, video=video)
         return data
 
     def create(self, validated_data):
@@ -533,6 +535,14 @@ class VideoSerializer(serializers.Serializer):
                 video.is_public = team.is_visible
 
         video.clear_team_video_cache()
+
+@extra.video.handler('player_urls')
+def add_player_urls(user, data, video):
+    video_urls = list(video.get_video_urls())
+    video_urls.sort(key=lambda vurl: vurl.primary, reverse=True)
+    data['player_urls'] = [
+        vurl.get_video_type().player_url() for vurl in video_urls
+    ]
 
 class VideoViewSet(mixins.CreateModelMixin,
                    mixins.RetrieveModelMixin,
