@@ -653,7 +653,7 @@ def manage_videos(request, team):
 def manage_videos_context_menu(team, video, enabled_forms):
     menu = ContextMenu([
         AjaxLink(form.label, form=form.name, selection=video.id)
-        for form in enabled_forms
+        for form in reversed(enabled_forms)
     ])
     team.new_workflow.video_management_alter_context_menu(video, menu)
     return menu
