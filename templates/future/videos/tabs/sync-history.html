@@ -6,11 +6,20 @@
 </nav>
 <table class="table table-striped">
   <tbody>
+    <tr>
+      <th>{% trans "Date" %}</th>
+      <th>{% trans "Account" %}</th>
+      <th>{% trans "Revision" %}</th>
+      <th>{% trans "Result" %}</th>
+      <th>{% trans "Details" %}</th>
+    </tr>
     {% for item in sync_history %}
     <tr>
       <td>{{ item.date|elapsed_time }}</td>
-      <td>{{ item.success }}</td>
-      <td>{{ item.account_type }}</td>
+      <td>{{ item.account }}</td>
+      <td>{{ item.version }}</td>
+      <td>{{ item.result }}</td>
+      <td>{{ item.details }}</td>
     </tr>
     {% endfor %}
   </tbody>

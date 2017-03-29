@@ -537,10 +537,10 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
             request.user).order_by('-version_number')
     activity = (ActivityRecord.objects.for_video(video, customization.team)
                 .filter(language_code=lang))[:8]
-
+    team_video = video.get_team_video()
     context = {
         'video': video,
-        'team_video': video.get_team_video(),
+        'team_video': team_video,
         'metadata': video.get_metadata().convert_for_display(),
         'subtitle_language': subtitle_language,
         'subtitle_version': version,
@@ -573,12 +573,13 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
                 request.user, video, subtitle_language, version)
     else:
         context['show_notes'] = False
-    if permissions.can_user_resync(video, request.user):
-        context['show_sync_history'] = True
+    if can_resync(team_video.team, request.user):
         context.update(sync_history_context(video, subtitle_language))
+        context['show_sync_history'] = True
+        context['can_resync'] = True
     else:
         context['show_sync_history'] = False
-    context['show_sync_history'] = True
+        context['can_resync'] = False
     return render(request, 'future/videos/subtitles.html', context)
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
@@ -630,7 +631,6 @@ def sync_history_context(video, subtitle_language):
             'syncable': get_sync_account(video, video_url),
         })
     context['synced_versions'] = synced_versions
-    context['can_resync'] = len(synced_versions) > 0
     return context
 
 def downloadable_formats(user):
