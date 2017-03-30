@@ -6,7 +6,7 @@
     </header>
     <form class="ajaxForm" action="{% query_string form=resync %}" method="POST">
       {% csrf_token %}
-      <p>{% blocktrans with number=version.version_number %}Syncing subtitles version {{ number }}{% endblocktrans %}</p>
+      <p>{% blocktrans with number=version.version_number %}Syncing subtitles revision {{ number }}{% endblocktrans %}</p>
       <div class="text-right">
         <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</a>
         <button class="button cta" type="submit">{% trans "Resync" %}</button>
