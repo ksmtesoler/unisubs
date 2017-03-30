@@ -338,6 +338,11 @@ class Team(models.Model):
         return UserLanguage.objects.filter(user__in=users).values_list('language', flat=True)
 
     def active_users(self, since=None, published=True):
+        if not self.videos.all().exists():
+            # If there are no videos, then the query takes forever because of
+            # mysql issues.  Luckly, it's easy to short circuit
+            return []
+
         sv = NewSubtitleVersion.objects.filter(video__in=self.videos.all())
         if published:
             sv = sv.filter(Q(visibility_override='public') | Q(visibility='public'))
