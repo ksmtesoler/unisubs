@@ -9,25 +9,25 @@
     <div class="content">
       <div class="row">
         <div class="col-xs-12 col-sm-4">
-	  <h1><a href="#">{{ member.get_full_name }}</a></h1>
-	  <p>{{ member.username }}</p>
+	  <h1><a href="#">{{ member_user.get_full_name }}</a></h1>
+	  <p>{{ member_user.username }}</p>
 	  <div class="profileWell">
 	    <div class="row middle-xs">
 	      <div class="col-xs">
-		{{ member.avatar_tag_extra_large }}
+		{{ member_user.avatar_tag_extra_large }}
 	      </div>
 	      <div class="col-xs">
-		<h3>Manager <a href="mailto:{{ member.email }}"><i class="icon icon-mail"></i></a></h3>
+		<h3>{{ member.get_role_display }} <a href="mailto:{{ member_user.email }}"><i class="icon icon-mail"></i></a></h3>
 		<p>
 		  <a href="{% url "teams:activity" team.slug %}">{% trans "See team activity" %}</a><br>
-		  <a href="{% url "profiles:profile" member.username %}">{% trans "See full profile" %}</a>
+		  <a href="{% url "profiles:profile" member_user.username %}">{% trans "See full profile" %}</a>
 		</p>
 	      </div>
 	    </div>
 	    <hr>
 	    <div class="row">
 	      <div class="col-xs">
-		{% with member.get_language_names as languages %}
+		{% with member_user.get_language_names as languages %}
 		<h4>{% trans "Languages" %}</h4>
 		{% if languages %}
 		<ul class="unstyled">
@@ -37,7 +37,7 @@
 		</ul>
 		{% else %}
 		<em>
-		  {{ member }} {% trans "hasn't selected languages yet." %}
+		  {{ member_user }} {% trans "hasn't selected languages yet." %}
 		</em>
 		{% endif%}
 		{% endwith %}
