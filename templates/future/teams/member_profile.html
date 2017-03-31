@@ -18,8 +18,8 @@
 	      </div>
 	      <div class="col-xs">
 		<h3>{{ member.get_role_display }} <a href="{{ member_user.send_message_url }}"><i class="icon icon-mail"></i></a></h3>
-		<p>
-		  <a href="{% url "teams:activity" team.slug %}">{% trans "See team activity" %}</a><br>
+		<p><!--
+		  <a href="{% url "teams:activity" team.slug %}">{% trans "See team activity" %}</a><br>-->
 		  <a href="{% url "profiles:profile" member_user.username %}">{% trans "See full profile" %}</a>
 		</p>
 	      </div>
