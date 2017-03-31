@@ -11,7 +11,7 @@
       <div class="thumbWrapper">
         <img src="{{ video.get_huge_thumbnail }}" alt="Select {{ video.title_display }}" title="{{ video.title_display }}" />
       </div>
-      <div class="videoCard-caption">
+      <div class="videoCard-caption" title="{{ video.title_display }}">
         <h4 class="videoCard-title">{{ video.title_display }}</h4>
         {% block subtitle %}{% if subtitle %}<h5 class="videoCard-subtitle">{{ subtitle }}</h5>{% endif %}{% endblock %}
       </div>
