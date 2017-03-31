@@ -76,6 +76,9 @@
         color: $text-color;
       }
     }
+    &.no-link {
+      padding: 10px 0;
+    }
   }
 }
 
