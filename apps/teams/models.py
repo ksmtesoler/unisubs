@@ -222,7 +222,7 @@ class Team(models.Model):
                                       upload_to='teams/square-logo/',
                                       default='', blank=True,
                                       legacy_filenames=False,
-                                      thumb_sizes=[(100, 100), (40, 40), (30, 30)])
+                                      thumb_sizes=[(100, 100), (48, 48), (40, 40), (30, 30)])
     is_visible = models.BooleanField(_(u'videos public?'), default=False)
     sync_metadata = models.BooleanField(_(u'Sync metadata when available (Youtube)?'), default=False)
     videos = models.ManyToManyField(Video, through='TeamVideo',  verbose_name=_('videos'))
@@ -450,6 +450,11 @@ class Team(models.Model):
         """URL for a small version of this team's square logo, or None."""
         if self.square_logo:
             return self.square_logo.thumb_url(30, 30)
+
+    def square_logo_thumbnail_oldsmall(self):
+        """small version of the team's square logo for old-style pages."""
+        if self.square_logo:
+            return self.square_logo.thumb_url(48,48)
 
     # URLs
     @models.permalink

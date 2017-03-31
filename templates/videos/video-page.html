@@ -64,7 +64,7 @@
             {% if team %}
                 <p class="group">
                     {% if team.square_logo %}
-                    <a href="{{ team.get_absolute_url }}"><img class="logo" src="{{ team.square_logo_thumbnail_small }}"></a>
+                    <a href="{{ team.get_absolute_url }}"><img class="logo" src="{{ team.square_logo_thumbnail_oldsmall }}"></a>
                     {% else %}
                     <a href="{{ team.get_absolute_url }}"><img class="logo" src="{{ STATIC_URL }}images/team.png"></a>
                     {% endif %}
