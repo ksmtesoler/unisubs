@@ -34,6 +34,7 @@ from django.db.models import query, Q, Count, Sum
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.http import Http404
 from django.template.loader import render_to_string
+from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _, ugettext
 
 import teams.moderation_const as MODERATION
@@ -1410,6 +1411,11 @@ class TeamMember(models.Model):
         """Return any language narrowings applied to this member."""
         return self.narrowings.filter(project__isnull=True)
 
+    def get_absolute_url(self):
+        if self.team.is_old_style():
+            raise NotImplementedError()
+        else:
+            return reverse('teams:member-profile', args=(self.team.slug, urlquote(self.user.username)))
 
     def project_narrowings_fast(self):
         """Return any project narrowings applied to this member.

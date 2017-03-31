@@ -60,8 +60,9 @@ class AjaxLink(Link):
         return mark_safe(u'<a class="ajaxLink" href="{}">{}</a>'.format(self.url, self.label))
 
 class CTA(Link):
-    def __init__(self, label, icon, view_name, block=False, *args, **kwargs):
+    def __init__(self, label, icon, view_name, block=False, disabled=False, *args, **kwargs):
         super(CTA, self).__init__(label, view_name, *args, **kwargs)
+        self.disabled = disabled
         self.icon = icon
         self.block = block
 
@@ -72,10 +73,13 @@ class CTA(Link):
         return self.render(block=True)
 
     def render(self, block=False):
-        if block:
-            css_class = "button cta block"
+        css_class = "button"
+        if self.disabled:
+            css_class += " disabled"
         else:
-            css_class = "button cta"
+            css_class += " cta"
+        if block:
+            css_class += " block"
         return mark_safe(u'<a href="{}" class="{}">'
                          u'<i class="icon {}"></i> {}</a>'.format(
                              self.url, css_class, self.icon, self.label))
