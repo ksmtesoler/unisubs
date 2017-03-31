@@ -178,8 +178,10 @@ Creating new subtitles
 
 .. http:post:: /api/videos/(video-id)/languages/(language-code)/subtitles/
 
-    :<json object subtitles: The subtitles to submit.  The format depends on
-        the sub_format param.
+    :<json object subtitles: The subtitles to submit, as a string. The
+        format depends on the sub_format param.    
+    :<json object subtitles_url: Alternativeley, subtitles can be given
+        as a text file URL.  The format depends on the sub_format param.
     :<json string sub_format: The format used to parse the subs. The same
         formats as for fetching subtitles are accepted. Optional - defaults to
         "dfxp".
@@ -541,11 +543,12 @@ class TextRenderer(SubtitleRenderer):
     format = 'txt'
 
 class SubtitlesField(serializers.CharField):
-    def __init__(self):
-        super(SubtitlesField, self).__init__(style={
+    def __init__(self, *args, **kwargs):
+        kwargs.update(style={
             'base_template': 'textarea.html',
             'rows': 10,
         })
+        super(SubtitlesField, self).__init__(*args, **kwargs)
 
     def get_attribute(self, version):
         return babelsubs.to(version.get_subtitles(),
@@ -595,7 +598,8 @@ class SubtitlesSerializer(serializers.Serializer):
     ]
     version_number = serializers.IntegerField(read_only=True)
     sub_format = SubFormatField(required=False, default='dfxp', initial='dfxp')
-    subtitles = SubtitlesField()
+    subtitles = SubtitlesField(required=False)
+    subtitles_url = serializers.URLField(max_length=512, required=False, write_only=True)
     author = UserField(read_only=True)
     action = serializers.CharField(required=False, write_only=True,
                                    allow_blank=True)
@@ -662,6 +666,15 @@ class SubtitlesSerializer(serializers.Serializer):
         return reverse('videos:subtitleversion_detail', kwargs=kwargs,
                        request=self.context['request'])
 
+    def validate(self, data):
+        """
+        Check that subtitles are provided, either via a string
+        or a URL.
+        """
+        if ('subtitles' in data) == ('subtitles_url' in data):
+            raise serializers.ValidationError("Subtitles must be provided either via a string or a URL")
+        return data
+
     def validate_origin(self, value):
         if not value or value == 'api':
             return ORIGIN_API
@@ -698,9 +711,13 @@ class SubtitlesSerializer(serializers.Serializer):
             action = validated_data.get("action")
         elif 'is_complete' in validated_data:
             complete = validated_data['is_complete']
+        if 'subtitles' in validated_data:
+            subtitles = validated_data['subtitles']
+        else:
+            subtitles = data_from_url(validated_data['subtitles_url'])
         return pipeline.add_subtitles(
             self.context['video'], self.context['language_code'],
-            validated_data['subtitles'],
+            subtitles,
             action=action, complete=complete,
             title=validated_data.get('title'),
             description=validated_data.get('description'),

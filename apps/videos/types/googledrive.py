@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
-import re
-from urlparse import urlparse
 import logging
 
 from base import VideoType
@@ -26,7 +24,6 @@ from utils.memoize import memoize
 logger = logging.getLogger(__file__)
 
 class GoogleDriveVideoType(VideoType):
-    _url_pattern = re.compile(r'/d/(.*?)/')
 
     abbreviation = 'I'
     name = 'Google Drive'
@@ -47,15 +44,7 @@ class GoogleDriveVideoType(VideoType):
             return None
 
     def _get_file_id(self):
-        parsed_url = urlparse(self.url)
-        if parsed_url.scheme == 'drive':
-            # Handle drive:///[file_id] schemes (see convert_to_video_url)
-            return parsed_url.path[1:]
-        match = self._url_pattern.search(parsed_url.path)
-        if match:
-            return match.group(1)
-        else:
-            raise ValueError("Unknown video id")
+        return google.get_drive_file_id(self.url)
 
     def convert_to_video_url(self):
         # Drive files have a lot of URLs associated with them.  It's not clear
@@ -66,9 +55,7 @@ class GoogleDriveVideoType(VideoType):
 
     @classmethod
     def matches_video_url(cls, url):
-        parsed_url = urlparse(url)
-        return (parsed_url.scheme == 'drive' or
-                parsed_url.netloc == 'drive.google.com')
+        return google.matches_drive_url(url)
 
     @memoize
     def get_drive_file_info(self):
