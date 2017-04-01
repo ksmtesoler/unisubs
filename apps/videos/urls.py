@@ -17,7 +17,7 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 from django.conf.urls import *
-#from videos.views import rpc_router
+from videos.views import rpc_router
 
 urlpatterns = patterns(
     'videos.views',
@@ -26,8 +26,8 @@ urlpatterns = patterns(
     url(r'^watch/latest/$', 'latest_videos', name='latest_videos'),
     url(r'^test_celery/$', 'test_celery'),
     url(r'^test_celery_exception/$', 'test_celery_exception'),
-    #url(r'^router/$', rpc_router, name='rpc_router'),
-    #url(r'^router/api/$', rpc_router.api, name='rpc_api'),
+    url(r'^router/$', rpc_router, name='rpc_router'),
+    url(r'^router/api/$', rpc_router.api, name='rpc_api'),
     url(r'^subscribe_to_updates/$', 'subscribe_to_updates', name='subscribe_to_updates'),
     url(r'^feedback/$', 'feedback', name='feedback'),
     url(r'^feedback/error/$', 'feedback', {'hide_captcha': True}, 'feedback_error'),
