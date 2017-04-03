@@ -1550,9 +1550,14 @@ class DeleteVideosForm(VideoManagementForm):
                 video.delete(self.user)
 
     def message(self):
-        msg = ungettext('Video has been deleted.',
-                        '%(count)s videos have been deleted.',
-                        self.count)
+        if self.cleaned_data.get('delete'):
+            msg = ungettext('Video has been deleted.',
+                            '%(count)s videos have been deleted.',
+                            self.count)
+        else:
+            msg = ungettext('Video has been removed.',
+                            '%(count)s videos have been removed.',
+                            self.count)
         return fmt(msg, count=self.count)
 
 class MoveVideosForm(VideoManagementForm):
