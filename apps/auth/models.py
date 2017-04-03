@@ -136,7 +136,8 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     homepage = models.URLField(blank=True)
     preferred_language = models.CharField(
         max_length=16, choices=ALL_LANGUAGES, blank=True)
-    picture = S3EnabledImageField(blank=True, upload_to='pictures/')
+    picture = S3EnabledImageField(blank=True, upload_to='pictures/',
+                                  thumb_sizes=[(110, 110), (100, 100), (50, 50), (30, 30)])
     valid_email = models.BooleanField(default=False)
 
     # if true, items that end on the user activity stream will also be
@@ -436,6 +437,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def avatar_tag_medium(self):
         avatar = self._get_avatar(50)
         return mark_safe('<img class="avatar avatar-md" src="{}">'.format(avatar))
+
     def avatar_tag_extra_large(self):
         avatar = self._get_avatar(110)
         return mark_safe('<img class="avatar avatar-xl" src="{}">'.format(avatar))
