@@ -1920,6 +1920,17 @@ class SubtitleVersion(models.Model):
     def is_synced(self):
         return self.get_subtitles().fully_synced
 
+    def is_synced_and_has_content(self):
+        subtitle_items = self.get_subtitles().subtitle_items()
+        if not subtitle_items:
+            return False
+        for item in subtitle_items:
+            if (item.start_time is None or
+                    item.end_time is None or
+                    item.text == ''):
+                return False
+        return True
+
     def publish(self):
         """Make this version publicly viewable."""
 
