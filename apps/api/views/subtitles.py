@@ -179,7 +179,7 @@ Creating new subtitles
 .. http:post:: /api/videos/(video-id)/languages/(language-code)/subtitles/
 
     :<json object subtitles: The subtitles to submit, as a string. The
-        format depends on the sub_format param.    
+        format depends on the sub_format param.
     :<json object subtitles_url: Alternativeley, subtitles can be given
         as a text file URL.  The format depends on the sub_format param.
     :<json string sub_format: The format used to parse the subs. The same
@@ -303,6 +303,7 @@ from subtitles.permissions import user_can_access_subtitles_format
 from subtitles.types import SubtitleFormatList
 import babelsubs
 from babelsubs.storage import SubtitleSet
+from utils.http import data_from_url
 from utils.subtitles import load_subtitles
 import videos.tasks
 
@@ -705,6 +706,22 @@ class SubtitlesSerializer(serializers.Serializer):
             self.context['sub_format'] = 'dfxp'
         return super(SubtitlesSerializer, self).to_internal_value(data)
 
+    def _process_subtitles_url(self, subtitles_url):
+        value = data_from_url(subtitles_url)
+        if not isinstance(value, basestring):
+            raise serializers.ValidationError("Invalid subtitle data")
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        try:
+            return load_subtitles(
+                self.context['language_code'], value,
+                self.context['sub_format'])
+        except babelsubs.SubtitleParserError, e:
+            logger.warn("Error parsing subtitles ({}/{})".format(
+                self.context['video'].video_id,
+                self.context['language_code']), exc_info=True)
+            raise serializers.ValidationError("Invalid subtitle data")
+
     def create(self, validated_data):
         action = complete = None
         if 'action' in validated_data:
@@ -714,7 +731,7 @@ class SubtitlesSerializer(serializers.Serializer):
         if 'subtitles' in validated_data:
             subtitles = validated_data['subtitles']
         else:
-            subtitles = data_from_url(validated_data['subtitles_url'])
+            subtitles = self._process_subtitles_url(validated_data['subtitles_url'])
         return pipeline.add_subtitles(
             self.context['video'], self.context['language_code'],
             subtitles,
