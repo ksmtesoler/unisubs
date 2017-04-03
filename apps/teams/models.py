@@ -217,10 +217,9 @@ class Team(models.Model):
                                default='',
                                thumb_sizes=[(280, 100), (100, 100)])
     square_logo = S3EnabledImageField(verbose_name=_(u'square logo'),
-                                      blank=True,
-                                      default='',
                                       upload_to='teams/square-logo/',
-                                      thumb_sizes=[(100, 100), (48, 48)])
+                                      default='', blank=True,
+                                      thumb_sizes=[(100, 100), (48, 48), (40, 40), (30, 30)])
     is_visible = models.BooleanField(_(u'videos public?'), default=False)
     sync_metadata = models.BooleanField(_(u'Sync metadata when available (Youtube)?'), default=False)
     videos = models.ManyToManyField(Video, through='TeamVideo',  verbose_name=_('videos'))
@@ -338,6 +337,11 @@ class Team(models.Model):
         return UserLanguage.objects.filter(user__in=users).values_list('language', flat=True)
 
     def active_users(self, since=None, published=True):
+        if not self.videos.all().exists():
+            # If there are no videos, then the query takes forever because of
+            # mysql issues.  Luckly, it's easy to short circuit
+            return []
+
         sv = NewSubtitleVersion.objects.filter(video__in=self.videos.all())
         if published:
             sv = sv.filter(Q(visibility_override='public') | Q(visibility='public'))
