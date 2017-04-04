@@ -185,16 +185,12 @@ def watch_page(request):
         'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
     })
 
-def video_listing_page(request, subheader, video_qs, query=None):
+def video_listing_page(request, subheader, video_qs, query=None,
+                       force_pages=None):
     paginator = AmaraPaginator(video_qs, VIDEO_IN_ROW * 3)
-    # counting videos is actually a fairly expensive operation, so we just
-    # pretend like there's an unlimited number.
-    paginator._count = sys.maxint
+    if force_pages:
+        paginator._count = paginator.per_page * force_pages
     page = paginator.get_page(request)
-    # Our _count hack will break the normal Page.has_next() code, so we
-    # hack that by saying once we don't get the full number of rows
-    # returned from the database, then we're on the last page.
-    page.has_next = len(page) == paginator.per_page
 
     return render(request, 'videos/watch.html', {
         'subheader': subheader,
@@ -204,11 +200,11 @@ def video_listing_page(request, subheader, video_qs, query=None):
 
 def featured_videos(request):
     return video_listing_page(request, _('Featured Videos'),
-                              Video.objects.featured())
+                              Video.objects.featured(), force_pages=1)
 
 def latest_videos(request):
     return video_listing_page(request, _('Latest Videos'),
-                              Video.objects.latest())
+                              Video.objects.latest(), force_pages=100)
 
 def search(request):
     query = request.GET.get('q')
