@@ -18,12 +18,14 @@
 
 import datetime
 import string
+import sys
 import urllib, urllib2
 from collections import namedtuple
 
 import json
 from babelsubs.storage import diff as diff_subs
 from babelsubs.generators.html import HTMLGenerator
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -176,22 +178,39 @@ class LanguageList(object):
 def index(request):
     return render_to_response('index.html', {},
                               context_instance=RequestContext(request))
-@login_required
+
 def watch_page(request):
-    context = {
+    return render(request, 'videos/watch-home.html', {
         'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
         'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
-    }
-    return render_to_response('videos/watch.html', context,
-                              context_instance=RequestContext(request))
-@login_required
+    })
+
+def video_listing_page(request, subheader, video_qs):
+    paginator = Paginator(video_qs, VIDEO_IN_ROW * 3)
+    # counting videos is actually a fairly expensive operation, so we just
+    # pretend like there's an unlimited number.
+    paginator._count = sys.maxint
+    try:
+        page = paginator.page(int(request.GET.get('page', 1)))
+    except:
+        page = paginator.page(1)
+    # Our _count hack will break the normal Page.has_next() code, so we
+    # hack that by saying once we don't get the full number of rows
+    # returned from the database, then we're on the last page.
+    page.has_next = len(page) == paginator.per_page
+
+    return render(request, 'videos/watch.html', {
+        'subheader': subheader,
+        'page': page,
+    })
+
 def featured_videos(request):
-    return render_to_response('videos/featured_videos.html', {},
-                              context_instance=RequestContext(request))
-@login_required
+    return video_listing_page(request, _('Featured Videos'),
+                              Video.objects.featured())
+
 def latest_videos(request):
-    return render_to_response('videos/latest_videos.html', {},
-                              context_instance=RequestContext(request))
+    return video_listing_page(request, _('Latest Videos'),
+                              Video.objects.latest())
 
 @login_required
 def create(request):

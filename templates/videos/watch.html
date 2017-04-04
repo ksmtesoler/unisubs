@@ -5,12 +5,6 @@
 
 {% block body_attrs %}id="watch"{% endblock %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script src="{% url "videos:rpc_api" %}" type="text/javascript"></script>
-    {% media_bundle 'ajax-paginator.js' %}
-{% endblock %}
-
 {% block main_content %}
 
 {% search_form %}
@@ -19,35 +13,23 @@
 
 <div class="pod" id="featured_videos">
     <div class="hd">
-        <a class="btn_more_videos" href="{% url "videos:featured_videos" %}">
-            {% trans "More Featured Videos" %}
-        </a>
-        <h2>{% trans "Featured Videos" %}</h2>
+      <h2>{{ subheader }}</h2>
     </div><!-- // hd -->
     <div class="bd">
-        {% with featured_videos as video_list %}
-            {% include 'videos/_watch_page.html' %}
-        {% endwith %}
+          {% include 'videos/_watch_page.html' with video_list=page %}
     </div><!-- // bd -->
+<div class="pages ajax-pagination clearfix">
+  {% if page.has_previous %}
+  <a class="pag_prev" href="?page={{ page.previous_page_number }}"><span class="icon"></span></a>
+  {% endif %}
+  <span class="page_count page-info">
+    {% blocktrans with start_index=page.start_index end_index=page.end_index %}{{ start_index }} - {{ end_index }} videos{% endblocktrans %}
+  </span>
+  {% if page.has_next %}
+  <a class="pag_next" href="?page={{ page.next_page_number }}"><span class="icon"></span></a>
+  {% endif %}
+</div>
 </div><!-- // pod -->
 <br/>
-
-{% block extra_videos %}{% endblock %}
-
-<div class="pod" id="latest_videos">
-    <div class="hd">
-        <a class="btn_more_videos" href="{% url "videos:latest_videos" %}">
-            {% trans "More Recent Videos" %}
-        </a>
-        <h2>{% trans "Latest Videos" %}</h2>
-    </div><!-- // hd -->
-    <div class="bd">
-        <div class="watch-page-content">
-            {% with latest_videos as video_list %}
-                {% include 'videos/_watch_page.html' with showdate="true" %}
-            {% endwith %}
-        </div>
-    </div><!-- // bd -->
-</div><!-- // pod -->
 
 {% endblock %}
