@@ -25,7 +25,6 @@ from collections import namedtuple
 import json
 from babelsubs.storage import diff as diff_subs
 from babelsubs.generators.html import HTMLGenerator
-from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -84,6 +83,7 @@ from utils.basexconverter import base62
 from utils.decorators import never_in_prod
 from utils.objectlist import object_list
 from utils.rpc import RpcRouter
+from utils.pagination import AmaraPaginator
 from utils.text import fmt
 from utils.translation import (get_user_languages_from_request,
                                get_language_label)
@@ -185,15 +185,12 @@ def watch_page(request):
         'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
     })
 
-def video_listing_page(request, subheader, video_qs):
-    paginator = Paginator(video_qs, VIDEO_IN_ROW * 3)
+def video_listing_page(request, subheader, video_qs, query=None):
+    paginator = AmaraPaginator(video_qs, VIDEO_IN_ROW * 3)
     # counting videos is actually a fairly expensive operation, so we just
     # pretend like there's an unlimited number.
     paginator._count = sys.maxint
-    try:
-        page = paginator.page(int(request.GET.get('page', 1)))
-    except:
-        page = paginator.page(1)
+    page = paginator.get_page(request)
     # Our _count hack will break the normal Page.has_next() code, so we
     # hack that by saying once we don't get the full number of rows
     # returned from the database, then we're on the last page.
@@ -202,6 +199,7 @@ def video_listing_page(request, subheader, video_qs):
     return render(request, 'videos/watch.html', {
         'subheader': subheader,
         'page': page,
+        'query': query
     })
 
 def featured_videos(request):
@@ -211,6 +209,17 @@ def featured_videos(request):
 def latest_videos(request):
     return video_listing_page(request, _('Latest Videos'),
                               Video.objects.latest())
+
+def search(request):
+    query = request.GET.get('q')
+    if query:
+        subheader = fmt(ugettext('Searching for "%(query)s"'),
+                        query=query)
+        queryset = Video.objects.public().search(query)
+    else:
+        subheader = ugettext('Search for videos')
+        queryset = Video.objects.none()
+    return video_listing_page(request, subheader, queryset, query)
 
 @login_required
 def create(request):

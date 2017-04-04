@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% load i18n search_tags media_bundle %}
+{% load i18n media_bundle %}
 {% load url from future %}
 
 {% block body_attrs %}id="watch"{% endblock %}
 
 {% block main_content %}
 
-{% search_form %}
+{% include "videos/watch-search-form.html" %}
 
 <h1>{% block heading %}{% trans "Watch Subtitled Videos" %}{% endblock %}</h1>
 
@@ -18,17 +18,18 @@
     <div class="bd">
           {% include 'videos/_watch_page.html' with video_list=page %}
     </div><!-- // bd -->
-<div class="pages ajax-pagination clearfix">
-  {% if page.has_previous %}
-  <a class="pag_prev" href="?page={{ page.previous_page_number }}"><span class="icon"></span></a>
-  {% endif %}
-  <span class="page_count page-info">
-    {% blocktrans with start_index=page.start_index end_index=page.end_index %}{{ start_index }} - {{ end_index }} videos{% endblocktrans %}
-  </span>
-  {% if page.has_next %}
-  <a class="pag_next" href="?page={{ page.next_page_number }}"><span class="icon"></span></a>
-  {% endif %}
-</div>
+
+    <div class="pages clearfix">
+      {% if page.has_previous %}
+      <a class="pag_prev" href="{{ page.previous_page_link }}"><span class="icon"></span></a>
+      {% endif %}
+      <span class="page_count page-info">
+        {% blocktrans with start_index=page.start_index end_index=page.end_index %}{{ start_index }} - {{ end_index }} videos{% endblocktrans %}
+      </span>
+      {% if page.has_next %}
+      <a class="pag_next" href="{{ page.next_page_link }}"><span class="icon"></span></a>
+      {% endif %}
+    </div>
 </div><!-- // pod -->
 <br/>
 
