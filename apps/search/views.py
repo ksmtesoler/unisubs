@@ -26,14 +26,13 @@ from utils.context_processors import current_site
 from django.contrib.auth.decorators import login_required
 from utils.rpc import RpcRouter
 
-from videos.views import Http503
+
 rpc_router = RpcRouter('search:rpc_router', {
     'SearchApi': SearchApiClass()
 })
 @login_required
 @render_to('search/search.html')
 def index(request):
-    return Http503(request)
     if request.GET:
         site = current_site(request)
         query = {}

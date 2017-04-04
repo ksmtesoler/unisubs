@@ -176,16 +176,8 @@ class LanguageList(object):
 def index(request):
     return render_to_response('index.html', {},
                               context_instance=RequestContext(request))
-
-def Http503(request):
-    response = render_to_response('503.html', {},
-                                  context_instance=RequestContext(request))
-    response.status_code = 503
-    return response
-
 @login_required
 def watch_page(request):
-    return Http503(request)
     context = {
         'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
         'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
@@ -194,12 +186,10 @@ def watch_page(request):
                               context_instance=RequestContext(request))
 @login_required
 def featured_videos(request):
-    return Http503(request)
     return render_to_response('videos/featured_videos.html', {},
                               context_instance=RequestContext(request))
 @login_required
 def latest_videos(request):
-    return Http503(request)
     return render_to_response('videos/latest_videos.html', {},
                               context_instance=RequestContext(request))
 
