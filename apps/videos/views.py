@@ -573,7 +573,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
                 request.user, video, subtitle_language, version)
     else:
         context['show_notes'] = False
-    if can_resync(team_video.team, request.user):
+    if team_video and can_resync(team_video.team, request.user):
         context.update(sync_history_context(video, subtitle_language))
         context['show_sync_history'] = True
         context['can_resync'] = True
