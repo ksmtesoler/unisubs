@@ -390,6 +390,7 @@
                 this.pop = _Popcorn.amara(this.$popContainer.attr('id'),
                         this.model.get('player_urls'),
                         this.model.get('video_type'), {
+                            controls: true,
                             frameAnimation: true
                         });
                 this.pop.controls(true);
