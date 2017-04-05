@@ -35,11 +35,14 @@ from utils.text import fmt
 class Link(object):
     def __init__(self, label, view_name, *args, **kwargs):
         self.label = label
+        query = kwargs.pop('query', None)
         if '/' in view_name:
             # URL path passed in, don't try to reverse it
             self.url = view_name
         else:
             self.url = reverse(view_name, args=args, kwargs=kwargs)
+        if query:
+            self.url += '?' + urlencode(query)
 
     def __unicode__(self):
         return mark_safe(u'<a href="{}">{}</a>'.format(self.url, self.label))

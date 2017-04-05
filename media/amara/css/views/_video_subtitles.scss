@@ -9,12 +9,12 @@
       flex-wrap: nowrap;
       justify-content: flex-start;
       align-items: center;
-      padding: 5px;
       font-size: 15px;
+      padding: 10px 5px 10px 40px;
       &:before {
         position: absolute;
-        width: 2rem;
-        height: 2rem;
+        width: 30px;
+        height: 30px;
         left: 5px;
         top: 10px;
         display: flex;
@@ -26,7 +26,6 @@
         counter-increment: step-counter;
         content: "" counter(step-counter) "";
       }
-      padding: 10px 5px 10px 2.65rem;
       i {
         display: inline-block;
         width: 30px;
@@ -53,6 +52,21 @@
           border-radius: 50%;
         }
       }
+    }
+  }
+
+  .subtitleStatus {
+    color: $plum;
+    background-color: $gray-light;
+    padding: 10px 5px 10px;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+
+    i {
+      font-size: 30px;
+      margin-right: 5px;
     }
   }
 
