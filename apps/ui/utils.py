@@ -60,11 +60,13 @@ class AjaxLink(Link):
         return mark_safe(u'<a class="ajaxLink" href="{}">{}</a>'.format(self.url, self.label))
 
 class CTA(Link):
-    def __init__(self, label, icon, view_name, block=False, disabled=False, *args, **kwargs):
+    def __init__(self, label, icon, view_name, block=False,
+                 disabled=False, tooltip='', *args, **kwargs):
         super(CTA, self).__init__(label, view_name, *args, **kwargs)
         self.disabled = disabled
         self.icon = icon
         self.block = block
+        self.tooltip = tooltip
 
     def __unicode__(self):
         return self.render()
@@ -73,6 +75,8 @@ class CTA(Link):
         return self.render(block=True)
 
     def render(self, block=False):
+        tooltip_element = u'<span data-toggle="tooltip" data-placement="top" title="{}">{}</span>'
+        link_element = u'<a href="{}" class="{}"><i class="icon {}"></i> {}</a>'
         css_class = "button"
         if self.disabled:
             css_class += " disabled"
@@ -80,9 +84,10 @@ class CTA(Link):
             css_class += " cta"
         if block:
             css_class += " block"
-        return mark_safe(u'<a href="{}" class="{}">'
-                         u'<i class="icon {}"></i> {}</a>'.format(
-                             self.url, css_class, self.icon, self.label))
+        link = link_element.format(self.url, css_class, self.icon, self.label)
+        if len(self.tooltip) > 0:
+            link = tooltip_element.format(self.tooltip, link)
+        return mark_safe(link)
 
     def __eq__(self, other):
         return (isinstance(other, Link) and
