@@ -393,6 +393,7 @@
                             controls: true,
                             frameAnimation: true
                         });
+                this.pop.controls(true);
 
                 this.pop.on('error', function() {
                     if (that.pop.error.code == window.MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
