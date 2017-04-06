@@ -72,6 +72,7 @@ class ActivityType(Code):
                         .select_related()
                         .get(id=related_obj_id))
             except ObjectDoesNotExist:
+                logger.warn("Missing related object for activity record: {}".format(related_obj_id))
                 return None
 
 class ActivityMessageDict(object):
