@@ -1366,6 +1366,9 @@ class TeamMemberManager(models.Manager):
     def admins(self):
         return self.filter(role__in=(ROLE_OWNER, ROLE_ADMIN))
 
+    def members_from_users(self, team, users):
+        return self.filter(team=team, user__in=users)
+
 class TeamMember(models.Model):
     ROLE_OWNER = ROLE_OWNER
     ROLE_ADMIN = ROLE_ADMIN
