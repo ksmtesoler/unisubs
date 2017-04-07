@@ -3309,6 +3309,9 @@ class BillToClient(models.Model):
 
     client = models.CharField(max_length=255, unique=True)
 
+    def __unicode__(self):
+        return self.client
+
 class BillingReportGenerator(object):
     def __init__(self, all_records, add_header=True):
         if add_header:
