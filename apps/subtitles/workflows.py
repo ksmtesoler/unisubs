@@ -322,7 +322,7 @@ class Workflow(object):
             # If the primary video URL is HTML5, then only send html5 video
             # URLs (see #2089)
             video_urls = [vurl for vurl in video_urls if vurl.is_html5()]
-        return [v.url for v in video_urls]
+        return [v.get_video_type().player_url() for v in video_urls]
 
 class VideoWorkflow(object):
     """
@@ -621,7 +621,7 @@ class LanguageWorkflow(object):
             # If the primary video URL is HTML5, then only send html5 video
             # URLs (see #2089)
             video_urls = [vurl for vurl in video_urls if vurl.is_html5()]
-        return [v.url for v in video_urls]
+        return [v.get_video_type().player_url() for v in video_urls]
 
 @behavior
 def get_workflow(video):

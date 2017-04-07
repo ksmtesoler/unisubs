@@ -2,7 +2,7 @@
 {% if announcement %}
 
 <ul class="announce-banner" data-id="{{ announcement.id }}">
-  <li class="content">
+  <li{% if add_content_class %} class="content"{% endif %}>
     <div class="container">
       <div class="row">
         <div class="col-xs-12">

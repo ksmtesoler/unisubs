@@ -51,10 +51,6 @@ class WistiaVideoType(VideoType):
     def convert_to_video_url(self):
         return "http://fast.wistia.net/embed/iframe/%s" % self.videoid
 
-    @classmethod    
-    def video_url(cls, obj):
-        return obj.url
-    
     @classmethod
     def matches_video_url(cls, url):
         return bool(wistia.WISTIA_REGEX.match(url))

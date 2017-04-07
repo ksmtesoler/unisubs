@@ -25,5 +25,13 @@ register = template.Library()
 @register.inclusion_tag('auth/_announcement.html', takes_context=True)
 def announcement(context):
     return {
-        'announcement': Announcement.last()
+        'announcement': Announcement.last(),
+        'add_content_class': False,
+    }
+
+@register.inclusion_tag('auth/_announcement.html', takes_context=True)
+def new_announcement(context):
+    return {
+        'announcement': Announcement.last(),
+        'add_content_class': True,
     }

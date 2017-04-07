@@ -50,17 +50,6 @@ class VimeoVideoType(VideoType):
     def convert_to_video_url(self):
         return 'http://vimeo.com/%s' % self.videoid
 
-    @classmethod    
-    def video_url(cls, obj):
-        """
-        This method can be called with wither a VideoType object or
-        an actual VideoURL object, therefore the if statement
-        """
-        if obj.videoid:
-            return 'http://vimeo.com/%s' % obj.videoid
-        else:
-            return obj.url
-    
     @classmethod
     def matches_video_url(cls, url):
         return bool(vimeo.VIMEO_REGEX.match(url))

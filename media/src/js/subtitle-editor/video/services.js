@@ -120,14 +120,9 @@ var angular = angular || null;
         return {
             init: function() {
                 videoURLs = SubtitleStorage.getVideoURLs();
-		if (EditorData.video.primaryVideoURLType == "C" && videoURLs.length == 1)
-                    pop = window.Popcorn.brightcove('#video', videoURLs[0], {
-			controls: false,
-                    });
-		else
-                    pop = window.Popcorn.smart('#video', videoURLs, {
-			controls: false,
-                    });
+                pop = window.Popcorn.amara('#video', videoURLs, EditorData.video.primaryVideoURLType, {
+                    controls: false,
+                });
                 handlePopcornEvents();
                 routeEvents();
             },

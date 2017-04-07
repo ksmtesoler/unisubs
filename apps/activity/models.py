@@ -16,6 +16,7 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db import transaction
@@ -75,9 +76,13 @@ class ActivityType(Code):
         if ModelClass is None or related_obj_id is None:
             return None
         else:
-            return (ModelClass.objects.all()
-                    .select_related()
-                    .get(id=related_obj_id))
+            try:
+                return (ModelClass.objects.all()
+                        .select_related()
+                        .get(id=related_obj_id))
+            except ObjectDoesNotExist:
+                logger.warn("Missing related object for activity record: {}".format(related_obj_id))
+                return None
 
 class ActivityMessageDict(object):
     """Helper class to format our messages.
@@ -311,8 +316,12 @@ class VideoDeleted(ActivityType):
 
     def get_message(self, record, user):
         deletion = record.get_related_obj()
+        if deletion is not None:
+            title = deletion.title
+        else:
+            title = _('Unknown video')
         return self.format_message(record, _('deleted a video: %(title)s'),
-                                   title=deletion.title)
+                                   title=title)
 
     def get_action_name(self):
         return _('deleted')
@@ -324,11 +333,14 @@ class VideoURLEdited(ActivityType):
 
     def get_message(self, record, user):
         url_edit = record.get_related_obj()
-        msg = _('changed primary url from '
-                '<a href="%(old_url)s">%(old_url)s</a> to '
-                '<a href="%(new_url)s">%(new_url)s</a>')
-        return self.format_message(record, msg, old_url=url_edit.old_url,
-                                   new_url=url_edit.new_url)
+        if url_edit is not None:
+            msg = _('changed primary url from '
+                    '<a href="%(old_url)s">%(old_url)s</a> to '
+                    '<a href="%(new_url)s">%(new_url)s</a>').format(old_url=url_edit.old_url,
+                                                                    new_url=url_edit.new_url)
+        else:
+            msg = _('changed the primary url')
+        return self.format_message(record, msg)
 
     def get_action_name(self):
         return _('made URL primary')

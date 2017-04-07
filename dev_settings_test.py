@@ -39,9 +39,9 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = ['utils.test_utils.plugin.UnisubsTestPlugin']
 CELERY_ALWAYS_EAGER = True
 
-YOUTUBE_CLIENT_ID = 'test-youtube-id'
-YOUTUBE_CLIENT_SECRET = 'test-youtube-secret'
-YOUTUBE_API_KEY = 'test-youtube-api-key'
+GOOGLE_CLIENT_ID = 'test-youtube-id'
+GOOGLE_CLIENT_SECRET = 'test-youtube-secret'
+GOOGLE_API_KEY = 'test-youtube-api-key'
 
 API_ALWAYS_USE_FUTURE = True
 
