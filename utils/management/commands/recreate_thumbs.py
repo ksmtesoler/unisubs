@@ -66,6 +66,7 @@ class Command(BaseCommand):
                     self.stdout.write("Error recreating thumbnails for "
                                       "%s: %s\n" % (obj, e))
                 else:
-                    self.stdout.write("Recreated thumbnails for %s\n" % (obj,))
+                    self.stdout.write("Recreated thumbnails for %s.%s\n" %
+                                      (obj, field_name))
             if not found_obj:
                 break
