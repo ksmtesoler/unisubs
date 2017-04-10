@@ -353,6 +353,7 @@ class Video(models.Model):
         blank=True,
         upload_to='video/thumbnail/',
         thumb_sizes=(
+            (720,405),
             (480,270),
             (288,162),
             (120,90),))
