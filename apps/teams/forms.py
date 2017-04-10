@@ -349,7 +349,7 @@ class AddVideoToTeamForm(forms.Form):
 
 class AddTeamVideoForm(forms.ModelForm):
     language = NewLanguageField(label=_(u'Video language'),
-                                required=False,
+                                required=True,
                                 options='null popular all',
                                 help_text=_(u'It will be saved only if video does not exist in our database.'))
 
