@@ -176,7 +176,7 @@ def get_video_urls(video_id):
 
     if video_urls is None:
         from videos.models import Video
-        video_urls = [vu.effective_url for vu
+        video_urls = [vu.url for vu
                  in Video.objects.get(video_id=video_id).videourl_set.all()]
         cache.set(cache_key, video_urls, TIMEOUT)
 

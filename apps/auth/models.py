@@ -54,7 +54,7 @@ EMAIL_CONFIRMATION_DAYS = getattr(settings, 'EMAIL_CONFIRMATION_DAYS', 3)
 
 DEFAULT_AVATAR_URL = ('https://s3.amazonaws.com/'
                       's3.www.universalsubtitles.org/'
-                      'gravatar/default-{size}.png')
+                      'gravatar/avatar-default-{size}.png')
 
 class AnonymousUserCacheGroup(CacheGroup):
     def __init__(self):

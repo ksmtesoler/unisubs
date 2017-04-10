@@ -25,9 +25,11 @@ from django.test import TestCase
 from babelsubs.storage import SubtitleLine, SubtitleSet
 
 from auth.models import CustomUser as User
+from nose.tools import assert_raises
 from teams.models import Team, TeamVideo
 from subtitles import pipeline
 from subtitles.models import SubtitleLanguage, SubtitleVersion
+from utils.factories import UserFactory
 from videos.models import Video, VIDEO_TYPE_BRIGHTCOVE
 from videos.types import video_type_registrar, VideoTypeError
 from videos.types.base import VideoType, VideoTypeRegistrar
@@ -68,6 +70,10 @@ class YoutubeVideoTypeTest(TestCase):
         mock_get_video_info.return_value = video_info
         vt = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0')
         self.assertEqual(vt.video_id, '_ShmidkrcY0')
+        vt = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0123')
+        self.assertEqual(vt.video_id, '_ShmidkrcY0')
+        vt = YoutubeVideoType('http://www.youtube.com/watch?v=_Shmid')
+        self.assertEqual(vt.video_id, '_Shmid')
 
     @test_utils.patch_for_test('externalsites.google.get_video_info')
     def test_set_values(self, mock_get_video_info):
@@ -119,6 +125,17 @@ class YoutubeVideoTypeTest(TestCase):
         vt = self.vt(self.shorter_url)
         self.assertTrue(vt)
         self.assertEqual(vt.video_id , self.shorter_url.split("/")[-1])
+
+    def test_add_youtube_video(self):
+        vt = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0')
+        vt_2 = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0we')
+        vt_3 = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0ewgwe')
+        user = UserFactory()
+        video, video_url = Video.add(vt, user)
+        with assert_raises(Video.UrlAlreadyAdded):
+            video_2, video_url_2 = Video.add(vt_2, user)
+        with assert_raises(Video.UrlAlreadyAdded):
+            video_3, video_url_3 = Video.add(vt_3, user)
 
 class HtmlFiveVideoTypeTest(TestCase):
     def setUp(self):

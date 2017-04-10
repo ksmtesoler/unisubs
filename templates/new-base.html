@@ -48,7 +48,7 @@
 
 <body>
   {% csrf_token %}
-    {% announcement %}
+    {% new_announcement %}
     {% if user.is_authenticated %}
         {% messages %}
     {% endif %}

@@ -39,9 +39,14 @@ class VideoType(object):
     def video_id(self):
         return
 
-    @classmethod 
-    def video_url(cls, obj):
-        return obj.url
+    def player_url(self):
+        """Get the URL to play the video.
+
+        By default this is just the normal url attribute.  But for some video
+        types we want to use a different URL to play the video than the main
+        url.
+        """
+        return self.url
 
     def get_audio_file(self):
         """

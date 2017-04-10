@@ -22,10 +22,12 @@ import urlparse
 
 from django.conf import settings
 from django.test import TestCase
+from django.test.utils import override_settings
 from nose.tools import *
 import mock
 import jwt
 
+from utils import dates
 from utils.factories import *
 from utils.test_utils import *
 from externalsites import google
@@ -40,7 +42,7 @@ class TestRequestTokenURL(TestCase):
         state = {'foo': 'bar', 'baz': 3}
 
         correct_params = {
-            "client_id": settings.YOUTUBE_CLIENT_ID,
+            "client_id": settings.GOOGLE_CLIENT_ID,
             "redirect_uri": redirect_uri,
             "scope": "openid scope1 scope2",
             "state": json.dumps(state),
@@ -56,7 +58,7 @@ class TestRequestTokenURL(TestCase):
         assert_equal(token_url.netloc, 'accounts.google.com')
         assert_equal(token_url.path, '/o/oauth2/auth')
         assert_equal(urlparse.parse_qs(token_url.query), {
-            "client_id": [settings.YOUTUBE_CLIENT_ID],
+            "client_id": [settings.GOOGLE_CLIENT_ID],
             "redirect_uri": [redirect_uri],
             "scope": ["openid scope1 scope2"],
             "state": [json.dumps(state)],
@@ -75,7 +77,7 @@ class TestRequestTokenURL(TestCase):
         assert_equal(token_url.netloc, 'accounts.google.com')
         assert_equal(token_url.path, '/o/oauth2/auth')
         assert_equal(urlparse.parse_qs(token_url.query), {
-            "client_id": [settings.YOUTUBE_CLIENT_ID],
+            "client_id": [settings.GOOGLE_CLIENT_ID],
             "redirect_uri": [redirect_uri],
             "scope": ["openid scope1 scope2"],
             "state": [json.dumps(state)],
@@ -105,8 +107,8 @@ class OauthTokenMocker(RequestsMocker):
         self.expect_request(
             'post', "https://accounts.google.com/o/oauth2/token",
             data={
-                'client_id': settings.YOUTUBE_CLIENT_ID,
-                'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                'client_id': settings.GOOGLE_CLIENT_ID,
+                'client_secret': settings.GOOGLE_CLIENT_SECRET,
                 'code': 'test-authorization-code',
                 'grant_type': 'authorization_code',
                 'redirect_uri': self.redirect_uri,
@@ -172,8 +174,8 @@ class AccessTokenTest(TestCase):
         mocker = RequestsMocker()
         mocker.expect_request(
             'post', "https://accounts.google.com/o/oauth2/token", data={
-                'client_id': settings.YOUTUBE_CLIENT_ID,
-                'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                'client_id': settings.GOOGLE_CLIENT_ID,
+                'client_secret': settings.GOOGLE_CLIENT_SECRET,
                 'grant_type': 'refresh_token',
                 'refresh_token': 'test-refresh-token',
             }, headers={
@@ -192,8 +194,8 @@ class AccessTokenTest(TestCase):
         mocker = RequestsMocker()
         mocker.expect_request(
             'post', "https://accounts.google.com/o/oauth2/token", data={
-                'client_id': settings.YOUTUBE_CLIENT_ID,
-                'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                'client_id': settings.GOOGLE_CLIENT_ID,
+                'client_secret': settings.GOOGLE_CLIENT_SECRET,
                 'grant_type': 'refresh_token',
                 'refresh_token': 'test-refresh-token',
             }, headers={
@@ -287,3 +289,62 @@ class OpenIDConnectAuthBackendTest(TestCase):
             first_name='Pat', last_name='Patterson')
         assert_equal(login_user.first_name, 'Sam')
         assert_equal(login_user.last_name, 'Patterson')
+
+class ServiceAccountTest(TestCase):
+    @override_settings(GOOGLE_SERVICE_ACCOUNT='test@example.com',
+                       GOOGLE_SERVICE_ACCOUNT_SECRET='test-secret')
+    @patch_for_test('jwt.encode')
+    @patch_for_test('time.time')
+    def test_get_access_token(self, mock_time, mock_encode):
+        mock_time.return_value = 123.4
+        now = 123
+        mock_encode.return_value = 'test-jwt-data'
+
+        mocker = RequestsMocker()
+        mocker.expect_request(
+            'post', "https://www.googleapis.com/oauth2/v4/token", data={
+                'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion': 'test-jwt-data',
+            }, headers={
+                "Content-Type": "application/x-www-form-urlencoded"
+            }, body=json.dumps({
+                'access_token': 'test-access-token',
+            }),
+        )
+        with mocker:
+            access_token = google.get_service_account_access_token('test-scope')
+        claim = {
+            'iss': 'test@example.com',
+            'scope': 'test-scope',
+            'aud': 'https://www.googleapis.com/oauth2/v4/token',
+            'exp': now + 3600,
+            'iat': now
+        }
+
+        assert_equal(mock_encode.call_args, mock.call(
+            claim, 'test-secret', 'RS256'))
+        assert_equal(access_token, 'test-access-token')
+
+    @override_settings(GOOGLE_SERVICE_ACCOUNT='test@example.com',
+                       GOOGLE_SERVICE_ACCOUNT_SECRET='test-secret')
+    @patch_for_test('jwt.encode')
+    @patch_for_test('time.time')
+    def test_get_access_token_error(self, mock_time, mock_encode):
+        mock_time.return_value = 123.4
+        now = 123
+        mock_encode.return_value = 'test-jwt-data'
+
+        mocker = RequestsMocker()
+        mocker.expect_request(
+            'post', "https://www.googleapis.com/oauth2/v4/token", data={
+                'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion': 'test-jwt-data',
+            }, headers={
+                "Content-Type": "application/x-www-form-urlencoded"
+            }, body=json.dumps({
+                'error': 'test error',
+            }),
+        )
+        with assert_raises(google.OAuthError):
+            with mocker:
+                access_token = google.get_service_account_access_token('test-scope')

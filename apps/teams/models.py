@@ -340,6 +340,11 @@ class Team(models.Model):
         return UserLanguage.objects.filter(user__in=users).values_list('language', flat=True)
 
     def active_users(self, since=None, published=True):
+        if not self.videos.all().exists():
+            # If there are no videos, then the query takes forever because of
+            # mysql issues.  Luckly, it's easy to short circuit
+            return []
+
         sv = NewSubtitleVersion.objects.filter(video__in=self.videos.all())
         if published:
             sv = sv.filter(Q(visibility_override='public') | Q(visibility='public'))
@@ -1366,6 +1371,9 @@ class TeamMemberManager(models.Manager):
     def admins(self):
         return self.filter(role__in=(ROLE_OWNER, ROLE_ADMIN))
 
+    def members_from_users(self, team, users):
+        return self.filter(team=team, user__in=users)
+
 class TeamMember(models.Model):
     ROLE_OWNER = ROLE_OWNER
     ROLE_ADMIN = ROLE_ADMIN
@@ -2259,7 +2267,7 @@ class Task(models.Model):
         video_urls = (VideoUrl.objects
                       .filter(video__teamvideo__id__in=team_video_pks)
                       .filter(primary=True))
-        video_url_map = dict((vu.video_id, vu.effective_url)
+        video_url_map = dict((vu.video_id, vu.url)
                              for vu in video_urls)
         for t in tasks:
             t.cached_video_url = video_url_map.get(t.team_video.video_id)
@@ -2795,6 +2803,7 @@ class Setting(models.Model):
         (309, 'block_approved_message'),
         (310, 'block_new_video_message'),
         (311, 'block_new_collab_assignments_message'),
+        (312, 'block_collab_auto_unassignments_message'),
         # 400 is for text displayed on web pages
         (401, 'pagetext_welcome_heading'),
         (402, 'pagetext_warning_tasks'),

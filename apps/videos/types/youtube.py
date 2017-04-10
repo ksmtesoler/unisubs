@@ -39,6 +39,8 @@ class YoutubeVideoType(VideoType):
 
     CAN_IMPORT_SUBTITLES = True
 
+    VIDEOID_MAX_LENGTH = 11
+
     def __init__(self, url):
         self.url = url
         self.videoid = self._get_video_id(self.url)
@@ -49,17 +51,6 @@ class YoutubeVideoType(VideoType):
 
     def convert_to_video_url(self):
         return 'http://www.youtube.com/watch?v=%s' % self.video_id
-
-    @classmethod
-    def video_url(cls, obj):
-        """
-        This method can be called with wither a VideoType object or
-        an actual VideoURL object, therefore the if statement
-        """
-        if obj.videoid:
-            return YoutubeVideoType.url_from_id(obj.videoid)
-        else:
-            return obj.url
 
     @classmethod
     def matches_video_url(cls, url):
@@ -104,5 +95,5 @@ class YoutubeVideoType(VideoType):
             match = pattern.search(video_url)
             video_id = match and match.group('video_id')
             if bool(video_id):
-                return video_id
+                return video_id[:YoutubeVideoType.VIDEOID_MAX_LENGTH]
         raise ValueError("Unknown video id")

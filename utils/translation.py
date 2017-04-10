@@ -16,8 +16,6 @@ import pyuca
 
 from unilangs import get_language_name_mapping, LanguageCode
 
-from utils.memoize import memoize
-
 collator = pyuca.Collator()
 
 # A set of all language codes we support.
