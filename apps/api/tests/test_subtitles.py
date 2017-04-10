@@ -396,7 +396,7 @@ class SubtitlesSerializerTest(TestCase):
     def test_create_url(self):
         subtitles = SubtitleSetFactory(num_subs=2)
         data = {
-            'sub_format': 'dfxp',
+            'sub_format': 'srt',
             'title': 'test-title',
             'description': 'test-description',
             'metadata': {
@@ -405,7 +405,7 @@ class SubtitlesSerializerTest(TestCase):
         }
         with assert_raises(ValidationError):
             self.run_create(data)
-        data['subtitles_url'] = "http://hello.com"
+        data['subtitles_url'] = "http://www.maxovahra.com/TAP_MAXSGAME_SUBS_GR.srt"
         version = self.run_create(data)
         #assert_equal(version.get_subtitles(), subtitles)
         assert_equal(version.video, self.video)
