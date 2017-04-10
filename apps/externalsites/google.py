@@ -532,7 +532,7 @@ def _make_drive_api_request(method, access_token, url_path, **kwargs):
 def drive_file_get(access_token, drive_file_id, fields):
     params = {}
     if fields is not None:
-        params['fields'] = ','.join(fields),
+        params['fields'] = ','.join(fields)
     return _make_drive_api_request('get', access_token,
                                    'files/{}'.format(drive_file_id),
                                    params=params)
