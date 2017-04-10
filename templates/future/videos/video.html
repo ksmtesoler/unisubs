@@ -24,9 +24,9 @@
           </ul>
           <div class="tab-content">
             <div id="video_info" class="tab-pane{% if tab == "info" %} active{% endif %}" role="tabpanel">
-              <nav class="actions">
-                <a href="#" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#share-dialog">Share</a>
-                <a href="#" class="btn btn-xs">Follow</a>
+              <nav class="tab-actions">
+                <a href="#" class="button small" data-toggle="modal" data-target="#share-dialog">{% trans "Embed" %}</a>
+                <a href="#">{% trans "Follow" %}</a>
               </nav>
               {% include "future/videos/tabs/info.html" %}
             </div>
