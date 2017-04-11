@@ -126,12 +126,21 @@ class TestDeleteVideosForm(TeamVideoManagementFormBase):
         with mock_handler(video_deleted) as handler:
             form = self.build_form(forms.DeleteVideosForm, videos, data={
                 'delete': 1,
+                'verify': unicode(forms.DeleteVideosForm.VERIFY_STRING)
             })
         for v in videos:
             assert_false(obj_exists(v))
         for call, v in zip(handler.call_args_list, videos):
             args, kwargs = call
             assert_equals(kwargs['user'], self.user)
+
+    def test_delete_requires_verify(self):
+        videos = self.videos[:2]
+        form = self.build_form(forms.DeleteVideosForm, videos, data={
+            'delete': 1,
+            'verify': "invalid string",
+        }, skip_submit=True)
+        assert_false(form.is_valid())
 
     @patch_for_test('teams.permissions.can_delete_video_in_team')
     def test_delete_permissions(self, can_delete_video_in_team):

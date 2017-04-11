@@ -1524,6 +1524,8 @@ class EditVideosForm(VideoManagementForm):
         return fmt(msg, count=self.count)
 
 class DeleteVideosForm(VideoManagementForm):
+    VERIFY_STRING = _(u'Yes, I want to delete this video')
+
     name = 'remove'
     label = _('Remove')
     permissions_check = staticmethod(permissions.can_remove_videos)
@@ -1533,12 +1535,24 @@ class DeleteVideosForm(VideoManagementForm):
         label=_('Delete entirely'), required=False, initial=False,
         help_text=_('Delete videos rather than moving them to the '
                     'public area'))
+    verify = forms.CharField(required=False, label=_('Are you sure?'))
 
     permissions_check = staticmethod(permissions.new_can_remove_videos)
 
     def setup_fields(self):
-        if not permissions.can_delete_video_in_team(self.team, self.user):
+        if permissions.can_delete_video_in_team(self.team, self.user):
+            self.fields['verify'].help_text = fmt(
+                ugettext('Please type: "%(words)s"'),
+                words=unicode(self.VERIFY_STRING))
+        else:
             del self.fields['delete']
+            del self.fields['verify']
+
+    def clean_verify(self):
+        verify = self.cleaned_data.get('verify')
+        delete = self.cleaned_data.get('delete')
+        if delete and verify != unicode(self.VERIFY_STRING):
+            raise forms.ValidationError(self.fields['verify'].help_text)
 
     def perform_submit(self, qs):
         delete = self.cleaned_data.get('delete', False)
