@@ -37,6 +37,9 @@ from utils import translation
 from utils.text import fmt
 from videos.models import Video
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Track progress on migrating the old activity records
 class ActivityMigrationProgress(models.Model):
     last_migrated_id = models.IntegerField()
