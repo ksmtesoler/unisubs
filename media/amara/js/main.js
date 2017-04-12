@@ -17,7 +17,7 @@ require([
         'ajax',
         'dialogs',
         'proxyField',
-        'dependentSelect',
+        'forms',
         'select',
         'scrollBars',
         'selectList',
