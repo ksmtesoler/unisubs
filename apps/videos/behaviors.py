@@ -109,5 +109,6 @@ class SubtitlesStep(object):
         self.user = user
         self.team = team
         self.current = current
+        self.member = team.get_member(user) if (team and user) else None
 
 Button = namedtuple('Button', 'url label')
