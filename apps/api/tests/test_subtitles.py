@@ -393,6 +393,29 @@ class SubtitlesSerializerTest(TestCase):
         assert_equal(version.author, self.user)
         assert_equal(version.origin, ORIGIN_API)
 
+    def test_create_url(self):
+        subtitles = SubtitleSetFactory(num_subs=2)
+        data = {
+            'sub_format': 'srt',
+            'title': 'test-title',
+            'description': 'test-description',
+            'metadata': {
+                'location': 'test-location',
+            },
+        }
+        with assert_raises(ValidationError):
+            self.run_create(data)
+        data['subtitles_url'] = "http://www.maxovahra.com/TAP_MAXSGAME_SUBS_GR.srt"
+        version = self.run_create(data)
+        #assert_equal(version.get_subtitles(), subtitles)
+        assert_equal(version.video, self.video)
+        assert_equal(version.language_code, 'en')
+        assert_equal(version.title, data['title'])
+        assert_equal(version.description, data['description'])
+        assert_equal(version.get_metadata(), data['metadata'])
+        assert_equal(version.author, self.user)
+        assert_equal(version.origin, ORIGIN_API)
+
     def test_from_editor(self):
         version = self.run_create({
             'subtitles': SubtitleSetFactory().to_xml(),

@@ -16,6 +16,7 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 import requests
+from externalsites import google
 
 def url_exists(url):
     """Check that a url (when following redirection) exists.
@@ -28,3 +29,15 @@ def url_exists(url):
         return 200 <= requests.head(url, timeout=15.0).status_code < 400
     except (requests.ConnectionError, requests.Timeout):
         return False
+
+def data_from_url(url):
+    """
+    Gets text data from a URL. It supports file hosted on
+    Google Drive.
+    """
+    if google.matches_drive_url(url):
+        drive_id = google.get_drive_file_id(url)
+        return google.get_drive_file_content(drive_id)
+    else:
+        response = requests.get(url)
+        return response.text
