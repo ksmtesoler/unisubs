@@ -72,6 +72,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'externalsites.tasks.retry_failed_sync',
         'schedule': timedelta(seconds=10),
     },
+    'prune_notification_history': {
+        'task': 'notifications.tasks.prune_notification_history',
+        'schedule': crontab(hour=0),
+    },
 }
 
 __all__ = ['CELERYBEAT_SCHEDULE', 'CELERY_QUEUES', 'CELERY_DEFAULT_QUEUE', ]

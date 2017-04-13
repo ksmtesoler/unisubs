@@ -17,6 +17,8 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 from contextlib import contextmanager
+from datetime import datetime, timedelta
+from django.db.models import Max
 from django.test import TestCase
 from nose.tools import *
 from requests.auth import HTTPBasicAuth
@@ -26,6 +28,7 @@ import mock
 
 from notifications import handlers
 from notifications.models import TeamNotificationSettings, TeamNotification
+from notifications.tasks import REMOVE_AFTER, MIN_KEEP, prune_notification_history
 from subtitles import pipeline
 from subtitles.signals import subtitles_imported
 from teams.models import TeamMember
@@ -389,3 +392,42 @@ class TestDoHTTPPost(TestCase):
                                   '')
         self.check_notification(None, error_message)
         TeamNotification.objects.all().delete()
+
+@mock.patch('notifications.tasks.MIN_KEEP', 100)
+@mock.patch('notifications.tasks.REMOVE_AFTER', 15)
+class NotificationHistoryTests(TestCase):
+
+    def setUp(self):
+        self.remove_after = datetime.now() - timedelta(days=15)
+        self.keep_up_to = 50
+        self.teams = [TeamFactory() for i in range(0, 3)]
+        self.notifications = []
+
+        self.build_notifications()
+
+    def build_notifications(self):
+        time_keep = datetime.now()
+        time_remove = datetime.now() - timedelta(days=30)
+
+        for team in self.teams:
+            for i in range(1, 151):
+                time = time_remove if i < 80 else time_keep
+                n = TeamNotification.objects.create(
+                    number=i,
+                    data={'text': 'Notification {}'.format(i)},
+                    url='https://example.com/{}'.format(team.slug),
+                    timestamp=time,
+                    team=team)
+                self.notifications.append(n)
+
+    def test_cleanup_notification(self):
+        prune_notification_history()
+
+        notification_list = TeamNotification.objects.all()
+
+        # check if notifications that should be removed are, those that shouldn't aren't
+        for n in self.notifications:
+            if n.timestamp <= self.remove_after and n.number <= self.keep_up_to:
+                self.assertNotIn(n, notification_list)
+            else:
+                self.assertIn(n, notification_list)
