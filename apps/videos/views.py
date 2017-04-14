@@ -252,7 +252,11 @@ def shortlink(request, encoded_pk):
 
 @get_video_from_code
 def redirect_to_video(request, video):
-    return redirect(video, permanent=True)
+    qs = request.META['QUERY_STRING']
+    url = video.get_absolute_url()
+    if qs:
+        url += '?' + qs
+    return redirect(url, permanent=True)
 
 def should_use_old_view(request):
     return 'team' not in request.GET
