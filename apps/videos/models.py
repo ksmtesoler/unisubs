@@ -87,6 +87,8 @@ VIDEO_META_TYPE_NAMES = {}
 VIDEO_META_TYPE_VARS = {}
 VIDEO_META_TYPE_IDS = {}
 
+def url_hash(url):
+    return hashlib.md5(url.encode("utf-8")).hexdigest()
 
 def update_metadata_choices():
     """Refresh the VIDEO_META_TYPE_* set of constants.
@@ -201,6 +203,9 @@ EXISTS(
                WHERE sl.video_id=videos_video.id AND
                sl.language_code=%s AND sl.subtitles_complete)""")
         return self.extra(where=[sql], params=[language_code])
+
+    def for_url(self, url):
+        return self.filter(videourl__url_hash=url_hash(url))
 
 class SubtitleLanguageFetcher(object):
     """Fetches/caches subtitle languages for videos."""
@@ -2196,7 +2201,7 @@ class VideoUrl(models.Model):
         assert self.type != '', "Can't set an empty type"
         if updates_timestamp:
             self.created = datetime.now()
-        self.url_hash = hashlib.md5(self.url.encode("utf-8")).hexdigest()
+        self.url_hash = url_hash(self.url)
         super(VideoUrl, self).save(*args, **kwargs)
 
 def video_url_remove_handler(sender, instance, **kwargs):
