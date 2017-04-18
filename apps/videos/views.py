@@ -18,6 +18,7 @@
 
 import datetime
 import string
+import sys
 import urllib, urllib2
 from collections import namedtuple
 
@@ -58,7 +59,8 @@ from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
                                    user_can_edit_subtitles)
 from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
-                             RollbackSubtitlesForm, SubtitlesNotesForm)
+                             RollbackSubtitlesForm, SubtitlesNotesForm,
+                             ResyncSubtitlesForm)
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
@@ -82,12 +84,13 @@ from videos.rpc import VideosApiClass
 from videos import share_utils
 from videos.tasks import video_changed_tasks
 from widget.views import base_widget_params
-from externalsites.models import can_sync_videourl, get_sync_account
+from externalsites.models import can_sync_videourl, get_sync_account, SyncHistory
 from utils import send_templated_email
 from utils.basexconverter import base62
 from utils.decorators import never_in_prod
 from utils.objectlist import object_list
 from utils.rpc import RpcRouter
+from utils.pagination import AmaraPaginator
 from utils.text import fmt
 from utils.translation import (get_user_languages_from_request,
                                get_language_label)
@@ -182,22 +185,44 @@ class LanguageList(object):
 def index(request):
     return render_to_response('index.html', {},
                               context_instance=RequestContext(request))
-@login_required
+
 def watch_page(request):
-    context = {
+    return render(request, 'videos/watch-home.html', {
         'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
         'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
-    }
-    return render_to_response('videos/watch.html', context,
-                              context_instance=RequestContext(request))
-@login_required
+    })
+
+def video_listing_page(request, subheader, video_qs, query=None,
+                       force_pages=None):
+    paginator = AmaraPaginator(video_qs, VIDEO_IN_ROW * 3)
+    if force_pages:
+        paginator._count = paginator.per_page * force_pages
+    page = paginator.get_page(request)
+
+    return render(request, 'videos/watch.html', {
+        'subheader': subheader,
+        'page': page,
+        'query': query
+    })
+
 def featured_videos(request):
-    return render_to_response('videos/featured_videos.html', {},
-                              context_instance=RequestContext(request))
-@login_required
+    return video_listing_page(request, _('Featured Videos'),
+                              Video.objects.featured(), force_pages=1)
+
 def latest_videos(request):
-    return render_to_response('videos/latest_videos.html', {},
-                              context_instance=RequestContext(request))
+    return video_listing_page(request, _('Latest Videos'),
+                              Video.objects.latest(), force_pages=100)
+
+def search(request):
+    query = request.GET.get('q')
+    if query:
+        subheader = fmt(ugettext('Searching for "%(query)s"'),
+                        query=query)
+        queryset = Video.objects.public().search(query)
+    else:
+        subheader = ugettext('Search for videos')
+        queryset = Video.objects.none()
+    return video_listing_page(request, subheader, queryset, query)
 
 @login_required
 def create(request):
@@ -211,14 +236,6 @@ def create(request):
         messages.info(request, message=_(u'''Here is the subtitle workspace for your video.
         You can share the video with friends, or get an embed code for your site. To start
         new subtitles, click \"Add a new language!\" in the sidebar.'''))
-
-        url_obj = video.videourl_set.filter(primary=True).all()[:1].get()
-        if url_obj.type != 'Y':
-            # Check for all types except for Youtube
-            if not url_obj.effective_url.startswith('https'):
-                messages.warning(request, message=_(u'''You have submitted a video
-                that is served over http.  Your browser may display mixed
-                content warnings.'''))
 
         if video_form.created:
             messages.info(request, message=_(u'''Existing subtitles will be imported in a few minutes.'''))
@@ -235,7 +252,11 @@ def shortlink(request, encoded_pk):
 
 @get_video_from_code
 def redirect_to_video(request, video):
-    return redirect(video, permanent=True)
+    qs = request.META['QUERY_STRING']
+    url = video.get_absolute_url()
+    if qs:
+        url += '?' + qs
+    return redirect(url, permanent=True)
 
 def should_use_old_view(request):
     return 'team' not in request.GET
@@ -536,10 +557,10 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
             request.user).order_by('-version_number')
     activity = (ActivityRecord.objects.for_video(video, customization.team)
                 .filter(language_code=lang))[:8]
-
+    team_video = video.get_team_video()
     context = {
         'video': video,
-        'team_video': video.get_team_video(),
+        'team_video': team_video,
         'metadata': video.get_metadata().convert_for_display(),
         'subtitle_language': subtitle_language,
         'subtitle_version': version,
@@ -572,12 +593,13 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
                 request.user, video, subtitle_language, version)
     else:
         context['show_notes'] = False
-    if permissions.can_user_resync(video, request.user):
-        context['show_sync_history'] = True
+    if team_video and can_resync(team_video.team, request.user):
         context.update(sync_history_context(video, subtitle_language))
+        context['show_sync_history'] = True
+        context['can_resync'] = True
     else:
         context['show_sync_history'] = False
-    context['show_sync_history'] = True
+        context['can_resync'] = False
     return render(request, 'future/videos/subtitles.html', context)
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
@@ -611,9 +633,7 @@ def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
 
 def sync_history_context(video, subtitle_language):
     context = {}
-    context['sync_history'] = (subtitle_language.synchistory_set
-                            .select_related('version')
-                            .fetch_with_accounts())
+    context['sync_history'] = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
     context['current_version'] = subtitle_language.get_public_tip()
     synced_versions = []
     for video_url in video.get_video_urls():
@@ -645,6 +665,7 @@ subtitles_form_map = {
     'delete': DeleteSubtitlesForm,
     'rollback': RollbackSubtitlesForm,
     'notes': SubtitlesNotesForm,
+    'resync': ResyncSubtitlesForm,
 }
 
 def subtitles_ajax_form(request, video, subtitle_language, version):
@@ -696,8 +717,8 @@ def handle_subtitles_ajax_form_success(request, video, subtitle_language,
 
 def _widget_params(request, video, version_no=None, language=None, video_url=None, size=None):
     primary_url = video_url or video.get_video_url()
-    alternate_urls = [vu.effective_url for vu in video.videourl_set.all()
-                      if vu.effective_url != primary_url]
+    alternate_urls = [vu.url for vu in video.videourl_set.all()
+                      if vu.url != primary_url]
     params = {'video_url': primary_url,
               'alternate_video_urls': alternate_urls,
               'base_state': {}}

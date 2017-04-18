@@ -1,53 +1,36 @@
 {% extends "base.html" %}
 
-{% load i18n search_tags media_bundle %}
+{% load i18n media_bundle %}
 {% load url from future %}
 
 {% block body_attrs %}id="watch"{% endblock %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script src="{% url "videos:rpc_api" %}" type="text/javascript"></script>
-    {% media_bundle 'ajax-paginator.js' %}
-{% endblock %}
-
 {% block main_content %}
 
-{% search_form %}
+{% include "videos/watch-search-form.html" %}
 
 <h1>{% block heading %}{% trans "Watch Subtitled Videos" %}{% endblock %}</h1>
 
 <div class="pod" id="featured_videos">
     <div class="hd">
-        <a class="btn_more_videos" href="{% url "videos:featured_videos" %}">
-            {% trans "More Featured Videos" %}
-        </a>
-        <h2>{% trans "Featured Videos" %}</h2>
+      <h2>{{ subheader }}</h2>
     </div><!-- // hd -->
     <div class="bd">
-        {% with featured_videos as video_list %}
-            {% include 'videos/_watch_page.html' %}
-        {% endwith %}
+          {% include 'videos/_watch_page.html' with video_list=page %}
     </div><!-- // bd -->
+
+    <div class="pages clearfix">
+      {% if page.has_previous %}
+      <a class="pag_prev" href="{{ page.previous_page_link }}"><span class="icon"></span></a>
+      {% endif %}
+      <span class="page_count page-info">
+        {% blocktrans with start_index=page.start_index end_index=page.end_index %}{{ start_index }} - {{ end_index }} videos{% endblocktrans %}
+      </span>
+      {% if page.has_next %}
+      <a class="pag_next" href="{{ page.next_page_link }}"><span class="icon"></span></a>
+      {% endif %}
+    </div>
 </div><!-- // pod -->
 <br/>
-
-{% block extra_videos %}{% endblock %}
-
-<div class="pod" id="latest_videos">
-    <div class="hd">
-        <a class="btn_more_videos" href="{% url "videos:latest_videos" %}">
-            {% trans "More Recent Videos" %}
-        </a>
-        <h2>{% trans "Latest Videos" %}</h2>
-    </div><!-- // hd -->
-    <div class="bd">
-        <div class="watch-page-content">
-            {% with latest_videos as video_list %}
-                {% include 'videos/_watch_page.html' with showdate="true" %}
-            {% endwith %}
-        </div>
-    </div><!-- // bd -->
-</div><!-- // pod -->
 
 {% endblock %}

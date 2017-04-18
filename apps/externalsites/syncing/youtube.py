@@ -19,7 +19,6 @@
 """externalsites.syncing.youtube -- Sync subtitles to/from Youtube"""
 
 from __future__ import absolute_import
-import logging
 
 from django.conf import settings
 from django.utils import translation
@@ -39,8 +38,6 @@ from teams.models import TeamVideo
 AMARA_CREDIT = translation.ugettext_lazy("Subtitles by the Amara.org community")
 AMARA_DESCRIPTON_CREDIT = translation.ugettext_lazy(
     "Help us caption & translate this video!")
-
-logger = logging.getLogger("externalsites.syncing.youtube")
 
 CAPTION_TRACK_LINK_REL = ('http://gdata.youtube.com'
                           '/schemas/2007#video.captionTracks')
@@ -79,9 +76,7 @@ def find_existing_caption_id(access_token, video_id, language_code,
 def update_subtitles(video_id, access_token, subtitle_version,
                      enable_language_mapping):
     """Push the subtitles for a language to YouTube """
-    logger.error("update_subtitles")
     language_code = subtitle_version.language_code
-    logger.error(language_code)
     subs = subtitle_version.get_subtitles()
     if should_add_credit_to_subtitles(subtitle_version, subs):
         add_credit_to_subtitles(subtitle_version, subs)
@@ -90,39 +85,26 @@ def update_subtitles(video_id, access_token, subtitle_version,
     caption_id = find_existing_caption_id(access_token, video_id,
                                           language_code,
                                           enable_language_mapping)
-    logger.error("A")
-    logger.error(enable_language_mapping)
     if caption_id:
-        logger.error("A")
         google.captions_update(access_token, caption_id, 'text/vtt', content)
     else:
-        logger.error("B")
         language_code = convert_language_code(language_code, enable_language_mapping)
-        logger.error(language_code)
-        logger.error("C")
         google.captions_insert(access_token, video_id, language_code,
                                'text/vtt', content)
-    logger.error("D")
     sync_metadata(video_id, access_token, subtitle_version,
                   enable_language_mapping)
 
-    logger.error("E")
 def sync_metadata(video_id, access_token, subtitle_version,
                   enable_language_mapping):
-    logger.error("sync metadata")
     video = subtitle_version.video
     team_video = video.get_team_video()
     if not (team_video and team_video.team.sync_metadata and
             subtitle_version.title and video.primary_audio_language_code):
         return
-    logger.error("1")
     primary_audio_language_code = convert_language_code(
         video.primary_audio_language_code, enable_language_mapping)
-    logger.error("2")
     language_code = convert_language_code(subtitle_version.language_code, \
                                           enable_language_mapping)
-    logger.error("3")
-    logger.error("Calling google")
     google.update_video_metadata(video_id,
                                  access_token,
                                  primary_audio_language_code,

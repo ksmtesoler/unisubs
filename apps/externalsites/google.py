@@ -26,6 +26,7 @@ import logging
 import urllib
 import urlparse
 import re
+import time
 
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -49,6 +50,9 @@ OAuthCallbackData = namedtuple(
 YoutubeUserInfo = namedtuple('YoutubeUserInfo', 'channel_id username')
 VideoInfo = namedtuple('VideoInfo',
                        'channel_id title description duration thumbnail_url')
+DriveFileInfo = namedtuple(
+    'DriveFileInfo',
+    'title description mime_type duration content_url embed_url thumbnail_url')
 OpenIDProfile = namedtuple('OpenIDProfile',
                            'sub email full_name first_name last_name')
 
@@ -81,7 +85,7 @@ def request_token_url(redirect_uri, access_type, state, extra_scopes=()):
     redirect_uri_parsed = urlparse.urlparse(redirect_uri)
 
     params = {
-        "client_id": settings.YOUTUBE_CLIENT_ID,
+        "client_id": settings.GOOGLE_CLIENT_ID,
         "redirect_uri": redirect_uri,
         "scope": ' '.join(scopes),
         "state": json.dumps(state),
@@ -97,8 +101,8 @@ def request_token_url(redirect_uri, access_type, state, extra_scopes=()):
             urllib.urlencode(params))
 
 def _oauth_token_post(**params):
-    params["client_id"] = settings.YOUTUBE_CLIENT_ID
-    params["client_secret"] = settings.YOUTUBE_CLIENT_SECRET
+    params["client_id"] = settings.GOOGLE_CLIENT_ID
+    params["client_secret"] = settings.GOOGLE_CLIENT_SECRET
 
     response = requests.post("https://accounts.google.com/o/oauth2/token",
                              data=params, headers={
@@ -223,7 +227,7 @@ def _make_api_request(method, access_token, url, **kwargs):
     else:
         if 'params' not in kwargs:
             kwargs['params'] = {}
-        kwargs['params']['key'] = settings.YOUTUBE_API_KEY
+        kwargs['params']['key'] = settings.GOOGLE_API_KEY
     response = requests.request(method, url, **kwargs)
     if method == 'delete':
         expected_status_code = 204
@@ -478,3 +482,90 @@ def update_video_metadata(video_id, access_token, primary_audio_language_code, l
         localizations = response.json()['items'][0]['localizations']
         localizations[language_code] = {"title": title, "description": description}
         result = video_put(access_token, video_id, localizations=localizations)
+
+def get_service_account_access_token(scope):
+    """Get an access token for our service account
+
+    The service account is what we use to perform requests where the "user" is
+    the amara server.  It's controlled by the following settings:
+
+    - GOOGLE_SERVICE_ACCOUNT: email address for the service account
+    - GOOGLE_SERVICE_ACCOUNT_SECRET: RSA private key for the service account
+    """
+    if (settings.GOOGLE_SERVICE_ACCOUNT is None or
+            settings.GOOGLE_SERVICE_ACCOUNT_SECRET is None):
+        raise APIError('Google service account not setup')
+    url = 'https://www.googleapis.com/oauth2/v4/token'
+    now = int(time.time())
+    claim = {
+        'iss': settings.GOOGLE_SERVICE_ACCOUNT,
+        'scope': scope,
+        'aud': 'https://www.googleapis.com/oauth2/v4/token',
+        'iat': now,
+        'exp': now + 3600,
+    }
+    data = {
+        'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        'assertion': jwt.encode(
+        claim, settings.GOOGLE_SERVICE_ACCOUNT_SECRET, 'RS256'),
+    }
+    response = requests.post(url, data=data, headers={
+        "Content-Type": "application/x-www-form-urlencoded"
+    })
+    try:
+        response_data = response.json()
+        if 'error' in response_data:
+            raise OAuthError(response_data['error'])
+        else:
+            return response_data['access_token']
+    except ValueError, KeyError:
+        raise OAuthError(
+            "Error parsing response: {}".format(response.content))
+
+def _make_drive_api_request(method, access_token, url_path, **kwargs):
+    url = 'https://www.googleapis.com/drive/v3/' + url_path
+    return _make_api_request(method, access_token, url, **kwargs)
+
+def drive_file_get(access_token, drive_file_id, fields):
+    params = {
+        'fields': ','.join(fields),
+    }
+    return _make_drive_api_request('get', access_token,
+                                   'files/{}'.format(drive_file_id),
+                                   params=params)
+
+def get_drive_file_info(drive_file_id):
+    """Get info on a drive file
+
+    Notes:
+       - The thumbnailLink is only valid "on the order of hours".  This is
+           okay for our purposes though, since we copy it to S3
+       - The embed link is no longer supported with the V3 API.  So for now,
+         we just construct it ourselves.
+   """
+    fields = [
+        'name', 'description', 'mimeType', 'webContentLink', 'thumbnailLink',
+        'videoMediaMetadata',
+    ]
+    access_token = get_service_account_access_token(
+        'https://www.googleapis.com/auth/drive.readonly')
+    response = drive_file_get(access_token, drive_file_id, fields)
+    embed_url = 'https://drive.google.com/file/d/{}/preview'.format(
+        drive_file_id)
+    try:
+        response_data = response.json()
+        try:
+            duration = response_data['videoMediaMetadata']['durationMillis']
+            duration = int(round(float(duration) / 1000.0))
+        except (ValueError, KeyError):
+            duration = None
+        return DriveFileInfo(response_data.get('name'),
+                             response_data.get('description'),
+                             response_data.get('mimeType'),
+                             duration,
+                             response_data.get('webContentLink'),
+                             embed_url,
+                             response_data.get('thumbnailLink'))
+    except StandardError, e:
+        raise APIError("get_drive_file_info: {} ({})".format(
+            e, response.content))

@@ -199,8 +199,7 @@ def members(request, team):
         edit_form = forms.EditMembershipForm(member)
 
     members = filters_form.update_qs(
-        team.members.select_related('user')
-        .prefetch_related('user__userlanguage_set',
+        team.members.prefetch_related('user__userlanguage_set',
                           'projects_managed',
                           'languages_managed'))
 
@@ -353,6 +352,17 @@ def language_page(request, team, language_code):
     return team.new_workflow.render_language_page(
         request, team, language_code, data,
     )
+
+@team_view
+def member_profile(request, team, username):
+    if team.is_old_style():
+        raise Http404
+    try:
+        user = User.objects.get(username=username)
+        member = TeamMember.objects.get(team=team, user=user)
+    except (User.DoesNotExist, TeamMember.DoesNotExist):
+        raise Http404
+    return team.new_workflow.member_view(request, team, member)
 
 @team_view
 def add_members(request, team):
@@ -653,7 +663,7 @@ def manage_videos(request, team):
 def manage_videos_context_menu(team, video, enabled_forms):
     menu = ContextMenu([
         AjaxLink(form.label, form=form.name, selection=video.id)
-        for form in enabled_forms
+        for form in reversed(enabled_forms)
     ])
     team.new_workflow.video_management_alter_context_menu(video, menu)
     return menu

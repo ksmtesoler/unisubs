@@ -2,7 +2,7 @@
 <ul class="paginator">
   {% if page.has_previous %}
   <li><a href="{{ page.first_page_link }}"><span class="fa fa-backward"></span></a></li>
-  <li><a href="{{ page.prev_page_link }}"><span class="fa fa-step-backward"></span></a></li>
+  <li><a href="{{ page.previous_page_link }}"><span class="fa fa-step-backward"></span></a></li>
   {% else %}
     <li><span class="fa fa-backward"></span></li>
     <li><span class="fa fa-step-backward"></span></li>

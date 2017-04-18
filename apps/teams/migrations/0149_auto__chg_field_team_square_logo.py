@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'Team.square_logo'
-        db.alter_column('teams_team', 'square_logo', self.gf('utils.amazon.fields.S3EnabledImageField')(max_length=100, thumb_sizes=[(100, 100), (40, 40), (30, 30)]))
+        db.alter_column('teams_team', 'square_logo', self.gf('utils.amazon.fields.S3EnabledImageField')(max_length=100, thumb_sizes=[(100, 100), (48, 48), (40, 40), (30, 30)]))
     def backwards(self, orm):
 
         # Changing field 'Team.square_logo'
@@ -18,6 +18,7 @@ class Migration(SchemaMigration):
     models = {
         'auth.customuser': {
             'Meta': {'object_name': 'CustomUser', '_ormbases': ['auth.User']},
+            'allow_3rd_party_login': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'autoplay_preferences': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'award_points': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'biography': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -32,6 +33,7 @@ class Migration(SchemaMigration):
             'partner': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['teams.Partner']", 'null': 'True', 'blank': 'True'}),
             'pay_rate_code': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '3', 'blank': 'True'}),
             'picture': ('utils.amazon.fields.S3EnabledImageField', [], {'max_length': '100', 'blank': 'True'}),
+            'playback_mode': ('django.db.models.fields.IntegerField', [], {'default': '2'}),
             'preferred_language': ('django.db.models.fields.CharField', [], {'max_length': '16', 'blank': 'True'}),
             'show_tutorial': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'user_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True', 'primary_key': 'True'}),
@@ -239,7 +241,7 @@ class Migration(SchemaMigration):
             'highlight': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_moderated': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_visible': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'is_visible': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'last_notification_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'logo': ('utils.amazon.fields.S3EnabledImageField', [], {'default': "''", 'max_length': '100', 'thumb_sizes': '[(280, 100), (100, 100)]', 'blank': 'True'}),
             'max_tasks_per_member': ('django.db.models.fields.PositiveIntegerField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
@@ -251,8 +253,9 @@ class Migration(SchemaMigration):
             'points': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'projects_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '50'}),
-            'square_logo': ('utils.amazon.fields.S3EnabledImageField', [], {'default': "''", 'max_length': '100', 'thumb_sizes': '[(100, 100), (40, 40), (30, 30)]', 'blank': 'True'}),
+            'square_logo': ('utils.amazon.fields.S3EnabledImageField', [], {'default': "''", 'max_length': '100', 'thumb_sizes': '[(100, 100), (48, 48), (40, 40), (30, 30)]', 'blank': 'True'}),
             'subtitle_policy': ('django.db.models.fields.IntegerField', [], {'default': '10'}),
+            'sync_metadata': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'task_assign_policy': ('django.db.models.fields.IntegerField', [], {'default': '10'}),
             'task_expiration': ('django.db.models.fields.PositiveIntegerField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
             'translate_policy': ('django.db.models.fields.IntegerField', [], {'default': '10'}),
@@ -400,7 +403,7 @@ class Migration(SchemaMigration):
             'meta_3_type': ('videos.metadata.MetadataTypeField', [], {'null': 'True', 'blank': 'True'}),
             'moderated_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'moderating'", 'null': 'True', 'to': "orm['teams.Team']"}),
             'primary_audio_language_code': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '16', 'blank': 'True'}),
-            's3_thumbnail': ('utils.amazon.fields.S3EnabledImageField', [], {'max_length': '100', 'thumb_sizes': '((480, 270), (288, 162), (120, 90))', 'blank': 'True'}),
+            's3_thumbnail': ('utils.amazon.fields.S3EnabledImageField', [], {'max_length': '100', 'thumb_sizes': '((720, 405), (480, 270), (288, 162), (120, 90))', 'blank': 'True'}),
             'small_thumbnail': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'thumbnail': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '2048', 'blank': 'True'}),

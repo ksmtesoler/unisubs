@@ -34,6 +34,7 @@ from django.db.models import query, Q, Count, Sum
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.http import Http404
 from django.template.loader import render_to_string
+from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _, ugettext
 
 import teams.moderation_const as MODERATION
@@ -221,7 +222,7 @@ class Team(models.Model):
                                       upload_to='teams/square-logo/',
                                       default='', blank=True,
                                       legacy_filenames=False,
-                                      thumb_sizes=[(100, 100), (40, 40), (30, 30)])
+                                      thumb_sizes=[(100, 100), (48, 48), (40, 40), (30, 30)])
     is_visible = models.BooleanField(_(u'videos public?'), default=False)
     sync_metadata = models.BooleanField(_(u'Sync metadata when available (Youtube)?'), default=False)
     videos = models.ManyToManyField(Video, through='TeamVideo',  verbose_name=_('videos'))
@@ -339,6 +340,11 @@ class Team(models.Model):
         return UserLanguage.objects.filter(user__in=users).values_list('language', flat=True)
 
     def active_users(self, since=None, published=True):
+        if not self.videos.all().exists():
+            # If there are no videos, then the query takes forever because of
+            # mysql issues.  Luckly, it's easy to short circuit
+            return []
+
         sv = NewSubtitleVersion.objects.filter(video__in=self.videos.all())
         if published:
             sv = sv.filter(Q(visibility_override='public') | Q(visibility='public'))
@@ -449,6 +455,11 @@ class Team(models.Model):
         """URL for a small version of this team's square logo, or None."""
         if self.square_logo:
             return self.square_logo.thumb_url(30, 30)
+
+    def square_logo_thumbnail_oldsmall(self):
+        """small version of the team's square logo for old-style pages."""
+        if self.square_logo:
+            return self.square_logo.thumb_url(48,48)
 
     # URLs
     @models.permalink
@@ -1360,6 +1371,9 @@ class TeamMemberManager(models.Manager):
     def admins(self):
         return self.filter(role__in=(ROLE_OWNER, ROLE_ADMIN))
 
+    def members_from_users(self, team, users):
+        return self.filter(team=team, user__in=users)
+
 class TeamMember(models.Model):
     ROLE_OWNER = ROLE_OWNER
     ROLE_ADMIN = ROLE_ADMIN
@@ -1410,6 +1424,11 @@ class TeamMember(models.Model):
         """Return any language narrowings applied to this member."""
         return self.narrowings.filter(project__isnull=True)
 
+    def get_absolute_url(self):
+        if self.team.is_old_style():
+            raise NotImplementedError()
+        else:
+            return reverse('teams:member-profile', args=(self.team.slug, urlquote(self.user.username)))
 
     def project_narrowings_fast(self):
         """Return any project narrowings applied to this member.
@@ -2248,7 +2267,7 @@ class Task(models.Model):
         video_urls = (VideoUrl.objects
                       .filter(video__teamvideo__id__in=team_video_pks)
                       .filter(primary=True))
-        video_url_map = dict((vu.video_id, vu.effective_url)
+        video_url_map = dict((vu.video_id, vu.url)
                              for vu in video_urls)
         for t in tasks:
             t.cached_video_url = video_url_map.get(t.team_video.video_id)
@@ -2784,6 +2803,7 @@ class Setting(models.Model):
         (309, 'block_approved_message'),
         (310, 'block_new_video_message'),
         (311, 'block_new_collab_assignments_message'),
+        (312, 'block_collab_auto_unassignments_message'),
         # 400 is for text displayed on web pages
         (401, 'pagetext_welcome_heading'),
         (402, 'pagetext_warning_tasks'),

@@ -92,7 +92,9 @@
               <li{% if step.current %} class="current"{% endif %}>
                 <span class="col-xs-6">{{ step.label }}</span>
                 <span class="col-xs-6">
-                  {% if step.user %}
+                  {% if step.member %}
+                  {% include "future/teams/icon-link-member.html" with member=step.member %}
+                  {% elif step.user %}
                   {% include "future/users/icon-link.html" with user=step.user %}
                   {% elif step.team %}
                   {% include "future/teams/icon-link.html" with team=step.team %}
@@ -105,19 +107,13 @@
               {% endfor %}
             </ol>
             {% else %}
-            <ol>
+            <div class="subtitleStatus">
               {% if subtitle_language.subtitles_complete %}
-              <li>
-                <span class="col-xs-6">{% trans "Subtitles" %}</span>
-                <span class="col-xs-6">{% trans "Complete" %}</span>
-              </li>
+              <i class="icon icon-complete"></i> {% trans "Subtitles complete" %}
               {% else %}
-              <li class="current">
-                <span class="col-xs-6">{% trans "Subtitles" %}</span>
-                <span class="col-xs-6">{% trans "In progress" %}</span>
-              </li>
+              <i class="icon icon-incomplete"></i> {% trans "Subtitles in progress" %}
               {% endif %}
-            </ol>
+            </div>
             {% endif %}
             {% if cta %}<div class="videoSubtitles-cta">{{ cta.as_block }}</div>{% endif %}
             {% if due_date %}<div>{{ due_date }}</div>{% endif %}

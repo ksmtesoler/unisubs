@@ -268,7 +268,6 @@ ul.video_list > li {
     width: 120px;
     float: left;
     margin: 13px;
-    height: 225px;
 }
 
 ul.video_list li ul.details {
@@ -310,11 +309,11 @@ ul.video_list li a span.video_thumb span.clip img {
 }
 
 ul.video_list li a h4 {
-    padding: 5px 0 8px;
+    padding: 5px 0;
     font-size: 13px;
     overflow: hidden;
     width: 120px;
-    height: 45px;
+    height: 55px;
 }
 
 ul.video_list li a:hover h4 {

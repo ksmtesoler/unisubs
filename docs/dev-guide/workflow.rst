@@ -17,13 +17,14 @@ Instead, Amara development tries to follow a "one branch per feature or
 bugfix" workflow.  Typically changes happen like this:
 
   - Someone creates a github issue that captures the bug/feature
+  - issue is prioritized and scheduled into a sprint
   - A developer creates a branch to handle the issue.  Each feature branch
-    should be named after its issue number (e.g.  ``gh-1234`` would be a branch
-    for github issue 1234).  Changes for the issue always get commited to this
+    should be named after its repository and issue number (e.g.  ``gh-enterprise-1234`` or ``gh-unisubs-5678`` would be branches for github issue 1234 in the amara-enterprise repo and github issue 5678 in the unisubs repo, respectively).  Changes for the issue always get commited to this
     branch.
-  - Once development on the issue is complete, we open a pull request from the
-    topic branch to staging.  Another developer will review the code and merge
-    it once they think it's good to go.
+  - Once development on the issue is complete, move the issue to the ``Testing`` pipeline
+  - Tester tests the changes, and issue is moved between ``In progress`` and ``Testing`` as work continues.
+  - Tester creates a pull request from branch to staging once they think it's good to go.
+  - Another developer reviews the code and merges
   - Once we decide that staging is ready to be deployed to production, we will
     merge the staging branch to production then deploy.
 
@@ -53,27 +54,32 @@ https://www.zenhub.com/.
 
 Zenhub adds a pipeline field to github issues.  We use this field to track the
 current status of work on the issue.  We use the following pipelines:
-
-  - ``To Do`` -- Issue that a developer wants to work on, but hasn't started yet
-  - ``In Progress`` -- Issue that a developer is currently working on
+  - ``Icebox`` -- Issues that have been deprioritized, or are inside an Epic to be scheduled later
+  - ``Discovery`` -- Issues that need to be triaged further and/or prioritized
+  - ``Waiting for Design`` -- Issues that need design decisions, mockups, or css before back-end implementation
+  - ``To Do`` -- Scheduled issues that a developer hasn't started yet
+  - ``In Progress`` -- Issues that a developer is currently working on
   - ``Testing`` -- Issue that a developer believes to be handled and needs
     testing to verify the fix
   - ``Waiting for Deploy`` -- Issue that has been fixed in the staging branch
-    and we need to deploy the change to production.
+    and we need to deploy the change to production
 
 Here's the workflow for a typical issue:
 
-  - Someone creates a github issue to capture a bug/feature
-  - Developer starts working on the issue.
+  - Someone creates a github issue to capture a bug/feature, and puts it in the Discovery pipeline for the current sprint (Sprint A)
+    - Product manager prioritizes with input from team, moves to Icebox or schedules for a future sprint in To Do (Sprint B)
+    - Developer reviews issue Friday before sprint B begins, adds hour estimates to issue
+    - Product manager reviews estimates, reorders prioritized issues in To Do pipeline before sprint B begins
+  
+  - At beginning of sprint B, developer starts working top issue in To Do pipeline
 
-     - They assign it to themself
      - Move the issue to the ``In progress`` pipeline
      - Create a topic branch to work in
 
   - Developer does the initial work on the feature
 
     - They commit code to the branch to handle the issue
-    - Move the issue to the ``Testing`` pipeline
+    - Move the issue to the ``Testing`` pipeline and add tester as assignee
     - Add a comment to the github issue with any notes needed to test the
       issue (what changes were needed, any areas that should be thoroughly
       tested, etc.)
@@ -95,7 +101,7 @@ Here's the workflow for a typical issue:
     - Once the code is merged, the tester should move the issue to the
       ``Waiting for deploy`` pipeline
 
-  - At some point we decide to deploy the code on staging to production.
+  - On Mondays, and sometimes during the week, we decide to deploy the code on staging to production.
 
      - When this happens the tester closes the issue.
 

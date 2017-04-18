@@ -18,7 +18,10 @@
 
 from collections import namedtuple
 
+from django.utils.translation import ugettext as _
+
 from utils.behaviors import behavior
+from ui import CTA
 
 @behavior
 def get_video_subtitle(video, metadata):
@@ -58,19 +61,26 @@ class SubtitlesPageCustomization(object):
         team: team context to show.  We include activity private to this team
             when showing activity records
     """
-    def __init__(self):
+    def __init__(self, user, video, subtitle_language):
+        workflow = video.get_workflow()
         self.steps = None
-        self.cta = None
         self.due_date = None
         self.header = None
         self.team = None
+        if workflow.user_can_edit_subtitles(
+                user, subtitle_language.language_code):
+            self.cta = CTA(_("Edit Subtitles"), 'icon-edit',
+                           'subtitles:subtitle-editor', video_id=video.video_id,
+                           language_code=subtitle_language.language_code)
+        else:
+            self.cta = None
 
 @behavior
 def subtitles_page_customize(request, video, subtitle_language):
     """Customize the subtitles page.
 
     """
-    return SubtitlesPageCustomization()
+    return SubtitlesPageCustomization(request.user, video, subtitle_language)
 
 class SubtitlesStep(object):
     """Represents an item on the subtitle steps list
@@ -99,5 +109,6 @@ class SubtitlesStep(object):
         self.user = user
         self.team = team
         self.current = current
+        self.member = team.get_member(user) if (team and user) else None
 
 Button = namedtuple('Button', 'url label')

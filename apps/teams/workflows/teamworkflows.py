@@ -57,6 +57,7 @@ class TeamWorkflow(object):
     team creation form.
     """
     dashboard_view = NotImplemented
+    member_view = NotImplemented
     """
     view function for the dashboard page.
     """

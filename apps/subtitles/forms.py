@@ -27,6 +27,7 @@ from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
+from externalsites.models import SyncHistory
 from subtitles import pipeline
 from subtitles.shims import is_dependent
 from subtitles.models import ORIGIN_UPLOAD, SubtitleLanguage
@@ -479,6 +480,17 @@ class RollbackSubtitlesForm(SubtitlesForm):
         else:
             messages.error(request,
                            ugettext(u'Can not rollback to the last version'))
+
+class ResyncSubtitlesForm(SubtitlesForm):
+    def check_permissions(self):
+        return True
+
+    def do_submit(self, request):
+        if SyncHistory.objects.force_retry_language_for_user(self.subtitle_language, self.user):
+            messages.success(request, ugettext(u'Resync started, this may take a few minutes'))
+        else:
+            messages.error(request,
+                           ugettext(u'Error while attempting to resync'))
 
 class SubtitlesNotesForm(SubtitlesForm):
     body = forms.CharField(label='', required=True,

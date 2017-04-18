@@ -35,11 +35,14 @@ from utils.text import fmt
 class Link(object):
     def __init__(self, label, view_name, *args, **kwargs):
         self.label = label
+        query = kwargs.pop('query', None)
         if '/' in view_name:
             # URL path passed in, don't try to reverse it
             self.url = view_name
         else:
             self.url = reverse(view_name, args=args, kwargs=kwargs)
+        if query:
+            self.url += '?' + urlencode(query)
 
     def __unicode__(self):
         return mark_safe(u'<a href="{}">{}</a>'.format(self.url, self.label))
@@ -60,10 +63,13 @@ class AjaxLink(Link):
         return mark_safe(u'<a class="ajaxLink" href="{}">{}</a>'.format(self.url, self.label))
 
 class CTA(Link):
-    def __init__(self, label, icon, view_name, block=False, *args, **kwargs):
+    def __init__(self, label, icon, view_name, block=False,
+                 disabled=False, tooltip='', *args, **kwargs):
         super(CTA, self).__init__(label, view_name, *args, **kwargs)
+        self.disabled = disabled
         self.icon = icon
         self.block = block
+        self.tooltip = tooltip
 
     def __unicode__(self):
         return self.render()
@@ -72,13 +78,19 @@ class CTA(Link):
         return self.render(block=True)
 
     def render(self, block=False):
-        if block:
-            css_class = "button cta block"
+        tooltip_element = u'<span data-toggle="tooltip" data-placement="top" title="{}">{}</span>'
+        link_element = u'<a href="{}" class="{}"><i class="icon {}"></i> {}</a>'
+        css_class = "button"
+        if self.disabled:
+            css_class += " disabled"
         else:
-            css_class = "button cta"
-        return mark_safe(u'<a href="{}" class="{}">'
-                         u'<i class="icon {}"></i> {}</a>'.format(
-                             self.url, css_class, self.icon, self.label))
+            css_class += " cta"
+        if block:
+            css_class += " block"
+        link = link_element.format(self.url, css_class, self.icon, self.label)
+        if len(self.tooltip) > 0:
+            link = tooltip_element.format(self.tooltip, link)
+        return mark_safe(link)
 
     def __eq__(self, other):
         return (isinstance(other, Link) and
