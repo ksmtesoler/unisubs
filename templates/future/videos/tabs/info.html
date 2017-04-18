@@ -1,7 +1,7 @@
 {% load i18n videos_tags %}
 <dl class="inline-description">
   <dt>{% trans "Title:" %}</dt>
-  <dd{% if subtitle_language %}
+  <dd{% if subtitle_language and subtitle_language.get_title %}
     {% if subtitle_language.is_rtl %} class="is-rtl"{% endif %}>
         <bdi>{{ subtitle_language.get_title }}</bdi>
     {% else %}
