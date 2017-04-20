@@ -122,14 +122,10 @@ def universal_url(*args, **kwargs):
         protocol = kwargs.pop('protocol_override')
     else:
         protocol = DEFAULT_PROTOCOL
-    if 'domain_override' in kwargs:
-        domain = kwargs.pop('domain_override')
-    else:
-        domain = Site.objects.get_current().domain
     try:
         original = urlresolvers.reverse(*args, **kwargs)
     except Exception :
         logger.exception("Failed to resolve universal url") 
         return
-    return "%s://%s%s" % (protocol, domain,
+    return "%s://%s%s" % (protocol, Site.objects.get_current().domain,
                      strip_path(original)[1])

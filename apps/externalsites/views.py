@@ -167,11 +167,10 @@ def settings_page_redirect_url(team, formset):
             'slug': team.slug,
         })
 
-def google_callback_url(request):
-    domain = request.META.get('HTTP_HOST')
+def google_callback_url():
     return universal_url(
         'externalsites:google-callback',
-        protocol_override=settings.OAUTH_CALLBACK_PROTOCOL, domain_override=domain)
+        protocol_override=settings.OAUTH_CALLBACK_PROTOCOL)
 
 def google_login(request, next=None, confirmed=True, email=None):
     state_type = 'login'
@@ -184,7 +183,7 @@ def google_login(request, next=None, confirmed=True, email=None):
     if email is not None:
         state['email'] = email
     return redirect(google.request_token_url(
-        google_callback_url(request), 'online', state, ['profile', 'email']))
+        google_callback_url(), 'online', state, ['profile', 'email']))
 
 def handle_login_callback(request, auth_info, confirmed=True):
     profile_info = google.get_openid_profile(auth_info.access_token)
@@ -223,7 +222,7 @@ def youtube_add_account(request):
         raise Http404()
     state['type'] = 'add-account'
     return redirect(google.request_token_url(
-        google_callback_url(request), 'offline', state,
+        google_callback_url(), 'offline', state,
         google.youtube_scopes()))
 
 def handle_add_account_callback(request, auth_info):
@@ -267,7 +266,7 @@ def handle_add_account_callback(request, auth_info):
 
 def google_callback(request):
     try:
-        auth_info = google.handle_callback(request, google_callback_url(request))
+        auth_info = google.handle_callback(request, google_callback_url())
     except google.APIError, e:
         logging.error("google_callback: %s" % e)
         messages.error(request, e.message)
