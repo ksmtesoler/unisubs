@@ -2069,6 +2069,20 @@ class UserTestResult(models.Model):
     task3 = models.TextField(blank=True)
     get_updates = models.BooleanField(default=False)
 
+class VideoUrlManager(models.Manager):
+    def get_query_set(self):
+        return VideoUrlQueryset(self.model, using=self._db)
+
+class VideoUrlQueryset(query.QuerySet):
+    def get(self, **kwargs):
+        if 'url' in kwargs:
+            kwargs['url_hash'] = url_hash(kwargs.pop('url'))
+        return super(VideoUrlQueryset, self).get(**kwargs)
+
+    def filter(self, **kwargs):
+        if 'url' in kwargs:
+            kwargs['url_hash'] = url_hash(kwargs.pop('url'))
+        return super(VideoUrlQueryset, self).filter(**kwargs)
 
 # VideoUrl
 class VideoUrl(models.Model):
@@ -2089,6 +2103,8 @@ class VideoUrl(models.Model):
     # this is the owner if the video is from a third party website
     # shuch as Youtube or Vimeo username
     owner_username = models.CharField(max_length=255, blank=True, null=True)
+
+    objects = VideoUrlManager()
 
     class Meta:
         ordering = ("video", "-primary",)
