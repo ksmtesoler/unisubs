@@ -764,16 +764,16 @@ class Video(models.Model):
                 raise VideoTypeError(url)
         else:
             vt = url
-        video_url, created = VideoUrl.objects.get_or_create(
-            url=vt.convert_to_video_url(), type=vt.abbreviation, defaults={
-                'video': self,
-                'added_by': user,
-                'primary': primary,
-                'original': primary,
-                'videoid': vt.video_id if vt.video_id else '',
-                'owner_username': vt.owner_username(),
-            })
-        if not created:
+        videos = Video.objects.all().for_url(vt.convert_to_video_url())
+        if videos.count() == 0:
+            video_url = VideoUrl.objects.create(
+                url=vt.convert_to_video_url(), type=vt.abbreviation,
+                video=self, added_by=user, primary=primary,
+                original=primary, videoid=(vt.video_id if vt.video_id else ''),
+                owner_username= vt.owner_username(),
+            )
+        else:
+            video_url = videos[0].videourl_set.get(url = vt.convert_to_video_url())
             raise Video.UrlAlreadyAdded(video_url)
         return vt, video_url
 
