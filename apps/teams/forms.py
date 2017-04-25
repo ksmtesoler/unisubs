@@ -349,9 +349,10 @@ class AddVideoToTeamForm(forms.Form):
 
 class AddTeamVideoForm(forms.ModelForm):
     language = NewLanguageField(label=_(u'Video language'),
-                                required=False,
+                                required=True,
                                 options='null popular all',
-                                help_text=_(u'It will be saved only if video does not exist in our database.'))
+                                help_text=_(u'It will be saved only if video does not exist in our database.'),
+                                error_messages={'required': 'Please select the video language.'})
 
     project = ProjectField(
         label=_(u'Project'),

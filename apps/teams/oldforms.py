@@ -26,6 +26,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
+from django.core.validators import EMPTY_VALUES
 from django.db.models import Q
 from django.db import transaction
 from django.forms.formsets import formset_factory
@@ -60,6 +61,8 @@ from videos.models import (
 )
 from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
+from ui.forms import LanguageField as NewLanguageField
+from ui.forms import AmaraChoiceField
 from utils.forms import (ErrorableModelForm, get_label_for_value,
                          UserAutocompleteField)
 from utils.panslugify import pan_slugify
@@ -182,16 +185,57 @@ class AddVideoToTeamForm(forms.Form):
             if can_add_video_somewhere(team, user)
         ]
 
-class AddTeamVideoForm(forms.ModelForm):
-    language = forms.ChoiceField(label=_(u'Video language'), choices=(),
-                                 required=False,
-                                 help_text=_(u'It will be saved only if video does not exist in our database.'))
+class ProjectField(AmaraChoiceField):
+    def __init__(self, *args, **kwargs):
+        self.null_label = kwargs.pop('null_label', _('Any'))
+        if 'label' not in kwargs:
+            kwargs['label'] = _("Project")
+        super(ProjectField, self).__init__(*args, **kwargs)
+        self.enabled = True
 
-    project = forms.ModelChoiceField(
+    def setup(self, team, promote_main_project=False, initial=None):
+        self.team = team
+        projects = list(Project.objects.for_team(team))
+        if projects:
+            if promote_main_project:
+                main_project = behaviors.get_main_project(team)
+                if main_project:
+                    projects.remove(main_project)
+                    projects.insert(0, main_project)
+                    if initial is None:
+                        initial = main_project.slug
+            choices = []
+            if not self.required:
+                choices.append(('', self.null_label))
+            choices.append(('none', _('No project')))
+            choices.extend((p.slug, p.name) for p in projects)
+            self.choices = choices
+            if initial is None:
+                initial = choices[0][0]
+            self.initial = initial
+        else:
+            self.enabled = False
+
+    def prepare_value(self, value):
+        return value.slug if isinstance(value, Project) else value
+
+    def clean(self, value):
+        if not self.enabled or value in EMPTY_VALUES:
+            return None
+        if value == 'none':
+            value = Project.DEFAULT_NAME
+        return Project.objects.get(team=self.team, slug=value)
+
+
+
+class AddTeamVideoForm(forms.ModelForm):
+    language = NewLanguageField(label=_(u'Video language'),
+                                required=False,
+                                options='null popular all',
+                                help_text=_(u'It will be saved only if video does not exist in our database.'))
+
+    project = ProjectField(
         label=_(u'Project'),
-        queryset = Project.objects.none(),
-        required=True,
-        empty_label=None,
         help_text=_(u"Let's keep things tidy, shall we?")
     )
     video_url = VideoURLField(label=_('Video URL'),
@@ -205,31 +249,19 @@ class AddTeamVideoForm(forms.ModelForm):
         self.team = team
         self.user = user
         super(AddTeamVideoForm, self).__init__(*args, **kwargs)
+        self.fields['project'].setup(team)
 
-        projects = self.team.project_set.all()
+    def use_future_ui(self):
+        self.fields['project'].help_text = None
+        self.fields['language'].help_text = None
 
-        if len(projects) > 1:
-            projects = projects.exclude(slug='_root')
-
-        self.fields['project'].queryset = projects
-
-        ordered_projects = ([p for p in projects if p.is_default_project] +
-                            [p for p in projects if not p.is_default_project])
-        ordered_projects = [p for p in ordered_projects if can_add_video(team, user, p)]
-
-        self.fields['project'].choices = [(p.pk, p) for p in ordered_projects]
-
-        writable_langs = team.get_writable_langs()
-        self.fields['language'].choices = [c for c in get_language_choices(True)
-                                           if c[0] in writable_langs]
+    def clean_project(self):
+        project = self.cleaned_data['project']
+        return project if project else self.team.default_project
 
     def clean(self):
         if self._errors:
             return self.cleaned_data
-
-        self.project = self.cleaned_data.get('project')
-        if not self.project:
-            self.project = self.team.default_project
 
         # See if any error happen when we create our video
         try:
@@ -241,15 +273,16 @@ class AddTeamVideoForm(forms.ModelForm):
 
     def setup_video(self, video, video_url):
         video.is_public = self.team.is_visible
+        video.primary_audio_language_code = self.cleaned_data['language']
         self.saved_team_video = TeamVideo.objects.create(
-            video=video, team=self.team, project=self.project,
+            video=video, team=self.team, project=self.cleaned_data['project'],
             added_by=self.user)
         self._success_message = ugettext('Video successfully added to team.')
 
     def setup_existing_video(self, video, video_url):
         team_video, created = TeamVideo.objects.get_or_create(
             video=video, defaults={
-                'team': self.team, 'project': self.project,
+                'team': self.team, 'project': self.cleaned_data['project'],
                 'added_by': self.user
             })
 
@@ -275,7 +308,8 @@ class AddTeamVideoForm(forms.ModelForm):
 
     def save(self):
         # TeamVideo was already created in clean()
-        return self.team_video
+        return self.saved_team_video
+
 
 class AddTeamVideosFromFeedForm(AddFromFeedForm):
     def __init__(self, team, user, *args, **kwargs):
