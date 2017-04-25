@@ -1,11 +1,11 @@
 {% load i18n videos_tags %}
 <dl class="inline-description">
   <dt>{% trans "Title:" %}</dt>
-  <dd{% if subtitle_language and subtitle_language.get_title %}
+  <dd{% if subtitle_version and subtitle_language and subtitle_language.get_title %}
     {% if subtitle_language.is_rtl %} class="is-rtl"{% endif %}>
-        <bdi>{{ subtitle_language.get_title }}</bdi>
+        <bdi>{{ subtitle_language.title_display }}</bdi>
     {% else %}
-       ><bdi>{{ video.title_display }}</bdi>
+       >{{ video.title_display }}
     {% endif %}
   </dd>
   {% for entry in metadata %}
@@ -17,11 +17,11 @@
   <dt>{% trans "Description:" %}</dt>
   <dd class="clamp">
     <div class="clamp-lines clamp-xs-5"
-      {% if subtitle_language and subtitle_language.get_description %}
+      {% if subtitle_version and subtitle_language and subtitle_language.get_description %}
         {% if subtitle_language.is_rtl %} class="is-rtl"{% endif %}>
         <bdi>{{ subtitle_language.get_description|linebreaks }}</bdi>
       {% else %}
-        ><bdi>{{ video.description|linebreaks }}</bdi>
+        >{{ video.description|linebreaks }}
     {% endif %}
     </div>
     {% include "future/clamp-toggle.html" %}
