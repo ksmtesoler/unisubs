@@ -47,7 +47,7 @@ from auth.models import UserLanguage, CustomUser as User
 from videos.templatetags.paginator import paginate
 from messages import tasks as notifier
 from teams.forms import (
-    CreateTeamForm, AddTeamVideoForm, EditTeamVideoForm,
+    CreateTeamForm, EditTeamVideoForm,
     AddTeamVideosFromFeedForm, TaskAssignForm, SettingsForm, TaskCreateForm,
     PermissionsForm, WorkflowForm, InviteForm, TaskDeleteForm,
     GuidelinesMessagesForm, RenameableSettingsForm, ProjectForm, LanguagesForm,
@@ -55,7 +55,7 @@ from teams.forms import (
     TaskCreateSubtitlesForm, TeamMultiVideoCreateSubtitlesForm,
     OldMoveVideosForm, AddVideoToTeamForm, GuidelinesLangMessagesForm,
 )
-from teams.oldforms import DeleteLanguageForm
+from teams.oldforms import DeleteLanguageForm, AddTeamVideoForm
 from teams.models import (
     Team, TeamMember, Invite, Application, TeamVideo, Task, Project, Workflow,
     Setting, TeamLanguagePreference, InviteExpiredException, BillingReport,
