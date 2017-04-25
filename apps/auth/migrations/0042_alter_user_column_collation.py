@@ -13,6 +13,10 @@ class Migration(SchemaMigration):
     def setup_user_collation(self, orm):
         db.execute('ALTER TABLE auth_user MODIFY username varchar(30) '
                    'CHARACTER SET utf8 COLLATE utf8_general_ci')
+        db.execute('ALTER TABLE auth_user MODIFY first_name varchar(30) '
+                   'CHARACTER SET utf8 COLLATE utf8_general_ci')
+        db.execute('ALTER TABLE auth_user MODIFY last_name varchar(30) '
+                   'CHARACTER SET utf8 COLLATE utf8_general_ci')
 
     def backwards(self, orm):
         pass
