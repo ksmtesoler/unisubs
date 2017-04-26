@@ -1099,6 +1099,22 @@ class Video(models.Model):
                 return True
         return False
 
+    @property
+    def is_primary_complete(self):
+        """Returns whether or not this video's primary language is marked complete."""
+        try:
+            palc = self.primary_audio_language_code
+            original = (self.newsubtitlelanguage_set
+                            .filter(language_code=palc)[:1].get())
+        except models.ObjectDoesNotExist:
+            original = None
+        if not original:
+            return False
+        if original.is_complete_and_synced():
+            return True
+        else:
+            return False
+
     def completed_subtitle_languages(self, public_only=True):
         return [sl for sl in self.newsubtitlelanguage_set.all()
                 if sl.is_complete_and_synced(public=public_only)]
