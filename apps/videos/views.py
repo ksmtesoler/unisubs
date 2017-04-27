@@ -110,7 +110,7 @@ AVAILABLE_SUBTITLE_FORMATS_FOR_DISPLAY = [
     'dfxp',  'sbv', 'srt', 'ssa', 'txt', 'vtt',
 ]
 
-LanguageListItem = namedtuple("LanguageListItem", "name status tags url")
+LanguageListItem = namedtuple("LanguageListItem", "name status tags url code")
 
 class LanguageList(object):
     """List of languages for the video pages."""
@@ -124,16 +124,17 @@ class LanguageList(object):
                 # no versions in this language yet
                 continue
             language_name = get_language_label(lang.language_code)
+            code = lang.language_code
             status = self._calc_status(lang)
             tags = self._calc_tags(lang)
             url = lang.get_absolute_url()
-            item = LanguageListItem(language_name, status, tags, url)
+            item = LanguageListItem(language_name, status, tags, url, code)
             if lang.language_code == video.primary_audio_language_code:
                 original_languages.append(item)
             else:
                 other_languages.append(item)
-        original_languages.sort(key=lambda li: li.name)
-        other_languages.sort(key=lambda li: li.name)
+        original_languages.sort(key=lambda li: li.code)
+        other_languages.sort(key=lambda li: li.code)
         self.items = original_languages + other_languages
 
     def _calc_status(self, lang):
