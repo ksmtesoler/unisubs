@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 import datetime
-from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
+from django.db import models, connection
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        self.setup_user_collation(orm)
+        cursor = connection.cursor()
+        self.setup_user_collation(cursor)
 
-    def setup_user_collation(self, orm):
-        db.execute('ALTER TABLE auth_user MODIFY username varchar(30) '
+    def setup_user_collation(self, cursor):
+        cursor.execute('ALTER TABLE auth_user MODIFY username varchar(30) '
                    'CHARACTER SET utf8 COLLATE utf8_general_ci')
-        db.execute('ALTER TABLE auth_user MODIFY first_name varchar(30) '
+        cursor.execute('ALTER TABLE auth_user MODIFY first_name varchar(30) '
                    'CHARACTER SET utf8 COLLATE utf8_general_ci')
-        db.execute('ALTER TABLE auth_user MODIFY last_name varchar(30) '
+        cursor.execute('ALTER TABLE auth_user MODIFY last_name varchar(30) '
                    'CHARACTER SET utf8 COLLATE utf8_general_ci')
 
     def backwards(self, orm):
