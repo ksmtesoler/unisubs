@@ -49,8 +49,8 @@
     {% for name, css_class, label in manage_forms %}
     <button class="button {{ css_class }}" type="submit" name="form" value="{{ name }}">{{ label }}</button>
     {% endfor %}
-    <button class="button inline deselectAll" data-target="#video-list">{% trans "Deselect" %}</button>
-  </form>
+    {% include "future/teams/management/videos-deselect-all.html" %}
+      </form>
 </div>
 {% endif %}
 {% endblock %}
