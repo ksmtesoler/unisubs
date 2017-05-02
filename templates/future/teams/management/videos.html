@@ -34,9 +34,8 @@
     <a class="ajaxLink" href="?form=add-video">{% trans "Add video" %}</a>
   </div>
   {% endif %}
-  <div class="checkbox">
-    <input id="selectAll" type="checkbox" value="" class="selectAll" data-target="#video-list">
-    <label for="selectAll" class="text-gray"><span></span> {% trans "Select all" %}</label>
+  <div class="checkbox" id="videos-select-all">
+      {% include "future/teams/management/videos-select-all.html" %}
   </div>
 </nav>
 <div id="video-list">{% include "future/teams/management/video-list.html" %}</div>
@@ -50,8 +49,8 @@
     {% for name, css_class, label in manage_forms %}
     <button class="button {{ css_class }}" type="submit" name="form" value="{{ name }}">{{ label }}</button>
     {% endfor %}
-    <button class="button inline deselectAll" data-target="#video-list">{% trans "Deselect" %}</button>
-  </form>
+    {% include "future/teams/management/videos-deselect-all.html" %}
+      </form>
 </div>
 {% endif %}
 {% endblock %}

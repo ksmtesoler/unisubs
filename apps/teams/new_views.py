@@ -656,6 +656,12 @@ def manage_videos(request, team):
         response_renderer.replace(
             '#video-list', 'future/teams/management/video-list.html', context
         )
+        response_renderer.replace(
+            '#videos-select-all', 'future/teams/management/videos-select-all.html', 
+            {})
+        response_renderer.replace(
+            '#videos-deselect-all', 'future/teams/management/videos-deselect-all.html',
+            {})
         return response_renderer.render()
 
     return render(request, 'future/teams/management/videos.html', context)
