@@ -674,6 +674,8 @@ def subtitles_ajax_form(request, video, subtitle_language, version):
         FormClass = subtitles_form_map[form_name]
     except KeyError:
         raise Http404()
+    if form_name == 'notes' and request.POST['body'] == '':
+        return AJAXResponseRenderer(request).render()
     form = FormClass(request.user, video, subtitle_language, version,
                      data=request.POST if request.method == 'POST' else None)
     if not form.check_permissions():
