@@ -11,7 +11,6 @@ class Command(BaseCommand):
         self.setup_video_fulltext_index(cursor)
         self.setup_activity_indexdes(cursor)
         self.setup_message_indexes(cursor)
-        self.setup_user_collation(cursor)
         optionalapps.exec_repository_scripts('setup_indexes.py',
                                              globals(), locals())
 
@@ -65,11 +64,3 @@ class Command(BaseCommand):
                        'ADD INDEX for_user (user_id, deleted_for_user, has_reply_for_user)')
         cursor.execute('ALTER TABLE messages_message '
                        'ADD INDEX for_author (user_id, deleted_for_author, has_reply_for_author)')
-
-    def setup_user_collation(self, cursor):
-        cursor.execute('ALTER TABLE auth_user MODIFY username varchar(30) '
-                       'CHARACTER SET utf8 COLLATE utf8_general_ci')
-        cursor.execute('ALTER TABLE auth_user MODIFY first_name varchar(30) '
-                       'CHARACTER SET utf8 COLLATE utf8_general_ci')
-        cursor.execute('ALTER TABLE auth_user MODIFY last_name varchar(30) '
-                       'CHARACTER SET utf8 COLLATE utf8_general_ci')
