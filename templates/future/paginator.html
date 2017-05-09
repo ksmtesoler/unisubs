@@ -2,7 +2,7 @@
   {% if paginator.num_pages > 1 %}
   <ul class="pagination">
     <li>
-      <a href="#" aria-label="Previous">
+      <a href="?page={{page.previous_page_number}}" aria-label="Previous">
         <span aria-hidden="true">&#xab;</span>
       </a>
     </li>
@@ -10,7 +10,7 @@
     <li{% if number == page.number %} class="active"{% endif %}><a href="{{ url }}">{{ number }}</a></li>
     {% endfor %}
     <li>
-      <a href="#" aria-label="Next">
+      <a href="?page={{page.next_page_number}}" aria-label="Next">
         <span aria-hidden="true">&#xbb;</span>
       </a>
     </li>
