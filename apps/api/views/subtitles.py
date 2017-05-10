@@ -874,6 +874,23 @@ class SubtitlesView(generics.CreateAPIView):
         videos.tasks.video_changed_tasks.delay(video.pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class LanguageFollowerView(views.APIView):
+    def get(self, request, video_id, language_code, *args, **kwargs):
+        subtitle_language = Video.objects.get(video_id=video_id).subtitle_language(language_code)
+        return Response({'follow': subtitle_language.user_is_follower(request.user)}, status=status.HTTP_200_OK)
+
+    def post(self, request, video_id, language_code, *args, **kwargs):
+        subtitle_language = Video.objects.get(video_id=video_id).subtitle_language(language_code)
+        follow = True if request.data.get('follow', "off") == "on" else False
+        if follow == subtitle_language.user_is_follower(request.user):
+            return Response("Not modified", status=status.HTTP_304_NOT_MODIFIED)
+        else:
+            if follow:
+                subtitle_language.followers.add(request.user)
+            else:
+                subtitle_language.followers.remove(request.user)
+            return Response({'follow': follow}, status=status.HTTP_200_OK)
+
 class ActionsSerializer(serializers.Serializer):
     action = serializers.CharField(source='name')
     label = serializers.CharField(read_only=True)
