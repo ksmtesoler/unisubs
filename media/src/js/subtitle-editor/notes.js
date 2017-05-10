@@ -45,17 +45,19 @@ var angular = angular || null;
         }
 
         $scope.postNote = function() {
-            SubtitleStorage.postNote($scope.newNoteText);
-            $scope.notes.push({
-                user: EditorData.user_fullname,
-                created: 'Just now',
-                body: convertBody($scope.newNoteText)
-            });
-            $scope.newNoteText = "";
-            $timeout(function() {
-                $scope.scrollToBottom();
-                $scope.fadeInLastNote();
-            });
+            if ($scope.newNoteText != "") {
+                SubtitleStorage.postNote($scope.newNoteText);
+                $scope.notes.push({
+                    user: EditorData.user_fullname,
+                    created: 'Just now',
+                    body: convertBody($scope.newNoteText)
+                });
+                $scope.newNoteText = "";
+                $timeout(function() {
+                    $scope.scrollToBottom();
+                    $scope.fadeInLastNote();
+                });
+            }
         }
 
         $scope.onPostClicked = function($event) {
