@@ -2,7 +2,8 @@
   {% if paginator.num_pages > 1 %}
   <ul class="pagination">
     <li>
-      <a href="?page={{page.previous_page_number}}" aria-label="Previous">
+        <a {% if page.number > 1 %}href="?page={{page.previous_page_number}}"
+            {% else %}{% endif %} aria-label="Previous">
         <span aria-hidden="true">&#xab;</span>
       </a>
     </li>
@@ -10,12 +11,13 @@
     <li{% if number == page.number %} class="active"{% endif %}><a href="{{ url }}">{{ number }}</a></li>
     {% endfor %}
     <li>
-      <a href="?page={{page.next_page_number}}" aria-label="Next">
+        <a {% if page.number < paginator.num_pages %}href="?page={{page.next_page_number}}"
+            {% else %}{% endif %} aria-label="Next">
         <span aria-hidden="true">&#xbb;</span>
       </a>
     </li>
   </ul>
-  </p>{{ page.start_index }}-{{ page.end_index }} out of {{ paginator.count }}</p>
+  <p>{{ page.start_index }}-{{ page.end_index }} out of {{ paginator.count }}</p>
   {% else %}
   </p>{{ page.object_list|length }} out of {{ paginator.count }}</p>
   {% endif %}
