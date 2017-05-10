@@ -1026,14 +1026,7 @@ def video_durations(request, team):
 @team_view
 def ajax_member_search(request, team):
     query = request.GET.get('q', '')
-    full_qs = User.objects.search(query).filter(team_members__team=team)
-
-    # filter out duplicate users
-    qs = []
-    for q in full_qs:
-        if q.id not in [u.id for u in qs]:
-            qs.append(q)
-
+    qs = User.objects.search(query).filter(team_members__team=team)
     data = {
         'results': [
             {

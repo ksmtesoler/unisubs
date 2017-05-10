@@ -108,11 +108,11 @@ class CustomUserManager(UserManager):
             if term:
                 valid_term = True
                 try:
-                    sql = """LOWER(first_name) LIKE %s
+                    sql = """(LOWER(first_name) LIKE %s
                 OR LOWER(last_name) LIKE %s
                 OR LOWER(email) LIKE %s
                 OR LOWER(username) LIKE %s
-                OR LOWER(biography) LIKE %s"""
+                OR LOWER(biography) LIKE %s)"""
                     term = '%' + term.lower() + '%'
                     qs = qs.extra(where=[sql], params=[term, term, term, term, term])
                 except Exception as e:
