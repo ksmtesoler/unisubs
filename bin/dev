@@ -268,15 +268,15 @@ class Design(Command):
 
     # match paths in unisubs to amara-design
     PATHS = [
-        ('media/amara/css/', 'src/_sass/'),
-        ('media/amara/js/', 'src/js/'),
-        ('media/bower.json', 'bower.json'),
+        ('media/amara/css/', 'src/_sass/', []),
+        ('media/amara/js/', 'src/js/', ['lib']),
+        ('media/bower.json', 'bower.json', []),
     ]
 
     def iter_paths(self):
-        for unisubs_relpath, design_relpath in self.PATHS:
+        for unisubs_relpath, design_relpath, exclude_paths in self.PATHS:
             yield (os.path.join(unisubs_root(), unisubs_relpath),
-                   os.path.join(self.design_path, design_relpath))
+                   os.path.join(self.design_path, design_relpath), exclude_paths)
 
     def run_inner(self, args, options):
         if not self.check_repo_path():
@@ -312,25 +312,29 @@ class Design(Command):
         return True
 
     def diff(self):
-        for unisubs_path, design_path in self.iter_paths():
+        for unisubs_path, design_path, exclude_paths in self.iter_paths():
             subprocess.call(['diff', '-dur', unisubs_path, design_path])
 
     def push(self):
-        for unisubs_path, design_path in self.iter_paths():
+        for unisubs_path, design_path, exclude_paths in self.iter_paths():
             self.sync(unisubs_path, design_path)
 
     def pull(self):
-        for unisubs_path, design_path in self.iter_paths():
-            self.sync(design_path, unisubs_path)
+        for unisubs_path, design_path, exclude_paths in self.iter_paths():
+            self.sync(design_path, unisubs_path, exclude_paths)
         # pull in the fonts as well.  We can't include this in the PATHS
         # variable because we have some extra fonts there.  This shouldn't be
         # an issue in practice since occupop is the only one to change these
         # files
         self.sync_fonts()
 
-    def sync(self, src, dest):
+    def sync(self, src, dest, exclude_paths):
         if os.path.isdir(src):
-            subprocess.check_call(['rsync', '-a', '--delete', src, dest])
+            cmd = ['rsync', '-a', '--delete']
+            for exclude_path in exclude_paths:
+                cmd.append('--exclude')
+                cmd.append(exclude_path)
+            subprocess.check_call(cmd  + [src, dest])
         else:
             shutil.copyfile(src, dest)
 
