@@ -317,7 +317,7 @@ class Design(Command):
 
     def push(self):
         for unisubs_path, design_path, exclude_paths in self.iter_paths():
-            self.sync(unisubs_path, design_path)
+            self.sync(unisubs_path, design_path, exclude_paths)
 
     def pull(self):
         for unisubs_path, design_path, exclude_paths in self.iter_paths():
