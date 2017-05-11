@@ -36,52 +36,6 @@
   }
 }
 
-.nav-stacked {
-  li {
-    position: relative;
-    padding-left: 10px;
-    padding-right: 10px;
-    &:hover {
-      background-color: rgba(0,0,0,.05);
-      cursor: pointer;
-    }
-    &:after {
-      position: absolute;
-      display: block;
-      right: 30px;
-      top: 8px;
-      content: "\e901";
-      font-family: 'amara';
-      font-size: 17px;
-      color: $turquoise;
-    }
-  }
-  &.languages {
-    height: 275px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    li {
-      &:after {
-        display: none;
-      }
-    }
-  }
-  h1,h2,h3,h4,h5,h6 {
-    margin: 0;
-    a {
-      color: $text-color;
-      display: block;
-      padding: 10px 0;
-      &:hover, &:focus, &:active {
-        color: $text-color;
-      }
-    }
-    &.no-link {
-      padding: 10px 0;
-    }
-  }
-}
-
 .nav-actions {
   position: relative;
   padding: 10px 0;

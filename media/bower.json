@@ -26,6 +26,7 @@
     "jScrollPane": "^2.0.23",
     "rjs": "^2.3.2",
     "almond": "^0.3.3",
+    "requirejs": "^2.3.3",
     "jquery-mousewheel": "^3.1.13"
   },
   "overrides": {
@@ -58,6 +59,9 @@
     "select2": {
       "main": [
         "dist/js/select2.js",
+        "src/js/select2/defaults.js",
+        "src/js/select2/core.js",
+        "src/js/jquery.select2.js",
         "dist/**/*.css"
       ]
     },

@@ -2,7 +2,6 @@
 //
 // Used to provide a clickable action to the user.  These should typically be used for things that change state in some way. Use the button classes on an `<a>`, `<button>`, or `<input>` element. Use `<a>` tags for simple navigation.
 //
-//
 // Example:
 // <a class="button" href="#" role="button">Link</a>
 // <button class="button">Button</button>
@@ -25,10 +24,9 @@ button {
 }
 
 // Options
-//
+// 
 // Use any of the available button classes to quickly create a styled button.
-//
-//
+// 
 // .small - Small sized button
 // .block - Full width button
 // .cta  - Call-to-action button.  Displayed with a plum color.  A typical use for this is the buttons to create subtitles
@@ -36,10 +34,10 @@ button {
 // .borderless  - borderless button.  Used for cancelation, deselection, etc.
 // .inline  - inline button
 // .disabled  - A disabled button
-//
+// 
 // Example:
 // <button type="button" class="button $modifier_class">Click me</button>
-//
+// 
 // Styleguide buttonOptions
 
 .button {

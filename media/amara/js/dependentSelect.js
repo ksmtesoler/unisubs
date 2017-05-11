@@ -19,7 +19,6 @@
 define(['jquery'], function($) {
 
 $.behaviors('.dependentSelect', dependentSelect);
-$.behaviors('.hideUnlessChecked', hideUnlessChecked);
 
 function dependentSelect(wrapper) {
     wrapper = $(wrapper);
@@ -47,22 +46,6 @@ function dependentSelect(wrapper) {
             }
         });
     }
-}
-
-function hideUnlessChecked(wrapper) {
-    wrapper = $(wrapper);
-    var controllerField = $(wrapper.data('controller'));
-
-    function updateHidden() {
-        if(controllerField.is(':checked')) {
-            wrapper.show();
-        } else {
-            wrapper.hide();
-        }
-    }
-
-    controllerField.on('change', updateHidden);
-    updateHidden();
 }
 
 });

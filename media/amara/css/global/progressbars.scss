@@ -1,22 +1,16 @@
 // Progress Bars
 //
-// 
 // Example:
 // <div class="progressBar">
-//   <div class="progressBar-progress" role="progressbar" style="width: 60%;">
-//     <span>60% Complete</span>
-//   </div>
+//   <div class="progressBar-progress" role="progressbar" style="width: 60%;"></div>
 // </div>
-// <p class="progressBar-label">Fun copy regarding what's happening</p>
+// <p class="progressBar-label">Fun copy regarding what's happening <span class="progressBar-percentage">60% Complete</span></p>
 //
-// 
 // Example:
 // <div class="progressBar teal">
-//   <div class="progressBar-progress" role="progressbar" style="width: 60%;">
-//     <span>60% Complete</span>
-//   </div>
+//   <div class="progressBar-progress" role="progressbar" style="width: 60%;"></div>
 // </div>
-// <p class="progressBar-label teal">Fun copy regarding what's happening</p>
+// <p class="progressBar-label teal">Fun copy regarding what's happening <span class="progressBar-percentage">60% Complete</span></p>
 // 
 // Styleguide progressbars
 
@@ -48,15 +42,11 @@
   line-height: 30px;
   text-align: center;
   background-color: #fff;
-  // clip-path: polygon(-1% 0, 100% 0, 99% 100%, -1% 100%);
-  // -webkit-clip-path: polygon(-1% 0, 100% 0, 99% 100%, -1% 100%);
   @include transition(0.6s);
-  span {
-    position: absolute;
-    bottom: 12px;
-    right: 10px;
-    color: #fff;
-  }
+}
+.progressBar-percentage {
+  float: right;
+  color: inherit;
 }
 
 .progressBar-label {
@@ -75,8 +65,5 @@
   }
   .progressBar-progress {
     background-color: $teal;
-    span {
-      color: $teal;
-    }
   }
 }
