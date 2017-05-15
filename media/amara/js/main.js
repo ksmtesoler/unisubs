@@ -5,7 +5,7 @@ require([
     'jquery-form',
     'jquery-select2',
     'jScrollPane',
-    'jScrollPane.mousewheel',
+    // 'jScrollPane.mousewheel',
 ], function() {
     // require all the other modules
     require([
@@ -17,7 +17,7 @@ require([
         'ajax',
         'dialogs',
         'proxyField',
-        'forms',
+        'dependentSelect',
         'select',
         'scrollBars',
         'selectList',

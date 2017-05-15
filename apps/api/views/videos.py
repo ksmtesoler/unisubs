@@ -739,6 +739,23 @@ class VideoDurationView(views.APIView):
         else:
             return Response("Duration already set", status=status.HTTP_304_NOT_MODIFIED)
 
+class VideoFollowerView(views.APIView):
+    def get(self, request, video_id, *args, **kwargs):
+        video = Video.objects.get(video_id=video_id)
+        return Response({'follow': video.user_is_follower(request.user)}, status=status.HTTP_200_OK)
+
+    def post(self, request, video_id, *args, **kwargs):
+        video = Video.objects.get(video_id=video_id)
+        follow = True if request.data.get('follow', "off") == "on" else False
+        if follow == video.user_is_follower(request.user):
+            return Response("Not modified", status=status.HTTP_304_NOT_MODIFIED)
+        else:
+            if follow:
+                video.followers.add(request.user)
+            else:
+                video.followers.remove(request.user)
+            return Response({'follow': follow}, status=status.HTTP_200_OK)
+
 class VideoURLViewSet(viewsets.ModelViewSet):
     serializer_class = VideoURLSerializer
     update_serializer_class = VideoURLUpdateSerializer

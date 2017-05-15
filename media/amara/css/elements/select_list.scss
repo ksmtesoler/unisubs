@@ -197,7 +197,7 @@ ul.selectList {
     position: absolute;
     top: 0;
     right: 0;
-    a {
+    a, button {
       color: $gray-light;
       &:hover, &:focus, &:active {
         color: $teal;
