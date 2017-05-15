@@ -1104,6 +1104,9 @@ class Video(models.Model):
                 return True
         return False
 
+    def is_language_complete(self, lc):
+        return (lc in [sl.language_code for sl in self.completed_subtitle_languages()])
+
     def completed_subtitle_languages(self, public_only=True):
         return [sl for sl in self.newsubtitlelanguage_set.all()
                 if sl.is_complete_and_synced(public=public_only)]
@@ -1118,7 +1121,6 @@ class Video(models.Model):
         """
         l = self.subtitle_language()
         return l.get_description() if l else self.description
-
 
     @property
     def is_moderated(self):
