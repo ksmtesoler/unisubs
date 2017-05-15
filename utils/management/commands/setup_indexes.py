@@ -67,8 +67,6 @@ class Command(BaseCommand):
                        'ADD INDEX for_author (user_id, deleted_for_author, has_reply_for_author)')
 
     def setup_user_collation(self, cursor):
-        cursor.execute('ALTER TABLE auth_user MODIFY username varchar(30) '
-                       'CHARACTER SET utf8 COLLATE utf8_general_ci')
         cursor.execute('ALTER TABLE auth_user MODIFY first_name varchar(30) '
                        'CHARACTER SET utf8 COLLATE utf8_general_ci')
         cursor.execute('ALTER TABLE auth_user MODIFY last_name varchar(30) '
