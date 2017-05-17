@@ -110,6 +110,8 @@ class ActivityMessageDict(object):
             return self.record.get_video_title()
         elif key == 'team':
             return self.record.team
+        elif key == 'user':
+            return self.record.user.username
         else:
             # Like the fmt() function, display something in the message rather
             # than raise an exception
@@ -122,7 +124,7 @@ class VideoAdded(ActivityType):
     def get_message(self, record, user):
         return self.format_message(
             record,
-            _('added a video: <a href="%(video_url)s">%(video)s</a>'))
+            _('<strong>%(user)s</strong> added a video: <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
         return _('added')
@@ -134,7 +136,9 @@ class VideoTitleChanged(ActivityType):
     active = False
 
     def get_message(self, record, user):
-        return _('edited a video title')
+        return self.format_message(
+                record,
+                _('<strong>%(user)s</strong> edited a video title'))
 
     def get_action_name(self):
         return _('changed title')
@@ -147,11 +151,11 @@ class CommentAdded(ActivityType):
     def get_message(self, record, user):
         if record.language_code:
             return self.format_message(record,
-                _(u'commented on <a href="%(language_url)s">%(language)s '
+                _(u'<strong>%(user)s</strong> commented on <a href="%(language_url)s">%(language)s '
                   'subtitles</a> for <a href="%(video_url)s">%(video)s</a>'))
         else:
             return self.format_message(record,
-                _(u'commented on <a href="%(video_url)s">%(video)s</a>'))
+                _(u'<strong>%(user)s</strong> commented on <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
         return _('commented')
@@ -162,7 +166,7 @@ class VersionAdded(ActivityType):
 
     def get_message(self, record, user):
         return self.format_message(record,
-            _(u'edited <a href="%(language_url)s">%(language)s '
+            _(u'<strong>%(user)s</strong> edited <a href="%(language_url)s">%(language)s '
               'subtitles</a> for <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
@@ -176,7 +180,7 @@ class VideoURLAdded(ActivityType):
     def get_message(self, record, user):
         url_edit = record.get_related_obj()
         return self.format_message(record,
-            _(u'added new URL for <a href="%(video_url)s">%(video)s</a>'))
+            _(u'<strong>%(user)s</strong> added new URL for <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
         return _('added URL')
@@ -189,7 +193,8 @@ class TranslationAdded(ActivityType):
     active = False
 
     def get_message(self, record, user):
-        return _('added a translation')
+        return self.format_message(record,
+            _('<strong>%(user)s</strong> added a translation'))
 
     def get_action_name(self):
         return _('translated')
@@ -202,7 +207,8 @@ class SubtitleRequestCreated(ActivityType):
     active = False
 
     def get_message(self, record, user):
-        return _('created a subtitle request')
+        return self.format_message(record,
+                _('<strong>%(user)s</strong> created a subtitle request'))
 
     def get_action_name(self):
         return _('requested')
@@ -213,7 +219,7 @@ class VersionApproved(ActivityType):
 
     def get_message(self, record, user):
         return self.format_message(record,
-            _('approved <a href="%(language_url)s">%(language)s</a> subtitles'
+            _('<strong>%(user)s</strong> approved <a href="%(language_url)s">%(language)s</a> subtitles'
               ' for <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
@@ -235,7 +241,7 @@ class MemberJoined(ActivityType):
 
     def get_message(self, record, user):
         return self.format_message(record,
-            _("joined the %(team)s team as a %(role)s"),
+            _("<strong>%(user)s</strong> joined the %(team)s team as a %(role)s"),
             role=self.get_role_name(record.related_obj_id))
 
     def get_action_name(self):
@@ -257,7 +263,7 @@ class VersionRejected(ActivityType):
 
     def get_message(self, record, user):
         return self.format_message(record,
-            _('rejected <a href="%(language_url)s">%(language)s</a> subtitles'
+            _('<strong>%(user)s</strong> rejected <a href="%(language_url)s">%(language)s</a> subtitles'
               ' for <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
@@ -268,7 +274,7 @@ class MemberLeft(ActivityType):
     label = _('Member Left')
 
     def get_message(self, record, user):
-        return self.format_message(record, _("left the %(team)s team"))
+        return self.format_message(record, _("<strong>%(user)s</strong> left the %(team)s team"))
 
     def get_action_name(self):
         return _('left')
@@ -282,7 +288,7 @@ class VersionReviewed(ActivityType):
 
     def get_message(self, record, user):
         return self.format_message(record,
-            _('reviewed <a href="%(language_url)s">%(language)s</a> subtitles'
+            _('<strong>%(user)s</strong> reviewed <a href="%(language_url)s">%(language)s</a> subtitles'
               ' for <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
@@ -294,7 +300,7 @@ class VersionAccepted(ActivityType):
 
     def get_message(self, record, user):
         return self.format_message(record,
-            _('accepted <a href="%(language_url)s">%(language)s</a> subtitles'
+            _('<strong>%(user)s</strong> accepted <a href="%(language_url)s">%(language)s</a> subtitles'
               ' for <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
@@ -306,7 +312,7 @@ class VersionDeclined(ActivityType):
 
     def get_message(self, record, user):
         return self.format_message(record,
-            _('declined <a href="%(language_url)s">%(language)s</a> subtitles'
+            _('<strong>%(user)s</strong> declined <a href="%(language_url)s">%(language)s</a> subtitles'
               ' for <a href="%(video_url)s">%(video)s</a>'))
 
     def get_action_name(self):
@@ -323,7 +329,7 @@ class VideoDeleted(ActivityType):
             title = deletion.title
         else:
             title = _('Unknown video')
-        return self.format_message(record, _('deleted a video: %(title)s'),
+        return self.format_message(record, _('<strong>%(user)s</strong> deleted a video: %(title)s'),
                                    title=title)
 
     def get_action_name(self):
@@ -337,12 +343,12 @@ class VideoURLEdited(ActivityType):
     def get_message(self, record, user):
         url_edit = record.get_related_obj()
         if url_edit is not None:
-            msg = _('changed primary url from '
+            msg = _('<strong>%(user)s</strong> changed primary url from '
                     '<a href="%(old_url)s">%(old_url)s</a> to '
                     '<a href="%(new_url)s">%(new_url)s</a>').format(old_url=url_edit.old_url,
                                                                     new_url=url_edit.new_url)
         else:
-            msg = _('changed the primary url')
+            msg = _('<strong>%(user)s</strong> changed the primary url')
         return self.format_message(record, msg)
 
     def get_action_name(self):
@@ -355,7 +361,7 @@ class VideoURLDeleted(ActivityType):
 
     def get_message(self, record, user):
         url_edit = record.get_related_obj()
-        msg = _('deleted url <a href="%(url)s">%(url)s</a>')
+        msg = _('<strong>%(user)s</strong> deleted url <a href="%(url)s">%(url)s</a>')
         return self.format_message(record, msg, url=url_edit.old_url)
 
     def get_action_name(self):
@@ -369,15 +375,15 @@ class VideoMovedToTeam(ActivityType):
     def get_message(self, record, user):
         team = record.get_related_obj()
         if team is None:
-            msg = _('moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s')
+            msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s')
             from_team_name = None
             from_team_url = None
         elif can_view_activity(team, user):
-            msg = _('moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s from <a href="%(from_team_url)s">%(from_team_name)s</a>')
+            msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s from <a href="%(from_team_url)s">%(from_team_name)s</a>')
             from_team_name = team.name
             from_team_url = reverse('teams:dashboard', args=(team.slug,))
         else:
-            msg = _('moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s from another team')
+            msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s from another team')
             from_team_name = None
             from_team_url = None
         return self.format_message(record, msg, from_team_name=from_team_name, from_team_url=from_team_url, to_team=record.team.name)
@@ -393,15 +399,15 @@ class VideoMovedFromTeam(ActivityType):
     def get_message(self, record, user):
         team = record.get_related_obj()
         if team is None:
-            msg = _('removed <a href="%(video_url)s">%(video)s</a> from %(from_team)s')
+            msg = _('<strong>%(user)s</strong> removed <a href="%(video_url)s">%(video)s</a> from %(from_team)s')
             to_team_name = None
             to_team_url = None
         elif can_view_activity(team, user):
-            msg = _('moved <a href="%(video_url)s">%(video)s</a> from %(from_team)s to <a href="%(to_team_url)s">%(to_team_name)s</a>')
+            msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> from %(from_team)s to <a href="%(to_team_url)s">%(to_team_name)s</a>')
             to_team_name = team.name
             to_team_url = reverse('teams:dashboard', args=(team.slug,))
         else:
-            msg = _('moved <a href="%(video_url)s">%(video)s</a> from %(from_team)s to another team')
+            msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> from %(from_team)s to another team')
             to_team_name = None
             to_team_url = None
         return self.format_message(record, msg, from_team=record.team.name, to_team_name=to_team_name, to_team_url=to_team_url)

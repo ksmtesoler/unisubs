@@ -5,9 +5,7 @@
     {% with url=record.get_url %}
     <tr>
       <td>{% include "future/users/icon-link.html" with user=record.user %}</td>
-      <td>{{ record.user }}</td>
-      <td>{{ record.get_action_name }}</td>
-      <td>{% if record.language_code %}<a href="{{ record.get_language_url }}{% query_string %}">{% blocktrans with language=record.get_language_code_display %}{{ language }} Subtitles{% endblocktrans %}</a>{% elif url %}<a href="{{ url }}">{{ url }}</a>{% endif %}</td>
+      <td>{{ record.get_message|safe }}</td>
       <td>{{ record.created|elapsed_time }}</td>
     </tr>
     {% endwith %}
