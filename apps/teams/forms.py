@@ -84,6 +84,7 @@ class TeamMemberField(AmaraChoiceField):
         self.team = team
         self.set_select_data('ajax', reverse('teams:ajax-member-search',
                                              args=(team.slug,)))
+        self.set_select_data('placeholder', ugettext('Select member'))
 
     def to_python(self, value):
         if value in EMPTY_VALUES:
@@ -110,7 +111,12 @@ class TeamMemberField(AmaraChoiceField):
             except User.DoesNotExist:
                 return None
         if value:
-            self.choices = [value]
+            choices = [
+                ('', ugettext('Select member')),
+                value,
+            ]
+            if self.choices != choices:
+                self.choices = choices
             return value[0]
         else:
             return None
@@ -126,10 +132,15 @@ class TeamVideoField(AmaraChoiceField):
     default_error_messages = {
         'invalid': _(u'Invalid video'),
     }
+
+    # TODO: Move some of the code shared between here and TeamMemberField into
+    # a base class
+
     def setup(self, team):
         self.team = team
         self.set_select_data('ajax', reverse('teams:ajax-video-search',
                                              args=(team.slug,)))
+        self.set_select_data('placeholder', ugettext('Select video'))
 
     def to_python(self, value):
         if value in EMPTY_VALUES:
@@ -157,7 +168,12 @@ class TeamVideoField(AmaraChoiceField):
             except Video.DoesNotExist:
                 return None
         if value:
-            self.choices = [value]
+            choices = [
+                ('', ugettext('Select video')),
+                value,
+            ]
+            if self.choices != choices:
+                self.choices = choices
             return value[0]
         else:
             return None
