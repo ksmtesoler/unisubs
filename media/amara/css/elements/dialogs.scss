@@ -154,15 +154,15 @@
 //         <p></p>
 //        <div class="form-group">
 //         <div class="radio">
-//           <input type="radio" id="=" value="">
-//           <label for=""><span></span>Just remove the video from the team.</label>
-//           <p><small>(It will remain on Amara but will no longer be subject to the team's permissions and workflows. Any outstanding tasks will be deleted.)</small></p>
+//           <input type="radio" name="remove_video" id="remove_team" value="team">
+//           <label for="remove_team"><span></span>Just remove the video from the team.</label>
+//           <p class="helpBlock helpBlock-radio">It will remain on Amara but will no longer be subject to the team's permissions and workflows. Any outstanding tasks will be deleted.</p>
 //         </div>
 //        </div> 
 //        <div class="form-group">
 //         <div class="radio">
-//           <input type="radio" id="=" value="">
-//           <label for=""><span></span>Delete the video entirely</label>
+//           <input type="radio" name="remove_video" id="delete_video" value="delete">
+//           <label for="delete_video"><span></span>Delete the video entirely</label>
 //         </div>
 //        </div>
 //         <div class="text-right">
@@ -241,10 +241,6 @@
     // TODO - remove form specific styles from here. These should be refadtored and added to other stylesheets
     form {
       margin-bottom: 0;
-      label {
-        font-size: 12px;
-        color: $gray;
-      }
       .checkbox {
         margin-bottom: 10px;
         font-size: 12px;

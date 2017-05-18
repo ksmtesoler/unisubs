@@ -59,6 +59,60 @@
 //     </tr>
 //   </tbody>
 // </table>
+// 
+// Example:
+// <table class="table table-condensed">
+//   <tbody>
+//     <tr>
+//       <td>
+//         <a href="#">
+//           <span class="avatar" 
+//                 data-toggle="tooltip"
+//                 data-placement="top" 
+//                 title="Member Name">
+//                 <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//           </span>
+//         </a>
+//       </td>
+//       <td>
+//         <strong>Gabriela Rocha</strong> started working as transcriber on <a href="#">Portuguese, Brazillian</a> for <a href="#"><strong>The Future of News? Virtual Reality</strong></a>
+//       </td>
+//       <td class="nowrap">1 hour ago</td>
+//     </tr>
+//     <tr>
+//       <td>
+//         <a href="#">
+//           <span class="avatar" 
+//                 data-toggle="tooltip"
+//                 data-placement="top" 
+//                 title="Member Name">
+//                 <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//           </span>
+//         </a>
+//       </td>
+//       <td>
+//         <strong>Gabriela Rocha</strong> started working as transcriber on <a href="#">Portuguese, Brazillian</a> for <a href="#"><strong>The Future of News? Virtual Reality</strong></a>
+//       </td>
+//       <td>1 hour ago</td>
+//     </tr>
+//     <tr>
+//       <td>
+//         <a href="#">
+//           <span class="avatar" 
+//                 data-toggle="tooltip"
+//                 data-placement="top" 
+//                 title="Member Name">
+//                 <img src="https://s3.amazonaws.com/s3.www.universalsubtitles.org/gravatar/default-50.png">
+//           </span>
+//         </a>
+//       </td>
+//       <td>
+//         <strong>Gabriela Rocha</strong> started working as transcriber on <a href="#">Portuguese, Brazillian</a> for <a href="#"><strong>The Future of News? Virtual Reality</strong></a>
+//       </td>
+//       <td>1 hour ago</td>
+//     </tr>
+//   </tbody>
+// </table>
 //
 // Styleguide tables
 .table {
@@ -76,7 +130,10 @@
       td {
         border: none;
         vertical-align: top;
-      }      
+        &.nowrap {
+          white-space: nowrap;
+        }
+      }
     }
   }
   &.table-striped {
