@@ -214,6 +214,7 @@ class ProjectField(AmaraChoiceField):
         self.null_label = kwargs.pop('null_label', _('Any'))
         if 'label' not in kwargs:
             kwargs['label'] = _("Project")
+        self.futureui = kwargs.pop('futureui', False)
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
 
@@ -237,8 +238,16 @@ class ProjectField(AmaraChoiceField):
             if initial is None:
                 initial = choices[0][0]
             self.initial = initial
+            if self.futureui:
+                self.setup_widget()
         else:
             self.enabled = False
+
+    def setup_widget(self):
+        if len(self.choices) < 7:
+            self.widget = AmaraRadioSelect()
+            self.widget.attrs.update(self.widget_attrs(self.widget))
+            self._setup_widget_choices()
 
     def prepare_value(self, value):
         return value.slug if isinstance(value, Project) else value
@@ -1104,7 +1113,7 @@ class VideoFiltersForm(FiltersForm):
     q = SearchField(label=_('Search for videos'), required=False)
     language = NewLanguageField(label=_("Video language"), required=False,
                                 placeholder=_("All languages"))
-    project = ProjectField(required=False, widget=AmaraRadioSelect)
+    project = ProjectField(required=False, futureui=True)
     duration = VideoDurationField(required=False, widget=AmaraRadioSelect)
     sort = AmaraChoiceField(label="", border=True, choices=[
         ('-time', _('Time, newest')),
