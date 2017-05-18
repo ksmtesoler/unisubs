@@ -23,20 +23,30 @@ define(['jquery', 'contentUpdate'], function($, contentUpdate) {
 $.behaviors('.styleGuide', styleGuide);
 
 function styleGuide(container) {
-
     $('.styleGuide-navLink', container).click(function(evt) {
         var link = $(this);
+        var anchor = link.attr('href');
         // Remove old active classes
         $('.styleGuide-navLink.active, .styleGuide-section.active', container).removeClass('active');
         // Add new active classes
         link.addClass('active');
-        $(link.attr('href')).addClass('active').updateBehaviors();
+        $(anchor).addClass('active').updateBehaviors();
 
         contentUpdate.fire();
 
         evt.preventDefault();
+        window.location.hash = anchor;
+        setTimeout(function() { window.scrollTo(0, 0) }, 1);
     });
-    $('.styleGuide-navLink', container).filter(':first').click();
+
+    // check for hash
+    var hash = window.location.hash;
+    if(hash) {
+        $('[href="'+hash+'"]').click();
+    } else {
+        $('.styleGuide-navLink', container).filter(':first').click();
+    }
+
 
     $('.actionBar-open').on('click', function(){
       $('#styleGuide-actionBar').toggleClass('open');

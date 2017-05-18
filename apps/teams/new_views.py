@@ -627,8 +627,8 @@ def manage_videos(request, team):
                                                         'teamvideo__video')
     form_name = request.GET.get('form')
     if form_name:
-        if form_name == 'add-video':
-            return add_video_form(request, team)
+        if form_name == 'add-videos':
+            return add_video_forms(request, team)
         else:
             return manage_videos_form(request, team, form_name, videos)
     enabled_forms = all_video_management_forms(team, request.user)
@@ -725,26 +725,50 @@ def manage_videos_form(request, team, form_name, videos):
     })
     return response_renderer.render()
 
-def add_video_form(request, team):
+def add_video_forms(request, team):
     if not permissions.can_add_video(team, request.user):
         return HttpResponseForbidden()
     response_renderer = AJAXResponseRenderer(request)
-    if request.method == 'POST':
-        form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, form.success_message())
-            response_renderer.reload_page()
-            return response_renderer.render()
-    else:
+    form = None
+    form_bulk = None
+    if request.method == 'POST' and 'form' in request.POST:
+        if request.POST['form'] == 'add-form':
+            form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, form.success_message())
+                response_renderer.reload_page()
+                return response_renderer.render()
+            else:
+                if permissions.can_add_videos_bulk(request.user, team):
+                    form_bulk = forms.TeamVideoCSVForm
+        elif request.POST['form'] == 'add-csv':
+            form_bulk = forms.TeamVideoCSVForm(data=request.POST, files=request.FILES)
+            if form_bulk.is_bound and form_bulk.is_valid():
+                csv_file = form_bulk.cleaned_data['csv_file']
+                if csv_file is not None:
+                    try:
+                        add_videos_from_csv(team, request.user, csv_file)
+                        message = fmt(_(u"File successfully uploaded, you should receive the summary shortly."))
+                    except:
+                        message = fmt(_(u"File was not successfully parsed."))
+                    messages.success(request, message)
+                    response_renderer.reload_page()
+                    return response_renderer.render()
+    if form is None:
         form = forms.AddTeamVideoForm(team, request.user)
+    if form_bulk is None and permissions.can_add_videos_bulk(request.user, team=team):
+        form_bulk = forms.TeamVideoCSVForm()
     form.use_future_ui()
-
-    template_name = 'future/teams/management/video-forms/add-video.html'
-    response_renderer.show_modal(template_name, {
+    template_name = 'future/teams/management/video-forms/add-videos.html'
+    context = {
         'team': team,
         'form': form,
-    })
+    }
+    if form_bulk is not None:
+        # form_bulk.use_future_ui()
+        context['form_bulk'] = form_bulk
+    response_renderer.show_modal(template_name, context)
     return response_renderer.render()
 
 @team_settings_view

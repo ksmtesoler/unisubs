@@ -26,8 +26,8 @@
 //       cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 //       proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 //   </div>
-//   <a class="clamp-expand">more &raquo;</a>
-//   <a class="clamp-collapse">&laquo; less</a>
+//   <a class="clamp-expand">More <i class="icon icon-down"></i></a>
+//   <a class="clamp-collapse">Less <i class="icon icon-up"></i></a>
 // </div>
 //
 // Example:
@@ -39,7 +39,6 @@
 //   <a class="clamp-collapse">&laquo; less</a>
 // </div>
 //
-//
 // Example:
 // <div class="clamp">
 //   <ul class="clamp-list clamp-sm-3 clamp-xs-2">
@@ -49,12 +48,11 @@
 //     <li>Four</li>
 //     <li>Five</li>
 //   </ul>
-//   <a class="clamp-expand">more <i class="icon icon-down"></i></a>
-//   <a class="clamp-collapse">less <i class="icon icon-up"></i></a>
+//   <a class="clamp-expand">More <i class="icon icon-down"></i></a>
+//   <a class="clamp-collapse">Less <i class="icon icon-up"></i></a>
 // </div>
 //
 // Example:
-//
 // <div class="clamp">
 //   <ul class="clamp-list clamp-xs-2">
 //     <li>No clamp</li>
@@ -140,7 +138,7 @@ $max-lines: 10;
         $selector: "#{$selector}, li:nth-child(#{$i})";
       }
       #{$selector} {
-        display: block;
+        display: flex;
       }
     }
   }
@@ -157,7 +155,7 @@ $max-lines: 10;
             $selector: "#{$selector}, li:nth-child(#{$i})";
           }
           #{$selector} {
-            display: block;
+            display: flex;
           }
         }
       }
@@ -165,12 +163,14 @@ $max-lines: 10;
   }
 
   .clamp.expanded & li {
-    display: block;
+    display: flex;
   }
 }
 
 .clamp-expand, .clamp-collapse {
   display: none;
+  color: $text-color;
+  font-weight: 600;
 }
 .clamp.overflowing {
   .clamp-expand {

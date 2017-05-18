@@ -17,7 +17,7 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db.models import Max
 from django.test import TestCase
 from nose.tools import *
@@ -398,7 +398,7 @@ class TestDoHTTPPost(TestCase):
 class NotificationHistoryTests(TestCase):
 
     def setUp(self):
-        self.remove_after = datetime.now() - timedelta(days=15)
+        self.remove_after = dates.now() - timedelta(days=15)
         self.keep_up_to = 50
         self.teams = [TeamFactory() for i in range(0, 3)]
         self.notifications = []
@@ -406,8 +406,8 @@ class NotificationHistoryTests(TestCase):
         self.build_notifications()
 
     def build_notifications(self):
-        time_keep = datetime.now()
-        time_remove = datetime.now() - timedelta(days=30)
+        time_keep = dates.now()
+        time_remove = dates.now() - timedelta(days=30)
 
         for team in self.teams:
             for i in range(1, 151):

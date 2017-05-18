@@ -34,7 +34,6 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db import models
 from django.db import transaction
-from django.db.models import Q
 from django.db.models.loading import get_model
 from django.db.models.signals import post_save
 from django.utils.http import urlquote
@@ -48,6 +47,9 @@ from utils.amazon import S3EnabledImageField
 from utils import secureid
 from utils import translation
 from utils.tasks import send_templated_email_async
+
+import logging
+logger = logging.getLogger(__name__)
 
 ALL_LANGUAGES = [(val, _(name))for val, name in settings.ALL_LANGUAGES]
 EMAIL_CONFIRMATION_DAYS = getattr(settings, 'EMAIL_CONFIRMATION_DAYS', 3)
@@ -105,11 +107,16 @@ class CustomUserManager(UserManager):
         for term in [term.strip() for term in query.split()]:
             if term:
                 valid_term = True
-                qs = qs.filter(Q(first_name__icontains=term)
-                               | Q(last_name__icontains=term)
-                               | Q(email__icontains=term)
-                               | Q(username__icontains=term)
-                               | Q(biography__icontains=term))
+                try:
+                    sql = """(LOWER(first_name) LIKE %s
+                OR LOWER(last_name) LIKE %s
+                OR LOWER(email) LIKE %s
+                OR LOWER(username) LIKE %s
+                OR LOWER(biography) LIKE %s)"""
+                    term = '%' + term.lower() + '%'
+                    qs = qs.extra(where=[sql], params=[term, term, term, term, term])
+                except Exception as e:
+                    logger.error(e)
         if valid_term:
             return qs
         else:

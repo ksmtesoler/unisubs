@@ -7,7 +7,6 @@
 // <button type="button" class="button cta" data-toggle="modal" data-target="#modal_baseline">
 //   Launch baseline example
 // </button>
-// 
 // <!-- Modal -->
 // <div id="modal_baseline" class="modal fade">
 //   <div class="modal-dialog modal-md">
@@ -34,13 +33,11 @@
 
 // Tabbed Content in Modal
 // 
-//
 // Example:
 // <!-- Trigger -->
 // <button type="button" class="button cta" data-toggle="modal" data-target="#modal_tabbed">
 //   Launch baseline example
 // </button>
-// 
 // <!-- Modal -->
 // <div id="modal_tabbed" class="modal fade">
 //   <div class="modal-dialog modal-md">
@@ -82,7 +79,6 @@
 // <button type="button" class="button cta" data-toggle="modal" data-target="#modal_message">
 //   Launch messaging / validation example
 // </button>
-// 
 // <!-- Modal -->
 // <div id="modal_message" class="modal fade">
 //   <div class="modal-dialog modal-md">
@@ -115,12 +111,10 @@
 // Confirmation Dialog
 //
 // Example:
-// 
 // <!-- Trigger -->
 // <button type="button" class="button cta" data-toggle="modal" data-target="#dialog_confirmation">
 //   Launch confirmation example
 // </button>
-// 
 // <!-- Modal / Dialog -->
 // <div id="dialog_confirmation" class="modal fade">
 //   <div class="modal-dialog modal-sm">
@@ -142,10 +136,12 @@
 //
 // Styleguide dialogconfirmation
 
+// Remove Video Dialog
+// 
+// Example:
 // <button type="button" class="button cta" data-toggle="modal" data-target="#modal_remove_video">
 //   Launch Remove Video Example
 // </button>
-
 // <!-- Modal -->
 // <div id="modal_remove_video" class="modal fade">
 //   <div class="modal-dialog modal-md">
@@ -177,7 +173,54 @@
 //     </div>
 //   </div>
 // </div>
+// 
 // Styleguide removevideo
+
+// Many Choices Dialog
+//
+// Example:
+// <!-- Trigger -->
+// <button type="button" class="button cta" data-toggle="modal" data-target="#dialog_choices">
+//   Choose Language
+// </button>
+// <!-- Modal / Dialog -->
+// <div id="dialog_choices" class="modal fade">
+//   <div class="modal-dialog modal-lg">
+//     <div class="modal-content">
+//       <div class="dialogHeader">
+//         <h4 class="dialogTitle">Select your language</h4>
+//       </div>
+//       <form>
+//         <div class="form-group searchbar searchbarFilter" data-target="languageChoice">
+//           <label class="sr-only">Search languages</label>
+//           <input type="text" placeholder="Search languages">
+//         </div>
+//         <ul id="languageChoice" class="col3 filteredList">
+//           <li><a href="#">Espanol (Internacional)</a></li>
+//           <li><a href="#">Bahasa Indonesia</a></li>
+//           <li><a href="#">Bahasa Indonesia</a></li>
+//           <li><a href="#">Dansk</a></li>
+//           <li><a href="#">Espanol (Internacional)</a></li>
+//           <li><a href="#">Espanol (Internacional)</a></li>
+//           <li><a href="#">Portugues (Brasil)</a></li>
+//           <li><a href="#">English</a></li>
+//           <li><a href="#">English</a></li>
+//           <li><a href="#">Dansk</a></li>
+//           <li><a href="#">Espanol (Internacional)</a></li>
+//           <li><a href="#">Espanol (Internacional)</a></li>
+//           <li><a href="#">Espanol (Internacional)</a></li>
+//           <li><a href="#">Bahasa Indonesia</a></li>
+//           <li><a href="#">Bahasa Indonesia</a></li>
+//           <li><a href="#">Dansk</a></li>
+//           <li><a href="#">Espanol (Internacional)</a></li>
+//           <li><a href="#">Portugues (Brasil)</a></li>
+//         </ul>
+//       </form>
+//     </div>
+//   </div>
+// </div>
+//
+// Styleguide dialogchoices
 
 .modal {
   z-index: $z-index-modal;

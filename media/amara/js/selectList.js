@@ -46,7 +46,7 @@ define(['jquery'], function($) {
     function deselectAll(button) {
         button = $(button);
         var target = button.data('target');
-        var inputs = $(target).find('.selectList-checkbox');
+        var inputs = $(target).find('.selectList-checkbox').add('[data-target="'+target+'"]');
 
         button.click(function() {
             inputs.prop('checked', false);
@@ -62,20 +62,23 @@ define(['jquery'], function($) {
         var checkboxes = list.find('.selectList-checkbox');
         var checkboxesFromOtherLists = $('.selectList-checkbox').not(checkboxes);
 
-        checkboxes.on('change', function() {
-            if(checkboxes.is(':checked')) {
-                actionBar.addClass('open');
-                checkboxesFromOtherLists.prop('disabled', true);
-                // Need to set the title on the parent, since mouse events
-                // don't fire for disabled inputs.
-                checkboxesFromOtherLists.parent().attr('title', gettext('You can only select from one list at once'));
-            } else {
-                actionBar.removeClass('open');
-                checkboxesFromOtherLists.prop('disabled', null);
-                checkboxesFromOtherLists.parent().attr('title', null);
-            }
-            selection.val(getSelection().join('-'));
-        }).trigger('change');
+        // Refactor this: Adding this to change other checkboxes when a user clicks an action on a single item
+        var items = list.find('.selectList-item');
+        items.each(function() {
+            var item = $(this);
+            var checkbox = item.find('.selectList-checkbox');
+            var actions = item.find('.actions');
+            actions.on('click', function() {
+                checkbox.prop('checked', true);
+                checkboxes.not(checkbox).prop('checked', false).trigger("change");
+            });
+        });
+
+        checkboxes.each(function() {
+            $(this).on('change', function() {
+                updateActionBar();
+            });
+        });
 
         function getSelection() {
             var selection = [];
@@ -84,5 +87,23 @@ define(['jquery'], function($) {
             });
             return selection;
         }
+
+        function updateActionBar() {
+            var selectedItems = getSelection();
+            if(selectedItems.length) {
+                actionBar.addClass('open');
+                checkboxesFromOtherLists.prop('disabled', true);
+                // Need to set the title on the parent, since mouse events
+                // don't fire for disabled inputs.
+                checkboxesFromOtherLists.parent().attr('title', gettext('You can only select from one list at once'));
+
+            } else {
+                actionBar.removeClass('open');
+                checkboxesFromOtherLists.prop('disabled', null);
+                checkboxesFromOtherLists.parent().attr('title', null);
+            }
+            selection.val(selectedItems.join('-'));
+        }
     }
+
 });

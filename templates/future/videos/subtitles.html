@@ -1,5 +1,5 @@
 {% extends "future/base.html" %}
-{% load i18n new_subtitles_tags ui query_string %}
+{% load i18n new_subtitles_tags ui query_string videos_tags %}
 {% load url from future %}
 
 {% block head-extra %}
@@ -15,7 +15,13 @@
       <div class="col-xs-12 col-sm-8"><a href="{{video.get_absolute_url}}{% query_string %}"><i class="icon icon-back"></i>{% trans "Return to Video" %}</a>
         <div class="content">
           {% include "future/videos/embed.html" with width=848 height=477 url=video.get_video_url %}
-          <h2>{{video.title_display}}</h2>
+          <h2{% if subtitle_version and subtitle_language and subtitle_language.get_title %}
+            {% if subtitle_language.is_rtl %} class="is-rtl"{% endif %}>
+            <bdi>{{ subtitle_language.title_display }}</bdi>
+          {% else %}
+            >{{video.title_display}}
+          {% endif %}
+          </h2>
           <ul class="nav nav-tabs">
             <li class="active"><a href="#subtitles_list" data-toggle="tab" aria-expanded="true">{% trans "Subtitles" %}</a></li>
             <li><a href="#subtitles_info" data-toggle="tab" aria-expanded="false">{% trans "Subtitles info" %}</a></li>
@@ -38,6 +44,17 @@
                 {% else %}
                 <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}{% query_string %}"{% else %}class="button small disabled"{% endif %}>{% trans "Edit subtitles" %}</a>
                 {% endif %}
+                <span>{% trans "Follow" %}</span>
+                <form action="{% url "api:language-follow" video.video_id subtitle_language.language_code %}" class="ajaxForm updateOnChange" method="post">
+                  {% csrf_token %}
+                  <label class="switch switchFollow">
+                    <input name="follow" type="checkbox" {% if subtitle_language|is_follower:user %}checked{% endif %}>
+                    <div class="slider round">
+                      <span class="switchText on">{% trans "ON" %}</span>
+                      <span class="switchText off">{% trans "OFF" %}</span>
+                    </div>
+                  </label>
+                </form>
               </nav>
               {% if subtitle_version and subtitle_version.has_subtitles %}
               {{ subtitle_version|render_subtitles }}
