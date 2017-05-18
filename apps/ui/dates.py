@@ -84,7 +84,7 @@ def format_time(when):
     else:
         delta = now() - when
         dt = when
-    return dt.strftime("%b. %-d, %Y, %-I:%M %p")
+    return dt.strftime("%b %-d, %Y, %-I:%M %p")
 
 def due_date(deadline, when, hypothetical=False):
     """Get text to display a due date
