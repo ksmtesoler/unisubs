@@ -378,7 +378,7 @@ class VideoMovedToTeam(ActivityType):
             msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s')
             from_team_name = None
             from_team_url = None
-        elif can_view_activity(team, user):
+        elif user is not None and can_view_activity(team, user):
             msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> to %(to_team)s from <a href="%(from_team_url)s">%(from_team_name)s</a>')
             from_team_name = team.name
             from_team_url = reverse('teams:dashboard', args=(team.slug,))
@@ -402,7 +402,7 @@ class VideoMovedFromTeam(ActivityType):
             msg = _('<strong>%(user)s</strong> removed <a href="%(video_url)s">%(video)s</a> from %(from_team)s')
             to_team_name = None
             to_team_url = None
-        elif can_view_activity(team, user):
+        elif user is not None and can_view_activity(team, user):
             msg = _('<strong>%(user)s</strong> moved <a href="%(video_url)s">%(video)s</a> from %(from_team)s to <a href="%(to_team_url)s">%(to_team_name)s</a>')
             to_team_name = team.name
             to_team_url = reverse('teams:dashboard', args=(team.slug,))
