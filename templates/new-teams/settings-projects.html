@@ -12,6 +12,9 @@
   <tr>
     <td><h4>{{ project.name }}</h4></td>
     <td class="actions">
+      {% if request.user.is_staff %}
+      <a class="button small copy-text" data-text="{{ project.slug }}">{% trans "copy slug" %}</a>
+      {% endif %}
       <a class="open-modal button small" href="#" data-clear-errors="1" data-modal="edit-form" data-heading="{% blocktrans with name=project.name %}Edit project: {{ name }}{% endblocktrans %}" data-set-form-values='{"project": {{ project.id }}, "name": "{{ project.name }}", "description": "{{ project.description }}"}' >{% trans "edit" %}</a>
       <a class="open-modal button small delete" href="#" data-modal="delete-form" data-heading="{% blocktrans with name=project.name %}Delete project: {{ name }}{% endblocktrans %}" data-text="{% trans "Are you sure you want to delete this project?" %}" data-set-form-values='{"project": {{ project.id }} }'>{% trans "delete" %}</a>
     </td>
