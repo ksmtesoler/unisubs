@@ -549,6 +549,7 @@ MEDIA_BUNDLES = {
             'src/js/third-party/behaviors.js',
             "src/js/third-party/js.cookie.js",
             'src/js/site/announcements.js',
+            'src/js/site/copytext.js',
             'src/js/site/menus.js',
             'src/js/site/modals.js',
             'src/js/site/querystring.js',
