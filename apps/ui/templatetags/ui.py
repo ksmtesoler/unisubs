@@ -30,3 +30,7 @@ def date(dt):
 @register.filter
 def elapsed_time(dt):
     return ui.dates.elapsed_time(dt)
+
+@register.filter
+def format_time(dt):
+    return ui.dates.format_time(dt)
