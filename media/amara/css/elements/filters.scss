@@ -80,11 +80,6 @@
 
 .filterList-select {
   .select2-selection {
-    text-indent: 10px;
-  }
-  .select2-selection__rendered {
-    &:after {
-      top: -5px;
-    }
+    margin-left: 10px;
   }
 }
