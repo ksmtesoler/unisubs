@@ -151,11 +151,14 @@ def videos(request, team):
 
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE)
     page = paginator.get_page(request)
+    next_page, prev_page = paginator.make_next_previous_page_links(page, request)
     add_completed_subtitles_count(list(page))
     context = {
         'team': team,
         'page': page,
         'paginator': paginator,
+        'next': next_page,
+        'previous': prev_page,
         'filters_form': filters_form,
         'team_nav': 'videos',
         'current_tab': 'videos',
@@ -633,6 +636,7 @@ def manage_videos(request, team):
             return manage_videos_form(request, team, form_name, videos)
     enabled_forms = all_video_management_forms(team, request.user)
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
+    next_page, prev_page = paginator.make_next_previous_page_links(page, request)
     page = paginator.get_page(request)
     team.new_workflow.video_management_add_counts(list(page))
     for video in page:
@@ -642,6 +646,8 @@ def manage_videos(request, team):
         'team': team,
         'page': page,
         'paginator': paginator,
+        'next': next_page,
+        'previous': prev_page,
         'filters_form': filters_form,
         'team_nav': 'management',
         'current_tab': 'videos',
