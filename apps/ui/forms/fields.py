@@ -39,19 +39,17 @@ class AmaraChoiceFieldMixin(object):
 
     def _set_choices(self, value):
         self._choices = list(value)
-        self._setup_widget_choices(value)
+        self._setup_widget_choices()
 
     choices = property(_get_choices, _set_choices)
 
-    def _setup_widget_choices(self, choices):
+    def _setup_widget_choices(self):
         null_choice = None
         widget_choices = []
-        for choice in choices:
-            if choice[0]:
-                widget_choices.append(choice)
-            else:
+        for choice in self.choices:
+            if not choice[0]:
                 null_choice = choice[1]
-        self.widget.choices = choices
+        self.widget.choices = self.choices
         if null_choice:
             self.set_select_data('placeholder', null_choice)
             self.set_select_data('allow-clear')
@@ -117,7 +115,7 @@ class LanguageFieldMixin(AmaraChoiceFieldMixin):
     def set_placeholder(self, placeholder):
         self.set_select_data('placeholder', placeholder)
 
-    def _setup_widget_choices(self, choices):
+    def _setup_widget_choices(self):
         pass
 
 class LanguageField(LanguageFieldMixin, forms.ChoiceField):

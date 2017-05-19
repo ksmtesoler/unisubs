@@ -1,17 +1,36 @@
 {% load i18n videos_tags %}
 <dl class="inline-description">
   <dt>{% trans "Title:" %}</dt>
-  <dd>{{ video.title_display }}
+  <dd{% if subtitle_version and subtitle_language and subtitle_language.get_title %}
+    {% if subtitle_language.is_rtl %} class="is-rtl"{% endif %}>
+        <bdi>{{ subtitle_language.title_display }}</bdi>
+    {% else %}
+       >{{ video.title_display }}
+    {% endif %}
+  </dd>
+     {% if subtitle_version.get_metadata_for_display %}
+        {% for entry in subtitle_version.get_metadata_for_display %}
+            <dt>{{ entry.label }}</dt>
+            <dd><bdi>{{ entry.content }}</bdi></dd>
+        {% endfor %}
+     {% else %}
+        {% for entry in metadata %}
+            <dt>{{ entry.label }}</dt>
+            <dd>{{ entry.content }}</dd>
+        {% endfor %}
+     {% endif %}
 
-  {% for entry in metadata %}
-  <dt>{{ entry.label }}</dt>
-  <dd>{{ entry.content }}</dd>
-  {% endfor %}
-
-  {% if video.description %}
+  {% if video.description or subtitle_version.description %}
   <dt>{% trans "Description:" %}</dt>
   <dd class="clamp">
-    <div class="clamp-lines clamp-xs-5">{{ video.description|linebreaks }}</div>
+    <div class="clamp-lines clamp-xs-5"
+      {% if subtitle_version %}
+        {% if subtitle_language.is_rtl %} class="is-rtl"{% endif %}>
+        <bdi>{{ subtitle_version.description|linebreaks }}</bdi>
+      {% else %}
+        >{{ video.description|linebreaks }}
+    {% endif %}
+    </div>
     {% include "future/clamp-toggle.html" %}
   </dd>
   {% endif %}

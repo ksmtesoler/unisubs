@@ -80,7 +80,7 @@ class VideoDurationField(forms.ChoiceField):
 
     @classmethod
     def filter(cls, qs, value):
-        return qs.filter(**self.filter_data(value))
+        return qs.filter(**cls.filter_data(value))
 
     @classmethod
     def filter_data(cls, value):
