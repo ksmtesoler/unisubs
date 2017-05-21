@@ -63,6 +63,13 @@ class ActivityType(Code):
         """Get the message to display in activity logs."""
         raise NotImplementedError()
 
+    # TODO: remove this once the old team activity page is removed
+    def get_old_message(self, record, user):
+        """Remove the username from the message."""
+        msg = self.get_message(record, user)
+        msg = msg.split()[1:]
+        return ' '.join(msg)
+
     def get_action_name(self):
         """Get a short action name for display
 
@@ -722,6 +729,10 @@ class ActivityRecord(models.Model):
 
     def get_message(self, user=None):
         return self.type_obj.get_message(self, user)
+
+    # TODO: Remove this once the team activity page is updated
+    def get_old_message(self, user=None):
+        return self.type_obj.get_old_message(self, user)
 
     def get_action_name(self):
         return self.type_obj.get_action_name()

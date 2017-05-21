@@ -3,7 +3,8 @@
 {% if page %}
 <ul class="activity listing">
   {% for record in page %}
-  <li>{% include "activity/record.html" %}</li>
+  <li>{% if is_team_activity_page %}{% include "activity/old_record.html" %}
+      {% else %}{% include "activity/record.html" %}{% endif %}</li>
   {% endfor %}
 </ul>
 

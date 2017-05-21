@@ -549,6 +549,8 @@ def activity(request, team):
             BreadCrumb(_('Activity')),
         ],
     }
+    # tells the template to use get_old_message instead
+    context['is_team_activity_page'] = True
     if team.is_old_style():
         template_dir = 'teams/'
     else:
