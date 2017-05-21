@@ -636,8 +636,8 @@ def manage_videos(request, team):
             return manage_videos_form(request, team, form_name, videos)
     enabled_forms = all_video_management_forms(team, request.user)
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
-    next_page, prev_page = paginator.make_next_previous_page_links(page, request)
     page = paginator.get_page(request)
+    next_page, prev_page = paginator.make_next_previous_page_links(page, request)
     team.new_workflow.video_management_add_counts(list(page))
     for video in page:
         video.context_menu = manage_videos_context_menu(team, video,
