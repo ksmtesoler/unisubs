@@ -231,7 +231,7 @@
         bctid = /^.*(?:\/|bctid=)(.{13})/.exec( media.src )[ 1 ];
         
         // Retrieve url queries
-        src_query = ( media.src.split( "?" )[ 1 ] || "" )
+        src_query = ( media.src[0].split( "?" )[ 1 ] || "" )
                     .replace( /bckey=.{50}/, "" )
                     .replace( /bctid=.{13}/, "" );
         src_query = src_query.replace( /&t=(?:(\d+)m)?(?:(\d+)s)?/, function( all, minutes, seconds ) {

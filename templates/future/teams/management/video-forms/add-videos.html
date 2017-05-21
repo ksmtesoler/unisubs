@@ -27,18 +27,20 @@
           <button class="button cta">{% trans "Add" %}</button>
 	</form>
       </div>
-        <div id="modal_tab_two" class="tab-pane">
-	  <p>{% trans "Your file should be a CSV file, with the first line being the header. Regardless the header names, the first four columns are the project name, the video URL, the title and the description. You can also add the following columns (determined by their header): duration and primary audio language code." %}</p>
-	  <form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
-	    {% csrf_token %}
-            {% include "future/forms/non-field-errors.html" %}
-	    <input type="hidden" name="form" value="add-csv">
-	    {{ form_bulk }}
+      <div id="modal_tab_two" class="tab-pane">
+	<p>{% trans "Please use this " %}<a href="{{ STATIC_URL }}images/template.csv" download>{% trans "CSV Import Template" %}</a>{% trans " as the basis for your import. The Video URL field is mandatory, but all other fields can be left blank." %}</p>
+	<p>{% trans "A CSV file can be created with a text editor or using the export function of a spreadsheet editor." %}</p>
+	<p>{% trans "Upon completion, you will receive a summary by email." %}</p>
+	<form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
+	  {% csrf_token %}
+          {% include "future/forms/non-field-errors.html" %}
+	  <input type="hidden" name="form" value="add-csv">
+	  {{ form_bulk }}
 	  <p>{% trans "Upon completion, you will recieve a summary by email." %}</p>
           <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
           <button class="button cta">{% trans "Add" %}</button>
-	  </form>
-        </div>
+	</form>
+      </div>
     </div>
     {% else %}
     <div class="modal-body">

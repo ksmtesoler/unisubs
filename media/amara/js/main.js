@@ -18,7 +18,7 @@ require([
         'dialogs',
         'proxyField',
         'dependentSelect',
-        'select',
+        'select/main',
         'scrollBars',
         'selectList',
         'videoPage',
