@@ -44,6 +44,12 @@ def setup_monkeypatches():
     from utils.compat import monkeypatch
     monkeypatch.monkeypatch_old_code()
 
+def uuid_hack():
+    # Fix for older Kombo version from
+    # https://stackoverflow.com/questions/34198538/
+    import uuid
+    uuid._uuid_generate_random = None
+
 def setup_celery_loader():
     os.environ.setdefault("CELERY_LOADER",
                           "amaracelery.loaders.AmaraCeleryLoader")
@@ -67,6 +73,7 @@ def startup():
     """
     optionalapps.setup_path()
     setup_ca()
+    uuid_hack()
     setup_monkeypatches()
     setup_celery_loader()
     run_startup_modules()
