@@ -313,6 +313,7 @@ def video(request, video_id, video_url=None, title=None):
         'metadata': video.get_metadata().convert_for_display(),
         'custom_sidebar': customization.sidebar,
         'header': customization.header,
+        'use_old_messages': True,
     })
 
 def video_ajax_form(request, video_id):
@@ -433,7 +434,8 @@ def activity(request, video_id):
     qs = ActivityRecord.objects.for_video(video)
 
     extra_context = {
-        'video': video
+        'video': video,
+        'use_old_messages': True
     }
 
     return object_list(request, queryset=qs, allow_empty=True,

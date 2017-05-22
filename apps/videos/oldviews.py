@@ -325,6 +325,8 @@ def video(request, video, video_url=None, title=None):
     template_name = 'videos/video-%s.html' % tab
     context = VideoPageContext(request, video, video_url, tab, workflow)
     context['tab'] = tab
+    if tab == 'activity':
+        context['use_old_messages'] = True
 
     if context['create_subtitles_form'].is_valid():
         return context['create_subtitles_form'].handle_post()
@@ -353,7 +355,8 @@ def activity(request, video_id):
     qs = ActivityRecord.objects.for_video(video)
 
     extra_context = {
-        'video': video
+        'video': video,
+        'use_old_messages': True
     }
 
     return object_list(request, queryset=qs, allow_empty=True,
