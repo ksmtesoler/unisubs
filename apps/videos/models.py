@@ -647,6 +647,17 @@ class Video(models.Model):
             'lang': language_code,
         })
 
+    def get_language_url_with_id(self, language_code):
+        sl = self.subtitle_language(language_code)
+        if sl is None:
+            self.get_language_url(self, language_code)
+        else:
+            return reverse('videos:translation_history', kwargs={
+                'video_id': self.video_id,
+                'lang': language_code,
+                'lang_id': int(sl.id),
+            })
+
     def get_primary_videourl_obj(self):
         """Return the primary video URL for this video if one exists, otherwise None.
 
