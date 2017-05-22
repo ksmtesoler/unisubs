@@ -5,29 +5,6 @@ This guide describes the development workflow for Amara.
 
 .. contents::
 
-Branches
---------
-
-The ``production`` branch is what gets deployed to our production server.
-It's what gets deployed to production server.  ``staging`` branch
-is what gets deployed to the staging server.  Commits should *never* be made
-directly to production and only trivial commits should be made to staging.
-
-Instead, Amara development tries to follow a "one branch per feature or
-bugfix" workflow.  Typically changes happen like this:
-
-  - Someone creates a github issue that captures the bug/feature
-  - issue is prioritized and scheduled into a sprint
-  - A developer creates a branch to handle the issue.  Each feature branch
-    should be named after its repository and issue number (e.g.  ``gh-enterprise-1234`` or ``gh-unisubs-5678`` would be branches for github issue 1234 in the amara-enterprise repo and github issue 5678 in the unisubs repo, respectively).  Changes for the issue always get commited to this
-    branch.
-  - Once development on the issue is complete, move the issue to the ``Testing`` pipeline
-  - Tester tests the changes, and issue is moved between ``In progress`` and ``Testing`` as work continues.
-  - Tester creates a pull request from branch to staging once they think it's good to go.
-  - Another developer reviews the code and merges
-  - Once we decide that staging is ready to be deployed to production, we will
-    merge the staging branch to production then deploy.
-
 Creating issues
 ---------------
 
@@ -42,86 +19,20 @@ easy to implement:
   - Try to describe the severity of the issue.  Who is it affecting?  How bad
     is the current behavior, etc.
 
-Development Workflow
---------------------
+Branches / Repositories
+-----------------------
 
-Overview
-~~~~~~~~
+The ``production`` branch is what gets deployed to our production server.
+It's what gets deployed to production server.  ``staging`` branch
+is what gets deployed to the staging server.
 
-We use zenhub for project management.  It's basically a chrome extension that
-adds a kanban-like board to github.  You can get it from
-https://www.zenhub.com/.
-
-Zenhub adds a pipeline field to github issues.  We use this field to track the
-current status of work on the issue.  We use the following pipelines:
-  - ``Icebox`` -- Issues that have been deprioritized, or are inside an Epic to be scheduled later
-  - ``Discovery`` -- Issues that need to be triaged further and/or prioritized
-  - ``Waiting for Design`` -- Issues that need design decisions, mockups, or css before back-end implementation
-  - ``To Do`` -- Scheduled issues that a developer hasn't started yet
-  - ``In Progress`` -- Issues that a developer is currently working on
-  - ``Testing`` -- Issue that a developer believes to be handled and needs
-    testing to verify the fix
-  - ``Waiting for Deploy`` -- Issue that has been fixed in the staging branch
-    and we need to deploy the change to production
-
-Here's the workflow for a typical issue:
-
-  - Someone creates a github issue to capture a bug/feature, and puts it in the Discovery pipeline for the current sprint (Sprint A)
-    - Product manager prioritizes with input from team, moves to Icebox or schedules for a future sprint in To Do (Sprint B)
-    - Developer reviews issue Friday before sprint B begins, adds hour estimates to issue
-    - Product manager reviews estimates, reorders prioritized issues in To Do pipeline before sprint B begins
-  
-  - At beginning of sprint B, developer starts working top issue in To Do pipeline
-
-     - Move the issue to the ``In progress`` pipeline
-     - Create a topic branch to work in
-
-  - Developer does the initial work on the feature
-
-    - They commit code to the branch to handle the issue
-    - Move the issue to the ``Testing`` pipeline and add tester as assignee
-    - Add a comment to the github issue with any notes needed to test the
-      issue (what changes were needed, any areas that should be thoroughly
-      tested, etc.)
-
-  - Tester tests the changes.  If there are problems they make a comment in
-    the issue explaining them, then move it back to the ``In progress``
-    pieline.  As work continues, we iterate back and forth between ``In
-    progress`` and ``Testing``.
-  - Once the tester decides everyting is set to go, they:
-
-    - Create a pull request in github from the topic branch to staging
-    - Add a comment explaining any notes that came up during testing
-
-  - A second developer reviews the code.
-
-    - If there are any issues, they should add a comment to the pull request
-      and the first developer should address them.
-    - Once the code is good, then we merge to staging.
-    - Once the code is merged, the tester should move the issue to the
-      ``Waiting for deploy`` pipeline
-
-  - On Mondays, and sometimes during the week, we decide to deploy the code on staging to production.
-
-     - When this happens the tester closes the issue.
-
-Keep the Topic Branch Up To Date
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Commits should *never* be made directly to production and only trivial commits
+should be made to staging.  Instead, Amara development tries to follow a "one
+branch per feature or bugfix" workflow (See :ref:`Workflow <workflow>`)
 
 As you work on your topic branch, other branches may have been merged into
 ``staging`` by other people.  Make sure you merge staging back to your branch
 as often as possible to keep it up-to-date.
-
-Testing
-~~~~~~~
-
-At a minimum, make sure you :ref:`run the tests <running-tests>`
-after your changes and ensure that all tests pass.
-
-If possible, use test driven development.  Write new tests that cover the
-issue you're working on before you start any code.  Write code that makes the
-test pass.  Then consider refactoring code to fix the problem in a cleaner
-way.
 
 Other Git Repositories
 ----------------------
@@ -152,3 +63,86 @@ those repositories you need to check out a local copy:
   - When we deploy amara, we pick up the the latest commit in master for these
     libraries.  So once your changes are merged to master, they will be live
     the next time we deploy.
+
+Testing
+-------
+
+At a minimum, make sure you :ref:`run the tests <running-tests>`
+after your changes and ensure that all tests pass.
+
+If possible, use test driven development.  Write new tests that cover the
+issue you're working on before you start any code.  Write code that makes the
+test pass.  Then consider refactoring code to fix the problem in a cleaner
+way.
+
+.. _workflow:
+
+Workflow
+--------
+
+We use zenhub for project management.  It's basically a chrome extension that
+adds a kanban-like board to github.  You can get it from
+https://www.zenhub.com/.
+
+Zenhub adds a pipeline field to github issues.  We use this field to track the
+current status of work on the issue.  We use the following pipelines:
+
+  - ``Icebox`` -- Issues that have been deprioritized, or are inside an Epic to be scheduled later
+  - ``Discovery`` -- Issues that need to be triaged further and/or prioritized
+  - ``Waiting for Design`` -- Issues that need design decisions, mockups, or css before back-end implementation
+  - ``To Do`` -- Scheduled issues that a developer hasn't started yet
+  - ``In Progress`` -- Issues that a developer is currently working on
+  - ``Testing`` -- Issue that a developer believes to be handled and needs
+    testing to verify the fix
+  - ``Waiting for Deploy`` -- Issue that has been fixed in the staging branch
+    and we need to deploy the change to production
+
+Here's the workflow for a typical issue:
+
+  - **Prep work**
+
+    - Someone creates a github issue that captures the bug/feature and puts it
+      in the ``Discovery`` pipeline
+    - The issue is prioritized and scheduled into a sprint
+    - Developer reviews issue Friday before the sprint begins, adds story points
+      to the issue
+
+  - **Initial development**
+
+    - A developer creates topic branches for both the ``unisubs`` and
+      ``amara-enterprise`` repositories to handle the issue.  The branches
+      should be named after its repository and issue number (e.g.
+      ``gh-enterprise-1234`` or ``gh-unisubs-5678`` would be branches for
+      github issue 1234 in the amara-enterprise repo and github issue 5678 in
+      the unisubs repo, respectively).  Changes for the issue get commited to
+      these branches.
+    - Once development on the issue is complete, developer moves the issue
+      to the ``Testing`` pipeline and adds any relevant notes for testing to
+      the issue.
+
+  - **Testing**
+
+    - Tester tests the changes.
+    - If there are problems, tester notes them on the issue and moves it back to ``In progress``.
+    - Developer fixes the problems, adds a note to the issue, moves it back to ``Testing``, and we start testing again
+    - Finally, tester approves the changes, then hands it back to developer to do a pull request
+
+  - **Review**
+
+    - Developer merges any new code from staging/master back into the topic branches
+    - Developer creates a pull request for unisubs and/or amara-enterprise
+      depending on which repositories were changed for the issue
+    - A second developer reviews the code
+    - If there are issues, the developer #2 adds comments to the PR and works
+      with developer #1 to resolve them
+    - Once developer #2 thinks the code is ready, they merge the PR
+    - Once we decide that staging is ready to be deployed to production, we will
+      merge the staging branch to production then deploy andnd moves the issue
+      to the ``Waiting for deploy`` pipeline
+
+  - **Deploy**
+    - At some point we will deploy the code.
+    - Usually this happens on a monday.
+    - We first deploy staging, do a check to see if things are okay, then deploy production
+    - Once production is deployed, tester closes all issues in ``Waiting for deploy``
+
