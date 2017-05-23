@@ -162,7 +162,7 @@ select.select {
     border: none;
     border-bottom: 1px solid $gray-light;
   }
-  .select2-results {
+  .select2-results > .select2-results__options {
     max-height: 200px;
     overflow-y: auto;
   }
