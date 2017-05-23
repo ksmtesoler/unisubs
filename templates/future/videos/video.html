@@ -66,9 +66,12 @@
 
 {% block bottom %}
 <div class="modal fade" id="share-dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-md">
     <div class="modal-content">
-      <h4>{% trans "Embed video" %} </h4>
+      <header class="dialogHeader">
+        <h4 class="dialogTitle">{% trans "Embed video" %} </h4>
+      </header>
+    <div class="text-left">
       <p>{% blocktrans %}Use the following code to embed this video. See our <a href="https://github.com/pculture/unisubs/wiki/Embed-Code-Usage-Guide" title="Embed usage guide">usage guide</a> for more details on embedding.{% endblocktrans %}</p>
 
       <p>
@@ -81,10 +84,14 @@
       <p>
         {% trans "Paste this inside your HTML body, where you want to include the widget, with the width and height of your choosing:" %}
         <pre>
-&lt;div class="amara-embed" data-height="{{ height }}px" data-width="{{ width }}px" data-url="{{ video_url }}"&gt;
+&lt;div class="amara-embed" data-height="{{ height }}px" data-width="{{ width }}px" data-url="{{ player_url }}"&gt;
 &lt;/div&gt;
         </pre>
       </p>
+    </div>
+    <form class="text-right">
+      <button class="button cta-reverse" data-dismiss="modal">Close</a>
+    </form>
     </div>
   </div>
 </div>
