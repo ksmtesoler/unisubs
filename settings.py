@@ -420,7 +420,6 @@ MEDIA_BUNDLES = {
         "files": [
             "bower/chartist/dist/chartist.css",
             "bower/select2/dist/css/select2.css",
-            "bower/select2-bootstrap-theme/dist/select2-bootstrap.css",
             "amara/bootstrap/bootstrap-theme.min.css",
             "amara/bootstrap/bootstrap.min.css",
             "amara/css/main.scss",
@@ -550,6 +549,7 @@ MEDIA_BUNDLES = {
             'src/js/third-party/behaviors.js',
             "src/js/third-party/js.cookie.js",
             'src/js/site/announcements.js',
+            'src/js/site/copytext.js',
             'src/js/site/menus.js',
             'src/js/site/modals.js',
             'src/js/site/querystring.js',
