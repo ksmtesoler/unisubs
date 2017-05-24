@@ -739,12 +739,22 @@ def add_video_forms(request, team):
     response_renderer = AJAXResponseRenderer(request)
     form = None
     form_bulk = None
+    form_multiple = None
     if request.method == 'POST' and 'form' in request.POST:
         if request.POST['form'] == 'add-form':
             form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
             if form.is_valid():
                 form.save()
                 messages.success(request, form.success_message())
+                response_renderer.reload_page()
+                return response_renderer.render()
+            else:
+                if permissions.can_add_videos_bulk(request.user, team):
+                    form_bulk = forms.TeamVideoCSVForm
+        elif request.POST['form'] == 'add-multiple':
+            form_multiple = forms.AddMultipleTeamVideoForm(team, request.user, data=request.POST)
+            if form_multiple.is_valid():
+                messages.success(request, form_multiple.success_message())
                 response_renderer.reload_page()
                 return response_renderer.render()
             else:
@@ -765,16 +775,19 @@ def add_video_forms(request, team):
                     return response_renderer.render()
     if form is None:
         form = forms.AddTeamVideoForm(team, request.user)
+    if form_multiple is None:
+        form_multiple = forms.AddMultipleTeamVideoForm(team, request.user)
     if form_bulk is None and permissions.can_add_videos_bulk(request.user, team=team):
         form_bulk = forms.TeamVideoCSVForm()
     form.use_future_ui()
+    form_multiple.use_future_ui()
     template_name = 'future/teams/management/video-forms/add-videos.html'
     context = {
         'team': team,
         'form': form,
+        'form_multiple': form_multiple,
     }
     if form_bulk is not None:
-        # form_bulk.use_future_ui()
         context['form_bulk'] = form_bulk
     response_renderer.show_modal(template_name, context)
     return response_renderer.render()

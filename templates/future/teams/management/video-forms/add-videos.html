@@ -4,10 +4,12 @@
     <header class="dialogHeader">
       <h4 class="dialogTitle">{% trans "Add Video" %}</h4>
     </header>
-    {% if form_bulk %}
     <ul class="nav nav-tabs">
       <li class="active"><a href="#modal_tab_one" data-toggle="tab">{% trans "Add video URL" %}</a></li>
-      <li><a href="#modal_tab_two" data-toggle="tab">{% trans "CSV upload" %}</a></li>
+      <li><a href="#modal_tab_two" data-toggle="tab">{% trans "Add multiple video URLs" %}</a></li>
+      {% if form_bulk %}
+      <li><a href="#modal_tab_three" data-toggle="tab">{% trans "CSV upload" %}</a></li>
+      {% endif %}
     </ul>
     <div class="tab-content">
       <div id="modal_tab_one" class="tab-pane active">
@@ -28,6 +30,17 @@
 	</form>
       </div>
       <div id="modal_tab_two" class="tab-pane">
+	<form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% include "future/forms/non-field-errors.html" %}
+	  <input type="hidden" name="form" value="add-multiple">
+	  {{ form_multiple }}
+          <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
+          <button class="button cta">{% trans "Add Multiple" %}</button>
+	</form>
+      </div>
+      {% if form_bulk %}
+      <div id="modal_tab_three" class="tab-pane">
 	<p>{% trans "Please use this " %}<a href="{{ STATIC_URL }}images/template.csv" download>{% trans "CSV Import Template" %}</a>{% trans " as the basis for your import. The Video URL field is mandatory, but all other fields can be left blank." %}</p>
 	<p>{% trans "A CSV file can be created with a text editor or using the export function of a spreadsheet editor." %}</p>
 	<p>{% trans "Upon completion, you will receive a summary by email." %}</p>
@@ -36,30 +49,11 @@
           {% include "future/forms/non-field-errors.html" %}
 	  <input type="hidden" name="form" value="add-csv">
 	  {{ form_bulk }}
-	  <p>{% trans "Upon completion, you will recieve a summary by email." %}</p>
           <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
           <button class="button cta">{% trans "Add" %}</button>
 	</form>
       </div>
+      {% endif %}
     </div>
-    {% else %}
-    <div class="modal-body">
-      <form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
-	{% csrf_token %}
-	{% include "future/forms/non-field-errors.html" %}
-	{% if form.include_all %}
-	<input type="hidden" name="form" value="add-form">
-	{{ form.include_all|render_field }}
-	{% endif  %}
-	{{ form.video_url|render_field }}
-        {{ form.language|render_field }}
-	{% if form.fields.project.enabled %}
-	{{ form.project|render_field }}
-	{% endif %}
-	<button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
-	<button class="button cta">{% trans "Add" %}</button>
-      </form>
-    </div>
-    {% endif %}
   </div>
 </div>
