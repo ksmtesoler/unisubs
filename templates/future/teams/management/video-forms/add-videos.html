@@ -34,7 +34,14 @@
           {% csrf_token %}
           {% include "future/forms/non-field-errors.html" %}
 	  <input type="hidden" name="form" value="add-multiple">
-	  {{ form_multiple }}
+          {% if form_multiple.include_all %}
+          {{ form_multiple.include_all|render_field }}
+          {% endif  %}
+          {{ form_multiple.video_urls|render_field }}
+          {{ form_multiple.language|render_field }}
+          {% if form_multiple.fields.project.enabled %}
+          {{ form_multiple.project|render_field }}
+          {% endif %}
           <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
           <button class="button cta">{% trans "Add Multiple" %}</button>
 	</form>

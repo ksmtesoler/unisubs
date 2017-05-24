@@ -474,8 +474,9 @@ class AddMultipleTeamVideoForm(forms.Form):
         label=_(u'Project'),
         help_text=_(u"Let's keep things tidy, shall we?")
     )
-    video_urls = MultipleURLsField(label=_('Video URLs'),
-        help_text=_("Enter the URLs of any compatible videos or any videos on our site. Enter one URL per line. You can also browse the site and use the 'Add Video to Team' menu."))
+    video_urls = MultipleURLsField(label="",
+                                   help_text=_("Enter the URLs of any compatible videos or any videos on our site. Enter one URL per line. You can also browse the site and use the 'Add Video to Team' menu."),
+                                   error_messages={'required': 'Please add video URLs.'})
 
     def __init__(self, team, user, *args, **kwargs):
         self.team = team
@@ -497,8 +498,10 @@ class AddMultipleTeamVideoForm(forms.Form):
         if self._errors:
             return self.cleaned_data
         video_urls = self.cleaned_data['video_urls'].split("\n")
-        # See if any error happen when we create our video
+        # See if any error happen when we create our videos
         for video_url in video_urls:
+            if len(video_url.strip()) == 0:
+                continue
             try:
                 Video.add(video_url, self.user,
                           self.setup_video)
@@ -514,8 +517,7 @@ class AddMultipleTeamVideoForm(forms.Form):
         self.saved_team_video = TeamVideo.objects.create(
             video=video, team=self.team, project=self.cleaned_data['project'],
             added_by=self.user)
-        self.summary[3] += 1
-        #self._success_message = ugettext('Video successfully added to team.')
+        self.summary[0] += 1
 
     def setup_existing_video(self, video, video_url):
         team_video, created = TeamVideo.objects.get_or_create(
@@ -526,9 +528,6 @@ class AddMultipleTeamVideoForm(forms.Form):
 
         if created:
             self.saved_team_video = team_video
-            #self._success_message = ugettext(
-            #    'Video successfully added to team from the community videos.'
-            #)
             self.summary[1] += 1
             return
         self.summary[2] += 1
@@ -544,9 +543,20 @@ class AddMultipleTeamVideoForm(forms.Form):
         self._errors['video_url'] = self.error_class([msg])
 
     def success_message(self):
-        message = "Done"
+        message = ""
+        if self.summary[0] > 0:
+            message += "{} videos successfully added, ".format(self.summary[0])
+        if self.summary[1] > 0:
+            message += "{} videos successfully added from community videos, ".format(self.summary[1])
+        if self.summary[2] > 0:
+            message += "{} videos belong to other teams, ".format(self.summary[2])
+        if self.summary[3] > 0:
+            message += "{} videos URL are not valid, ".format(self.summary[3])
+        if len(message) > 2:
+            message = message[:len(message) - 2]
+        else:
+            message = _(u'Please input valid video URLs')
         return message
-        #return self._success_message
 
     def save():
         return self.clean()
