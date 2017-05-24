@@ -52,10 +52,10 @@ class AmaraChoiceFieldMixin(object):
         self.widget.choices = self.choices
         if null_choice:
             self.set_select_data('placeholder', null_choice)
-            self.set_select_data('allow-clear')
+            self.set_select_data('clear', 'true')
         else:
             self.unset_select_data('placeholder')
-            self.unset_select_data('allow-clear')
+            self.set_select_data('clear', 'false')
 
     def widget_attrs(self, widget):
         if isinstance(widget, forms.Select):
