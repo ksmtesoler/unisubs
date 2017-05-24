@@ -5,14 +5,14 @@
       <h4 class="dialogTitle">{% trans "Add Video" %}</h4>
     </header>
     <ul class="nav nav-tabs">
-      <li class="active"><a href="#modal_tab_one" data-toggle="tab">{% trans "Add video URL" %}</a></li>
-      <li><a href="#modal_tab_two" data-toggle="tab">{% trans "Add multiple video URLs" %}</a></li>
+      <li{% if current_tab == 'add-form' %} class="active"{% endif %}><a href="#modal_tab_one" data-toggle="tab">{% trans "Add video URL" %}</a></li>
+      <li{% if current_tab == 'add-multiple' %} class="active"{% endif %}><a href="#modal_tab_two" data-toggle="tab">{% trans "Add multiple video URLs" %}</a></li>
       {% if form_bulk %}
-      <li><a href="#modal_tab_three" data-toggle="tab">{% trans "CSV upload" %}</a></li>
+      <li{% if current_tab == 'add-csv' %} class="active"{% endif %}><a href="#modal_tab_three" data-toggle="tab">{% trans "CSV upload" %}</a></li>
       {% endif %}
     </ul>
     <div class="tab-content">
-      <div id="modal_tab_one" class="tab-pane active">
+      <div id="modal_tab_one" class="tab-pane {% if current_tab == 'add-form' %}active{% endif %}">
 	<form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           {% include "future/forms/non-field-errors.html" %}
@@ -29,7 +29,7 @@
           <button class="button cta">{% trans "Add" %}</button>
 	</form>
       </div>
-      <div id="modal_tab_two" class="tab-pane">
+      <div id="modal_tab_two" class="tab-pane {% if current_tab == 'add-multiple' %}active{% endif %}">
 	<form class="ajaxForm" action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           {% include "future/forms/non-field-errors.html" %}
@@ -47,7 +47,7 @@
 	</form>
       </div>
       {% if form_bulk %}
-      <div id="modal_tab_three" class="tab-pane">
+      <div id="modal_tab_three" class="tab-pane {% if current_tab == 'add-csv' %}active{% endif %}">
 	<p>{% trans "Please use this " %}<a href="{{ STATIC_URL }}images/template.csv" download>{% trans "CSV Import Template" %}</a>{% trans " as the basis for your import. The Video URL field is mandatory, but all other fields can be left blank." %}</p>
 	<p>{% trans "A CSV file can be created with a text editor or using the export function of a spreadsheet editor." %}</p>
 	<p>{% trans "Upon completion, you will receive a summary by email." %}</p>

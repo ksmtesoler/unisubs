@@ -740,6 +740,7 @@ def add_video_forms(request, team):
     form = None
     form_bulk = None
     form_multiple = None
+    current_tab = 'add-form'
     if request.method == 'POST' and 'form' in request.POST:
         if request.POST['form'] == 'add-form':
             form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
@@ -752,6 +753,7 @@ def add_video_forms(request, team):
                 if permissions.can_add_videos_bulk(request.user, team):
                     form_bulk = forms.TeamVideoCSVForm
         elif request.POST['form'] == 'add-multiple':
+            current_tab = 'add-multiple'
             form_multiple = forms.AddMultipleTeamVideoForm(team, request.user, data=request.POST)
             if form_multiple.is_valid():
                 messages.success(request, form_multiple.success_message())
@@ -761,6 +763,7 @@ def add_video_forms(request, team):
                 if permissions.can_add_videos_bulk(request.user, team):
                     form_bulk = forms.TeamVideoCSVForm
         elif request.POST['form'] == 'add-csv':
+            current_tab = 'add-csv'
             form_bulk = forms.TeamVideoCSVForm(data=request.POST, files=request.FILES)
             if form_bulk.is_bound and form_bulk.is_valid():
                 csv_file = form_bulk.cleaned_data['csv_file']
@@ -786,6 +789,7 @@ def add_video_forms(request, team):
         'team': team,
         'form': form,
         'form_multiple': form_multiple,
+        'current_tab': current_tab,
     }
     if form_bulk is not None:
         context['form_bulk'] = form_bulk
