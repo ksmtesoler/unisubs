@@ -1568,7 +1568,7 @@ class TeamVideoURLForm(forms.Form):
 TeamVideoURLFormSet = formset_factory(TeamVideoURLForm)
 
 class TeamVideoCSVForm(forms.Form):
-    csv_file = forms.FileField(label=_(u"CSV file"), required=True, allow_empty_file=False)
+    csv_file = forms.FileField(label="", required=True, allow_empty_file=False)
 
 class VideoManagementForm(ManagementForm):
     """Base class for forms on the video management page."""

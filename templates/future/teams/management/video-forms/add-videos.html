@@ -25,8 +25,10 @@
           {% if form.fields.project.enabled %}
           {{ form.project|render_field }}
           {% endif %}
-          <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
-          <button class="button cta">{% trans "Add" %}</button>
+	  <div class="modal-footer">
+            <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
+            <button class="button cta">{% trans "Add" %}</button>
+	  </div>
 	</form>
       </div>
       <div id="modal_tab_two" class="tab-pane {% if current_tab == 'add-multiple' %}active{% endif %}">
@@ -42,8 +44,10 @@
           {% if form_multiple.fields.project.enabled %}
           {{ form_multiple.project|render_field }}
           {% endif %}
-          <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
-          <button class="button cta">{% trans "Add Multiple" %}</button>
+	  <div class="modal-footer">
+            <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
+            <button class="button cta">{% trans "Add Multiple" %}</button>
+	  </div>
 	</form>
       </div>
       {% if form_bulk %}
@@ -55,9 +59,14 @@
 	  {% csrf_token %}
           {% include "future/forms/non-field-errors.html" %}
 	  <input type="hidden" name="form" value="add-csv">
-	  {{ form_bulk }}
-          <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
-          <button class="button cta">{% trans "Add" %}</button>
+          {% if form_bulk.include_all %}
+          {{ form_bulk.include_all|render_field }}
+          {% endif  %}
+          {{ form_bulk.csv_file|render_field }}
+	  <div class="modal-footer">
+            <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</button>
+            <button class="button cta">{% trans "Add" %}</button>
+	  </div>
 	</form>
       </div>
       {% endif %}
