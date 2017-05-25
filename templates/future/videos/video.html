@@ -41,7 +41,7 @@
               {% include "future/videos/tabs/info.html" %}
             </div>
             <div id="video_activity" class="tab-pane{% if tab == "activity" %} active{% endif %}" role="tabpanel">
-              {% include "future/videos/tabs/activity.html" %}
+              {% include "future/videos/tabs/activity.html" with count=activity_count show_more=show_more %}
             </div>
             <div id="video_comments" class="tab-pane{% if tab == "comments" %} active{% endif %}" role="tabpanel">
               {% include "future/videos/tabs/comments.html" %}
