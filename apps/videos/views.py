@@ -99,6 +99,7 @@ from teams.permissions import can_edit_video, can_add_version, can_resync
 from . import video_size
 
 VIDEO_IN_ROW = 6
+ACTIVITY_PER_PAGE = 8
 
 rpc_router = RpcRouter('videos:rpc_router', {
     'VideosApi': VideosApiClass()
@@ -299,28 +300,17 @@ def video(request, video_id, video_url=None, title=None):
     all_activities = ActivityRecord.objects.for_video(
         video, customization.team)
 
-    if request.is_ajax() and request.GET.get('more', None):
-        count = int(request.GET.get('more'))
-        end = (count * 8) + 8
-        if end < len(all_activities):
-            count += 1
-            show_more = True
-        else:
-            show_more = False
+    if request.is_ajax() and request.GET.get('show-all', None):
         response_renderer = AJAXResponseRenderer(request)
         response_renderer.replace(
-            'table', "future/videos/tabs/activity.html", {
-                'activity': all_activities[:end],
-                })
-        response_renderer.replace(
-            '#activity-show-more', "future/videos/tabs/activity.html", {
-            'show_more': show_more,
-            'count': count
-            })
+            '#video_activity', "future/videos/tabs/activity.html", {
+                'activity': all_activities,
+            },
+        )
         return response_renderer.render()
 
-    activity = all_activities[:8]
-    show_more = False if len(activity) >= len(all_activities) else True
+    activity = all_activities[:ACTIVITY_PER_PAGE]
+    show_all = False if len(activity) >= len(all_activities) else True
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
@@ -334,7 +324,7 @@ def video(request, video_id, video_url=None, title=None):
         'comments': Comment.get_for_object(video),
         'activity': activity,
         'activity_count': 1,
-        'show_more': show_more,
+        'show_all': show_all,
         'metadata': video.get_metadata().convert_for_display(),
         'custom_sidebar': customization.sidebar,
         'header': customization.header,
@@ -583,31 +573,20 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     all_activities = (ActivityRecord.objects.for_video(video, customization.team)
                 .filter(language_code=lang))
 
-    if request.is_ajax() and request.GET.get('more', None):
-        count = int(request.GET.get('more'))
-        end = (count * 8) + 8
-        if end < len(all_activities):
-            count += 1
-            show_more = True
-        else:
-            show_more = False
+    if request.is_ajax() and request.GET.get('show-all', None):
         response_renderer = AJAXResponseRenderer(request)
         response_renderer.replace(
-            'table', "future/videos/tabs/activity.html", {
-                'activity': all_activities[:end],
-            })
-        response_renderer.replace(
-            '#activity-show-more', "future/videos/tabs/activity.html", {
-                'show_more': show_more,
-                'count': count
-            })
+            '#subtitles_activity', "future/videos/tabs/activity.html", {
+                'activity': all_activities,
+            },
+        )
         return response_renderer.render()
 
     all_subtitle_versions = subtitle_language.versions_for_user(
             request.user).order_by('-version_number')
     team_video = video.get_team_video()
-    activity = all_activities[:8]
-    show_more = False if len(activity) >= len(all_activities) else True
+    activity = all_activities[:ACTIVITY_PER_PAGE]
+    show_all = False if len(activity) >= len(all_activities) else True
     context = {
         'video': video,
         'team_video': team_video,
@@ -624,7 +603,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'downloadable_formats': downloadable_formats(request.user),
         'activity': activity,
         'activity_count': 1,
-        'show_more': show_more,
+        'show_all': show_all,
         'comments': comments,
         'comment_form': comment_form,
         'enable_edit_in_admin': request.user.is_superuser,

@@ -12,8 +12,6 @@
     {% endfor %}
   </tbody>
 </table>
-{% if show_more %}
-<div id="activity-show-more">
-  <a class="ajaxLink button" href="{% query_string -more %}&more={{count}}" role="button">More</a>
-</div>
+{% if show_all %}
+<a class="ajaxLink button loadingIcon" href="{% query_string show-all=1 %}" role="button">{% trans "Show all" %}</a>
 {% endif %}
