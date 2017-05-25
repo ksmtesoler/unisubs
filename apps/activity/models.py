@@ -697,20 +697,24 @@ class ActivityRecord(models.Model):
             return ''
 
     def get_video_url(self):
-        if self.video:
+        if self.video and self.team.workflow_type != 'O':
             url = self.video.get_absolute_url()
             if self.team:
                 url += "?team={}".format(self.team.slug)
             return url
+        elif self.video:
+            return self.video.get_absolute_url()
         else:
             return ''
 
     def get_language_url(self):
         if self.video and self.language_code:
             url = self.video.get_language_url_with_id(self.language_code)
-            if self.team:
+            if self.team and self.team.workflow_type != 'O':
                 url += "?team={}".format(self.team.slug)
             return url
+        elif self.video:
+            return self.video.get_language_url_with_id(self.language_code)
         else:
             return ''
 
