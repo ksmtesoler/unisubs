@@ -441,6 +441,10 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         avatar = self._get_avatar(30)
         return mark_safe('<img class="avatar" src="{}">'.format(avatar))
 
+    def avatar_tag_alert(self):
+        avatar = self._get_avatar(30)
+        return mark_safe('<img class="avatar avatar-alert" src="{}">'.format(avatar))
+
     def avatar_tag_medium(self):
         avatar = self._get_avatar(50)
         return mark_safe('<img class="avatar avatar-md" src="{}">'.format(avatar))
