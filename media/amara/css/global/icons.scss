@@ -214,7 +214,10 @@ i {
   content: "\e910";
 }
 
-
+.icon-loading:before {
+  // TODO: replace this with a new, animated, loading icon
+  content: "\e902";
+}
 
 
 

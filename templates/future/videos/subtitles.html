@@ -66,7 +66,7 @@
               {% include "future/videos/tabs/info.html" %}
             </div>
             <div id="subtitles_activity" class="tab-pane">
-              {% include "future/videos/tabs/activity.html" %}
+              {% include "future/videos/tabs/activity.html" with count=activity_count show_more=show_more %}
             </div>
             {% if comments %}
             <div id="subtitles_comments" class="tab-pane">
