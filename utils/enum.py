@@ -15,8 +15,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
+"""
+utils.enum -- Enum handling
+"""
 
 from __future__ import absolute_import
+
+from django.db import models
+from south.modelsinspector import add_introspection_rules
 
 RAISE_KEY_ERROR = object()
 
@@ -133,3 +139,51 @@ class Enum(object):
 
     def __iter__(self):
         return iter(self.members)
+
+    def __len__(self):
+        return len(self.members)
+
+class EnumField(models.PositiveSmallIntegerField):
+    """
+    Store enum values in a database field.
+    """
+    # FIXME: merge this code with codefield.CodeField
+
+    __metaclass__ = models.SubfieldBase
+
+    def __init__(self, enum=None, **kwargs):
+        if enum is None:
+            # Note, enum=None doesn't really make any sense, but we need to
+            # allow it to make south migrations work
+            enum = Enum('FakeEnum', [])
+        super(EnumField, self).__init__(**kwargs)
+        self.enum = enum
+
+    def db_type(self, connection):
+        return 'tinyint UNSIGNED' # 256 values should be enough for our enums
+
+    def contribute_to_class(self, cls, name):
+        super(EnumField, self).contribute_to_class(cls, name)
+        setattr(cls, '{}_choices'.format(name), self.enum.slug_choices)
+
+    def to_python(self, value):
+        if isinstance(value, basestring):
+            return self.enum.lookup_slug(value)
+        elif isinstance(value, (int, long)):
+            return self.enum.lookup_number(value)
+        else:
+            return value
+
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        elif isinstance(value, (int, long)):
+            return value
+        elif isinstance(value, basestring):
+            return self.enum.lookup_slug(value).number
+        else:
+            return value.number
+
+add_introspection_rules([], [
+    "^utils\.enum\.EnumField$",
+])
