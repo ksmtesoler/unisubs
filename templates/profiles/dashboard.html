@@ -96,7 +96,7 @@
             {% if video_activity %}
                 <ul class="listing activity">
                     {% for record in video_activity %}
-                    <li>{% include "activity/record.html" %}</li>
+                    <li>{% include "activity/old_record.html" %}</li>
                     {% endfor %}
                 </ul>
             {% else %}
@@ -122,7 +122,7 @@
             {% if team_activity %}
                 <ul class="listing activity">
                     {% for record in team_activity %}
-                    <li>{% include "activity/record.html" %}</li>
+                    <li>{% include "activity/old_record.html" %}</li>
                     {% endfor %}
                 </ul>
             {% else %}
