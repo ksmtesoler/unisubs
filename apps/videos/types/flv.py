@@ -36,7 +36,7 @@ class FLVVideoType(VideoType):
     def matches_video_url(cls, url):
         return cls.url_extension(url) == 'flv'
 
-    def set_values(self, video):
+    def set_values(self, video, user, team):
         cmd = """avprobe -v error -show_format -show_streams "{}" | grep duration= | sed 's/^.*=//' | head -n1""".format(self.url)
         try:
             duration = int(float(subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)))

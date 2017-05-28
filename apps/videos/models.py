@@ -668,7 +668,7 @@ class Video(models.Model):
         return self.videourl_set.count()
 
     @staticmethod
-    def add(url, user, setup_callback=None):
+    def add(url, user, setup_callback=None, team=None):
         """
         Add a new Video
 
@@ -709,7 +709,7 @@ class Video(models.Model):
             video = Video.objects.create()
             vt, video_url = video._add_video_url(url, user, True)
             # okay, we can now run the setup
-            video.set_values(vt)
+            video.set_values(vt, user, team)
             video.user = user
             if setup_callback:
                 setup_callback(video, video_url)
@@ -728,8 +728,8 @@ class Video(models.Model):
 
         return (video, video_url)
 
-    def set_values(self, video_type):
-        video_type.set_values(self)
+    def set_values(self, video_type, user, team):
+        video_type.set_values(self, user, team)
         self.title = self.re_unicode.sub(u'\uFFFD', self.title)
         self.description = self.re_unicode.sub(u'\uFFFD', self.description)
 

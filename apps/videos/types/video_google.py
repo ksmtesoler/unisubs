@@ -32,7 +32,7 @@ class GoogleVideoType(VideoType):
     def matches_video_url(cls, url):
         return bool(google_video.GOOGLE_VIDEO_REGEX.match(url))
 
-    def set_values(self, video_obj):
+    def set_values(self, video_obj, user, team):
         video_obj.title = google_video.scrape_title(self.url)
         video_obj.description = google_video.scrape_description(self.url)
         raise Warning('GoogleVideoType does not support thumbnail loading')

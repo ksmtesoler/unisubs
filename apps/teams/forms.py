@@ -234,7 +234,7 @@ class AddTeamVideoForm(forms.ModelForm):
         # See if any error happen when we create our video
         try:
             Video.add(self.cleaned_data['video_url'], self.user,
-                      self.setup_video)
+                      self.setup_video, self.team)
         except Video.UrlAlreadyAdded, e:
             self.setup_existing_video(e.video, e.video_url)
         return self.cleaned_data
@@ -1649,7 +1649,7 @@ class TeamVideoURLForm(forms.Form):
                                                   added_by=user)
 
         try:
-            Video.add(video_type, user, setup_video)
+            Video.add(video_type, user, setup_video, team)
         except Video.UrlAlreadyAdded, e:
             if e.video.get_team_video() is not None:
                 return (False,
