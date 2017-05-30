@@ -75,7 +75,7 @@ select.select {
   width: 100% !important;
 
   .select2-selection {
-    height: 32px;
+    min-height: 32px;
     line-height: 32px;
     padding: 0px 10px;
     outline: 0; // We create our own focus ring below
