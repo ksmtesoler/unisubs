@@ -137,8 +137,8 @@ p.empty {
 .v1 ul .timestamp {
     color: $light;
     text-align: right;
-    width: 150px;
-    @include box-right;
+    padding-left: 10px;
+    float: right;
 }
 div.hidden, form.hidden {
     display: none;
@@ -1376,11 +1376,6 @@ div#language_picker {
 
         &.unread {
             font-weight: bold;
-        }
-
-        .timestamp {
-            top: 1em;
-            width: 150px;
         }
     }
 

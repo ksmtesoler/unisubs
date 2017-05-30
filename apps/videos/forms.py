@@ -105,8 +105,9 @@ class VideoURLField(forms.URLField):
     """
     def clean(self, video_url):
         if not video_url:
+            if self.required:
+                raise forms.ValidationError(self.error_messages['required'])
             return None
-
         try:
             video_type = video_type_registrar.video_type_for_url(video_url)
         except VideoTypeError, e:
@@ -188,7 +189,7 @@ class CreateVideoUrlForm(forms.Form):
         return output
 
 class NewCreateVideoUrlForm(forms.Form):
-    url = VideoURLField()
+    url = VideoURLField(required=True)
 
     def __init__(self, video, user, *args, **kwargs):
         super(NewCreateVideoUrlForm, self).__init__(*args, **kwargs)
@@ -197,7 +198,7 @@ class NewCreateVideoUrlForm(forms.Form):
 
     def clean(self):
         data = super(NewCreateVideoUrlForm, self).clean()
-        if 'url' in self.cleaned_data:
+        if self.cleaned_data.get('url'):
             self.create_video_url()
         return self.cleaned_data
 

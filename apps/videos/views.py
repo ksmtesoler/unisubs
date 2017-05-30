@@ -265,7 +265,7 @@ def should_use_old_view(request):
 def video(request, video_id, video_url=None, title=None):
     if should_use_old_view(request):
         return oldviews.video(request, video_id, video_url, title)
-    if request.is_ajax() and 'form' in request.GET:
+    if request.is_ajax() and 'form' in request.POST:
         return video_ajax_form(request, video_id)
     request.use_cached_user()
     try:

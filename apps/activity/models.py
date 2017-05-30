@@ -427,10 +427,11 @@ class VideoURLEdited(ActivityType):
     def get_message(self, record, user):
         url_edit = record.get_related_obj()
         if url_edit is not None:
-            msg = _('<strong>%(user)s</strong> changed primary url from '
-                    '<a href="%(old_url)s">%(old_url)s</a> to '
-                    '<a href="%(new_url)s">%(new_url)s</a>').format(old_url=url_edit.old_url,
-                                                                    new_url=url_edit.new_url)
+            msg = fmt(_('<strong>%(user)s</strong> changed primary url from '
+                        '<a href="%(old_url)s">%(old_url)s</a> to '
+                        '<a href="%(new_url)s">%(new_url)s</a>'),
+                      old_url=url_edit.old_url,
+                      new_url=url_edit.new_url)
         else:
             msg = _('<strong>%(user)s</strong> changed the primary url')
         return self.format_message(record, msg)
@@ -438,10 +439,11 @@ class VideoURLEdited(ActivityType):
     def get_old_message(self, record, user):
         url_edit = record.get_related_obj()
         if url_edit is not None:
-            msg = _('changed primary url from '
-                    '<a href="%(old_url)s">%(old_url)s</a> to '
-                    '<a href="%(new_url)s">%(new_url)s</a>').format(old_url=url_edit.old_url,
-                                                                    new_url=url_edit.new_url)
+            msg = fmt(_('changed primary url from '
+                        '<a href="%(old_url)s">%(old_url)s</a> to '
+                        '<a href="%(new_url)s">%(new_url)s</a>'),
+                        old_url=url_edit.old_url,
+                        new_url=url_edit.new_url)
         else:
             msg = _('changed the primary url')
         return self.format_message(record, msg)
@@ -846,7 +848,7 @@ class ActivityRecord(models.Model):
     def get_language_url(self):
         if self.video and self.language_code:
             url = self.video.get_language_url_with_id(self.language_code)
-            if self.team and self.team.workflow_type != 'O':
+            if self.team and self.team and self.team.workflow_type != 'O':
                 url += "?team={}".format(self.team.slug)
             return url
         elif self.video:
