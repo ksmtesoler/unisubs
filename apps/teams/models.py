@@ -858,7 +858,7 @@ class Team(models.Model):
     def get_completed_language_counts(self):
         from subtitles.models import SubtitleLanguage
         qs = (SubtitleLanguage.objects
-              .filter(video__in=self.videos.all())
+              .filter(video__teamvideo__team=self)
               .values_list('language_code')
               .annotate(Sum('subtitles_complete')))
         return [(lc, int(count)) for lc, count in qs]
