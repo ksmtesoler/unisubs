@@ -61,7 +61,7 @@ define([
             });
         }
         this.extraOptions = this.convertToOptions(makeExtraOptions(extraOptions));
-        this.addOptions(this.extraOptions);
+        this.$element.prepend(this.extraOptions);
     }
 
     function AmaraAjaxData($element, data) {
@@ -77,7 +77,7 @@ define([
     AmaraAjaxData.prototype.query = function(params, callback) {
         if(!params.term || params.term.length < 1) {
             var results = this.filterOutExtraOptions(this.$element.select2('data'));
-            results = results.concat(this.extraOptions);
+            results = this.extraOptions.concat(results);
             callback({
                 results: results
             });
