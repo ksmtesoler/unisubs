@@ -44,6 +44,14 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
                     dialogs.showModal(change[1]).updateBehaviors();
                     break;
 
+                case 'hideModal':
+                    if(change[1]) {
+                        $(change[1]).modal('hide');
+                    } else {
+                        closeCurrentModal();
+                    }
+                    break;
+
                 case 'showModalProgress':
                     dialogs.showModalProgress(change[1], change[2]);
                     break;
