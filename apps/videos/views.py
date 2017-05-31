@@ -535,11 +535,15 @@ def legacy_history(request, video, lang):
     language, created = SubtitleLanguage.objects.get_or_create(
         video=video, language_code=lang)
 
-    return HttpResponseRedirect(reverse("videos:translation_history", kwargs={
-            'video_id': video.video_id,
-            'lang_id': language.pk,
-            'lang': language.language_code,
-            }))
+    url = reverse("videos:translation_history", kwargs={
+        'video_id': video.video_id,
+        'lang_id': language.pk,
+        'lang': language.language_code,
+    })
+    if request.META['QUERY_STRING']:
+        url = '{}?{}'.format(url, request.META['QUERY_STRING'])
+
+    return HttpResponseRedirect(url)
 
 def subtitles(request, video_id, lang, lang_id, version_id=None):
     if should_use_old_view(request):
