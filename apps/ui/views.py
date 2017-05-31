@@ -19,10 +19,11 @@
 from __future__ import absolute_import
 
 from celery.result import AsyncResult
+from django.conf import settings
 from django.contrib import messages
 from django.http import Http404
 from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
+from django.utils.translation import to_locale, ugettext as _
 
 from ui import tasks
 from ui.ajax import AJAXResponseRenderer
@@ -80,4 +81,16 @@ def render_management_form_submit(request, form):
         for error in form.error_messages():
             messages.error(request, error)
         response_renderer.reload_page()
+    return response_renderer.render()
+
+def language_select(request):
+    url = request.META.get('HTTP_REFERER').split('/')
+    template_name = 'future/language_switcher.html'
+    response_renderer = AJAXResponseRenderer(request)
+    context = {}
+    context['languages'] = []
+    for code, name in settings.LANGUAGES:
+        url[3] = to_locale(code)
+        context['languages'] += [('/'.join(url), name)]
+    response_renderer.show_modal(template_name, context)
     return response_renderer.render()
