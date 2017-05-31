@@ -1,0 +1,22 @@
+{% load i18n %}
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="dialogHeader">
+        <h4 class="dialogTitle">{% trans "Select your language" %}</h4>
+      </div>
+      <form>
+        <div class="form-group searchbar searchbarFilter" data-target="languageChoice">
+          <label class="sr-only">{% trans "Search languages" %}</label>
+          <input id="languageSearchBar" onkeyup="filterLanguages()" type="text" placeholder="{% trans "Search languages"%}">
+        </div>
+        <ul id="languageChoice" class="col3 filteredList">
+          {% for url, name in languages %}
+          <li><a href="{{url}}">{{name}}</a></li>
+          {% endfor %}
+        </ul>
+        <div class="text-right">
+          <button class="button cta-reverse" data-dismiss="modal">{% trans "Cancel" %}</a>
+        </div>
+      </form>
+    </div>
+  </div>
