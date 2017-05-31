@@ -31,7 +31,6 @@ def to_localized_display(language_code):
         })
     return '?'
 
-
 @register.filter()
 def to_language_display(language_code):
     return  LANGUAGE_NAMES[language_code]

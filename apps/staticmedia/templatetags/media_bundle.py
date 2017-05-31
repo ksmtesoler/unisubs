@@ -22,6 +22,7 @@ from django import template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import to_locale
+from utils.translation import get_language_label
 
 from staticmedia import bundles
 from staticmedia import utils
@@ -58,3 +59,7 @@ def js_language_data(context):
     else:
         src = reverse('staticmedia:js_language_data', args=(locale,))
     return '<script type="text/javascript" src="{}"></script>'.format(src)
+
+@register.simple_tag(takes_context=True)
+def current_language_name(context):
+    return get_language_label(context['LANGUAGE_CODE'])

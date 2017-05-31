@@ -47,15 +47,15 @@
               </p>
             </div>
           </div>
-          <nav class="col-xs-14 col-sm-6">
+          <nav class="col-xs-12 col-sm-6">
             <div class="row start-xs">
             {% if not user.is_staff %}
-              <ul class="col-xs-4">
+              <ul class="col-xs-3">
                 <li>
-                  <button type="button" class="ajaxLink" href="/ui/language-select/">
+                  <a class="ajaxLink text" href="/ui/language-select/">
                     <img width="25" height="25" src="/media/images/language-switch-globe.svg"/>
-                    <strong>Choose Language</strong>
-                  </button>
+                    <strong>{% current_language_name %}</strong>
+                  </a>
                 </li>
               </ul>
               <ul class="col-xs-3">
@@ -76,12 +76,12 @@
                 <li><a href="//facebook.com/Amara.Community">{% trans "Facebook" %}</a></li>
               </ul>
               {% else %}
-              <ul class="col-xs-4">
+              <ul class="col-xs-3">
                 <li>
-                  <button type="button" class="ajaxLink" href="/ui/language-select/">
+                  <a class="ajaxLink text" href="/ui/language-select/">
                     <img width="25" height="25" src="/media/images/language-switch-globe.svg"/>
-                    <strong>Choose Language</strong>
-                  </button>
+                    <strong>{% current_language_name %}</strong>
+                  </a>
                 </li>
               </ul>
               <ul class="col-xs-2">

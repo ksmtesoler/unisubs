@@ -28,6 +28,7 @@ from django.utils.translation import to_locale, ugettext as _
 from ui import tasks
 from ui.ajax import AJAXResponseRenderer
 from utils.text import fmt
+from utils.translation import get_language_choices
 
 TASK_UPDATE_INTERVAL = 0.5
 
@@ -89,7 +90,9 @@ def language_select(request):
     response_renderer = AJAXResponseRenderer(request)
     context = {}
     context['languages'] = []
-    for code, name in settings.LANGUAGES:
+    valid_options = [code for code, label in settings.LANGUAGES]
+    for code, name in get_language_choices(flat=True, limit_to=valid_options):
+        print(code, name)
         url[3] = to_locale(code)
         context['languages'] += [('/'.join(url), name)]
     response_renderer.show_modal(template_name, context)
