@@ -2,6 +2,9 @@
 ul.subtitlesList {
   display: flex;
   flex-wrap: wrap;
+  &.is-rtl {
+      text-align: right;
+  }
   li {
     position: relative;
     display: flex;
@@ -19,7 +22,10 @@ ul.subtitlesList {
       position: relative;
       padding-left: 30px;
       word-wrap: break-word;
-      max-width: 85%;
+      width: 85%;
+      &.is-rtl {
+	  direction: rtl;
+      }
       &.topicSentence {
         &:before {
           content: "\00B6";
