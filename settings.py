@@ -106,6 +106,7 @@ COMPRESS_OUTPUT_DIRNAME = "static-cache"
 
 
 USER_LANGUAGES_COOKIE_NAME = 'unisub-languages-cookie'
+LANGUAGE_COOKIE_NAME = 'language'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
