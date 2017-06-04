@@ -140,6 +140,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'middleware.AmaraSecurityMiddleware',
+    'caching.middleware.AmaraCachingMiddleware',
     'middleware.LogRequest',
     'middleware.StripGoogleAnalyticsCookieMiddleware',
     'utils.ajaxmiddleware.AjaxErrorMiddleware',

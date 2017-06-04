@@ -53,6 +53,7 @@ import widget
 from widget import rpc as widget_rpc
 from activity.models import ActivityRecord
 from auth.models import CustomUser as User
+from caching.decorators import cache_page
 from comments.models import Comment
 from comments.forms import CommentForm
 from subtitles.models import SubtitleLanguage, SubtitleVersion
@@ -184,16 +185,19 @@ class LanguageList(object):
     def __len__(self):
         return len(self.items)
 
+@cache_page(minutes=60)
 def index(request):
     return render_to_response('index.html', {},
                               context_instance=RequestContext(request))
 
+@cache_page(minutes=60)
 def watch_page(request):
     return render(request, 'videos/watch-home.html', {
         'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
         'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
     })
 
+@cache_page(minutes=60)
 def video_listing_page(request, subheader, video_qs, query=None,
                        force_pages=None):
     paginator = AmaraPaginator(video_qs, VIDEO_IN_ROW * 3)

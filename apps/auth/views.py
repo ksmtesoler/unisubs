@@ -36,7 +36,7 @@ from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from django.template.response import TemplateResponse
 from django.utils.http import urlquote
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, get_language
 from django.views.decorators.csrf import csrf_protect
 from oauth import oauth
 from auth.forms import CustomUserCreationForm, ChooseUserForm, SecureAuthenticationForm, \
@@ -66,6 +66,19 @@ def login(request):
         form = AuthenticationForm(label_suffix="")
     return render_login(request, CustomUserCreationForm(label_suffix=""),
                         form, redirect_to)
+
+def logout(request):
+    """Log the user out
+
+    This method differs from the standard django one in a couple ways:
+
+    - We delete the session and unset the session cookie (better for caching)
+    - We redirect to a language-specific homepage URL
+    """
+    request.session.delete()
+    response = HttpResponseRedirect("/{}/".format(get_language()))
+    response.delete_cookie(settings.SESSION_COOKIE_NAME)
+    return response
 
 def confirm_create_user(request, account_type, email):
     redirect_to = request.REQUEST.get(REDIRECT_FIELD_NAME, '')

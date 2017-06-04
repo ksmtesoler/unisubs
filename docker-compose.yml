@@ -58,3 +58,8 @@ services:
     image: memcached
     ports:
       - "11211"
+
+  varnish:
+    image: amara/amara-cache
+    ports:
+      - "9000:80"
