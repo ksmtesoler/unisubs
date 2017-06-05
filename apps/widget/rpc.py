@@ -61,7 +61,7 @@ LANGUAGES_MAP = dict(ALL_LANGUAGES)
 
 def get_general_settings(request):
     general_settings = {
-        'writelock_expiration' : models.WRITELOCK_EXPIRATION,
+        'writelock_expiration' : new_models.WRITELOCK_EXPIRATION,
         'embed_version': '',
         'languages': ALL_LANGUAGES,
         'metadata_languages': settings.METADATA_LANGUAGES
@@ -364,7 +364,7 @@ class Rpc(BaseRpc):
             return locked
 
         # just lock the video *after* we verify if team moderation happened
-        language.writelock(request.user, request.browser_id)
+        language.writelock(request.user)
         language.save()
 
         # Create the subtitling session and subtitle version for these edits.
@@ -441,10 +441,10 @@ class Rpc(BaseRpc):
         if error:
             return {'response': 'cannot_resume'}
 
-        if language.can_writelock(request.browser_id) and \
+        if language.can_writelock(request.user) and \
                 session.parent_version == language.version():
 
-            language.writelock(request.user, request.browser_id)
+            language.writelock(request.user)
 
             version_for_subs, version_number = self._get_version_to_edit(language, session)
 
@@ -475,7 +475,7 @@ class Rpc(BaseRpc):
     # Locking
     def release_lock(self, request, session_pk):
         language = SubtitlingSession.objects.get(pk=session_pk).language
-        if language.can_writelock(request.browser_id):
+        if language.can_writelock(request.user):
             language.release_writelock()
             language.save()
             video_cache.writelocked_langs_clear(language.video.video_id)
@@ -483,10 +483,10 @@ class Rpc(BaseRpc):
 
     def regain_lock(self, request, session_pk):
         language = SubtitlingSession.objects.get(pk=session_pk).language
-        if not language.can_writelock(request.browser_id):
+        if not language.can_writelock(request.user):
             return { 'response': 'unlockable' }
         else:
-            language.writelock(request.user, request.browser_id)
+            language.writelock(request.user)
             video_cache.writelock_add_lang(
                 language.video.video_id, language.language_code)
             return { 'response': 'ok' }
@@ -796,7 +796,7 @@ class Rpc(BaseRpc):
 
         if not request.user.is_authenticated():
             return { 'response': 'not_logged_in' }
-        if not session.language.can_writelock(request.browser_id):
+        if not session.language.can_writelock(request.user):
             return { "response" : "unlockable" }
         if not session.matches_request(request):
             return { "response" : "does not match request" }
@@ -978,8 +978,7 @@ class Rpc(BaseRpc):
         session = SubtitlingSession(
             language=language,
             base_language=base_language,
-            parent_version=version,
-            browser_id=request.browser_id)
+            parent_version=version)
 
         if request.user.is_authenticated():
             session.user = request.user
@@ -1117,7 +1116,7 @@ class Rpc(BaseRpc):
                 # if we reached this point, we have no good matches
                 language = candidates[0]
 
-        editable = language.can_writelock(request.browser_id)
+        editable = language.can_writelock(request.user)
 
         if editable:
             if created:

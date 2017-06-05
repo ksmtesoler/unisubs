@@ -2254,8 +2254,8 @@ def _writelock_languages_for_delete(request, subtitle_language):
     locked = []
 
     for sl in to_lock:
-        if sl.can_writelock(request.browser_id):
-            sl.writelock(request.user, request.browser_id)
+        if sl.can_writelock(request.user):
+            sl.writelock(request.user)
             locked.append(sl)
         else:
             messages.error(request, fmt(

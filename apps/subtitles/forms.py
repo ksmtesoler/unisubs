@@ -208,10 +208,6 @@ class SubtitlesUploadForm(forms.Form):
         return data
 
     def clean(self):
-        if self.video.is_writelocked:
-            raise forms.ValidationError(_(
-                u'Somebody is subtitling this video right now. Try later.'))
-
         from_language_code = self.cleaned_data.get('from_language_code')
         language_code = self.cleaned_data['language_code']
         subtitle_language = self.video.subtitle_language(language_code)
