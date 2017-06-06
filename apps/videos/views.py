@@ -160,7 +160,7 @@ class LanguageList(object):
         if not lang.subtitles_complete:
             tags.append(ugettext(u'incomplete'))
         elif team_video is not None:
-            # subtiltes are complete, check if they are under review/approval.
+            # subtitles are complete, check if they are under review/approval.
             incomplete_tasks = (Task.objects.incomplete()
                                             .filter(team_video=team_video,
                                                     language=lang.language_code))
