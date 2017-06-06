@@ -40,7 +40,7 @@
             <div id="subtitles_list" class="tab-pane active">
               <nav class="tab-actions">
                 {% if show_rollback %}
-                <a {% if can_edit %}class="button small ajaxLink" href="{% query_string form=rollback %}"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
+                <a {% if can_edit %}class="button small ajaxLink" data-href="{% query_string form=rollback %}"{% else %}class="button small disabled"{% endif %}>{% blocktrans with number=subtitle_version.version_number  %}Rollback to version {{ number }}{% endblocktrans %}</a>
                 {% else %}
                 <a {% if can_edit %}class="button small" href="{{ subtitle_language.editor_url }}{% query_string %}"{% else %}class="button small disabled"{% endif %}>{% trans "Edit subtitles" %}</a>
                 {% endif %}
@@ -178,7 +178,7 @@
             <p><em class="italic">{% trans "Private revisions are in italics." %}</em></p>
             {% endif %}
             {% if enable_delete_subtitles %}
-            <p class="text-right"><a class="ajaxLink" href="{% query_string form=delete %}">{% trans "Delete subititles" %}</a></p>
+            <p class="text-right"><a class="ajaxLink" data-href="{% query_string form=delete %}">{% trans "Delete subititles" %}</a></p>
             {% endif %}
             </section>
           {% else %}

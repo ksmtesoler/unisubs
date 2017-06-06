@@ -2,7 +2,7 @@
 {% load i18n ui query_string %}
 
 <nav class="tab-actions">
-<a {% if can_resync and sync_history %}class="button small ajaxLink" href="{% query_string form=resync %}"{% else %}class="button small disabled"{% endif %}>Resync</a>
+<a {% if can_resync and sync_history %}class="button small ajaxLink" data-href="{% query_string form=resync %}"{% else %}class="button small disabled"{% endif %}>Resync</a>
 </nav>
 {% if sync_history %}
 <table class="table table-striped">
