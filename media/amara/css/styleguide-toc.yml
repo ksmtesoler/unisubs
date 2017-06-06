@@ -14,19 +14,13 @@
   - scrollBars
   - tabs
   - tables
-  # - grid
-  # - utilities
-
 - - Avatars, Icons, Steps
   - avatars
   - icons
   - stepList
-
 - - Buttons
   - buttonTags
   - buttonOptions
-  # - buttonStates
-
 - - Forms
   - fields
   - fileUpload
@@ -41,9 +35,10 @@
   - dialogconfirmation
   - modalvalidation
   - modaltabbed
+  - dialogchoices
+  - removevideo
 
 - - Utility Classes
-  # - text
   - thumbWrapper
 
 - - Elements
@@ -54,13 +49,5 @@
   - pagination
   - hangingLink
   - constrainContent
-  # - select2
-  # - comments
-
-# - - Charts
-  # - barChart
-  # - lineChart
-
-# - - Views
-
+  - zeroState
 

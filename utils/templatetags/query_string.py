@@ -59,8 +59,8 @@ def query_string(parser, token):
         Result: "?foo2=bar2"
     """
     # matches 'tagname1+val1' or 'tagname1=val1' but not 'anyoldvalue'
-    set_re = re.compile(r"^(\w+)=(\w+)$")
-    remove_re = re.compile(r"^-(\w+)$")
+    set_re = re.compile(r"^([\w-]+)=([\w-]+)$")
+    remove_re = re.compile(r"^-([\w-]+)$")
     bits = token.split_contents()
     changes = []
     asvar = None

@@ -151,11 +151,14 @@ def videos(request, team):
 
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE)
     page = paginator.get_page(request)
+    next_page, prev_page = paginator.make_next_previous_page_links(page, request)
     add_completed_subtitles_count(list(page))
     context = {
         'team': team,
         'page': page,
         'paginator': paginator,
+        'next': next_page,
+        'previous': prev_page,
         'filters_form': filters_form,
         'team_nav': 'videos',
         'current_tab': 'videos',
@@ -549,6 +552,8 @@ def activity(request, team):
             BreadCrumb(_('Activity')),
         ],
     }
+    # tells the template to use get_old_message instead
+    context['use_old_messages'] = True
     if team.is_old_style():
         template_dir = 'teams/'
     else:
@@ -627,13 +632,14 @@ def manage_videos(request, team):
                                                         'teamvideo__video')
     form_name = request.GET.get('form')
     if form_name:
-        if form_name == 'add-video':
-            return add_video_form(request, team)
+        if form_name == 'add-videos':
+            return add_video_forms(request, team)
         else:
             return manage_videos_form(request, team, form_name, videos)
     enabled_forms = all_video_management_forms(team, request.user)
     paginator = AmaraPaginatorFuture(videos, VIDEOS_PER_PAGE_MANAGEMENT)
     page = paginator.get_page(request)
+    next_page, prev_page = paginator.make_next_previous_page_links(page, request)
     team.new_workflow.video_management_add_counts(list(page))
     for video in page:
         video.context_menu = manage_videos_context_menu(team, video,
@@ -642,6 +648,8 @@ def manage_videos(request, team):
         'team': team,
         'page': page,
         'paginator': paginator,
+        'next': next_page,
+        'previous': prev_page,
         'filters_form': filters_form,
         'team_nav': 'management',
         'current_tab': 'videos',
@@ -656,6 +664,12 @@ def manage_videos(request, team):
         response_renderer.replace(
             '#video-list', 'future/teams/management/video-list.html', context
         )
+        response_renderer.replace(
+            '#videos-select-all', 'future/teams/management/videos-select-all.html', 
+            {})
+        response_renderer.replace(
+            '#videos-deselect-all', 'future/teams/management/videos-deselect-all.html',
+            {})
         return response_renderer.render()
 
     return render(request, 'future/teams/management/videos.html', context)
@@ -719,26 +733,67 @@ def manage_videos_form(request, team, form_name, videos):
     })
     return response_renderer.render()
 
-def add_video_form(request, team):
+def add_video_forms(request, team):
     if not permissions.can_add_video(team, request.user):
         return HttpResponseForbidden()
     response_renderer = AJAXResponseRenderer(request)
-    if request.method == 'POST':
-        form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, form.success_message())
-            response_renderer.reload_page()
-            return response_renderer.render()
-    else:
+    form = None
+    form_bulk = None
+    form_multiple = None
+    current_tab = 'add-form'
+    if request.method == 'POST' and 'form' in request.POST:
+        if request.POST['form'] == 'add-form':
+            form = forms.AddTeamVideoForm(team, request.user, data=request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, form.success_message())
+                response_renderer.reload_page()
+                return response_renderer.render()
+            else:
+                if permissions.can_add_videos_bulk(request.user, team):
+                    form_bulk = forms.TeamVideoCSVForm
+        elif request.POST['form'] == 'add-multiple':
+            current_tab = 'add-multiple'
+            form_multiple = forms.AddMultipleTeamVideoForm(team, request.user, data=request.POST)
+            if form_multiple.is_valid():
+                messages.success(request, form_multiple.success_message())
+                response_renderer.reload_page()
+                return response_renderer.render()
+            else:
+                if permissions.can_add_videos_bulk(request.user, team):
+                    form_bulk = forms.TeamVideoCSVForm
+        elif request.POST['form'] == 'add-csv':
+            current_tab = 'add-csv'
+            form_bulk = forms.TeamVideoCSVForm(data=request.POST, files=request.FILES)
+            if form_bulk.is_bound and form_bulk.is_valid():
+                csv_file = form_bulk.cleaned_data['csv_file']
+                if csv_file is not None:
+                    try:
+                        add_videos_from_csv(team, request.user, csv_file)
+                        message = fmt(_(u"File successfully uploaded, you should receive the summary shortly."))
+                    except:
+                        message = fmt(_(u"File was not successfully parsed."))
+                    messages.success(request, message)
+                    response_renderer.reload_page()
+                    return response_renderer.render()
+    if form is None:
         form = forms.AddTeamVideoForm(team, request.user)
+    if form_multiple is None:
+        form_multiple = forms.AddMultipleTeamVideoForm(team, request.user)
+    if form_bulk is None and permissions.can_add_videos_bulk(request.user, team=team):
+        form_bulk = forms.TeamVideoCSVForm()
     form.use_future_ui()
-
-    template_name = 'future/teams/management/video-forms/add-video.html'
-    response_renderer.show_modal(template_name, {
+    form_multiple.use_future_ui()
+    template_name = 'future/teams/management/video-forms/add-videos.html'
+    context = {
         'team': team,
         'form': form,
-    })
+        'form_multiple': form_multiple,
+        'current_tab': current_tab,
+    }
+    if form_bulk is not None:
+        context['form_bulk'] = form_bulk
+    response_renderer.show_modal(template_name, context)
     return response_renderer.render()
 
 @team_settings_view

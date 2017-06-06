@@ -36,7 +36,7 @@ class Link(object):
     def __init__(self, label, view_name, *args, **kwargs):
         self.label = label
         query = kwargs.pop('query', None)
-        if '/' in view_name:
+        if '/' in view_name or view_name == '#':
             # URL path passed in, don't try to reverse it
             self.url = view_name
         else:

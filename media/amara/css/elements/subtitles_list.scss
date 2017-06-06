@@ -2,6 +2,9 @@
 ul.subtitlesList {
   display: flex;
   flex-wrap: wrap;
+  &.is-rtl {
+      text-align: right;
+  }
   li {
     position: relative;
     display: flex;
@@ -12,12 +15,17 @@ ul.subtitlesList {
     &:nth-of-type(odd) {
       background-color: $gray-lighter;
     }
-    .subtitlesList-subtitleTime {
+    .subtitlesList-time {
       margin: 0 10px;
     }
     .subtitlesList-subtitle {
       position: relative;
       padding-left: 30px;
+      word-wrap: break-word;
+      width: 85%;
+      &.is-rtl {
+	  direction: rtl;
+      }
       &.topicSentence {
         &:before {
           content: "\00B6";
@@ -30,5 +38,9 @@ ul.subtitlesList {
         }
       }
     }
+  }
+  em {
+    color: inherit;
+    font-style: italic;
   }
 }

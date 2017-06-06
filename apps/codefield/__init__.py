@@ -33,6 +33,8 @@ A good example of CodeField is the ActivityRecord.type field, which classifies
 the kind of activity and customizes the message we display for it.
 """
 
+# FIXME: Merge this code with EnumField
+
 from __future__ import absolute_import
 
 from django.db import models

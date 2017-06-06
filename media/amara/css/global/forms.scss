@@ -36,7 +36,6 @@
 //   <button class="button cta-reverse">Cancel</button>
 // </div>
 //
-//
 // Styleguide fields
 
 label {
@@ -261,6 +260,7 @@ select {
 
 
 
+
 // Input States
 // 
 // Example:
@@ -317,5 +317,18 @@ select {
   }
 }
 
+
+
+.helpBlock {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: $gray;
+}
+
+.helpBlock-radio {
+  margin-left: 20px;
+}
 
 

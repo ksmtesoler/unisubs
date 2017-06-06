@@ -99,6 +99,7 @@ from teams.permissions import can_edit_video, can_add_version, can_resync
 from . import video_size
 
 VIDEO_IN_ROW = 6
+ACTIVITY_PER_PAGE = 8
 
 rpc_router = RpcRouter('videos:rpc_router', {
     'VideosApi': VideosApiClass()
@@ -265,7 +266,7 @@ def should_use_old_view(request):
 def video(request, video_id, video_url=None, title=None):
     if should_use_old_view(request):
         return oldviews.video(request, video_id, video_url, title)
-    if request.is_ajax():
+    if request.is_ajax() and 'form' in request.POST:
         return video_ajax_form(request, video_id)
     request.use_cached_user()
     try:
@@ -297,8 +298,20 @@ def video(request, video_id, video_url=None, title=None):
         allow_delete = allow_make_primary = False
 
     customization = behaviors.video_page_customize(request, video)
-    activity = ActivityRecord.objects.for_video(
-        video, customization.team)[:8]
+    all_activities = ActivityRecord.objects.for_video(
+        video, customization.team)
+
+    if request.is_ajax() and request.GET.get('show-all', None):
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#video_activity', "future/videos/tabs/activity.html", {
+                'activity': all_activities,
+            },
+        )
+        return response_renderer.render()
+
+    activity = all_activities[:ACTIVITY_PER_PAGE]
+    show_all = False if len(activity) >= len(all_activities) else True
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
@@ -311,9 +324,12 @@ def video(request, video_id, video_url=None, title=None):
         'create_url_form': create_url_form,
         'comments': Comment.get_for_object(video),
         'activity': activity,
+        'activity_count': 1,
+        'show_all': show_all,
         'metadata': video.get_metadata().convert_for_display(),
         'custom_sidebar': customization.sidebar,
         'header': customization.header,
+        'use_old_messages': True,
     })
 
 def video_ajax_form(request, video_id):
@@ -434,7 +450,8 @@ def activity(request, video_id):
     qs = ActivityRecord.objects.for_video(video)
 
     extra_context = {
-        'video': video
+        'video': video,
+        'use_old_messages': True
     }
 
     return object_list(request, queryset=qs, allow_empty=True,
@@ -519,11 +536,15 @@ def legacy_history(request, video, lang):
     language, created = SubtitleLanguage.objects.get_or_create(
         video=video, language_code=lang)
 
-    return HttpResponseRedirect(reverse("videos:translation_history", kwargs={
-            'video_id': video.video_id,
-            'lang_id': language.pk,
-            'lang': language.language_code,
-            }))
+    url = reverse("videos:translation_history", kwargs={
+        'video_id': video.video_id,
+        'lang_id': language.pk,
+        'lang': language.language_code,
+    })
+    if request.META['QUERY_STRING']:
+        url = '{}?{}'.format(url, request.META['QUERY_STRING'])
+
+    return HttpResponseRedirect(url)
 
 def subtitles(request, video_id, lang, lang_id, version_id=None):
     if should_use_old_view(request):
@@ -552,13 +573,25 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         comment_form = CommentForm(subtitle_language)
     else:
         comment_form = None
-    customization = behaviors.subtitles_page_customize(
-        request, video, subtitle_language)
+
+    customization = behaviors.subtitles_page_customize(request, video, subtitle_language)
+    all_activities = (ActivityRecord.objects.for_video(video, customization.team)
+                .filter(language_code=lang))
+
+    if request.is_ajax() and request.GET.get('show-all', None):
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#subtitles_activity', "future/videos/tabs/activity.html", {
+                'activity': all_activities,
+            },
+        )
+        return response_renderer.render()
+
     all_subtitle_versions = subtitle_language.versions_for_user(
             request.user).order_by('-version_number')
-    activity = (ActivityRecord.objects.for_video(video, customization.team)
-                .filter(language_code=lang))[:8]
     team_video = video.get_team_video()
+    activity = all_activities[:ACTIVITY_PER_PAGE]
+    show_all = False if len(activity) >= len(all_activities) else True
     context = {
         'video': video,
         'team_video': team_video,
@@ -574,6 +607,8 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
                                    all_subtitle_versions),
         'downloadable_formats': downloadable_formats(request.user),
         'activity': activity,
+        'activity_count': 1,
+        'show_all': show_all,
         'comments': comments,
         'comment_form': comment_form,
         'enable_edit_in_admin': request.user.is_superuser,
@@ -675,6 +710,8 @@ def subtitles_ajax_form(request, video, subtitle_language, version):
         FormClass = subtitles_form_map[form_name]
     except KeyError:
         raise Http404()
+    if form_name == 'notes' and request.POST['body'] == '':
+        return AJAXResponseRenderer(request).render()
     form = FormClass(request.user, video, subtitle_language, version,
                      data=request.POST if request.method == 'POST' else None)
     if not form.check_permissions():

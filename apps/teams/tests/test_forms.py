@@ -17,12 +17,15 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 from django.test import TestCase
+import logging
 import mock
 
 from videos.signals import video_deleted
 from teams import forms
 from utils.factories import *
 from utils.test_utils import *
+
+logger = logging.getLogger(__name__)
 
 class TeamVideoManagementFormBase(TestCase):
     def setUp(self):
@@ -45,7 +48,7 @@ class TeamVideoManagementFormBase(TestCase):
                           data=data, files=files)
         if data is not None:
             if form.errors:
-                print form.errors.as_text()
+                logger.warn(form.errors.as_text())
             if not skip_submit:
                 form.submit()
         return form

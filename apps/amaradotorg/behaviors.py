@@ -27,9 +27,12 @@ from utils.text import fmt
 
 logger = logging.getLogger(__name__)
 
+def is_ted_team(team):
+    return team.slug.startswith('ted')
+
 @get_main_project.override
 def amara_get_main_project(team):
-    if team.slug == 'ted':
+    if is_ted_team(team):
         try:
             return team.project_set.get(slug='tedtalks')
         except Project.DoesNotExist:

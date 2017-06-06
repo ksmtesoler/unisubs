@@ -734,11 +734,13 @@ class SyncHistoryManager(models.Manager):
         qs = qs.order_by('-id')[:items_to_display]
         history = []
         for item in qs:
-            history.append({'account': item.get_account(),
-                            'version': item.version.version_number,
-                            'result': item.get_result_display(),
-                            'details': item.details,
-                            'date': item.datetime,})
+            history.append({
+                'account': item.get_account(),
+                'version': item.version.version_number if item.version else '',
+                'result': item.get_result_display(),
+                'details': item.details,
+                'date': item.datetime,
+            })
         return history
 
     def get_attempt_to_resync(self):

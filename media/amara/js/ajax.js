@@ -44,6 +44,14 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
                     dialogs.showModal(change[1]).updateBehaviors();
                     break;
 
+                case 'hideModal':
+                    if(change[1]) {
+                        $(change[1]).modal('hide');
+                    } else {
+                        closeCurrentModal();
+                    }
+                    break;
+
                 case 'showModalProgress':
                     dialogs.showModalProgress(change[1], change[2]);
                     break;
@@ -150,11 +158,36 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
 
     function ajaxLink(link) {
         var link = $(link);
+        var inProgress = false;
+        var linkContents = null;
+
+        var ajaxParams = {
+            beforeSend: function() {
+                if(inProgress) {
+                    return false;
+                }
+                inProgress = true;
+                if(link.hasClass('loadingIcon')) {
+                    link.css({
+                        'width': link.css('width'),
+                    });
+                    linkContents = link.contents();
+                    linkContents.detach();
+                    link.empty().append($('<i class="icon icon-loading"></i>'));
+                }
+            },
+            complete: function() {
+                inProgress = false;
+                if(link.hasClass('loadingIcon')) {
+                    link.removeAttr('style');
+                    link.empty().append(linkContents);
+                }
+            },
+            success: processAjaxResponse,
+        };
 
         link.click(function() {
-            $.ajax(link.attr('href'), {
-                success: processAjaxResponse
-            });
+            $.ajax(link.attr('href'), ajaxParams);
             return false;
         });
     }

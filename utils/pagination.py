@@ -74,3 +74,9 @@ class AmaraPaginatorFuture(Paginator):
     def make_page_link(self, page_number, query):
         query['page'] = page_number
         return '?' + query.urlencode()
+
+    def make_next_previous_page_links(self, page, request):
+        query = request.GET.copy()
+        next_url = self.make_page_link(page.number+1, query) if page.number < self.num_pages else ''
+        prev_url = self.make_page_link(page.number-1, query) if page.number > 1 else ''
+        return (next_url, prev_url)

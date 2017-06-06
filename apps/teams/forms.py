@@ -84,6 +84,7 @@ class TeamMemberField(AmaraChoiceField):
         self.team = team
         self.set_select_data('ajax', reverse('teams:ajax-member-search',
                                              args=(team.slug,)))
+        self.set_select_data('placeholder', ugettext('Select member'))
 
     def to_python(self, value):
         if value in EMPTY_VALUES:
@@ -110,7 +111,12 @@ class TeamMemberField(AmaraChoiceField):
             except User.DoesNotExist:
                 return None
         if value:
-            self.choices = [value]
+            choices = [
+                ('', ugettext('Select member')),
+                value,
+            ]
+            if self.choices != choices:
+                self.choices = choices
             return value[0]
         else:
             return None
@@ -126,10 +132,15 @@ class TeamVideoField(AmaraChoiceField):
     default_error_messages = {
         'invalid': _(u'Invalid video'),
     }
+
+    # TODO: Move some of the code shared between here and TeamMemberField into
+    # a base class
+
     def setup(self, team):
         self.team = team
         self.set_select_data('ajax', reverse('teams:ajax-video-search',
                                              args=(team.slug,)))
+        self.set_select_data('placeholder', ugettext('Select video'))
 
     def to_python(self, value):
         if value in EMPTY_VALUES:
@@ -157,7 +168,12 @@ class TeamVideoField(AmaraChoiceField):
             except Video.DoesNotExist:
                 return None
         if value:
-            self.choices = [value]
+            choices = [
+                ('', ugettext('Select video')),
+                value,
+            ]
+            if self.choices != choices:
+                self.choices = choices
             return value[0]
         else:
             return None
@@ -198,6 +214,7 @@ class ProjectField(AmaraChoiceField):
         self.null_label = kwargs.pop('null_label', _('Any'))
         if 'label' not in kwargs:
             kwargs['label'] = _("Project")
+        self.futureui = kwargs.pop('futureui', False)
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
 
@@ -221,8 +238,16 @@ class ProjectField(AmaraChoiceField):
             if initial is None:
                 initial = choices[0][0]
             self.initial = initial
+            if self.futureui:
+                self.setup_widget()
         else:
             self.enabled = False
+
+    def setup_widget(self):
+        if len(self.choices) < 7:
+            self.widget = AmaraRadioSelect()
+            self.widget.attrs.update(self.widget_attrs(self.widget))
+            self._setup_widget_choices()
 
     def prepare_value(self, value):
         return value.slug if isinstance(value, Project) else value
@@ -430,6 +455,112 @@ class AddTeamVideoForm(forms.ModelForm):
         # TeamVideo was already created in clean()
         return self.saved_team_video
 
+class MultipleURLsField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        if 'max_length' not in kwargs:
+            kwargs['max_length'] = 2000
+        super(MultipleURLsField, self).__init__(
+            required=False, widget=forms.Textarea,
+            *args, **kwargs)
+
+class AddMultipleTeamVideoForm(forms.Form):
+    language = NewLanguageField(label=_(u'Video language'),
+                                required=True,
+                                options='null popular all',
+                                help_text=_(u'It will be saved only if video does not exist in our database.'),
+                                error_messages={'required': 'Please select the video language.'})
+
+    project = ProjectField(
+        label=_(u'Project'),
+        help_text=_(u"Let's keep things tidy, shall we?")
+    )
+    video_urls = MultipleURLsField(label="",
+                                   help_text=_("Enter the URLs of any compatible videos or any videos on our site. Enter one URL per line. You can also browse the site and use the 'Add Video to Team' menu."),
+                                   error_messages={'required': 'Please add video URLs.'})
+
+    def __init__(self, team, user, *args, **kwargs):
+        self.team = team
+        self.user = user
+        super(AddMultipleTeamVideoForm, self).__init__(*args, **kwargs)
+        self.fields['project'].setup(team)
+        # [# of OK, # of existing, # of existing in other teams, # of errors]
+        self.summary = [0, 0, 0, 0]
+
+    def use_future_ui(self):
+        self.fields['project'].help_text = None
+        self.fields['language'].help_text = None
+
+    def clean_project(self):
+        project = self.cleaned_data['project']
+        return project if project else self.team.default_project
+
+    def clean(self):
+        if self._errors:
+            return self.cleaned_data
+        video_urls = self.cleaned_data['video_urls'].split("\n")
+        # See if any error happen when we create our videos
+        for video_url in video_urls:
+            if len(video_url.strip()) == 0:
+                continue
+            try:
+                Video.add(video_url, self.user,
+                          self.setup_video)
+            except Video.UrlAlreadyAdded, e:
+                self.setup_existing_video(e.video, e.video_url)
+            except:
+                self.summary[3] += 1
+        return self.cleaned_data
+
+    def setup_video(self, video, video_url):
+        video.is_public = self.team.is_visible
+        video.primary_audio_language_code = self.cleaned_data['language']
+        self.saved_team_video = TeamVideo.objects.create(
+            video=video, team=self.team, project=self.cleaned_data['project'],
+            added_by=self.user)
+        self.summary[0] += 1
+
+    def setup_existing_video(self, video, video_url):
+        team_video, created = TeamVideo.objects.get_or_create(
+            video=video, defaults={
+                'team': self.team, 'project': self.cleaned_data['project'],
+                'added_by': self.user
+            })
+
+        if created:
+            self.saved_team_video = team_video
+            self.summary[1] += 1
+            return
+        self.summary[2] += 1
+        return
+        if team_video.team.user_can_view_videos(self.user):
+            msg = mark_safe(fmt(
+                _(u'This video already belongs to the %(team)s team '
+                  '(<a href="%(link)s">view video</a>)'),
+                team=unicode(team_video.team),
+                link=team_video.video.get_absolute_url()))
+        else:
+            msg = _(u'This video already belongs to another team.')
+        self._errors['video_url'] = self.error_class([msg])
+
+    def success_message(self):
+        message = ""
+        if self.summary[0] > 0:
+            message += "{} videos successfully added, ".format(self.summary[0])
+        if self.summary[1] > 0:
+            message += "{} videos successfully added from community videos, ".format(self.summary[1])
+        if self.summary[2] > 0:
+            message += "{} videos belong to other teams, ".format(self.summary[2])
+        if self.summary[3] > 0:
+            message += "{} videos URL are not valid, ".format(self.summary[3])
+        if len(message) > 2:
+            message = message[:len(message) - 2]
+        else:
+            message = _(u'Please input valid video URLs')
+        return message
+
+    def save():
+        return self.clean()
+ 
 class AddTeamVideosFromFeedForm(AddFromFeedForm):
     def __init__(self, team, user, *args, **kwargs):
         if not can_add_video(team, user):
@@ -1088,7 +1219,7 @@ class VideoFiltersForm(FiltersForm):
     q = SearchField(label=_('Search for videos'), required=False)
     language = NewLanguageField(label=_("Video language"), required=False,
                                 placeholder=_("All languages"))
-    project = ProjectField(required=False, widget=AmaraRadioSelect)
+    project = ProjectField(required=False, futureui=True)
     duration = VideoDurationField(required=False, widget=AmaraRadioSelect)
     sort = AmaraChoiceField(label="", border=True, choices=[
         ('-time', _('Time, newest')),
@@ -1437,7 +1568,7 @@ class TeamVideoURLForm(forms.Form):
 TeamVideoURLFormSet = formset_factory(TeamVideoURLForm)
 
 class TeamVideoCSVForm(forms.Form):
-    csv_file = forms.FileField(label=_(u"CSV file"), required=True, allow_empty_file=False)
+    csv_file = forms.FileField(label="", required=True, allow_empty_file=False)
 
 class VideoManagementForm(ManagementForm):
     """Base class for forms on the video management page."""
