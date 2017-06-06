@@ -373,8 +373,11 @@ class SubtitleEditorBase(View):
         if (not self.check_can_edit() or
             not self.check_can_writelock() or
             not self.assign_task_for_editor()):
-            if self.team_video:
-                return redirect(self.video.get_absolute_url() + "?team=" + self.team_video.team.slug)
+            if 'team' in self.request.GET:
+                qs = '?{}'.format(urlencode({
+                    'team': self.request.GET['team']
+                }))
+                return redirect(self.video.get_absolute_url() + qs)
             return redirect(self.video)
 
         self.editing_language.writelock(self.user, self.request.browser_id,
