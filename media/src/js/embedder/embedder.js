@@ -431,7 +431,10 @@
                                 that.buildLanguageSelector();
                                 // update the view on amara button
                                 that.$viewOnAmaraButton.attr('href', apiDomain(that.model.get('embed_on_amara')) + '/en/videos/' + that.model.get('id'));
-                                _$('#amara-video-link').attr('href', apiDomain(that.model.get('embed_on_amara')) + '/subtitles/editor/' + that.model.get('id') + '/en/?team=' + that.model.get('team'));
+                                var amara_video_link = apiDomain(that.model.get('embed_on_amara')) + '/subtitles/editor/' + that.model.get('id') + '/en/';
+                                if (that.model.get('team'))
+                                    amara_video_link += '?team=' + that.model.get('team');
+                                _$('#amara-video-link').attr('href', amara_video_link);
                                 // Make the request to fetch the initial subtitles.
                                 // TODO: This needs to be an option.
                                 that.loadSubtitles(that.model.get('initial_language'));
@@ -703,7 +706,10 @@
 			this.$amaraLanguagesList.find("[data-language='" + language + "']").addClass('currently-selected');
 			this.$amaraCurrentLang.text(languageName);
 			_$('#amara-download-subtitles').attr('href', apiDomain(this.model.get('embed_on_amara')) + '/en/videos/' + this.model.get('id') + '/' + languageCode);
-			_$('#amara-video-link').attr('href', apiDomain(this.model.get('embed_on_amara')) + '/subtitles/editor/' + this.model.get('id') + '/' + languageCode);
+                        var amara_video_link = apiDomain(this.model.get('embed_on_amara')) + '/subtitles/editor/' + this.model.get('id') + '/' + languageCode;
+                        if (this.model.get('team'))
+                            amara_video_link += '?team=' + this.model.get('team');
+			_$('#amara-video-link').attr('href', amara_video_link);
 			_$('ul.amara-languages-list li').removeClass('currently-selected-item');
 			_$('.currently-selected').parent().addClass('currently-selected-item');
                     } else {
