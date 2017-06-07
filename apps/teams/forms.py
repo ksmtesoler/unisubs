@@ -1227,7 +1227,7 @@ class VideoFiltersForm(FiltersForm):
         ('name', _('Name, a-z')),
         ('-name', _('Name, z-a')),
         ('-subs', _('Most completed languages')),
-        ('subs', _('Least complete languages')),
+        ('subs', _('Least completed languages')),
     ], initial='-time', required=False)
 
     promote_main_project = True
