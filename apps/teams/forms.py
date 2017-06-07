@@ -152,6 +152,9 @@ class TeamVideoField(AmaraChoiceField):
         except Video.DoesNotExist:
             raise forms.ValidationError(self.error_messages['invalid'])
 
+    def choice_for_video(self, video):
+        return (video.video_id, unicode(video))
+
     def prepare_value(self, value):
         # Handles initial values and submitted data.  There are a few cases we
         # need to handle:
