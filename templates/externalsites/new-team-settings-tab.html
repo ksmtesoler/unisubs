@@ -27,8 +27,10 @@
         Linked Account: {{ account_name }}
         {% endblocktrans %}
       </h3>
+      {{ form.sync_subtitles }}
+      {{ form.fetch_initial_subtitles }}
       {% if form.show_sync_teams %}
-      <h4>{% trans "Sync videos from these teams:" %}</h4>
+      <h4>{% trans "Sync subtitles for videos from these teams:" %}</h4>
       {{ form.sync_teams }}
       {% endif %}
       {% include "_field.html" with field=form.import_team %}

@@ -215,6 +215,8 @@ class YoutubeAccountForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         required=False)
     import_team = forms.ChoiceField(label='', required=False)
+    sync_subtitles = forms.BooleanField(label=ugettext_lazy('Sync subtitles'))
+    fetch_initial_subtitles = forms.BooleanField(label=ugettext_lazy('Fetch initial subtitles'))
 
     def __init__(self, admin_user, account, data=None, **kwargs):
         super(YoutubeAccountForm, self).__init__(data=data, **kwargs)

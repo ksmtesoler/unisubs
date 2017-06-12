@@ -102,6 +102,8 @@ class YouTubeAccountAdmin(admin.ModelAdmin):
         'import_team',
         'resync_subtitles',
         'enable_language_mapping',
+        'sync_subtitles',
+        'fetch_initial_subtitles',
     )
 
     def save_model(self, request, obj, form, change):

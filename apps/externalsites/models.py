@@ -386,6 +386,8 @@ class YouTubeAccount(ExternalAccount):
                                             default='')
     import_team = models.ForeignKey(Team, null=True, blank=True)
     enable_language_mapping = models.BooleanField(default=True)
+    sync_subtitles = models.BooleanField(default=True)
+    fetch_initial_subtitles = models.BooleanField(default=True)
     sync_teams = models.ManyToManyField(
         Team, related_name='youtube_sync_accounts')
 
