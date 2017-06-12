@@ -68,7 +68,8 @@ def fetch_subs_youtube(video_url):
     except YouTubeAccount.DoesNotExist:
         logger.warn("fetch_subs() no youtube account for %s", channel_id)
         return
-
+    if not account.fetch_initial_subtitles:
+        return
     existing_langs = set(
         l.language_code for l in
         video_url.video.newsubtitlelanguage_set.having_versions()

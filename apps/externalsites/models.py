@@ -467,10 +467,11 @@ class YouTubeAccount(ExternalAccount):
 
         Subclasses must implement this method.
         """
-        access_token = google.get_new_access_token(self.oauth_refresh_token)
-        syncing.youtube.update_subtitles(video_url.videoid, access_token,
-                                         version,
-                                         self.enable_language_mapping)
+        if self.sync_subtitles:
+            access_token = google.get_new_access_token(self.oauth_refresh_token)
+            syncing.youtube.update_subtitles(video_url.videoid, access_token,
+                                             version,
+                                             self.enable_language_mapping)
 
     def do_delete_subtitles(self, video_url, language):
         access_token = google.get_new_access_token(self.oauth_refresh_token)
