@@ -724,7 +724,7 @@ class Video(models.Model):
         video.cache.invalidate()
         signals.video_added.send(sender=video, video_url=video_url)
         signals.video_url_added.send(sender=video_url, video=video,
-                                     new_video=True)
+                                     new_video=True, user=user, team=team)
 
         return (video, video_url)
 
