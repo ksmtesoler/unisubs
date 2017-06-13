@@ -202,6 +202,7 @@
             project: null,
             resource_uri: null,
             team: null,
+            team_type: null,
             thumbnail: null,
             title: null,
 
@@ -431,7 +432,13 @@
                                 that.buildLanguageSelector();
                                 // update the view on amara button
                                 that.$viewOnAmaraButton.attr('href', apiDomain(that.model.get('embed_on_amara')) + '/en/videos/' + that.model.get('id'));
-                                _$('#amara-video-link').attr('href', apiDomain(that.model.get('embed_on_amara')) + '/subtitles/editor/' + that.model.get('id') + '/en/?team=' + that.model.get('team'));
+                                // change video url based on team type
+                                if (that.model.get('team_type') == 'EC') {
+                                    _$('#amara-video-link').attr('href', apiDomain(that.model.get('embed_on_amara')) + '/subtitles/editor/' + that.model.get('id') + '/en/?team=' + that.model.get('team'));
+                                } else {
+                                    _$('#amara-video-link').attr('href', apiDomain(that.model.get('embed_on_amara')) + '/subtitles/editor/' + that.model.get('id') + '/');
+                                }
+
                                 // Make the request to fetch the initial subtitles.
                                 // TODO: This needs to be an option.
                                 that.loadSubtitles(that.model.get('initial_language'));
