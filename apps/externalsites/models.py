@@ -142,7 +142,6 @@ class ExternalAccount(models.Model):
             'action': SyncHistory.ACTION_UPDATE_SUBTITLES,
             'version': version,
         }
-
         try:
             self.do_update_subtitles(video_url, language, version)
         except Exception, e:
@@ -401,6 +400,9 @@ class YouTubeAccount(ExternalAccount):
 
     def __unicode__(self):
         return "YouTube: %s" % (self.username)
+
+    def should_skip_syncing(self):
+        return not self.sync_subtitles
 
     def set_sync_teams(self, user, teams):
         """Set other teams to sync for
