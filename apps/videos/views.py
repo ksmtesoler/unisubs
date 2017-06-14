@@ -632,7 +632,6 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     if team_video and can_resync(team_video.team, request.user):
         context.update(sync_history_context(video, subtitle_language))
         context['show_sync_history'] = True
-        context['can_resync'] = True
     else:
         context['show_sync_history'] = False
         context['can_resync'] = False
@@ -669,7 +668,9 @@ def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
 
 def sync_history_context(video, subtitle_language):
     context = {}
-    context['sync_history'] = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
+    sync_history = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
+    context['sync_history'] = sync_history
+    context['can_resync'] = (len(sync_history) > 0) and not sync_history[0].get_account().should_skip_syncing()
     context['current_version'] = subtitle_language.get_public_tip()
     synced_versions = []
     for video_url in video.get_video_urls():
