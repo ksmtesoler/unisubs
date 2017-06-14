@@ -215,8 +215,8 @@ class YoutubeAccountForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         required=False)
     import_team = forms.ChoiceField(label='', required=False)
-    sync_subtitles = forms.BooleanField(label=ugettext_lazy('Sync subtitles'), required=False)
-    fetch_initial_subtitles = forms.BooleanField(label=ugettext_lazy('Fetch initial subtitles'), required=False)
+    sync_subtitles = forms.BooleanField(label=ugettext_lazy('Sync subtitles from Amara to YouTube'), required=False)
+    fetch_initial_subtitles = forms.BooleanField(label=ugettext_lazy('Fetch initial subtitles from YouTube when videos are submitted to Amara'), required=False)
 
     def __init__(self, admin_user, account, data=None, **kwargs):
         super(YoutubeAccountForm, self).__init__(data=data, **kwargs)
