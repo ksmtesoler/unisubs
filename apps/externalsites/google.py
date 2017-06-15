@@ -420,7 +420,7 @@ def get_openid_profile(access_token):
         response_data.get('family_name', ''),
     )
 
-def get_video_info(video_id, accounts):
+def get_video_info(video_id, accounts=[]):
     for account in accounts:
         try:
             access_token = get_new_access_token(account.oauth_refresh_token)

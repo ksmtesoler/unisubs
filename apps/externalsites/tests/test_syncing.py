@@ -863,7 +863,7 @@ class RefetchYoutubeChannelIDTest(TestCase):
         self.check_username_fixed()
 
     def check_username_fixed(self):
-        self.mock_get_video_info.assert_called_with(self.video_url.videoid)
+        self.mock_get_video_info.assert_called_with(self.video_url.videoid, [])
         self.assertEquals(
             self.video.get_primary_videourl_obj().owner_username,
             'test-channel-id')
