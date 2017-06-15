@@ -308,6 +308,11 @@ class TeamSerializer(serializers.CharField):
         except Team.DoesNotExist:
             self.fail('unknown-team', team=slug)
 
+class TeamTypeSerializer(serializers.CharField):
+    def get_attribute(self, video):
+        team_video = video.get_team_video()
+        return team_video.team.workflow_type if team_video else None
+
 class ProjectSerializer(serializers.CharField):
     def get_attribute(self, video):
         team_video = video.get_team_video()
@@ -367,6 +372,7 @@ class VideoSerializer(serializers.Serializer):
     thumbnail = VideoThumbnailField(required=False, allow_blank=True)
     created = TimezoneAwareDateTimeField(read_only=True)
     team = TeamSerializer(required=False, allow_null=True)
+    team_type = TeamTypeSerializer(required=False, allow_null=True)
     project = ProjectSerializer(required=False, allow_null=True)
     all_urls = serializers.SerializerMethodField()
     metadata = VideoMetadataSerializer(required=False)
@@ -486,8 +492,12 @@ class VideoSerializer(serializers.Serializer):
                                       commit=False)
             self._update_team(video, validated_data)
         try:
+            if 'team' in validated_data:
+                team = validated_data['team']
+            else:
+                team = None
             return Video.add(validated_data['video_url'],
-                             self.context['user'], setup_video)[0]
+                             self.context['user'], setup_video, team)[0]
         except VideoTypeError:
             self.fail('invalid-url', url=validated_data['video_url'])
         except Video.UrlAlreadyAdded:
