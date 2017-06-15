@@ -65,6 +65,7 @@ def render_subtitles(subtitle_version):
     thousands of subtitles that gets slow
     """
     subtitles = subtitle_version.get_subtitles()
+    is_rtl = " is-rtl" if subtitle_version.subtitle_language.is_rtl() else ""
     timing_template = string.Template(u"""\
 <div class="subtitlesList-time">
     <a class="subtitlesList-seek" href="#" data-start-time="$start_time" title="{}">
@@ -72,9 +73,9 @@ def render_subtitles(subtitle_version):
     </a>
 </div>""".format(_('Play video here')))
     not_synced_timing = u'<div class="subtitlesList-time">{}</div>'.format(_('Not Synced'))
-    text_template = string.Template(u'<div class="subtitlesList-subtitle">$text</div>')
+    text_template = string.Template(u'<div class="subtitlesList-subtitle{}">$text</div>'.format(is_rtl))
     text_template_new_p = string.Template(
-        u'<div class="subtitlesList-subtitle topicSentence">$text</div>')
+        u'<div class="subtitlesList-subtitle topicSentence{}">$text</div>'.format(is_rtl))
 
     synced_subs = []
     unsynced_subs = []
@@ -87,7 +88,7 @@ def render_subtitles(subtitle_version):
     synced_subs.sort(key=lambda item: item.start_time)
 
     parts = []
-    parts.append(u'<ul class="subtitlesList">')
+    parts.append(u'<ul class="subtitlesList{}">'.format(is_rtl))
     for item in synced_subs + unsynced_subs:
         new_paragraph = item.meta.get('new_paragraph', False)
         parts.append(u'<li>')
