@@ -128,6 +128,7 @@ USE_I18N = True
 # Example: "/home/media/media.lawrence.com/"
 STATIC_ROOT = rel('media')+'/'
 MEDIA_ROOT  = rel('user-data')+'/'
+CSS_ROOT = os.path.join(STATIC_ROOT, 'amara/css')
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -216,9 +217,11 @@ INSTALLED_APPS = (
     'search',
     'staff',
     'staticmedia',
+    'styleguide',
     'teams',
     'testhelpers',
     'thirdpartyaccounts',
+    'ui',
     'unisubs_compressor',
     'utils',
     'videos',
@@ -380,6 +383,7 @@ AVATAR_MAX_SIZE = 500*1024
 THUMBNAILS_SIZE = (
     (100, 100),
     (50, 50),
+    (30, 30),
     (120, 90),
     (240, 240)
 )
@@ -412,6 +416,24 @@ API_DOCS_MODULES = [
 ]
 
 MEDIA_BUNDLES = {
+    "amara.css": {
+        "files": [
+            "bower/chartist/dist/chartist.css",
+            "bower/select2/dist/css/select2.css",
+            "amara/bootstrap/bootstrap-theme.min.css",
+            "amara/bootstrap/bootstrap.min.css",
+            "amara/css/main.scss",
+        ],
+    },
+    "amara.js": {
+        "use_requirejs": True,
+        "root_dir": "amara/js",
+        "sub_dirs": {
+            'lib': 'bower',
+        },
+        # extension_modules gets filled in by our optional repositories
+        "extension_modules": [],
+    },
     "base.css": {
         "files": (
             "css/jquery.jgrowl.css",
@@ -770,7 +792,7 @@ if DEBUG:
             'SHOW_TOOLBAR_CALLBACK': 'settings.custom_show_toolbar',
             'EXTRA_SIGNALS': [],
             'HIDE_DJANGO_SQL': False,
-            'TAG': 'div',
+            'INSERT_BEFORE': '</body>',
         }
 
 optionalapps.exec_repository_scripts('settings_extra.py', globals(), locals())

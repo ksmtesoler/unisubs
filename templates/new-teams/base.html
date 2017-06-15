@@ -14,11 +14,6 @@
     <li>
         <a href="{% url "teams:dashboard" team.slug %}">{% trans "Dashboard" %}</a>
     </li>
-    {% for page in team|extra_pages:request.user %}
-    <li>
-        <a href="{{ page.url }}">{{ page.title }}</a>
-    </li>
-    {% endfor %}
     <li>
         <a href="{% url "teams:videos" team.slug %}">{% trans "Videos" %}</a>
     </li>
@@ -28,17 +23,8 @@
     <li>
         <a href="{% url "teams:activity" team.slug %}">{% trans "Activity" %}</a>
     </li>
-    {% if projects %}
-    <li>
-      <a href="#" class="menu-toggle">{% trans "Projects" %}</a>
-      <ul class="dropdown">
-        {% for project in projects %}
-        <li>
-        <a href="{{ project.get_absolute_url }}">{{ project }} <span class="count">{{ project.videos_count }}</span></a>
-        </li>
-        {% endfor %}
-      </ul>
-    </li>
+    {% if team|can_view_management_tab:request.user %}
+    <li><a href="{{ team|management_page_default:request }}">{% trans "Management" %}</a></li>
     {% endif %}
     {% if team|can_view_settings_tab:user %}
     <li>

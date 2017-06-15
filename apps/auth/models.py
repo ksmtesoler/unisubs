@@ -37,6 +37,7 @@ from django.db import transaction
 from django.db.models.loading import get_model
 from django.db.models.signals import post_save
 from django.utils.http import urlquote
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _, ugettext
 from tastypie.models import ApiKey
 
@@ -47,8 +48,15 @@ from utils import secureid
 from utils import translation
 from utils.tasks import send_templated_email_async
 
+import logging
+logger = logging.getLogger(__name__)
+
 ALL_LANGUAGES = [(val, _(name))for val, name in settings.ALL_LANGUAGES]
 EMAIL_CONFIRMATION_DAYS = getattr(settings, 'EMAIL_CONFIRMATION_DAYS', 3)
+
+DEFAULT_AVATAR_URL = ('https://s3.amazonaws.com/'
+                      's3.www.universalsubtitles.org/'
+                      'gravatar/avatar-default-{size}.png')
 
 class AnonymousUserCacheGroup(CacheGroup):
     def __init__(self):
@@ -92,6 +100,27 @@ class CustomUserManager(UserManager):
                                                 string.digits)
                                   for i in xrange(6))
             yield '{}{}{}'.format(part1, rand_string, part2)
+
+    def search(self, query):
+        qs = self.all()
+        valid_term = False
+        for term in [term.strip() for term in query.split()]:
+            if term:
+                valid_term = True
+                try:
+                    sql = """(LOWER(first_name) LIKE %s
+                OR LOWER(last_name) LIKE %s
+                OR LOWER(email) LIKE %s
+                OR LOWER(username) LIKE %s
+                OR LOWER(biography) LIKE %s)"""
+                    term = '%' + term.lower() + '%'
+                    qs = qs.extra(where=[sql], params=[term, term, term, term, term])
+                except Exception as e:
+                    logger.error(e)
+        if valid_term:
+            return qs
+        else:
+            return self.none()
 
 class CustomUser(BaseUser, secureid.SecureIDMixin):
     AUTOPLAY_ON_BROWSER = 1
@@ -382,21 +411,47 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         from teams.models import Task
         return Task.objects.incomplete().filter(assignee=self)
 
-    def _get_gravatar(self, size):
+    def _get_gravatar(self, size, default='mm'):
         url = "http://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
-        url += urllib.urlencode({'d': 'mm', 's':str(size)})
+        url += urllib.urlencode({'d': default, 's':str(size)})
         return url
 
+    # old UI avatars
     def _get_avatar_by_size(self, size):
         if self.picture:
             return self.picture.thumb_url(size, size)
         else:
             return self._get_gravatar(size)
+
     def avatar(self):
         return self._get_avatar_by_size(100)
 
     def small_avatar(self):
         return self._get_avatar_by_size(50)
+
+    # future UI avatag
+    def _get_avatar(self, size):
+        if self.picture:
+            return self.picture.thumb_url(size, size)
+        else:
+            return self._get_gravatar(
+                size, default=DEFAULT_AVATAR_URL.format(size=size))
+
+    def avatar_tag(self):
+        avatar = self._get_avatar(30)
+        return mark_safe('<span class="avatar"><img src="{}"></span>'.format(avatar))
+
+    def avatar_tag_alert(self):
+        avatar = self._get_avatar(30)
+        return mark_safe('<span class="avatar avatar-alert"><img src="{}"></span>'.format(avatar))
+
+    def avatar_tag_medium(self):
+        avatar = self._get_avatar(50)
+        return mark_safe('<span class="avatar avatar-md"><img src="{}"></span>'.format(avatar))
+
+    def avatar_tag_extra_large(self):
+        avatar = self._get_avatar(110)
+        return mark_safe('<span class="avatar avatar-xl"><img src="{}"></span>'.format(avatar))
 
     @models.permalink
     def get_absolute_url(self):
@@ -415,9 +470,9 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         if self.preferred_language:
             return self.preferred_language
 
-        user_languages = list(self.userlanguage_set.all())
+        user_languages = self.get_languages()
         if user_languages:
-            return user_languages[0].language
+            return user_languages[0]
 
         if request:
             languages = translation.get_user_languages_from_request(request)

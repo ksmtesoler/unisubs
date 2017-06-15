@@ -28,7 +28,10 @@ the files does several things.
 See the bundle_* functions for exactly what we do for various media types.
 """
 
+import json
 import os
+import shutil
+import tempfile
 import time
 
 from django.contrib.sites.models import Site
@@ -41,9 +44,7 @@ from staticmedia import utils
 import optionalapps
 
 def media_directories():
-    dirs = [
-        os.path.join(settings.PROJECT_ROOT, 'media')
-    ]
+    dirs = [ settings.STATIC_ROOT ]
     for repo_dir in optionalapps.get_repository_paths():
         repo_media_dir = os.path.join(repo_dir, 'media')
         if os.path.exists(repo_media_dir):
@@ -97,6 +98,13 @@ class Bundle(object):
         return reverse(view_name, kwargs={
             'bundle_name': self.name,
         })
+
+    def get_html(self):
+        """Get the HTML for this bundle
+
+        This gets placed inside the <head> tag.
+        """
+        raise NotImplementedError()
 
     def modified_since(self, since):
         """Check if any of our files has been modified after a certain time
@@ -157,6 +165,158 @@ class JavascriptBundle(Bundle):
         else:
             return source_code
 
+    def get_html(self):
+        return '<script src="%s"></script>' % self.get_url()
+
+class RequireJSBundle(Bundle):
+    """Bundle Javascript using require.js
+
+    This bundle is used when the extension is js and use_requirejs is set to
+    True.
+
+    The basic strategy is to use require.js to load our modules and it's
+    companion r.js to combine and optimize them.  For development, we load
+    require.js and point it at our toplevel modules.  For production, we use
+    rjs to combine and compress the code.
+
+    The root_dir and sub_dirs settings are used to create a virtual filesystem
+    that require.js sees.  root_dir specifies the root directory contents and
+    sub_dirs specifies the subdirectories.  Both of those commands take paths
+    relative to STATIC_ROOT (AKA the media directory).
+
+    One tricky part about the directory structure is that we have media
+    directories in both unisubs and our optional repos.  For the virtual
+    filesystem, we merge files from both of those.
+
+    The config.js and main.js files then load our modules using the paths from
+    the virtual filesystem.  Also the extension_modules setting allows
+    optional repos to load other modules.
+
+    Options:
+        use_requirejs: Enables this bundle type instead of JavascriptBundle
+        root_dir: root directory for modules
+        sub_dirs: sub directories for modules
+        main: Name of the main module (defaults to "main")
+        config: Name of the configuration module (defaults to "config")
+        extension_modules: Modules from extension repositories to load.
+    """
+
+    mime_type = 'text/javascript'
+    bundle_type = 'js'
+
+    # settings.STATIC_MEDIA_USES_S3
+    # settings.STATIC_MEDIA_COMPRESSED
+
+    def config_module(self):
+        return self.config.get('config', 'config')
+
+    def main_module(self):
+        return self.config.get('main', 'main')
+
+    def sub_dirs(self):
+        return self.config.get('sub_dirs', {})
+
+    def extension_modules(self):
+        return self.config.get('extension_modules', [])
+
+    def resolve_dev_path(self, module_path):
+        """Locate a path to be served by the development server
+
+        This method finds a filesystem path for a path relative to the baseUrl
+        config value that we set up in get_html_local_server()
+        """
+        for dir_name, real_dir in self.sub_dirs().items():
+            if module_path.startswith(dir_name + '/'):
+                return self.path(module_path.replace(dir_name, real_dir, 1))
+        return self.path(os.path.join(self.config['root_dir'], module_path))
+
+    def setup_build_dir(self, build_dir):
+        """Setup a temp directory to build from
+
+        This method finds files in root_dir and sub_dirs in all the media
+        directories (unisubs + all optional repos) and links to those files
+        from build_dir.
+
+        This directory is what we point r.js to when building our single JS
+        file.
+        """
+        def setup_links(media_dir, dest_dir):
+            for media_root in media_directories():
+                source_dir = os.path.join(media_root, media_dir)
+                if not os.path.exists(source_dir):
+                    continue
+                for filename in os.listdir(source_dir):
+                    os.symlink(os.path.join(source_dir, filename),
+                               os.path.join(dest_dir, filename))
+        setup_links(self.config['root_dir'], build_dir)
+        for dir_name, real_dir in self.sub_dirs().items():
+            dir_path = os.path.join(build_dir, dir_name)
+            os.mkdir(dir_path)
+            setup_links(real_dir, dir_path)
+
+    def build_contents(self):
+        build_dir = tempfile.mkdtemp()
+        try:
+            return self._build_contents(build_dir)
+        finally:
+            shutil.rmtree(build_dir)
+
+    def _build_contents(self, build_dir):
+        self.setup_build_dir(build_dir)
+        optimize = "uglify" if settings.STATIC_MEDIA_COMPRESSED else "none"
+        build_config = {
+            'baseUrl': build_dir,
+            'mainConfigFile': os.path.join(build_dir,
+                                           self.config_module() + '.js'),
+            'findNestedDependencies': True,
+            'name': os.path.join(settings.STATIC_ROOT,
+                                 "bower/almond/almond.js"),
+            'include': [self.main_module()] + self.extension_modules(),
+            'insertRequire': self.extension_modules(),
+            'optimize': optimize,
+            'logLevel': 4,
+        }
+        r_path = os.path.join(settings.STATIC_ROOT, 'bower/rjs/dist/r.js')
+        with tempfile.NamedTemporaryFile(suffix='.js', prefix='build-') as f:
+            json.dump(build_config, f)
+            f.flush()
+            return utils.run_command([
+                'nodejs', r_path, '-o', f.name, 'out=stdout'
+            ])
+
+    def get_html(self):
+        if settings.STATIC_MEDIA_USES_S3:
+            return self.get_html_s3()
+        else:
+            return self.get_html_local_server()
+
+    def get_html_s3(self):
+        return '<script async src="{}"></script>'.format(self.get_s3_url())
+
+    def get_html_local_server(self):
+        """HTML for a local dev server."""
+
+        return """\
+<script src="/media/js/require.js"></script>'
+<script>
+  require.config({config});
+  {config_module}
+  require({modules});
+</script>""".format(
+    config=json.dumps({
+        'baseUrl': self.get_url()
+    }),
+    config_module=self.config_module_source(),
+    modules=json.dumps([
+        self.main_module(),
+    ] + self.extension_modules()))
+
+    def config_module_source(self):
+        path = self.path(os.path.join(self.config['root_dir'],
+                                      self.config_module() + '.js'))
+        with open(path) as f:
+            return f.read()
+
 class CSSBundle(Bundle):
     """Bundle CSS files
 
@@ -173,6 +333,30 @@ class CSSBundle(Bundle):
     mime_type = 'text/css'
     bundle_type = 'css'
 
+    def include_paths(self):
+        seen = set()
+        rv = []
+        def add_paths(paths):
+            for path in paths:
+                if path not in seen:
+                    rv.append(path)
+                    seen.add(path)
+
+        add_paths(os.path.join(path, 'css') for path in media_directories())
+        add_paths(os.path.dirname(path) for path in self.paths())
+        if 'include_paths' in self.config:
+            add_paths(self.path(p) for p in self.config['include_paths'])
+        return rv
+
+    def modified_since(self, since):
+        # Update modified_since to check all files in our paths.  This is
+        # needed to handle the SASS include directive.
+        for path in self.include_paths():
+            for child in os.listdir(path):
+                if os.path.getmtime(os.path.join(path, child)) > since:
+                    return True
+        return False
+
     def build_contents(self):
         source_css = self.concatinate_files()
         if settings.STATIC_MEDIA_COMPRESSED:
@@ -182,24 +366,28 @@ class CSSBundle(Bundle):
         cmdline = [
             'sass', '-t', sass_type, '-E', 'utf-8', 
         ]
-        for path in media_directories():
-            cmdline.extend(['--load-path', os.path.join(path, 'css')])
+        for path in self.include_paths():
+            cmdline.extend(['--load-path', path])
         cmdline.extend(['--scss', '--stdin'])
         return utils.run_command(cmdline, stdin=source_css)
 
-_type_to_bundle_class = {
-    'js': JavascriptBundle,
-    'css': CSSBundle,
-}
+    def get_html(self):
+        url = self.get_url()
+        return '<link href="%s" rel="stylesheet" type="text/css" />' % url
+
 def get_bundle(name):
-    basename, type_ = name.rsplit('.', 1)
-    try:
-        BundleClass = _type_to_bundle_class[type_]
-    except KeyError:
-        raise ValueError("Unknown bundle type for %s" % name)
+    basename, ext = name.rsplit('.', 1)
     try:
         config = settings.MEDIA_BUNDLES[name]
     except KeyError:
         # hack to find the setting using the old unisubs_compressor format
         config = settings.MEDIA_BUNDLES[basename]
-    return BundleClass(name, config)
+    if ext == 'css':
+        return CSSBundle(name, config)
+    elif ext == 'js':
+        if config.get('use_requirejs'):
+            return RequireJSBundle(name, config)
+        else:
+            return JavascriptBundle(name, config)
+    else:
+        raise ValueError("Unknown bundle type for %s" % name)

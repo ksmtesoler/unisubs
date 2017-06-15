@@ -19,7 +19,6 @@
 """externalsites.syncing.youtube -- Sync subtitles to/from Youtube"""
 
 from __future__ import absolute_import
-import logging
 
 from django.conf import settings
 from django.utils import translation
@@ -39,8 +38,6 @@ from teams.models import TeamVideo
 AMARA_CREDIT = translation.ugettext_lazy("Subtitles by the Amara.org community")
 AMARA_DESCRIPTON_CREDIT = translation.ugettext_lazy(
     "Help us caption & translate this video!")
-
-logger = logging.getLogger("externalsites.syncing.youtube")
 
 CAPTION_TRACK_LINK_REL = ('http://gdata.youtube.com'
                           '/schemas/2007#video.captionTracks')

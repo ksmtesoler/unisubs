@@ -1,0 +1,12 @@
+{% load i18n videos_tags %}
+{% if page %}
+{% load url from future %}
+<div class="row">
+  {% for video in page %}
+  {% include "future/teams/videos/card.html" %}
+  {% endfor %}
+</div>
+{% include "future/paginator.html" %}
+{% else %}
+<div class="zero-state">{% trans "No videos" %}</div>
+{% endif %}

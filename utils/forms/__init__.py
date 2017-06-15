@@ -11,10 +11,11 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from .autocomplete import AutocompleteTextInput
 from .dates import MonthChoiceField
 from .formrouter import FormRouter
-from .languages import MultipleLanguageChoiceField
+from .languages import LanguageDropdown, LanguageField, MultipleLanguageField
 from .recapcha import ReCaptchaField
 from .teamautocomplete import TeamAutocompleteField, autocomplete_team_view
 from .userautocomplete import UserAutocompleteField, autocomplete_user_view
+from .widgets import Dropdown
 from utils.translation import get_language_choices
 
 assert ReCaptchaField # Shut up, Pyflakes.
@@ -27,6 +28,7 @@ class AjaxForm(object):
         return output
 
 class LanguageCodeField(forms.ChoiceField):
+    # DEPRECATED: the LanguageField should be used in the new UI
     def __init__(self, *args, **kwargs):
         self.with_any = kwargs.pop('with_any', None)
         kwargs['choices'] = self.static_choices() + get_language_choices()
@@ -180,3 +182,13 @@ def get_label_for_value(form, name):
             if smart_unicode(choice[0]) == value:
                 return unicode(choice[1])
     return value
+
+class Dropdown(forms.Select):
+    def build_attrs(self, extra_attrs=None, **kwargs):
+        attrs = super(Dropdown, self).build_attrs(extra_attrs, **kwargs)
+        if 'class' in attrs:
+            attrs['class'] += ' select'
+        else:
+            attrs['class'] = 'select'
+        attrs['style'] = 'width: 100%'
+        return attrs

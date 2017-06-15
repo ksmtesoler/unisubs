@@ -21,9 +21,13 @@ from itertools import izip
 
 import babelsubs
 from django import forms
+from django.contrib import messages
+from django.db import transaction
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 
+from externalsites.models import SyncHistory
 from subtitles import pipeline
 from subtitles.shims import is_dependent
 from subtitles.models import ORIGIN_UPLOAD, SubtitleLanguage
@@ -395,3 +399,111 @@ class SubtitlesUploadForm(forms.Form):
             output[key] = '\n'.join([force_unicode(i) for i in value])
         return output
 
+class SubtitlesForm(forms.Form):
+    """Form that operates on a video's subtitles.
+
+    This is the base class for forms on the video subtitles page.
+    """
+    def __init__(self, user, video, subtitle_language, subtitle_version, *args, **kwargs):
+        super(SubtitlesForm, self).__init__(*args, **kwargs)
+
+        self.user = user
+        self.video = video
+        self.subtitle_language = subtitle_language
+        self.subtitle_version = subtitle_version
+        self.language_code = subtitle_language.language_code
+        self.setup_fields()
+
+    def setup_fields(self):
+        pass
+
+    def check_permissions(self):
+        """Check the user has permission to use the form."""
+        raise NotImplementedError()
+
+    def submit(self, request):
+        """Handle form submission."""
+        with transaction.commit_on_success():
+            if self.subtitle_language.is_writelocked:
+                messages.error(request, _(u'Subtitles are currently being edited'))
+                return
+            self.do_submit(request)
+        video_changed_tasks.delay(self.video.pk)
+
+class DeleteSubtitlesForm(SubtitlesForm):
+    VERIFY_STRING = _(u'Yes, I want to delete this language')
+    verify = forms.CharField(label=_(u'Are you sure?'), required=False)
+
+    def setup_fields(self):
+        self.fields['verify'].help_text = fmt(
+            ugettext(
+                _(u'Type "%(words)s" if you are sure you wish to continue')),
+            words=self.VERIFY_STRING)
+
+    def bullets(self):
+        workflow = self.video.get_workflow()
+        return workflow.delete_subtitles_bullets(self.language_code)
+
+    def check_permissions(self):
+        workflow = self.video.get_workflow()
+        return workflow.user_can_delete_subtitles(
+            self.user, self.language_code)
+
+    def clean_verify(self):
+        if self.cleaned_data['verify'] != self.VERIFY_STRING:
+            raise forms.ValidationError(self.fields['verify'].help_text)
+
+    def clean(self):
+        if not self.check_permissions():
+            raise forms.ValidationError(
+                ugettext(u'You do not have permission to delete the subtitles')
+            )
+        return self.cleaned_data
+
+    def do_submit(self, request):
+        self.subtitle_language.nuke_language()
+        messages.success(request, _(u'Subtitles deleted'))
+
+class RollbackSubtitlesForm(SubtitlesForm):
+    def check_permissions(self):
+        workflow = self.video.get_workflow()
+        return workflow.user_can_edit_subtitles(
+            self.user, self.language_code)
+
+    def do_submit(self, request):
+        if self.subtitle_version.next_version():
+            pipeline.rollback_to(
+                self.video, self.language_code,
+                version_number=self.subtitle_version.version_number,
+                rollback_author=self.user)
+            messages.success(request, ugettext(u'Rollback successful'))
+        else:
+            messages.error(request,
+                           ugettext(u'Can not rollback to the last version'))
+
+class ResyncSubtitlesForm(SubtitlesForm):
+    def check_permissions(self):
+        return True
+
+    def do_submit(self, request):
+        if SyncHistory.objects.force_retry_language_for_user(self.subtitle_language, self.user):
+            messages.success(request, ugettext(u'Resync started, this may take a few minutes'))
+        else:
+            messages.error(request,
+                           ugettext(u'Error while attempting to resync'))
+
+class SubtitlesNotesForm(SubtitlesForm):
+    body = forms.CharField(label='', required=True,
+                           widget=forms.Textarea(attrs={
+                               'placeholder': _("Post new note"),
+                               'rows': 3,
+                           }))
+
+    def check_permissions(self):
+        workflow = self.video.get_workflow()
+        return workflow.user_can_post_notes(self.user, self.language_code)
+
+    def do_submit(self, request):
+        notes = self.video.get_workflow().get_editor_notes(self.user,
+                                                           self.language_code)
+        notes.post(self.user, self.cleaned_data['body'])

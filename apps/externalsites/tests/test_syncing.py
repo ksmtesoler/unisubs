@@ -77,7 +77,7 @@ class SyncingTriggerTest(TestCase):
 
     def test_delete_subititles_on_language_deleted(self):
         lang = self.video.subtitle_language('en')
-        subtitles.signals.language_deleted.send(lang)
+        subtitles.signals.subtitles_deleted.send(lang)
 
         self.assertEqual(self.mock_delete_subtitles.delay.call_count, 1)
         self.mock_delete_subtitles.delay.assert_called_with(

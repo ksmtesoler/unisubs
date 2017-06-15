@@ -45,8 +45,8 @@ def on_subtitles_published(signal, sender, version=None, **kwargs):
         raise ValueError("sender must be a SubtitleLanguage: %s" % sender)
     _update_subtitles_for_language(sender)
 
-@receiver(subtitles.signals.language_deleted)
-def on_language_deleted(signal, sender, **kwargs):
+@receiver(subtitles.signals.subtitles_deleted)
+def on_subtitles_deleted(signal, sender, **kwargs):
     if not isinstance(sender, SubtitleLanguage):
         raise ValueError("sender must be a SubtitleLanguage: %s" % sender)
     language = sender

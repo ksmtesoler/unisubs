@@ -24,24 +24,15 @@ from teams.behaviors import get_main_project
 from teams.models import Project
 from utils.behaviors import DONT_OVERRIDE
 from utils.text import fmt
-from videos.behaviors import make_video_title
 
 logger = logging.getLogger(__name__)
 
-@make_video_title.override
-def amara_make_video_title(video, title, metadata):
-    if not metadata.get('speaker-name'):
-        return DONT_OVERRIDE
-    tv = video.get_team_video()
-    if tv is None or tv.team.slug != 'ted':
-        return DONT_OVERRIDE
-    return fmt(_('%(speaker_name)s: %(title)s'),
-               speaker_name=metadata['speaker-name'],
-               title=title)
+def is_ted_team(team):
+    return team.slug.startswith('ted')
 
 @get_main_project.override
 def amara_get_main_project(team):
-    if team.slug == 'ted':
+    if is_ted_team(team):
         try:
             return team.project_set.get(slug='tedtalks')
         except Project.DoesNotExist:

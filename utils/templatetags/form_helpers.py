@@ -1,6 +1,6 @@
 from django import template
-from django.forms.widgets import CheckboxInput
-
+from django.forms.widgets import (CheckboxInput, RadioSelect, Select,
+                                  SelectMultiple)
 
 register = template.Library()
 
@@ -35,5 +35,19 @@ def smart_field_render(field):
 def is_checkbox(field):
     try:
         return isinstance(field.field.widget, CheckboxInput)
+    except StandardError:
+        return False
+
+@register.filter
+def is_select(field):
+    try:
+        return isinstance(field.field.widget, (Select, SelectMultiple))
+    except StandardError:
+        return False
+
+@register.filter
+def is_radio_select(field):
+    try:
+        return isinstance(field.field.widget, RadioSelect)
     except StandardError:
         return False

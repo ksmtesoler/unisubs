@@ -22,6 +22,7 @@ Team workflow startup code
 
 from utils.behaviors import DONT_OVERRIDE
 import subtitles.workflows
+import videos.behaviors
 from teams.models import Team
 from teams.workflows import TeamWorkflow
 from teams.workflows.old import OldTeamWorkflow
@@ -32,15 +33,34 @@ def get_workflow_override(video):
     team_video = video.get_team_video()
     if team_video is None:
         return DONT_OVERRIDE
-    # if we have have a video from cache also get the team from cache
     if video.cache.cache_pattern is not None:
+        # If we have have a video from cache also get the team from cache
         team = Team.cache.get_instance(team_video.team_id,
                                        video.cache.cache_pattern)
         team_video.team = team
         team_workflow = TeamWorkflow.get_workflow(team)
     else:
         team_workflow = TeamWorkflow.get_workflow(team_video.team)
-    return team_workflow.get_subtitle_workflow(team_video)
+    return team_workflow.get_subtitle_workflow(video.get_team_video())
+
+@videos.behaviors.video_page_customize.override
+def video_page_customize(request, video):
+    team_video = video.get_team_video()
+    if team_video:
+        team_workflow = TeamWorkflow.get_workflow(team_video.team)
+        return team_workflow.video_page_customize(request, video)
+    else:
+        return DONT_OVERRIDE
+
+@videos.behaviors.subtitles_page_customize.override
+def subtitles_page_customize(request, video, subtitle_language):
+    team_video = video.get_team_video()
+    if team_video:
+        team_workflow = TeamWorkflow.get_workflow(team_video.team)
+        return team_workflow.subtitles_page_customize(request, video,
+                                                      subtitle_language)
+    else:
+        return DONT_OVERRIDE
 
 # register default team workflows
 OldTeamWorkflow.register('O', 'default')

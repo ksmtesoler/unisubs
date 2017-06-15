@@ -18,7 +18,7 @@
         {% if activity_list %}
             <ul class="listing activity">
                 {% for record in activity_list %}
-                <li>{% include "activity/record.html" %}</li>
+                <li>{% include "activity/old_record.html" %}</li>
                 {% endfor %}
             </ul>
             {% if is_paginated %}{% paginator %}{% endif %}

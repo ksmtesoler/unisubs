@@ -44,6 +44,12 @@ from collections import namedtuple
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
+from django.utils.safestring import mark_safe
+from django.utils.translation import ungettext
+
+from subtitles.models import SubtitleLanguage
+from utils.behaviors import DONT_OVERRIDE
+from utils.text import fmt
 
 class TeamWorkflow(object):
     label = NotImplemented
@@ -51,6 +57,7 @@ class TeamWorkflow(object):
     team creation form.
     """
     dashboard_view = NotImplemented
+    member_view = NotImplemented
     """
     view function for the dashboard page.
     """
@@ -114,6 +121,88 @@ class TeamWorkflow(object):
         url = reverse(view_name, kwargs={'slug': self.team.slug})
         return TeamPage(name, title,  url)
 
+    def video_page_customize(self, request, video):
+        """Add extra content to the video page when viewing from the context
+        of a team."""
+        return DONT_OVERRIDE
+
+    def subtitles_page_customize(self, request, video, subtitle_language):
+        """Add extra content to the subtitles page when viewing from the context
+        of a team."""
+        return DONT_OVERRIDE
+
+    def team_video_page_extra_tabs(self, request):
+        """Add extra sub tabs to the team video page.
+
+        These appear near the top of the page.
+        """
+        return []
+
+    def management_page_extra_tabs(self, request):
+        """Add extra sub tabs to the team management page.
+
+        These appear near the top of the page.
+        """
+        return []
+
+    def team_video_page_default(self, request):
+        extra_tabs = self.team_video_page_extra_tabs(request)
+        if extra_tabs:
+            return extra_tabs[0].url
+        else:
+            return reverse("teams:videos", kwargs={
+                'slug': self.team.slug,
+            })
+
+    def management_page_default(self, request):
+        extra_tabs = self.management_page_extra_tabs(request)
+        if extra_tabs:
+            return extra_tabs[0].url
+        else:
+            return reverse("teams:manage_videos", kwargs={
+                'slug': self.team.slug,
+            })
+
+    def video_management_add_counts(self, videos):
+        """Add the subtitle counts for the videos management page
+
+        By default we add the number of completed subtitles, but other
+        workflows may want to add other/different counts.
+
+        For each video you can set the counts attribute to a list of strings.
+        Each string should describe a count of something, like the number of
+        completed subtitles.  The number should be wrapped in a <strong> tag
+        (and the whole thing should be wrapped in a mark_safe() call).
+        You can also set the counts2 attribute to create a
+        second line of counts.
+
+        Args:
+            videos -- List of Video instances.
+        """
+        counts = SubtitleLanguage.count_completed_subtitles(videos)
+        for v in videos:
+            incomplete_count, completed_count = counts[v.id]
+            v.counts = []
+            if completed_count > 0:
+                msg = ungettext(
+                    (u'<strong>%(count)s</strong> subtitle completed'),
+                    (u'<strong>%(count)s</strong> subtitles completed'),
+                    completed_count)
+                v.counts.append(mark_safe(fmt(msg, count=completed_count)))
+            if incomplete_count > 0:
+                msg = ungettext(
+                    (u'<strong>%(count)s</strong> subtitle started'),
+                    (u'<strong>%(count)s</strong> subtitles started'),
+                    incomplete_count)
+                v.counts.append(mark_safe(fmt(msg, count=incomplete_count)))
+
+    def video_management_alter_context_menu(self, video, menu):
+        """Alter the context menu for the video management page."""
+
+    def video_management_extra_forms(self):
+        """Add extra forms to the video management page """
+        return []
+
     def activity_type_filter_options(self):
         """
         Get possible activity type filter values
@@ -133,7 +222,6 @@ class TeamWorkflow(object):
             'video-moved-from-team',
             'video-moved-to-team',
         ]
-
 
     # these can be used to customize the content in the project/language
     # manager pages

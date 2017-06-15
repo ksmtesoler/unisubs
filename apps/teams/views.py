@@ -47,15 +47,15 @@ from auth.models import UserLanguage, CustomUser as User
 from videos.templatetags.paginator import paginate
 from messages import tasks as notifier
 from teams.forms import (
-    CreateTeamForm, AddTeamVideoForm, EditTeamVideoForm,
+    CreateTeamForm, EditTeamVideoForm,
     AddTeamVideosFromFeedForm, TaskAssignForm, SettingsForm, TaskCreateForm,
     PermissionsForm, WorkflowForm, InviteForm, TaskDeleteForm,
     GuidelinesMessagesForm, RenameableSettingsForm, ProjectForm, LanguagesForm,
-    DeleteLanguageForm, MoveTeamVideoForm, TaskUploadForm,
-    make_billing_report_form, TaskCreateSubtitlesForm,
-    TeamMultiVideoCreateSubtitlesForm, MoveVideosForm, AddVideoToTeamForm,
-    GuidelinesLangMessagesForm,
+    MoveTeamVideoForm, TaskUploadForm, make_billing_report_form,
+    TaskCreateSubtitlesForm, TeamMultiVideoCreateSubtitlesForm,
+    OldMoveVideosForm, AddVideoToTeamForm, GuidelinesLangMessagesForm,
 )
+from teams.oldforms import DeleteLanguageForm, AddTeamVideoForm
 from teams.models import (
     Team, TeamMember, Invite, Application, TeamVideo, Task, Project, Workflow,
     Setting, TeamLanguagePreference, InviteExpiredException, BillingReport,
@@ -626,7 +626,7 @@ def move_videos(request, slug, project_slug=None, languages=None):
     managed_projects_choices = map(lambda project: {'id': project.id, 'team': str(project.team.id), 'name': str(project)}, managed_projects)
 
     if request.method == 'POST':
-        form = MoveVideosForm(request.user, request.POST)
+        form = OldMoveVideosForm(request.user, request.POST)
         if 'move' in request.POST and form.is_valid():
             target_team = form.cleaned_data['team']
             if target_team not in managed_teams:
@@ -655,7 +655,7 @@ def move_videos(request, slug, project_slug=None, languages=None):
                 except MultipleObjectsReturned:
                     return  HttpResponseServerError("Internal Error")
     else:
-        form = MoveVideosForm(request.user)
+        form = OldMoveVideosForm(request.user)
      
     project_filter = (project_slug if project_slug is not None
                       else request.GET.get('project'))
@@ -787,7 +787,10 @@ def add_video(request, slug):
     team = get_team_for_view(slug, request.user)
 
     project_id = request.GET.get('project') or request.POST.get('project') or None
-    project = Project.objects.get(team=team, pk=project_id) if project_id else team.default_project
+    if project_id and project_id != 'none':
+        project = Project.objects.get(team=team, slug=project_id)
+    else:
+        project = team.default_project
 
     if request.POST and not can_add_video(team, request.user, project):
         messages.error(request, _(u"You can't add that video to this team/project."))

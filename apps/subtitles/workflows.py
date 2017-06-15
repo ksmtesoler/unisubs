@@ -248,6 +248,13 @@ class Workflow(object):
         """
         raise NotImplementedError()
 
+    def delete_subtitles_bullets(self):
+        """Bullet points for the delete subtitles dialog
+
+        returns: list of text strings
+        """
+        return NotImplementedError()
+
     def user_can_view_video(self, user):
         """Check if a user can view the video
 
@@ -279,6 +286,16 @@ class Workflow(object):
             True/False
         """
         raise NotImplementedError()
+
+    # Right now these are both tied to the edit permissions, but we might
+    # change that at some point
+    def user_can_view_notes(self, user, language_code):
+        """Check if a user can view editor notes."""
+        return self.user_can_edit_subtitles(user, language_code)
+
+    def user_can_post_notes(self, user, language_code):
+        """Check if a user can post editor notes."""
+        return self.user_can_edit_subtitles(user, language_code)
 
     def editor_data(self, user, language_code):
         """Get data to pass to the editor for this workflow."""
@@ -437,9 +454,23 @@ class VideoWorkflow(object):
         return (self.get_language_workflow(language_code)
                 .user_can_delete_subtitles(user))
 
+    def delete_subtitles_bullets(self, language_code):
+        return (self.get_language_workflow(language_code)
+                .delete_subtitles_bullets())
+
     def user_can_edit_subtitles(self, user, language_code):
         return (self.get_language_workflow(language_code)
                 .user_can_edit_subtitles(user))
+
+    def user_can_view_notes(self, user, language_code):
+        """Check if a user can view editor notes."""
+        return (self.get_language_workflow(language_code)
+                .user_can_view_notes(user))
+
+    def user_can_post_notes(self, user, language_code):
+        """Check if a user can post editor notes."""
+        return (self.get_language_workflow(language_code)
+                .user_can_post_notes(user))
 
     def editor_data(self, user, language_code):
         return self.get_language_workflow(language_code).editor_data(user)
@@ -556,6 +587,14 @@ class LanguageWorkflow(object):
             True/False
         """
         raise NotImplementedError()
+
+    def user_can_view_notes(self, user):
+        """Check if a user can view the editor notes."""
+        return self.user_can_edit_subtitles(user)
+
+    def user_can_post_notes(self, user):
+        """Check if a user can post editor notes."""
+        return self.user_can_edit_subtitles(user)
 
     def editor_data(self, user):
         """Get data to pass to the editor for this workflow."""
@@ -900,6 +939,12 @@ class DefaultWorkflow(Workflow):
     def user_can_edit_subtitles(self, user, language_code):
         return True
 
+    def delete_subtitles_bullets(self, language_code):
+        return [
+            _(u'All subtitles will be deleted'),
+            _('This language will no longer be usable for translations'),
+        ]
+
 class DefaultVideoWorkflow(VideoWorkflow):
     def user_can_view_video(self, user):
         return True
@@ -922,6 +967,12 @@ class DefaultLanguageWorkflow(LanguageWorkflow):
 
     def user_can_delete_subtitles(self, user):
         return user.is_superuser
+
+    def delete_subtitles_bullets(self):
+        return [
+            _(u'All subtitles will be deleted'),
+            _('This language will no longer be usable for translations'),
+        ]
 
     def user_can_edit_subtitles(self, user):
         return True

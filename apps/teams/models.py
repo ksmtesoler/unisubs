@@ -34,6 +34,7 @@ from django.db.models import query, Q, Count, Sum
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.http import Http404
 from django.template.loader import render_to_string
+from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _, ugettext
 
 import teams.moderation_const as MODERATION
@@ -43,7 +44,7 @@ from auth.models import UserLanguage, CustomUser as User
 from auth.providers import get_authentication_provider
 from messages import tasks as notifier
 from subtitles import shims
-from subtitles.signals import language_deleted
+from subtitles.signals import subtitles_deleted
 from teams.moderation_const import WAITING_MODERATION, UNMODERATED, APPROVED
 from teams.permissions_const import (
     TEAM_PERMISSIONS, PROJECT_PERMISSIONS, ROLE_OWNER, ROLE_ADMIN, ROLE_MANAGER,
@@ -215,10 +216,12 @@ class Team(models.Model):
     logo = S3EnabledImageField(verbose_name=_(u'logo'), blank=True,
                                upload_to='teams/logo/',
                                default='',
+                               legacy_filenames=False,
                                thumb_sizes=[(280, 100), (100, 100)])
     square_logo = S3EnabledImageField(verbose_name=_(u'square logo'),
                                       upload_to='teams/square-logo/',
                                       default='', blank=True,
+                                      legacy_filenames=False,
                                       thumb_sizes=[(100, 100), (48, 48), (40, 40), (30, 30)])
     is_visible = models.BooleanField(_(u'videos public?'), default=False)
     sync_metadata = models.BooleanField(_(u'Sync metadata when available (Youtube)?'), default=False)
@@ -438,15 +441,43 @@ class Team(models.Model):
         if self.logo:
             return self.logo.thumb_url(280, 100)
 
+    AVATAR_STYLES = [
+        'default', 'inverse', 'teal', 'plum', 'lime',
+    ]
+    def default_avatar(self, size):
+        return ('https://s3.amazonaws.com/'
+                's3.www.universalsubtitles.org/gravatar/'
+                'avatar-team-{}-{}.png'.format(
+                    self.default_avatar_style(), size))
+
+    def default_avatar_style(self):
+        return self.AVATAR_STYLES[self.id % len(self.AVATAR_STYLES)]
+
     def square_logo_thumbnail(self):
         """URL for this team's square logo, or None."""
         if self.square_logo:
             return self.square_logo.thumb_url(100, 100)
+        else:
+            return self.default_avatar(100)
+
+    def square_logo_thumbnail_medium(self):
+        """URL for a medium version of this team's square logo, or None."""
+        if self.square_logo:
+            return self.square_logo.thumb_url(40, 40)
+        else:
+            return self.default_avatar(50) # FIXME size mismatch.
 
     def square_logo_thumbnail_small(self):
         """URL for a small version of this team's square logo, or None."""
         if self.square_logo:
-            return self.square_logo.thumb_url(48, 48)
+            return self.square_logo.thumb_url(30, 30)
+        else:
+            return self.default_avatar(30)
+
+    def square_logo_thumbnail_oldsmall(self):
+        """small version of the team's square logo for old-style pages."""
+        if self.square_logo:
+            return self.square_logo.thumb_url(48,48)
 
     # URLs
     @models.permalink
@@ -845,7 +876,7 @@ class Team(models.Model):
     def get_completed_language_counts(self):
         from subtitles.models import SubtitleLanguage
         qs = (SubtitleLanguage.objects
-              .filter(video__in=self.videos.all())
+              .filter(video__teamvideo__team=self)
               .values_list('language_code')
               .annotate(Sum('subtitles_complete')))
         return [(lc, int(count)) for lc, count in qs]
@@ -869,6 +900,8 @@ class ProjectManager(models.Manager):
             team = Team.objects.get(pk=team_identifier)
         elif isinstance(team_identifier, str):
             team = Team.objects.get(slug=team_identifier)
+        else:
+            raise TypeError("Bad team_identifier: {}".format(team_identifier))
         return Project.objects.filter(team=team).exclude(name=Project.DEFAULT_NAME)
 
 class Project(models.Model):
@@ -1296,7 +1329,7 @@ def team_video_delete(sender, instance, **kwargs):
     if instance.video_id is not None:
         Video.cache.invalidate_by_pk(instance.video_id)
 
-def on_language_deleted(sender, **kwargs):
+def on_subtitles_deleted(sender, **kwargs):
     """When a language is deleted, delete all tasks associated with it."""
     team_video = sender.video.get_team_video()
     if not team_video:
@@ -1340,7 +1373,7 @@ post_save.connect(team_video_autocreate_task, TeamVideo, dispatch_uid='teams.tea
 post_save.connect(team_video_add_video_moderation, TeamVideo, dispatch_uid='teams.teamvideo.team_video_add_video_moderation')
 post_delete.connect(team_video_delete, TeamVideo, dispatch_uid="teams.teamvideo.team_video_delete")
 post_delete.connect(team_video_rm_video_moderation, TeamVideo, dispatch_uid="teams.teamvideo.team_video_rm_video_moderation")
-language_deleted.connect(on_language_deleted, dispatch_uid="teams.subtitlelanguage.language_deleted")
+subtitles_deleted.connect(on_subtitles_deleted, dispatch_uid="teams.subtitlelanguage.subtitles_deleted")
 
 # TeamMember
 class TeamMemberManager(models.Manager):
@@ -1355,6 +1388,9 @@ class TeamMemberManager(models.Manager):
 
     def admins(self):
         return self.filter(role__in=(ROLE_OWNER, ROLE_ADMIN))
+
+    def members_from_users(self, team, users):
+        return self.filter(team=team, user__in=users)
 
 class TeamMember(models.Model):
     ROLE_OWNER = ROLE_OWNER
@@ -1406,6 +1442,11 @@ class TeamMember(models.Model):
         """Return any language narrowings applied to this member."""
         return self.narrowings.filter(project__isnull=True)
 
+    def get_absolute_url(self):
+        if self.team.is_old_style():
+            raise NotImplementedError()
+        else:
+            return reverse('teams:member-profile', args=(self.team.slug, urlquote(self.user.username)))
 
     def project_narrowings_fast(self):
         """Return any project narrowings applied to this member.

@@ -35,18 +35,18 @@ from subtitles import workflows
 class DeleteLanguageTest(TestCase):
     def setUp(self):
         self.video = TeamVideoFactory().video
-        self.language_deleted_handler = mock.Mock()
-        signals.language_deleted.connect(self.language_deleted_handler,
+        self.subtitles_deleted_handler = mock.Mock()
+        signals.subtitles_deleted.connect(self.subtitles_deleted_handler,
                                          weak=False)
-        self.addCleanup(signals.language_deleted.disconnect,
-                        self.language_deleted_handler)
+        self.addCleanup(signals.subtitles_deleted.disconnect,
+                        self.subtitles_deleted_handler)
 
-    def test_language_deleted(self):
+    def test_subtitles_deleted(self):
         v1 = pipeline.add_subtitles(self.video, 'en', None)
         language = v1.subtitle_language
         language.nuke_language()
-        self.assertEquals(self.language_deleted_handler.call_count, 1)
-        self.language_deleted_handler.assert_called_with(signal=mock.ANY,
+        self.assertEquals(self.subtitles_deleted_handler.call_count, 1)
+        self.subtitles_deleted_handler.assert_called_with(signal=mock.ANY,
                                                          sender=language)
 
 class NewVersionTest(TestCase):

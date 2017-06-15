@@ -46,10 +46,11 @@ from utils import translation
 
 def render_js_language_script():
     return render_to_string('languageData.js', {
-        'languages': [
-            (code, translation.choice_label(code))
-            for code, en_label in translation.SUPPORTED_LANGUAGE_CHOICES
-        ],
+        'languages': sorted(
+            ((code, translation.choice_label (code)) 
+                for code, en_label in translation.SUPPORTED_LANGUAGE_CHOICES), 
+                key=lambda x: x[0]
+            ),
         'popular_languages': translation.POPULAR_LANGUAGES,
         'locale_choices': [code for (code, label) in settings.LANGUAGES],
         'allLanguagesLabel': json.dumps(ugettext('All Languages')),

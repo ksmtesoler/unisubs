@@ -729,6 +729,26 @@ class SyncHistoryManager(models.Manager):
                 seen.add(item.language)
         return keep
 
+    def get_sync_history_for_subtitle_language(self, language):
+        """
+        Get sync history for a particular subtitle language
+        """
+        days_of_search = 183
+        items_to_display = 20
+        qs = self.filter(language=language)
+        qs = qs.filter(datetime__gt=datetime.datetime.now() - datetime.timedelta(days=days_of_search))
+        qs = qs.order_by('-id')[:items_to_display]
+        history = []
+        for item in qs:
+            history.append({
+                'account': item.get_account(),
+                'version': item.version.version_number if item.version else '',
+                'result': item.get_result_display(),
+                'details': item.details,
+                'date': item.datetime,
+            })
+        return history
+
     def get_attempt_to_resync(self):
         """Lookup failed sync attempt that we should retry.
 
@@ -759,6 +779,15 @@ class SyncHistoryManager(models.Manager):
             if can_user_resync_own_video(sh.video_url.video, user):
                 sh.retry = True
                 sh.save()
+
+    def force_retry_language_for_user(self, language, user):
+        items = self.filter(language=language).order_by('-id')
+        if items.exists():
+            item = items[0]
+            item.retry = True
+            item.save()
+            return True
+        return False
 
 class SyncHistory(models.Model):
     """History of all subtitle sync attempts."""

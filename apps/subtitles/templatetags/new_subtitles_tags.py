@@ -65,6 +65,70 @@ def render_subtitles(subtitle_version):
     thousands of subtitles that gets slow
     """
     subtitles = subtitle_version.get_subtitles()
+    is_rtl = " is-rtl" if subtitle_version.subtitle_language.is_rtl() else ""
+    timing_template = string.Template(u"""\
+<div class="subtitlesList-time">
+    <a class="subtitlesList-seek" href="#" data-start-time="$start_time" title="{}">
+        $start_time_display - $end_time_display
+    </a>
+</div>""".format(_('Play video here')))
+    not_synced_timing = u'<div class="subtitlesList-time">{}</div>'.format(_('Not Synced'))
+    text_template = string.Template(u'<div class="subtitlesList-subtitle{}">$text</div>'.format(is_rtl))
+    text_template_new_p = string.Template(
+        u'<div class="subtitlesList-subtitle topicSentence{}">$text</div>'.format(is_rtl))
+
+    synced_subs = []
+    unsynced_subs = []
+
+    for item in subtitles.subtitle_items(HTMLGenerator.MAPPINGS):
+        if item.start_time is not None:
+            synced_subs.append(item)
+        else:
+            unsynced_subs.append(item)
+    synced_subs.sort(key=lambda item: item.start_time)
+
+    parts = []
+    parts.append(u'<ul class="subtitlesList{}">'.format(is_rtl))
+    for item in synced_subs + unsynced_subs:
+        new_paragraph = item.meta.get('new_paragraph', False)
+        parts.append(u'<li>')
+        if item.start_time is not None:
+            parts.append(timing_template.substitute(
+                start_time=item.start_time,
+                start_time_display=format_time(item.start_time),
+                end_time_display=format_time(item.end_time)))
+        else:
+            parts.append(not_synced_timing)
+        if new_paragraph:
+            parts.append(text_template_new_p.substitute(text=item.text))
+        else:
+            parts.append(text_template.substitute(text=item.text))
+        parts.append(u'</li>')
+    parts.append(u'</ul>')
+    return mark_safe(u"\n".join(parts))
+
+@register.simple_tag
+def subtitle_download_url(version, format_name):
+    filename = '.'.join([
+        version.video.get_download_filename(),
+        version.language_code
+    ])
+    return reverse('subtitles:download', kwargs={
+        'video_id': version.video.video_id,
+        'language_code': version.language_code,
+        'filename': filename,
+        'format': format_name,
+        'version_number': version.version_number,
+    })
+
+@register.filter
+def old_render_subtitles(subtitle_version):
+    """Render the subtitles for a SubtitleVersion
+
+    This would be much nicer in a django template, but for versions with
+    thousands of subtitles that gets slow
+    """
+    subtitles = subtitle_version.get_subtitles()
     timing_template = string.Template(u"""\
 <div class="timing">
     <a class="time_link" href="#" title="Play video here">
@@ -116,16 +180,3 @@ def render_subtitles(subtitle_version):
             parts.append(text_template.substitute(text=item.text))
     return mark_safe(u"\n".join(parts))
 
-@register.simple_tag
-def subtitle_download_url(version, format_name):
-    filename = '.'.join([
-        version.video.get_download_filename(),
-        version.language_code
-    ])
-    return reverse('subtitles:download', kwargs={
-        'video_id': version.video.video_id,
-        'language_code': version.language_code,
-        'filename': filename,
-        'format': format_name,
-        'version_number': version.version_number,
-    })

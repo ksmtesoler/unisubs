@@ -82,7 +82,7 @@
                     {{ field.content }}
                 </li>
                 {% endfor %}
-                {{ version|render_subtitles }}
+                {{ version|old_render_subtitles }}
             </ol>
         {% else %}
             {% if revision_count > 1 %}

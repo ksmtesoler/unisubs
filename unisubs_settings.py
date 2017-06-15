@@ -47,6 +47,10 @@ elif INSTALLATION == PRODUCTION:
     COMPRESS_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     # only send actual email on the production server
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+elif INSTALLATION == BETA:
+    SITE_ID = 20
+    SITE_NAME = 'unisubs'
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 elif INSTALLATION == DEMO:
     DEBUG = True
     REDIS_DB = "4"

@@ -216,7 +216,7 @@ class MonkeyPatcher(object):
             mock_obj.side_effect = side_effect
         mock_now.reset()
 
-def patch_for_test(spec, MockClass=None):
+def patch_for_test(spec, MockClass=None, autospec=False):
     """Use mock to patch a function for the test case.
 
     Use this to decorate a TestCase test or setUp method.  It will call
@@ -231,14 +231,16 @@ def patch_for_test(spec, MockClass=None):
         def setUp(self, mock_foo):
             ...
     """
-    if MockClass is None:
-        MockClass = mock.Mock
     def decorator(func):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
-            mock_obj = MockClass()
-            patcher = mock.patch(spec, mock_obj)
-            patcher.start()
+            if MockClass is not None:
+                if autospec:
+                    raise AssertionError("Can't specify MockClass and autospec")
+                patcher = mock.patch(spec, MockClass())
+            else:
+                patcher = mock.patch(spec, autospec=autospec)
+            mock_obj = patcher.start()
             self.addCleanup(patcher.stop)
             return func(self, mock_obj, *args, **kwargs)
         return wrapper

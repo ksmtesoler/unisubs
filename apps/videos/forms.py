@@ -24,6 +24,8 @@ from django import forms
 from django.conf import settings
 from django.core.mail import EmailMessage, send_mail
 from django.core.urlresolvers import reverse
+from django.core.validators import EMPTY_VALUES
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import force_unicode, DjangoUnicodeDecodeError
@@ -54,6 +56,47 @@ def language_choices_with_empty():
     choices.extend(get_language_choices())
     return choices
 
+class VideoDurationField(forms.ChoiceField):
+    # Duration choices in the form of (min, max, label)
+    DURATION_CHOICE_DATA = [
+        (None, 6, _('< 6 min')),
+        (6, 12, _('6-12 min')),
+        (12, 18, _('12-18 min')),
+        (18, 30, _('18-30  min')),
+        (30, None, _('> 30 min')),
+    ]
+    DURATION_CHOICES = [ ('', _('Any length')) ] + [
+        (str(i+1), option[2])
+        for i, option in enumerate(DURATION_CHOICE_DATA)
+    ]
+    def __init__(self, *args, **kwargs):
+        if 'choices' not in kwargs:
+            kwargs['choices'] = self.DURATION_CHOICES
+        if 'initial' not in kwargs:
+            kwargs['initial'] = ''
+        if 'label' not in kwargs:
+            kwargs['label'] = _("Video length")
+        super(VideoDurationField, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def filter(cls, qs, value):
+        return qs.filter(**cls.filter_data(value))
+
+    @classmethod
+    def filter_data(cls, value):
+        filter_data = {}
+        if value in EMPTY_VALUES:
+            return filter_data
+        try:
+            min, max, label = cls.DURATION_CHOICE_DATA[int(value)-1]
+        except StandardError:
+            return filter_data
+        if min is not None:
+            filter_data['duration__gte'] = min * 60
+        if max is not None:
+            filter_data['duration__lt'] = max * 60
+        return filter_data
+
 class VideoURLField(forms.URLField):
     """Field for inputting URLs for videos.
 
@@ -62,8 +105,9 @@ class VideoURLField(forms.URLField):
     """
     def clean(self, video_url):
         if not video_url:
+            if self.required:
+                raise forms.ValidationError(self.error_messages['required'])
             return None
-
         try:
             video_type = video_type_registrar.video_type_for_url(video_url)
         except VideoTypeError, e:
@@ -143,6 +187,49 @@ class CreateVideoUrlForm(forms.Form):
         for key, value in self.errors.items():
             output[key] = '/n'.join([force_unicode(i) for i in value])
         return output
+
+class NewCreateVideoUrlForm(forms.Form):
+    url = VideoURLField(required=True)
+
+    def __init__(self, video, user, *args, **kwargs):
+        super(NewCreateVideoUrlForm, self).__init__(*args, **kwargs)
+        self.user = user
+        self.video = video
+
+    def clean(self):
+        data = super(NewCreateVideoUrlForm, self).clean()
+        if self.cleaned_data.get('url'):
+            self.create_video_url()
+        return self.cleaned_data
+
+    def create_video_url(self):
+        """Create our VideoUrl object.
+
+        We do this the last part of the clean() method.
+        """
+        try:
+            self.video_url = self.video.add_url( self.cleaned_data['url'],
+                self.user)
+        except Video.UrlAlreadyAdded, e:
+            self._errors['url'] = self.error_class([
+                self.already_added_message(e.video)
+            ])
+
+    def already_added_message(self, video):
+        if video == self.video:
+            return _('Video URL already added to this video')
+
+        if video.can_user_see(self.user):
+            link = mark_safe('<a href="{}">{}</a>'.format(
+                video.get_absolute_url(), ugettext('view video')))
+            return fmt(
+                _('Video URL already added to a different video (%(link)s)'),
+                link=link)
+        else:
+            return _('Video URL already added to a different video')
+
+    def save(self):
+        return self.video_url
 
 class UserTestResultForm(forms.ModelForm):
 

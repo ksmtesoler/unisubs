@@ -118,3 +118,28 @@ def send_templated_email(to, subject, body_template, body_dict,
 
     return email.send(fail_silently)
 
+class CheckResult(object):
+    """Result object for a check function
+
+    This object gets returned from one of our typical check methods.  Those
+    methods check if a user can perform some action: add subtitles to a video,
+    take an assignment, manage a team, etc.  We usually want to return two
+    things from those types of methods:
+
+      - If the check was successful or not
+      - Why was the check successful or not (e.g. why can't a user do the
+        action)
+
+    This class is made to be the return value from those methods.  It can be
+    used as a boolean to simply test if the check was true or false.  It also
+    has an optional reason attribute that describes the reasoning behind the
+    decision.  Typically we set the reason for false values, and leave it
+    blank for true values.
+    """
+    def __init__(self, result, reason=''):
+        self.result = result
+        self.reason = reason
+
+    def __nonzero__(self):
+        return bool(self.result)
+

@@ -21,12 +21,16 @@ TeamWorkflow classes for old-style teams
 """
 
 from __future__ import absolute_import
+from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 
 from teams import views
 from teams.workflows import TeamWorkflow
 from .subtitleworkflows import (TaskTeamSubtitlesWorkflow,
                                 NonTaskTeamSubtitlesWorkflow)
+from utils.behaviors import DONT_OVERRIDE
+from videos.behaviors import VideoPageCustomization
 
 class OldTeamWorkflow(TeamWorkflow):
     """Workflow for old-style teams
@@ -62,6 +66,17 @@ class OldTeamWorkflow(TeamWorkflow):
                 'version-declined',
             ])
         return options
+
+    def video_page_customize(self, request, video):
+        if not (self.team.is_tasks_team() and
+                self.team.user_is_member(request.user)):
+            return DONT_OVERRIDE
+        sidebar = render_to_string('future/teams/tasks/video-sidebar.html', {
+            'video': video,
+            'team': self.team,
+            'team_video': video.get_team_video(),
+        }, RequestContext(request))
+        return VideoPageCustomization(sidebar, None)
 
     def get_subtitle_workflow(self, team_video):
         """Get the SubtitleWorkflow for a video with this workflow.  """

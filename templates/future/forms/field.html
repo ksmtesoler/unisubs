@@ -1,0 +1,19 @@
+{% if widget_type == "hidden" %}
+{{ field }}
+{% else %}
+<div class="form-group{% if field.errors %} has-error{% endif %}">
+  {% if widget_type == "checkbox" %}
+  <div class="checkbox">{{ field }}<label for="{{ field.auto_id }}"><span></span>{{ field.label }}</label></div>
+  {% else %}
+  {% if field.label %}{{ field.label_tag }}{% endif %}{{ field }}
+  {% endif %}
+
+  {% if field.errors %}
+  {% for error in field.errors %}
+  <p class="help-block">{{ error|escape }}</p>
+  {% endfor %}
+  {% elif field.help_text %}
+  <p class="help-block">{{ field.help_text }}</p>
+  {% endif %}
+</div>
+{% endif %}
