@@ -152,6 +152,9 @@ class TeamVideoField(AmaraChoiceField):
         except Video.DoesNotExist:
             raise forms.ValidationError(self.error_messages['invalid'])
 
+    def choice_for_video(self, video):
+        return (video.video_id, unicode(video))
+
     def prepare_value(self, value):
         # Handles initial values and submitted data.  There are a few cases we
         # need to handle:
@@ -411,7 +414,7 @@ class AddTeamVideoForm(forms.ModelForm):
         # See if any error happen when we create our video
         try:
             Video.add(self.cleaned_data['video_url'], self.user,
-                      self.setup_video)
+                      self.setup_video, self.team)
         except Video.UrlAlreadyAdded, e:
             self.setup_existing_video(e.video, e.video_url)
         return self.cleaned_data
@@ -1227,7 +1230,7 @@ class VideoFiltersForm(FiltersForm):
         ('name', _('Name, a-z')),
         ('-name', _('Name, z-a')),
         ('-subs', _('Most completed languages')),
-        ('subs', _('Least complete languages')),
+        ('subs', _('Least completed languages')),
     ], initial='-time', required=False)
 
     promote_main_project = True
@@ -1546,7 +1549,7 @@ class TeamVideoURLForm(forms.Form):
                                                   added_by=user)
 
         try:
-            Video.add(video_type, user, setup_video)
+            Video.add(video_type, user, setup_video, team)
         except Video.UrlAlreadyAdded, e:
             if e.video.get_team_video() is not None:
                 return (False,

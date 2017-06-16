@@ -20,6 +20,7 @@ from urlparse import urlparse
 
 from base import VideoType
 from externalsites import google
+import externalsites
 
 class YoutubeVideoType(VideoType):
 
@@ -64,14 +65,18 @@ class YoutubeVideoType(VideoType):
         else:
             return google.get_direct_url_to_video(self.video_id)
 
-    def get_video_info(self):
+    def get_video_info(self, user, team):
         if not hasattr(self, '_video_info'):
-            self._video_info = google.get_video_info(self.video_id)
+            if team is not None and user is not None:
+                accounts = externalsites.models.YouTubeAccount.objects.get_accounts_for_user_and_team(user, team)
+            else:
+                accounts = []
+            self._video_info = google.get_video_info(self.video_id, accounts)
         return self._video_info
 
-    def set_values(self, video):
+    def set_values(self, video, user, team):
         try:
-            video_info = self.get_video_info()
+            video_info = self.get_video_info(user, team)
         except google.APIError:
             return
         video.title = video_info.title
@@ -81,7 +86,7 @@ class YoutubeVideoType(VideoType):
 
     def owner_username(self):
         try:
-            return self.get_video_info().channel_id
+            return self.get_video_info(None, None).channel_id
         except google.APIError:
             return None
 

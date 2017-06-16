@@ -65,4 +65,10 @@ def on_video_url_added(sender, video, **kwargs):
     if credit.should_add_credit_to_video_url(video_url, account):
         tasks.add_amara_credit.delay(video_url.pk)
     if subfetch.should_fetch_subs(video_url):
-        tasks.fetch_subs.delay(video_url.pk)
+        team = kwargs.pop('team', None)
+        if team is not None:
+            team = team.pk
+        user = kwargs.pop('user', None)
+        if user is not None:
+            user = user.pk
+        tasks.fetch_subs.delay(video_url.pk, user, team)

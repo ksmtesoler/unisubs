@@ -35,14 +35,6 @@ class ShouldFetchSubsTest(TestCase):
         video = YouTubeVideoFactory(channel_id="username")
         assert_true(should_fetch_subs(video.get_primary_videourl_obj()))
 
-    def test_should_fetch_subs_no_youtube_account(self):
-        video = YouTubeVideoFactory(channel_id="username")
-        assert_false(should_fetch_subs(video.get_primary_videourl_obj()))
-
-    def test_should_fetch_subs_no_channel_id(self):
-        video = YouTubeVideoFactory(channel_id=None)
-        assert_false(should_fetch_subs(video.get_primary_videourl_obj()))
-
     def test_should_fetch_subs_non_youtube_video(self):
         video = VideoFactory()
         assert_false(should_fetch_subs(video.get_primary_videourl_obj()))
