@@ -670,7 +670,7 @@ def sync_history_context(video, subtitle_language):
     context = {}
     sync_history = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
     context['sync_history'] = sync_history
-    context['can_resync'] = (len(sync_history) > 0) and not sync_history[0].get_account().should_skip_syncing()
+    context['can_resync'] = (len(sync_history) > 0) and not sync_history[0]['account'].should_skip_syncing()
     context['current_version'] = subtitle_language.get_public_tip()
     synced_versions = []
     for video_url in video.get_video_urls():
