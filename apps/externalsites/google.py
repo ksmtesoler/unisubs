@@ -420,7 +420,13 @@ def get_openid_profile(access_token):
         response_data.get('family_name', ''),
     )
 
-def get_video_info(video_id):
+def get_video_info(video_id, accounts=[]):
+    for account in accounts:
+        try:
+            access_token = get_new_access_token(account.oauth_refresh_token)
+            return _get_video_info(video_id, access_token)
+        except Exception, e:
+            pass
     try:
         logger.info("youtube.get_video_info()", extra={
             'stack': True,
@@ -434,8 +440,8 @@ def get_video_info(video_id):
         except:
             raise e
 
-def _get_video_info(video_id):
-    response = video_get(None, video_id, ['snippet', 'contentDetails'])
+def _get_video_info(video_id, access_token=None):
+    response = video_get(access_token, video_id, ['snippet', 'contentDetails'])
     try:
         response_data = response.json()
         snippet = response_data['items'][0]['snippet']

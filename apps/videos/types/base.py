@@ -138,7 +138,7 @@ class VideoType(object):
             'allow_community_edits': True
         }
 
-    def set_values(self, video):
+    def set_values(self, video, user, team):
         pass
 
     def owner_username(self):

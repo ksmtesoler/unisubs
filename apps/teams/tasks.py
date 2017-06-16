@@ -219,7 +219,7 @@ def add_team_videos(team_pk, user_pk, videos):
                                                       project=project, added_by=user)
 
             try:
-                video, video_url = Video.add(video_type, user, setup_video)
+                video, video_url = Video.add(video_type, user, setup_video, team)
             except Video.UrlAlreadyAdded, e:
                 if e.video.get_team_video() is not None:
                     messages.append(fmt(_(u"Video is already part of a team: %(url)s\n"), url=video_url))
