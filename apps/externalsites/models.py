@@ -142,7 +142,6 @@ class ExternalAccount(models.Model):
             'action': SyncHistory.ACTION_UPDATE_SUBTITLES,
             'version': version,
         }
-
         try:
             self.do_update_subtitles(video_url, language, version)
         except Exception, e:
@@ -392,6 +391,8 @@ class YouTubeAccount(ExternalAccount):
                                             default='')
     import_team = models.ForeignKey(Team, null=True, blank=True)
     enable_language_mapping = models.BooleanField(default=True)
+    sync_subtitles = models.BooleanField(default=True)
+    fetch_initial_subtitles = models.BooleanField(default=True)
     sync_teams = models.ManyToManyField(
         Team, related_name='youtube_sync_accounts')
 
@@ -405,6 +406,9 @@ class YouTubeAccount(ExternalAccount):
 
     def __unicode__(self):
         return "YouTube: %s" % (self.username)
+
+    def should_skip_syncing(self):
+        return not self.sync_subtitles
 
     def set_sync_teams(self, user, teams):
         """Set other teams to sync for
@@ -471,10 +475,11 @@ class YouTubeAccount(ExternalAccount):
 
         Subclasses must implement this method.
         """
-        access_token = google.get_new_access_token(self.oauth_refresh_token)
-        syncing.youtube.update_subtitles(video_url.videoid, access_token,
-                                         version,
-                                         self.enable_language_mapping)
+        if self.sync_subtitles:
+            access_token = google.get_new_access_token(self.oauth_refresh_token)
+            syncing.youtube.update_subtitles(video_url.videoid, access_token,
+                                             version,
+                                             self.enable_language_mapping)
 
     def do_delete_subtitles(self, video_url, language):
         access_token = google.get_new_access_token(self.oauth_refresh_token)
