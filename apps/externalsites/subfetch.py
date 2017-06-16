@@ -58,11 +58,13 @@ def fetch_subs_youtube(video_url, user, team):
     accounts = set()
     if team is not None and user is not None:
         for account in YouTubeAccount.objects.get_accounts_for_user_and_team(user, team):
-            accounts.add(account)
+            if account.fetch_initial_subtitles:
+                accounts.add(account)
     if channel_id:
         try:
             account = YouTubeAccount.objects.get(channel_id=channel_id)
-            accounts.add(account)
+            if account.fetch_initial_subtitles:
+                accounts.add(account)
         except:
             pass
     if len(accounts) == 0:
@@ -73,8 +75,6 @@ def fetch_subs_youtube(video_url, user, team):
         video_url.video.newsubtitlelanguage_set.having_versions()
     )
     for account in accounts:
-        if not account.fetch_initial_subtitles:
-            continue
         access_token = google.get_new_access_token(account.oauth_refresh_token)
         try:
             captions_list = google.captions_list(access_token, video_id)
