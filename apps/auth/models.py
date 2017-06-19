@@ -439,19 +439,19 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
 
     def avatar_tag(self):
         avatar = self._get_avatar(30)
-        return mark_safe('<img class="avatar" src="{}">'.format(avatar))
+        return mark_safe('<span class="avatar"><img src="{}"></span>'.format(avatar))
 
     def avatar_tag_alert(self):
         avatar = self._get_avatar(30)
-        return mark_safe('<img class="avatar avatar-alert" src="{}">'.format(avatar))
+        return mark_safe('<span class="avatar avatar-alert"><img src="{}"></span>'.format(avatar))
 
     def avatar_tag_medium(self):
         avatar = self._get_avatar(50)
-        return mark_safe('<img class="avatar avatar-md" src="{}">'.format(avatar))
+        return mark_safe('<span class="avatar avatar-md"><img src="{}"></span>'.format(avatar))
 
     def avatar_tag_extra_large(self):
         avatar = self._get_avatar(110)
-        return mark_safe('<img class="avatar avatar-xl" src="{}">'.format(avatar))
+        return mark_safe('<span class="avatar avatar-xl"><img src="{}"></span>'.format(avatar))
 
     @models.permalink
     def get_absolute_url(self):

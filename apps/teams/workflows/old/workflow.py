@@ -76,7 +76,7 @@ class OldTeamWorkflow(TeamWorkflow):
             'team': self.team,
             'team_video': video.get_team_video(),
         }, RequestContext(request))
-        return VideoPageCustomization(sidebar, None)
+        return VideoPageCustomization(sidebar, None, self.team)
 
     def get_subtitle_workflow(self, team_video):
         """Get the SubtitleWorkflow for a video with this workflow.  """

@@ -441,20 +441,38 @@ class Team(models.Model):
         if self.logo:
             return self.logo.thumb_url(280, 100)
 
+    AVATAR_STYLES = [
+        'default', 'inverse', 'teal', 'plum', 'lime',
+    ]
+    def default_avatar(self, size):
+        return ('https://s3.amazonaws.com/'
+                's3.www.universalsubtitles.org/gravatar/'
+                'avatar-team-{}-{}.png'.format(
+                    self.default_avatar_style(), size))
+
+    def default_avatar_style(self):
+        return self.AVATAR_STYLES[self.id % len(self.AVATAR_STYLES)]
+
     def square_logo_thumbnail(self):
         """URL for this team's square logo, or None."""
         if self.square_logo:
             return self.square_logo.thumb_url(100, 100)
+        else:
+            return self.default_avatar(100)
 
     def square_logo_thumbnail_medium(self):
         """URL for a medium version of this team's square logo, or None."""
         if self.square_logo:
             return self.square_logo.thumb_url(40, 40)
+        else:
+            return self.default_avatar(50) # FIXME size mismatch.
 
     def square_logo_thumbnail_small(self):
         """URL for a small version of this team's square logo, or None."""
         if self.square_logo:
             return self.square_logo.thumb_url(30, 30)
+        else:
+            return self.default_avatar(30)
 
     def square_logo_thumbnail_oldsmall(self):
         """small version of the team's square logo for old-style pages."""

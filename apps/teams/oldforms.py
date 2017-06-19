@@ -1049,7 +1049,7 @@ class VideoFiltersForm(forms.Form):
         ('time', _('Time, oldest')),
         ('-time', _('Time, newest')),
         ('-subs', _('Most completed languages')),
-        ('subs', _('Least complete languages')),
+        ('subs', _('Least completed languages')),
     ], initial='-time', required=False)
 
     def __init__(self, team, get_data=None, **kwargs):

@@ -111,7 +111,7 @@ AVAILABLE_SUBTITLE_FORMATS_FOR_DISPLAY = [
     'dfxp',  'sbv', 'srt', 'ssa', 'txt', 'vtt',
 ]
 
-LanguageListItem = namedtuple("LanguageListItem", "name status tags url")
+LanguageListItem = namedtuple("LanguageListItem", "name status tags url code")
 
 class LanguageList(object):
     """List of languages for the video pages."""
@@ -125,16 +125,17 @@ class LanguageList(object):
                 # no versions in this language yet
                 continue
             language_name = get_language_label(lang.language_code)
+            code = lang.language_code
             status = self._calc_status(lang)
             tags = self._calc_tags(lang)
             url = lang.get_absolute_url()
-            item = LanguageListItem(language_name, status, tags, url)
+            item = LanguageListItem(language_name, status, tags, url, code)
             if lang.language_code == video.primary_audio_language_code:
                 original_languages.append(item)
             else:
                 other_languages.append(item)
-        original_languages.sort(key=lambda li: li.name)
-        other_languages.sort(key=lambda li: li.name)
+        original_languages.sort(key=lambda li: li.code)
+        other_languages.sort(key=lambda li: li.code)
         self.items = original_languages + other_languages
 
     def _calc_status(self, lang):
@@ -159,7 +160,7 @@ class LanguageList(object):
         if not lang.subtitles_complete:
             tags.append(ugettext(u'incomplete'))
         elif team_video is not None:
-            # subtiltes are complete, check if they are under review/approval.
+            # subtitles are complete, check if they are under review/approval.
             incomplete_tasks = (Task.objects.incomplete()
                                             .filter(team_video=team_video,
                                                     language=lang.language_code))
@@ -535,11 +536,15 @@ def legacy_history(request, video, lang):
     language, created = SubtitleLanguage.objects.get_or_create(
         video=video, language_code=lang)
 
-    return HttpResponseRedirect(reverse("videos:translation_history", kwargs={
-            'video_id': video.video_id,
-            'lang_id': language.pk,
-            'lang': language.language_code,
-            }))
+    url = reverse("videos:translation_history", kwargs={
+        'video_id': video.video_id,
+        'lang_id': language.pk,
+        'lang': language.language_code,
+    })
+    if request.META['QUERY_STRING']:
+        url = '{}?{}'.format(url, request.META['QUERY_STRING'])
+
+    return HttpResponseRedirect(url)
 
 def subtitles(request, video_id, lang, lang_id, version_id=None):
     if should_use_old_view(request):
@@ -627,7 +632,6 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     if team_video and can_resync(team_video.team, request.user):
         context.update(sync_history_context(video, subtitle_language))
         context['show_sync_history'] = True
-        context['can_resync'] = True
     else:
         context['show_sync_history'] = False
         context['can_resync'] = False
@@ -664,7 +668,9 @@ def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
 
 def sync_history_context(video, subtitle_language):
     context = {}
-    context['sync_history'] = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
+    sync_history = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
+    context['sync_history'] = sync_history
+    context['can_resync'] = (len(sync_history) > 0) and not sync_history[0]['account'].should_skip_syncing()
     context['current_version'] = subtitle_language.get_public_tip()
     synced_versions = []
     for video_url in video.get_video_urls():

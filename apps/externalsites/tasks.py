@@ -28,7 +28,8 @@ from externalsites.models import (get_account, get_sync_account, SyncHistory,
                                   YouTubeAccount)
 from subtitles.models import SubtitleLanguage, SubtitleVersion
 from videos.models import VideoUrl
-
+from auth.models import CustomUser as User
+from teams.models import Team
 logger = logging.getLogger(__name__)
 
 @task
@@ -131,8 +132,16 @@ def add_amara_credit(video_url_id):
         credit.add_credit_to_video_url(video_url, account)
 
 @task
-def fetch_subs(video_url_id):
-    subfetch.fetch_subs(VideoUrl.objects.get(id=video_url_id))
+def fetch_subs(video_url_id, user_id=None,  team_id=None):
+    if team_id is None:
+        team = None
+    else:
+        team = Team.objects.get(id=team_id)
+    if user_id is None:
+        user = None
+    else:
+        user = User.objects.get(id=user_id)
+    subfetch.fetch_subs(VideoUrl.objects.get(id=video_url_id), user, team)
 
 @task
 def retry_failed_sync():
