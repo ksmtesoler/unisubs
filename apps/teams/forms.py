@@ -221,12 +221,18 @@ class ProjectField(AmaraChoiceField):
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
 
-    def setup(self, team, promote_main_project=False, initial=None):
+    def setup(self, team, promote_main_project=False, initial=None, collabs=None):
         self.team = team
-        projects = list(Project.objects.for_team(team))
+        if collabs:
+            self.teams = list(set([c.owner_team() for c in collabs]))
+            projects = []
+            for team in self.teams:
+                projects += list(Project.objects.for_team(team))
+        else:
+            projects = list(Project.objects.for_team(self.team))
         if projects:
             if promote_main_project:
-                main_project = behaviors.get_main_project(team)
+                main_project = behaviors.get_main_project(self.team)
                 if main_project:
                     projects.remove(main_project)
                     projects.insert(0, main_project)
@@ -236,7 +242,7 @@ class ProjectField(AmaraChoiceField):
             if not self.required:
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
-            choices.extend((p.slug, p.name) for p in projects)
+            choices.extend((p.id, p.team.name + ' - ' + p.name) for p in projects)
             self.choices = choices
             if initial is None:
                 initial = choices[0][0]
@@ -253,14 +259,16 @@ class ProjectField(AmaraChoiceField):
             self._setup_widget_choices()
 
     def prepare_value(self, value):
-        return value.slug if isinstance(value, Project) else value
+        return value.id if isinstance(value, Project) else value
 
     def clean(self, value):
-        if not self.enabled or value in EMPTY_VALUES:
+        if not self.enabled or value in EMPTY_VALUES or not self.team:
             return None
         if value == 'none':
-            value = Project.DEFAULT_NAME
-        return Project.objects.get(team=self.team, slug=value)
+            project = Project.DEFAULT_NAME
+        else:
+            project = Project.objects.get(id=value)
+        return project
 
 class EditTeamVideoForm(forms.ModelForm):
     author = forms.CharField(max_length=255, required=False)
@@ -1252,7 +1260,10 @@ class VideoFiltersForm(FiltersForm):
         if q:
             qs = qs.search(q)
         if project:
-            qs = qs.filter(teamvideo__project=project)
+            if isinstance(project, Project):
+                qs = qs.filter(teamvideo__project=project)
+            else:
+                qs = qs.filter(teamvideo__project__slug=project)
         if language:
             qs = qs.filter(primary_audio_language_code=language)
         if duration:
