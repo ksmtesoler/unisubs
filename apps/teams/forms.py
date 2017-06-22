@@ -221,12 +221,11 @@ class ProjectField(AmaraChoiceField):
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
 
-    def setup(self, team, promote_main_project=False, initial=None, collabs=None):
+    def setup(self, team, promote_main_project=False, initial=None, source_teams=None):
         self.team = team
-        if collabs:
-            self.teams = list(set([c.owner_team() for c in collabs]))
+        if source_teams:
             projects = []
-            for team in self.teams:
+            for team in source_teams:
                 projects += list(Project.objects.for_team(team))
         else:
             projects = list(Project.objects.for_team(self.team))
