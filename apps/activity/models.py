@@ -429,7 +429,7 @@ class VideoURLEdited(ActivityType):
         if url_edit is not None:
             msg = _('<strong>%(user)s</strong> changed primary url from '
                         '<a href="{0}">{0}</a> to '
-                        '<a href="{1}">{1}</a>').format(
+                        '<a href="{1}">{1}</a>'.format(
                         url_edit.old_url, url_edit.new_url))
         else:
             msg = _('<strong>%(user)s</strong> changed the primary url')
