@@ -633,6 +633,11 @@ class SyncedSubtitleVersion(models.Model):
     def get_account(self):
         return get_account(self.account_type, self.account_id)
 
+    def is_for_account(self, account):
+        AccountModel = _account_type_to_model[self.account_type]
+        return (isinstance(account, AccountModel) and
+                account.id == self.account_id)
+
 class SyncHistoryQuerySet(query.QuerySet):
     def fetch_with_accounts(self):
         """Fetch SyncHistory objects and join them to their related accounst

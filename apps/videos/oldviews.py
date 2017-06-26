@@ -604,16 +604,18 @@ class LanguagePageContextSyncHistory(LanguagePageContext):
         for video_url in video.get_video_urls():
             if not can_sync_videourl(video_url):
                 continue
-            try:
-                version = (language.syncedsubtitleversion_set.
-                           select_related('version').
-                           get(video_url=video_url)).version
-            except ObjectDoesNotExist:
-                version = None
+            version = None
+            sync_account = get_sync_account(video, video_url)
+            synced_version_qs = (language.syncedsubtitleversion_set
+                                 .select_related('version'))
+            for ssv in synced_version_qs:
+                if ssv.is_for_account(sync_account):
+                    version = ssv.version
+                    break
             synced_versions.append({
                 'video_url': video_url,
                 'version': version,
-                'syncable': get_sync_account(video, video_url),
+                'syncable': sync_account is not None,
             })
         self['synced_versions'] = synced_versions
 
