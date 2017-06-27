@@ -264,7 +264,8 @@ class ProjectField(AmaraChoiceField):
         if not self.enabled or value in EMPTY_VALUES or not self.team:
             return None
         if value == 'none':
-            project = Project.DEFAULT_NAME
+            # TODO: find a way to get collabs for all source team videos without a project
+            project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
         else:
             project = Project.objects.get(id=value)
         return project
