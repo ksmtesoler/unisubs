@@ -60,7 +60,7 @@ class AjaxLink(Link):
         self.url = '?' + urlencode(query_params)
 
     def __unicode__(self):
-        return mark_safe(u'<a class="ajaxLink" href="{}">{}</a>'.format(self.url, self.label))
+        return mark_safe(u'<a class="ajaxLink" data-href="{}">{}</a>'.format(self.url, self.label))
 
 class CTA(Link):
     def __init__(self, label, icon, view_name, block=False,

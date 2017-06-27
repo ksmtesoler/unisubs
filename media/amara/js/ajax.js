@@ -187,7 +187,7 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
         };
 
         link.click(function() {
-            $.ajax(link.attr('href'), ajaxParams);
+            $.ajax(link.attr('data-href'), ajaxParams);
             return false;
         });
     }
