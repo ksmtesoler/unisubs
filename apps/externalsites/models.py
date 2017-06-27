@@ -443,6 +443,9 @@ class YouTubeAccount(ExternalAccount):
         return 'https://gdata.youtube.com/feeds/api/users/%s/uploads' % (
             self.channel_id)
 
+    def channel_url(self):
+        return 'https://youtube.com/channel/{}'.format(self.channel_id)
+
     def get_owner_display(self):
         if self.username:
             return self.username

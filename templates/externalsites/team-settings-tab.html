@@ -31,8 +31,8 @@
                     <div class="remove-button">
                         {{ form.remove_button }}
                     </div>
-                    <h3>{% blocktrans with account_name=form.account.get_owner_display %}
-                        Linked Account: {{ account_name }}
+                    <h3>{% blocktrans with account_name=form.account.get_owner_display channel_url=form.account.channel_url %}
+                        Linked Account: <a style="color:#0f80e2" href="{{ channel_url }}">{{ account_name }}</a>
                         {% endblocktrans %}
                     </h3>
                     {% if form.show_sync_teams %}
