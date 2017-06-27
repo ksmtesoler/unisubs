@@ -428,23 +428,23 @@ class VideoURLEdited(ActivityType):
         url_edit = record.get_related_obj()
         if url_edit is not None:
             msg = _('<strong>%(user)s</strong> changed primary url from '
-                        '<a href="{0}">{0}</a> to '
-                        '<a href="{1}">{1}</a>'.format(
-                        url_edit.old_url, url_edit.new_url))
+                        '<a href="%(old_url)s">%(old_url)s</a> to '
+                        '<a href="%(new_url)s">%(new_url)s</a>')
+            return self.format_message(record, msg, old_url=url_edit.old_url, new_url=url_edit.new_url)
         else:
             msg = _('<strong>%(user)s</strong> changed the primary url')
-        return self.format_message(record, msg)
+            return self.format_message(record, msg)
 
     def get_old_message(self, record, user):
         url_edit = record.get_related_obj()
         if url_edit is not None:
             msg = _('changed primary url from '
-                        '<a href="{0}">{0}</a> to '
-                        '<a href="{1}">{1}</a>'.format(
-                        url_edit.old_url, url_edit.new_url))
+                    '<a href="%(old_url)s">%(old_url)s</a> to '
+                    '<a href="%(new_url)s">%(new_url)s</a>')
+            return self.format_message(record, msg, old_url=url_edit.old_url, new_url=url_edit.new_url)
         else:
             msg = _('changed the primary url')
-        return self.format_message(record, msg)
+            return self.format_message(record, msg)
 
     def get_action_name(self):
         return _('made URL primary')
