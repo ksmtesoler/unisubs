@@ -9,6 +9,7 @@
     <div class="selectList-thumb">
       <div class="thumbWrapper">
         <label for="video-{{ video.id }}"><img src="{{ video.get_medium_thumbnail }}" alt="Select {{ video.title_display }}" title="{{ video.title_display }}" class="img-responsive"></label>
+        {% if video.duration %}<span class="thumbWrapper-duration">{{ video.duration|format_duration }}</span>{% endif %}
       </div>
     </div>
     <h3><a href="{{ video.get_absolute_url }}?team={{ team.slug }}" title="{{ video.title_display }}">{% if subtitle %}{% blocktrans with video_title=video.title_display %}{{ subtitle }}: {{ video_title }}{% endblocktrans %}{% else %}{{ video.title_display }}{% endif %}</a></h3>
