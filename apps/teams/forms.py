@@ -221,12 +221,11 @@ class ProjectField(AmaraChoiceField):
         super(ProjectField, self).__init__(*args, **kwargs)
         self.enabled = True
 
-    def setup(self, team, promote_main_project=False, initial=None, collabs=None):
+    def setup(self, team, promote_main_project=False, initial=None, source_teams=None):
         self.team = team
-        if collabs:
-            self.teams = list(set([c.owner_team() for c in collabs]))
+        if source_teams:
             projects = []
-            for team in self.teams:
+            for team in source_teams:
                 projects += list(Project.objects.for_team(team))
         else:
             projects = list(Project.objects.for_team(self.team))
@@ -268,8 +267,10 @@ class ProjectField(AmaraChoiceField):
         if not self.enabled or value in EMPTY_VALUES or not self.team:
             return None
         if value == 'none':
-            value = Project.DEFAULT_NAME
-        project = Project.objects.get(team=self.team, slug=value)
+            # TODO: find a way to get collabs for all source team videos without a project
+            project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
+        else:
+            project = Project.objects.get(id=value)
         return project
 
 class EditTeamVideoForm(forms.ModelForm):
