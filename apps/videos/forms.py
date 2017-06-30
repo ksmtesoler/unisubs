@@ -171,11 +171,11 @@ class CreateVideoUrlForm(forms.Form):
             return _('Video URL already added to this video')
 
         if video.can_user_see(self.user):
-            link = mark_safe('<a href="{}">{}</a>'.format(
-                video.get_absolute_url(), ugettext('view video')))
-            return fmt(
+            link = '<a href="{}">{}</a>'.format(
+                video.get_absolute_url(), ugettext('view video'))
+            return mark_safe(fmt(
                 _('Video URL already added to a different video (%(link)s)'),
-                link=link)
+                link=link))
         else:
             return _('Video URL already added to a different video')
 
@@ -220,11 +220,11 @@ class NewCreateVideoUrlForm(forms.Form):
             return _('Video URL already added to this video')
 
         if video.can_user_see(self.user):
-            link = mark_safe('<a href="{}">{}</a>'.format(
-                video.get_absolute_url(), ugettext('view video')))
-            return fmt(
+            link = '<a href="{}">{}</a>'.format(
+                video.get_absolute_url(), ugettext('view video'))
+            return mark_safe(fmt(
                 _('Video URL already added to a different video (%(link)s)'),
-                link=link)
+                link=link))
         else:
             return _('Video URL already added to a different video')
 

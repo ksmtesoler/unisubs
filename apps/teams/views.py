@@ -54,6 +54,7 @@ from teams.forms import (
     MoveTeamVideoForm, TaskUploadForm, make_billing_report_form,
     TaskCreateSubtitlesForm, TeamMultiVideoCreateSubtitlesForm,
     OldMoveVideosForm, AddVideoToTeamForm, GuidelinesLangMessagesForm,
+    ProjectField,
 )
 from teams.oldforms import DeleteLanguageForm, AddTeamVideoForm
 from teams.models import (
@@ -540,6 +541,7 @@ def detail(request, slug, project_slug=None, languages=None):
         'team': team,
         'member': member,
         'project':project,
+        'project_field_initial': ProjectField().prepare_value(project),
         'project_filter': project_filter,
         'language_filter': language_filter,
         'language_code': language_code,

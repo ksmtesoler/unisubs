@@ -57,7 +57,7 @@ class TestEditVideosForm(TeamVideoManagementFormBase):
     def test_set_project(self):
         videos = self.videos[:2]
         form = self.build_form(forms.EditVideosForm, videos, data={
-            'project': self.project.id,
+            'project': self.project.slug,
         })
         for v in videos:
             assert_equal(reload_obj(v).get_team_video().project, self.project)
@@ -66,7 +66,7 @@ class TestEditVideosForm(TeamVideoManagementFormBase):
         self.team.teamvideo_set.update(project=self.project)
         videos = self.videos[:2]
         form = self.build_form(forms.EditVideosForm, videos, data={
-            'project': self.team.default_project.id,
+            'project': self.team.default_project.slug,
         })
         for v in videos:
             assert_equal(reload_obj(v).get_team_video().project,

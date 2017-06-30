@@ -18,6 +18,7 @@ require([
         'dialogs',
         'proxyField',
         'dependentSelect',
+        'languageSwitcher',
         'select/main',
         'scrollBars',
         'selectList',

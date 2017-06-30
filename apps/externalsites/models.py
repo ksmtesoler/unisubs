@@ -443,6 +443,9 @@ class YouTubeAccount(ExternalAccount):
         return 'https://gdata.youtube.com/feeds/api/users/%s/uploads' % (
             self.channel_id)
 
+    def channel_url(self):
+        return 'https://youtube.com/channel/{}'.format(self.channel_id)
+
     def get_owner_display(self):
         if self.username:
             return self.username
@@ -632,6 +635,11 @@ class SyncedSubtitleVersion(models.Model):
 
     def get_account(self):
         return get_account(self.account_type, self.account_id)
+
+    def is_for_account(self, account):
+        AccountModel = _account_type_to_model[self.account_type]
+        return (isinstance(account, AccountModel) and
+                account.id == self.account_id)
 
 class SyncHistoryQuerySet(query.QuerySet):
     def fetch_with_accounts(self):

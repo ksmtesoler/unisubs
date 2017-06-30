@@ -236,12 +236,15 @@ class ProjectField(AmaraChoiceField):
                     projects.remove(main_project)
                     projects.insert(0, main_project)
                     if initial is None:
-                        initial = main_project.id
+                        initial = main_project.slug
             choices = []
             if not self.required:
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
-            choices.extend((p.id, p.team.name + ' - ' + p.name) for p in projects)
+            # Only use the project name for now until we fix
+            # amara-enterprise#1495
+            #choices.extend((p.slug, team.name + ' - ' + p.name) for p in projects)
+            choices.extend((p.slug, p.name) for p in projects)
             self.choices = choices
             if initial is None:
                 initial = choices[0][0]
@@ -258,7 +261,7 @@ class ProjectField(AmaraChoiceField):
             self._setup_widget_choices()
 
     def prepare_value(self, value):
-        return value.id if isinstance(value, Project) else value
+        return value.slug if isinstance(value, Project) else value
 
     def clean(self, value):
         if not self.enabled or value in EMPTY_VALUES or not self.team:

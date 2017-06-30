@@ -44,10 +44,10 @@
                 </fieldset>
             </form>
             {% if can_move_videos %}
-                <a href="{% url "teams:move_videos" team.slug %}{% if project %}?project={{ project.pk }}{% endif %}" class="button">{% trans "Move Videos" %}</a>
+                <a href="{% url "teams:move_videos" team.slug %}{% if project %}?project={{ project_field_initial }}{% endif %}" class="button">{% trans "Move Videos" %}</a>
             {% endif %}
             {% if can_add_video %}
-                <a href="{% url "teams:add_video" team.slug %}{% if project %}?project={{ project.pk }}{% endif %}" class="button">{% trans "Add Video" %}</a>
+                <a href="{% url "teams:add_video" team.slug %}{% if project %}?project={{ project_field_initial }}{% endif %}" class="button">{% trans "Add Video" %}</a>
             {% endif %}
             {% if team|can_view_settings_tab:user %}
                 <a class="button" href="{% url "teams:settings_feeds" slug=team.slug %}">
