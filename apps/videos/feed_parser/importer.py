@@ -99,7 +99,7 @@ class VideoImporter(object):
         try:
             video, video_url = Video.add(video_type, self.user, setup_video)
             self._created_videos.append(video)
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             # This shouldn't happen since we filtered out existing items
             # already, but catch the exception anyways
             pass

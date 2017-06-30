@@ -44,7 +44,7 @@ def get_video_id(video_url, public_only=False, referer=None):
         from videos.models import Video
         try:
             video, _ = Video.add(video_url, None)
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             video = e.video
 
         video_id = video.video_id

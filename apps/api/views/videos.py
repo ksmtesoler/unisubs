@@ -500,7 +500,7 @@ class VideoSerializer(serializers.Serializer):
                              self.context['user'], setup_video, team)[0]
         except VideoTypeError:
             self.fail('invalid-url', url=validated_data['video_url'])
-        except Video.UrlAlreadyAdded:
+        except Video.DuplicateUrlError:
             self.fail('video-exists', url=validated_data['video_url'])
 
     def update(self, video, validated_data):

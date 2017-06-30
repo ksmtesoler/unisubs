@@ -132,9 +132,9 @@ class YoutubeVideoTypeTest(TestCase):
         vt_3 = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0ewgwe')
         user = UserFactory()
         video, video_url = Video.add(vt, user)
-        with assert_raises(Video.UrlAlreadyAdded):
+        with assert_raises(Video.DuplicateUrlError):
             video_2, video_url_2 = Video.add(vt_2, user)
-        with assert_raises(Video.UrlAlreadyAdded):
+        with assert_raises(Video.DuplicateUrlError):
             video_3, video_url_3 = Video.add(vt_3, user)
 
 class HtmlFiveVideoTypeTest(TestCase):

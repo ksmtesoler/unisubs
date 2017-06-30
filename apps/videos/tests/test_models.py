@@ -588,7 +588,7 @@ class AddVideoTestWithTransactions(TransactionTestCase):
         # test calling Video.add() with a URL already in the system
         video = VideoFactory(video_url__url=url)
         num_videos_before_call = Video.objects.count()
-        with assert_raises(Video.UrlAlreadyAdded) as cm:
+        with assert_raises(Video.DuplicateUrlError) as cm:
             v, vurl = Video.add(url, UserFactory())
         assert_equal(cm.exception.video, video)
         assert_equal(cm.exception.video_url, video.get_primary_videourl_obj())
@@ -632,7 +632,7 @@ class AddVideoUrlTest(TestCase):
     def test_already_added(self):
         video_url = self.video.add_url(MockVideoType(self.new_url), self.user)
         num_video_urls_before_call = VideoUrl.objects.count()
-        with assert_raises(Video.UrlAlreadyAdded) as cm:
+        with assert_raises(Video.DuplicateUrlError) as cm:
             video_url = self.video.add_url(MockVideoType(self.new_url),
                                            self.user)
         assert_equal(cm.exception.video, self.video)

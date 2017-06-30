@@ -511,7 +511,7 @@ class YouTubeAccount(ExternalAccount):
             if self.type == ExternalAccount.TYPE_USER:
                 try:
                     Video.add(video_url, self.user)
-                except Video.UrlAlreadyAdded:
+                except Video.DuplicateUrlError:
                     continue
             elif self.import_team:
                 def add_to_team(video, video_url):
@@ -520,7 +520,7 @@ class YouTubeAccount(ExternalAccount):
                                              added_by=self.user)
                 try:
                     Video.add(video_url, None, add_to_team)
-                except Video.UrlAlreadyAdded:
+                except Video.DuplicateUrlError:
                     continue
 
         self.last_import_video_id = video_ids[0]

@@ -409,9 +409,10 @@ class Video(models.Model):
 
     objects = VideoManager()
 
-    class UrlAlreadyAdded(Exception):
+    class DuplicateUrlError(Exception):
         """
-        Video.add() was called with a URL that already exists in amara
+        Raised where a video URL would be added twice to videos on the same
+        team or two non-team videos.
 
         Attributes:
           video: Video for the URL
@@ -422,7 +423,7 @@ class Video(models.Model):
             self.video = video_url.video
 
         def __unicode__(self):
-            return 'Video.UrlAlreadyAdded: {}'.format(self.url)
+            return 'Video.DuplicateUrlError: {}'.format(self.url)
 
     def __init__(self, *args, **kwargs):
         super(Video, self).__init__(*args, **kwargs)
@@ -716,7 +717,7 @@ class Video(models.Model):
 
         Raises:
             VideoTypeError: The video URL is invalid
-            Video.UrlAlreadyAdded: The video URL has already been added
+            Video.DuplicateUrlError: The video URL has already been added
 
         Returns:
             (video, video_url) tuple
@@ -770,7 +771,8 @@ class Video(models.Model):
             VideoUrl object that was added
 
         Raises:
-            Video.UrlAlreadyAdded: The URL was already added to a different video
+            Video.DuplicateUrlError: The URL was already added to a
+                                     different video
         """
         vt, video_url = self._add_video_url(url, user, False)
 
@@ -799,7 +801,7 @@ class Video(models.Model):
                 'owner_username': vt.owner_username(),
             })
         if not created:
-            raise Video.UrlAlreadyAdded(video_url)
+            raise Video.DuplicateUrlError(video_url)
         return vt, video_url
 
     @property
