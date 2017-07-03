@@ -519,7 +519,7 @@ class YouTubeAccount(ExternalAccount):
                                              team=self.import_team,
                                              added_by=self.user)
                 try:
-                    Video.add(video_url, None, add_to_team)
+                    Video.add(video_url, None, add_to_team, self.import_team)
                 except Video.DuplicateUrlError:
                     continue
 
