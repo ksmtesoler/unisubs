@@ -312,6 +312,9 @@ def video(request, video_id, video_url=None, title=None):
 
     activity = all_activities[:ACTIVITY_PER_PAGE]
     show_all = False if len(activity) >= len(all_activities) else True
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
@@ -427,6 +430,16 @@ def urls_tab_replacement_data(request, video):
             'allow_make_primary': True,
             'create_url_form': NewCreateVideoUrlForm(video, request.user),
         })
+
+def sanity_check_video_urls(request, video):
+    team = video.get_team()
+    for video_url in video.get_video_urls():
+        if video_url.team != team:
+            video_url.team = team
+            video_url.save()
+            if request.user.is_staff:
+                messages.warning(request, "Updated team for {} to {}".format(
+                                     video_url.url, team))
 
 def _get_related_task(request):
     """
@@ -637,6 +650,9 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     else:
         context['show_sync_history'] = False
         context['can_resync'] = False
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/subtitles.html', context)
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
