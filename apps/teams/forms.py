@@ -261,7 +261,7 @@ class ProjectField(AmaraChoiceField):
             self._setup_widget_choices()
 
     def prepare_value(self, value):
-        return value.slug if isinstance(value, Project) else value
+        return value.id if isinstance(value, Project) else value
 
     def clean(self, value):
         if not self.enabled or value in EMPTY_VALUES or not self.team:
