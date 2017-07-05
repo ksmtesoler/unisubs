@@ -11,16 +11,16 @@ class Migration(SchemaMigration):
 
         # Changing field 'Video.s3_thumbnail'
         db.alter_column('videos_video', 's3_thumbnail', self.gf('utils.amazon.fields.S3EnabledImageField')(max_length=100, thumb_sizes=((720, 405), (480, 270), (288, 162), (120, 90))))
-        # Adding field 'VideoUrl.team'
-        db.add_column('videos_videourl', 'team',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['teams.Team'], null=True, blank=True),
+        # Adding field 'VideoUrl.team_id'
+        db.add_column('videos_videourl', 'team_id',
+                      self.gf('django.db.models.fields.IntegerField')(default=0, blank=True),
                       keep_default=False)
 
     def backwards(self, orm):
 
         # Changing field 'Video.s3_thumbnail'
         db.alter_column('videos_video', 's3_thumbnail', self.gf('utils.amazon.fields.S3EnabledImageField')(max_length=100, thumb_sizes=((480, 270), (288, 162), (120, 90))))
-        # Deleting field 'VideoUrl.team'
+        # Deleting field 'VideoUrl.team_id'
         db.delete_column('videos_videourl', 'team_id')
 
     models = {
@@ -396,7 +396,7 @@ class Migration(SchemaMigration):
             'original': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'owner_username': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'primary': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'team': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['teams.Team']", 'null': 'True', 'blank': 'True'}),
+            'team_id': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
             'type': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '2048'}),
             'url_hash': ('django.db.models.fields.CharField', [], {'max_length': '32'}),

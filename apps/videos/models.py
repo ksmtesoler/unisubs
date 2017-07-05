@@ -796,10 +796,12 @@ class Video(models.Model):
                 raise VideoTypeError(url)
         else:
             vt = url
+        team_id = team.id if team else 0
         video_url, created = VideoUrl.objects.get_or_create(
-            url=vt.convert_to_video_url(), type=vt.abbreviation, defaults={
+            url=vt.convert_to_video_url(), type=vt.abbreviation,
+            defaults={
                 'video': self,
-                'team': team,
+                'team_id': team_id,
                 'added_by': user,
                 'primary': primary,
                 'original': primary,
@@ -822,7 +824,8 @@ class Video(models.Model):
             - Being moved from a team back to the public area (TeamVideo
               object deleted)
         """
-        self.videourl_set.update(team=team)
+        new_team_id = team.id if team else 0
+        self.videourl_set.update(team_id=new_team_id)
 
     @property
     def language(self):
@@ -2176,9 +2179,14 @@ class VideoUrl(models.Model):
     # this is the owner if the video is from a third party website
     # shuch as Youtube or Vimeo username
     owner_username = models.CharField(max_length=255, blank=True, null=True)
-    # This is copied from TeamVideo.team.  It's only here because we need to
-    # use it in our UNIQUE constraint
-    team = models.ForeignKey('teams.Team', null=True, blank=True)
+    # Team.id value copied from TeamVideo.team.  It's only here because we
+    # need to use it in our unique constraint.
+    #
+    # We use an IntegerField instead of a ForeignKey because this makes the
+    # unique constraint work properly with non-team videos.  If it was a NULL
+    # valued ForeignKey, then mysql would not enforce the constraint.  So
+    # instead, we use an IntegerField set equal to 0.
+    team_id = models.IntegerField(blank=True, default=0)
 
     objects = VideoUrlManager()
 

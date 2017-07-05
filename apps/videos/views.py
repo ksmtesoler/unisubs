@@ -433,9 +433,10 @@ def urls_tab_replacement_data(request, video):
 
 def sanity_check_video_urls(request, video):
     team = video.get_team()
+    team_id = team.id if team else 0
     for video_url in video.get_video_urls():
-        if video_url.team != team:
-            video_url.team = team
+        if video_url.team_id != team_id:
+            video_url.team_id = team_id
             video_url.save()
             if request.user.is_staff:
                 messages.warning(request, "Updated team for {} to {}".format(

@@ -25,9 +25,21 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         cursor = connection.cursor()
-        rows_updated = cursor.execute('UPDATE videos_videourl vurl '
-                                      'LEFT JOIN teams_teamvideo tv '
-                                      'ON tv.video_id=vurl.video_id '
-                                      'SET vurl.team_id=tv.team_id '
-                                      'WHERE vurl.team_id != tv.team_id')
+        rows_updated = 0
+        # update team videos
+        rows_updated += cursor.execute(
+            'UPDATE videos_videourl vurl '
+            'LEFT JOIN teams_teamvideo tv '
+            'ON tv.video_id=vurl.video_id '
+            'SET vurl.team_id=tv.team_id '
+            'WHERE tv.id IS NOT NULL AND '
+            'vurl.team_id != tv.team_id')
+        # update non-team videos
+        rows_updated += cursor.execute(
+            'UPDATE videos_videourl vurl '
+            'LEFT JOIN teams_teamvideo tv '
+            'ON tv.video_id=vurl.video_id '
+            'SET vurl.team_id=0 '
+            'WHERE tv.id IS NULL AND '
+            'vurl.team_id != 0')
         print('{} rows updated'.format(rows_updated))
