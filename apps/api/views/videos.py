@@ -397,7 +397,7 @@ class VideoSerializer(serializers.Serializer):
     default_error_messages = {
         'project-without-team': "Can't specify project without team",
         'unknown-project': 'Unknown project: {project}',
-        'video-exists': 'Video already exists for {url}',
+        'video-exists': 'Video already added for {url}',
         'invalid-url': 'Invalid URL: {url}',
     }
 
@@ -432,8 +432,8 @@ class VideoSerializer(serializers.Serializer):
 
     def will_add_video_to_team(self):
         if not self.team_video:
-            return 'team' in self.validated_data
-        if 'team' in self.validated_data:
+            return self.validated_data.get('team')
+        if self.validated_data.get('team'):
             if self.validated_data['team'] != self.team_video.team:
                 return True
             if 'project' in self.validated_data:
@@ -522,7 +522,10 @@ class VideoSerializer(serializers.Serializer):
                     setattr(video, field_name, validated_data[field_name])
         if validated_data.get('metadata'):
             video.update_metadata(validated_data['metadata'], commit=True)
-        self._update_team(video, validated_data)
+        try:
+            self._update_team(video, validated_data)
+        except Video.DuplicateUrlError, e:
+            self.fail('video-exists', url=e.video_url.url)
         video.save()
         if validated_data.get('thumbnail'):
             videos.tasks.save_thumbnail_in_s3.delay(video.id)
@@ -544,7 +547,7 @@ class VideoSerializer(serializers.Serializer):
         team_video = video.get_team_video()
         if team is None:
             if team_video:
-                team_video.delete()
+                team_video.remove(self.context['user'])
             video.is_public = True
         else:
             if project is None:

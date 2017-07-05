@@ -583,17 +583,39 @@ class AddVideoTestWithTransactions(TransactionTestCase):
     # TransactionTestCase.  TransactionTestCase is not needed for the other
     # tests and it slows things down a lot.
 
-    def test_video_already_added(self):
-        url = 'http://example.com/video.mp4'
-        # test calling Video.add() with a URL already in the system
-        video = VideoFactory(video_url__url=url)
+    def check_duplicate_url_error(self, url, existing_video, team=None):
         num_videos_before_call = Video.objects.count()
         with assert_raises(Video.DuplicateUrlError) as cm:
-            v, vurl = Video.add(url, UserFactory())
-        assert_equal(cm.exception.video, video)
-        assert_equal(cm.exception.video_url, video.get_primary_videourl_obj())
+            v, vurl = Video.add(url, UserFactory(), team=team)
+        assert_equal(cm.exception.video, existing_video)
+        assert_equal(cm.exception.video_url, existing_video.get_primary_videourl_obj())
         # test that we didn't create any extra videos as a result of the call
         assert_equal(Video.objects.count(), num_videos_before_call)
+
+    def test_duplicate_video_url_public_video(self):
+        # test calling Video.add() with a URL already in the system on a
+        # public video.
+        url = 'http://example.com/video.mp4'
+        # This should be an exception if the video is being added without a
+        # team
+        video = VideoFactory(video_url__url=url)
+        self.check_duplicate_url_error(url, video)
+        # Adding with to a team should be okay though
+        Video.add(url, UserFactory(), team=TeamFactory())
+
+    def test_duplicate_video_url_but_other_team(self):
+        # test calling Video.add() with a URL already in the system on a
+        # team video
+        url = 'http://example.com/video.mp4'
+        team = TeamFactory()
+        other_team = TeamFactory()
+        video = VideoFactory(video_url__url=url, team=team)
+        # Adding a video to the same team should be an exception
+        self.check_duplicate_url_error(url, video, team=team)
+        # Adding to a different team should be okay though
+        Video.add(url, UserFactory(), team=other_team)
+        # Adding a public video should also be okay
+        Video.add(url, UserFactory(), team=None)
 
     def test_exception_in_setup_callback(self):
         # If setup_callback throws an exception, we shouldn't create any

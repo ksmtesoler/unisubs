@@ -423,7 +423,7 @@ class Video(models.Model):
             self.video = video_url.video
 
         def __unicode__(self):
-            return 'Video.DuplicateUrlError: {}'.format(self.url)
+            return 'Video.DuplicateUrlError: {}'.format(self.video_url.url)
 
     def __init__(self, *args, **kwargs):
         super(Video, self).__init__(*args, **kwargs)
@@ -719,10 +719,12 @@ class Video(models.Model):
               It will be passed 2 args: a Video and VideoUrl.  Video.save()
               will be called after, so there's no need to call it in
               setup_callback().
+            team: Team that the video will be added to
 
         Raises:
             VideoTypeError: The video URL is invalid
-            Video.DuplicateUrlError: The video URL has already been added
+            Video.DuplicateUrlError: The video URL has already been added for
+                the team
 
         Returns:
             (video, video_url) tuple
@@ -767,7 +769,7 @@ class Video(models.Model):
     def add_url(self, url, user):
         """
         Add an extra URL to an existing video
-        
+
         Args:
             url: URL of the video to add (either a string or a VideoType)
             user: User adding the URL
@@ -798,10 +800,10 @@ class Video(models.Model):
             vt = url
         team_id = team.id if team else 0
         video_url, created = VideoUrl.objects.get_or_create(
-            url=vt.convert_to_video_url(), type=vt.abbreviation,
+            url=vt.convert_to_video_url(), team_id=team_id,
+                type=vt.abbreviation,
             defaults={
                 'video': self,
-                'team_id': team_id,
                 'added_by': user,
                 'primary': primary,
                 'original': primary,
@@ -823,9 +825,21 @@ class Video(models.Model):
             - Being moved from team to team (TeamVideo object changed)
             - Being moved from a team back to the public area (TeamVideo
               object deleted)
+
+        Raises:
+            DuplicateUrlError: One of the video URLs for this video was
+                already added to the team
         """
         new_team_id = team.id if team else 0
-        self.videourl_set.update(team_id=new_team_id)
+        try:
+            self.videourl_set.update(team_id=new_team_id)
+        except IntegrityError:
+            for vurl in self.get_video_urls():
+                qs = VideoUrl.objects.filter(url=vurl.url, type=vurl.type,
+                                             team_id=new_team_id)
+                if qs.exists():
+                    raise Video.DuplicateUrlError(vurl)
+            raise
 
     @property
     def language(self):
@@ -2192,7 +2206,7 @@ class VideoUrl(models.Model):
 
     class Meta:
         ordering = ("video", "-primary",)
-        unique_together = ("url_hash", "type",)
+        unique_together = ("url_hash", "team_id", "type")
 
     def __unicode__(self):
         return self.url

@@ -29,6 +29,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.models import Site
+from django.core.exceptions import MultipleObjectsReturned
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count
 from django.http import (
@@ -38,7 +39,7 @@ from django.http import (
 from django.shortcuts import (get_object_or_404, redirect, render_to_response,
                               render)
 from django.template import RequestContext
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ungettext
 from django.utils.encoding import iri_to_uri, force_unicode
 from django.core.cache import cache
 
@@ -628,6 +629,7 @@ def move_videos(request, slug, project_slug=None, languages=None):
     managed_projects_choices = map(lambda project: {'id': project.id, 'team': str(project.team.id), 'name': str(project)}, managed_projects)
 
     if request.method == 'POST':
+        duplicate_url_errors = []
         form = OldMoveVideosForm(request.user, request.POST)
         if 'move' in request.POST and form.is_valid():
             target_team = form.cleaned_data['team']
@@ -641,7 +643,7 @@ def move_videos(request, slug, project_slug=None, languages=None):
                     target_project = Project.objects.get(id=project_id)
                     if target_project not in managed_projects:
                         return  HttpResponseForbidden("Not allowed")
-                except Entry.DoesNotExist:
+                except Project.DoesNotExist:
                     return  HttpResponseBadRequest("Illegal Request")
                 except MultipleObjectsReturned:
                     return  HttpResponseServerError("Internal Error")
@@ -652,10 +654,22 @@ def move_videos(request, slug, project_slug=None, languages=None):
                     if team_video.team not in managed_teams:
                         return  HttpResponseForbidden("Not allowed")
                     team_video.move_to(target_team, project=target_project, user=request.user)
-                except Entry.DoesNotExist:
+                except TeamVideo.DoesNotExist:
                     return  HttpResponseBadRequest("Illegal Request")
                 except MultipleObjectsReturned:
                     return  HttpResponseServerError("Internal Error")
+                except Video.DuplicateUrlError, e:
+                    duplicate_url_errors.append(e.video_url.url)
+            if duplicate_url_errors:
+                messages.warning(request, fmt(
+                    ungettext(
+                        "%(urls)s couldn't be moved because it was "
+                        "already added to %(team)s",
+                        "Some videos couldn't be moved because they were "
+                        "already added to the %(team)s: %(urls)s",
+                        len(duplicate_url_errors)),
+                    urls=','.join(duplicate_url_errors),
+                    team=target_team))
     else:
         form = OldMoveVideosForm(request.user)
      
@@ -774,8 +788,12 @@ def add_video_to_team(request, video_id):
         form = AddVideoToTeamForm(request.user, request.POST)
         if form.is_valid():
             team = Team.objects.get(id=form.cleaned_data['team'])
-            team.add_existing_video(video, request.user)
-            return redirect(video.get_absolute_url())
+            try:
+                team.add_existing_video(video, request.user)
+            except Video.DuplicateUrlError, e:
+                messages.error(request, _(u'Video URL already added to team'))
+            else:
+                return redirect(video.get_absolute_url())
     else:
         form = AddVideoToTeamForm(request.user)
     return render(request, 'teams/add-video-to-team.html', {
@@ -827,8 +845,15 @@ def move_video(request):
         team_video = form.cleaned_data['team_video']
         team = form.cleaned_data['team']
         project = form.cleaned_data['project']
-        team_video.move_to(team, project, request.user)
-        messages.success(request, _(u'The video has been moved to the new team.'))
+        try:
+            team_video.move_to(team, project, request.user)
+        except Video.DuplicateUrlError, e:
+            messages.error(request, fmt(
+                _( "%(url)s couldn't be moved because it was "
+                  "already added to %(team)s"),
+                url=e.video_url.url, team=team))
+        else:
+            messages.success(request, _(u'The video has been moved to the new team.'))
     else:
         for e in flatten_errorlists(form.errors):
             messages.error(request, e)
@@ -916,15 +941,21 @@ def remove_video(request, team_video_pk):
 
     if wants_delete:
         video.delete(request.user)
-        msg = _(u'Video has been deleted from Amara.')
+        messages.success(request, _(u'Video has been deleted from Amara.'))
     else:
-        team_video.remove(request.user)
-        msg = _(u'Video has been removed from the team.')
+        try:
+            team_video.remove(request.user)
+        except Video.DuplicateUrlError:
+            messages.error(request,
+                             _(u'Video not removed because it already '
+                               u'exists in the public area'))
+        else:
+            messages.success(request,
+                             _(u'Video has been removed from the team.'))
 
     if request.is_ajax():
         return { 'success': True }
     else:
-        messages.success(request, msg)
         return HttpResponseRedirect(next)
 
 

@@ -1250,7 +1250,7 @@ class TeamVideo(models.Model):
             if project is not None:
                 self.project = project
             with transaction.atomic():
-                self.video.update_team(None)
+                self.video.update_team(new_team)
                 self.save(user=user)
             video_changed_tasks.delay(self.video_id)
 
