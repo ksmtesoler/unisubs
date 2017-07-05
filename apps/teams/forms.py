@@ -241,10 +241,7 @@ class ProjectField(AmaraChoiceField):
             if not self.required:
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
-            # Only use the project name for now until we fix
-            # amara-enterprise#1495
-            #choices.extend((p.slug, team.name + ' - ' + p.name) for p in projects)
-            choices.extend((p.slug, p.name) for p in projects)
+            choices.extend((p.id, p.name) for p in projects)
             self.choices = choices
             if initial is None:
                 initial = choices[0][0]
