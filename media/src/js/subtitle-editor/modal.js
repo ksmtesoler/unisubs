@@ -91,7 +91,6 @@
     });
 
     module.value('InputFields', {
-        scale: makeInputField('scale', 'Scaling factor'),
         shift: makeInputField('shift', 'Shift timing (msec)')
     });
 
@@ -122,11 +121,11 @@
             buttons: [ 'continueButton', 'cancel' ],
             allowClose: true
         },
-        shiftScaleTiming: {
-            title: 'Shit/Scale Subtitles Timing',
+        shiftTiming: {
+            title: 'Shift Subtitles Timing',
             text: 'This will adjust all subtitles timing. Do you want to continue?',
             buttons: [ 'continueButton', 'cancel' ],
-            inputFields: ['shift', 'scale'],
+            inputFields: ['shift'],
             allowClose: true
         },
         confirmTextReset: {
@@ -305,7 +304,7 @@
                     callback: callbacks[buttonName] || null
                 };
             });
-	    if (dialog.hasOwnProperty('inputFields')) {
+            if (dialog.hasOwnProperty('inputFields')) {
               dialog.inputFields = _.map(dialog.inputFields, function(fieldName) {
                 var fieldDef = InputFields[fieldName];
                 if(fieldDef === undefined) {

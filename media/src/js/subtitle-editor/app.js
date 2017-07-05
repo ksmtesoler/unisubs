@@ -85,7 +85,7 @@ var angular = angular || null;
         $scope.uploading = false;
         $scope.uploadError = false;
         $scope.exiting = false;
-        $scope.modalValues = { 'shift': "0", 'scale': "1.0"};
+        $scope.modalValues = {'shift': "0"};
         $scope.hideNextTime = function() {
             $scope.showHideNextTime = false;
         };
@@ -203,12 +203,11 @@ var angular = angular || null;
             // that if anything changed
             $scope.$root.$emit('work-done');
 	}
-        $scope.shiftScaleTiming = function() {
+        $scope.shiftTiming = function() {
             var nextWorkingSubtitle = $scope.workingSubtitles.subtitleList.firstSubtitle();
-	    var scale = parseFloat($scope.modalValues['scale']);
-	    var shift = parseFloat($scope.modalValues['shift']);
+            var shift = parseFloat($scope.modalValues['shift']);
             while (nextWorkingSubtitle) {
-                $scope.workingSubtitles.subtitleList.updateSubtitleTime(nextWorkingSubtitle, scale * (nextWorkingSubtitle.startTime + shift), scale * (nextWorkingSubtitle.endTime + shift));
+                $scope.workingSubtitles.subtitleList.updateSubtitleTime(nextWorkingSubtitle, nextWorkingSubtitle.startTime + shift, nextWorkingSubtitle.endTime + shift);
                 nextWorkingSubtitle = $scope.workingSubtitles.subtitleList.nextSubtitle(nextWorkingSubtitle);
             }
             // Sent no matter anything has changed or not, ideally we'd only emit
@@ -291,9 +290,9 @@ var angular = angular || null;
             $event.preventDefault();
         };
 
-        $scope.showShiftScaleTimingModal = function($event) {
-            $scope.dialogManager.openDialog('shiftScaleTiming', {
-                continueButton: $scope.shiftScaleTiming
+        $scope.showShiftTimingModal = function($event) {
+            $scope.dialogManager.openDialog('shiftTiming', {
+                continueButton: $scope.shiftTiming
             });
             $event.stopPropagation();
             $event.preventDefault();
