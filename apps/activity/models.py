@@ -838,7 +838,7 @@ class ActivityRecord(models.Model):
                     language_code_display = translation.get_language_label(self.language_code.lower())
                 except KeyError:
                     logger.error("Error with language code {} in activity record {} can not be fixed".format(self.id, self.language_code))
-                    language_code_display = ''
+                    language_code_display = 'Unknown language'
             return language_code_display
         else:
             return ''
