@@ -648,7 +648,7 @@ class Video(models.Model):
     def get_language_url_with_id(self, language_code):
         sl = self.subtitle_language(language_code)
         if sl is None:
-            self.get_language_url(self, language_code)
+            self.get_language_url(language_code)
         else:
             return reverse('videos:translation_history', kwargs={
                 'video_id': self.video_id,

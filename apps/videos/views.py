@@ -624,13 +624,15 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'header': customization.header,
     }
     if workflow.user_can_view_notes(request.user, subtitle_language.language_code):
-        context['show_notes'] = True
-        context['notes'] = (workflow
-                            .get_editor_notes(request.user, subtitle_language.language_code)
-                            .fetch_notes())
-        if workflow.user_can_post_notes(request.user, subtitle_language.language_code):
-            context['notes_form'] = SubtitlesNotesForm(
-                request.user, video, subtitle_language, version)
+        editor_notes = workflow.get_editor_notes(request.user, subtitle_language.language_code)
+        if editor_notes:
+            context['show_notes'] = True
+            context['notes'] = editor_notes.fetch_notes()
+            if workflow.user_can_post_notes(request.user, subtitle_language.language_code):
+                context['notes_form'] = SubtitlesNotesForm(
+                    request.user, video, subtitle_language, version)
+        else:
+            context['show_notes'] = False
     else:
         context['show_notes'] = False
     if team_video and can_resync(team_video.team, request.user):
