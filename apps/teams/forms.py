@@ -1638,7 +1638,7 @@ class EditVideosForm(VideoManagementForm):
     def setup_single_selection(self, video):
         team_video = video.teamvideo
         self.fields['project'].required = True
-        self.fields['project'].initial = team_video.project.slug
+        self.fields['project'].initial = team_video.project.id
         self.fields['project'].choices = self.fields['project'].choices[1:]
         self.fields['language'].set_placeholder(_('No language set'))
         self.fields['language'].initial = video.primary_audio_language_code
