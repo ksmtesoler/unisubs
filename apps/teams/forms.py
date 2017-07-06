@@ -224,6 +224,7 @@ class ProjectField(AmaraChoiceField):
     def setup(self, team, promote_main_project=False, initial=None, source_teams=None):
         self.team = team
         if source_teams:
+            self.source_teams = source_teams
             projects = []
             for team in source_teams:
                 projects += list(Project.objects.for_team(team))
@@ -242,7 +243,7 @@ class ProjectField(AmaraChoiceField):
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
             if source_teams:
-                choices.extend((p.id, p.team.slug + ' - ' + p.name) for p in projects)
+                choices.extend((p.id, p.team.name + ' - ' + p.name) for p in projects)
             else:
                 choices.extend((p.id, p.name) for p in projects)
             self.choices = choices
@@ -267,8 +268,11 @@ class ProjectField(AmaraChoiceField):
         if not self.enabled or value in EMPTY_VALUES or not self.team:
             return None
         if value == 'none':
-            # TODO: find a way to get collabs for all source team videos without a project
-            project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
+            if getattr(self, 'source_teams', None):
+                project = [p for p in Project.objects.filter(team__in=self.source_teams)
+                           if p.slug == Project.DEFAULT_NAME]
+            else:
+                project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
         else:
             project = Project.objects.get(id=value)
         return project
