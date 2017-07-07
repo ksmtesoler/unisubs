@@ -242,7 +242,7 @@ class ProjectField(AmaraChoiceField):
             if not self.required:
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
-            if source_teams:
+            if source_teams and len(source_teams) > 1:
                 choices.extend((p.id, p.team.name + ' - ' + p.name) for p in projects)
             else:
                 choices.extend((p.id, p.name) for p in projects)
