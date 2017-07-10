@@ -253,7 +253,7 @@ def settings_basic(request, team):
 
         if form.is_valid():
             try:
-                form.save()
+                form.save(request.user)
             except:
                 logger.exception("Error on changing team settings")
                 raise

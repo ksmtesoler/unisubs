@@ -844,6 +844,15 @@ class SettingsForm(forms.ModelForm):
         widget=forms.FileInput,
         required=False)
 
+    def __init__(self, *args, **kwargs):
+        super(SettingsForm, self).__init__(*args, **kwargs)
+        self.initial_settings = self.instance.get_settings()
+
+    def save(self, user):
+        with transaction.atomic():
+            super(SettingsForm, self).save()
+            self.instance.handle_settings_changes(user, self.initial_settings)
+
     class Meta:
         model = Team
         fields = ('description', 'logo', 'square_logo', 'is_visible', 'sync_metadata')
