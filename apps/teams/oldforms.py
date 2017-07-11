@@ -266,7 +266,7 @@ class AddTeamVideoForm(forms.ModelForm):
         # See if any error happen when we create our video
         try:
             Video.add(self.cleaned_data['video_url'], self.user,
-                      self.setup_video)
+                      self.setup_video, self.team)
         except Video.DuplicateUrlError, e:
             self.setup_existing_video(e.video, e.video_url)
         return self.cleaned_data
