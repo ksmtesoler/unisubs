@@ -322,6 +322,9 @@ AUTHENTICATION_BACKENDS = (
    'django.contrib.auth.backends.ModelBackend',
 )
 
+# Use cookie storage always since it works the best with our caching system
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+
 SKIP_SOUTH_TESTS = True
 SOUTH_TESTS_MIGRATE = False
 
