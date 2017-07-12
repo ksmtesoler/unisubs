@@ -790,7 +790,7 @@ def add_video(request, slug):
 
     project_id = request.GET.get('project') or request.POST.get('project') or None
     if project_id and project_id != 'none':
-        project = Project.objects.get(team=team, slug=project_id)
+        project = Project.objects.get(id=project_id)
     else:
         project = team.default_project
 
