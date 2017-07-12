@@ -2,12 +2,13 @@
 HTTP Callbacks for Teams
 ========================
 
-Enterprise customers can register an http callback so that activity on their
-teams will fire an HTTP POST request.
+Enterprise customers can register a URL for http callbacks so that activity on their
+teams will fire an HTTP POST requests to that URL.
 
 To register your Team to receive HTTP notifications, please send your request
-to us and we will set it up for you. You can also contact us with inquiry
-about any custom notifications that are not listed in our general offering below.
+to us at enterprise@amara.org and we will set it up for you. You can also
+contact us with inquiry about any custom notifications that are not listed in
+our general offering below.
 
 Please indicate a URL where you’d like to get notified. Each team can have
 their own URL, or a common URL can be used for several teams. We recommend
@@ -45,7 +46,7 @@ They can also include ``primary_team`` if the video being worked on belongs to a
 
         Additional data: ``url``
     on_video_moved_project
-        Sent when a video on your team is moved to a new project.
+        Sent when a video on your team is moved to a different project.
 
         Additional data: ``old_project``
     on_subtitles_published
@@ -57,10 +58,10 @@ They can also include ``primary_team`` if the video being worked on belongs to a
 
         Additional data: ``language_code``
 
-User notifications
+Team member notifications
 ------------------
 
-User notifications always include the following data:
+Team member notifications always include the following data:
 
 - ``event``
 - ``username``
