@@ -42,4 +42,5 @@ class Command(BaseCommand):
             'SET vurl.team_id=0 '
             'WHERE tv.id IS NULL AND '
             'vurl.team_id != 0')
+        cursor.execute("COMMIT")
         print('{} rows updated'.format(rows_updated))
