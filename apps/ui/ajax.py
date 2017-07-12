@@ -108,6 +108,14 @@ class AJAXResponseRenderer(object):
         """
         self.add_change('clearForm', selector)
 
+    def reset_form(self, selector):
+        """Reset the form to it's original state
+
+        Args:
+            selector: CSS selector to reset
+        """
+        self.add_change('resetForm', selector)
+
     def reload_page(self):
         self.add_change('reloadPage')
 

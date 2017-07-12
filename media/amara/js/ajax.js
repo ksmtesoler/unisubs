@@ -68,6 +68,12 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
                     $(change[1]).clearForm();
                     break;
 
+                case 'resetForm':
+                    $(change[1]).resetForm();
+                    history.pushState(null, "", window.location.protocol + "//" +
+                                      window.location.host + window.location.pathname);
+                    break;
+
                 case 'reloadPage':
                     $(window).on('beforeunload', scrollAfterReload);
                     window.location.reload();
