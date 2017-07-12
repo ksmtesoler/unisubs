@@ -5,18 +5,14 @@ HTTP Callbacks for Teams
 Enterprise customers can register an http callback so that activity on their
 teams will fire an HTTP POST request.
 
-To register your Team to receive HTTP notfications get in contact with us,
-this process is done manually, there is no UI for this over the website at the
-moment. You can also contact us to inquire about any custom notifications.
+To register your team to receive HTTP notifications, email us at enterprise@amara.org with the http endpoint/url where you'd like to get notified. Each team can have their own
+URL, or a single URL can be used for notifications from several teams. We recommend that the URL(s) use https for safer communication.
 
-Pick a URL where you'd like to get notified. Each team can have their own
-URL, or a URL can be used amongst serveral teams (for example in a public /
-private team setup) We recomend the URL uses https for safer communication.
+You can also contact us to inquire about any custom notifications that are not listed in our general offering below.
 
 Notification Details
 ====================
 
-We can send notifications for various events, depending on what your team is interested in.
 Currently, we send the following notifications:
 
 Video notifications
