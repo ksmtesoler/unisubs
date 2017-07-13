@@ -31,7 +31,7 @@ Video notifications always include the following data:
 - ``project``
 - ``primary_team`` (used when the same callback URL is shared between multiple teams and the event that triggered callback happened on another team).
 
-They can also include ``primary_team`` if the video being worked on belongs to another team.
+Supported events for videos:
 
     on_video_added
         Sent when a video is added to your team, or moved to your team from another team.
@@ -67,6 +67,8 @@ Team member notifications always include the following data:
 - ``username``
 - ``team``
 - ``primary_team`` (used when the same callback URL is shared between multiple teams and the event that triggered callback happened on another team)
+
+Supported events for team members:
 
     on_user_added
         Sent when a user is added to your team.
