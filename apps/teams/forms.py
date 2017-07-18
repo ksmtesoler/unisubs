@@ -514,7 +514,7 @@ class AddMultipleTeamVideoForm(forms.Form):
         if self.summary[0] > 0:
             message += "{} videos successfully added, ".format(self.summary[0])
         if self.summary[1] > 0:
-            message += "{} videos already added to your team, ".format(self.summary[2])
+            message += "{} videos already added to your team, ".format(self.summary[1])
         if self.summary[2] > 0:
             message += "{} videos URL are not valid, ".format(self.summary[3])
         if len(message) > 2:
