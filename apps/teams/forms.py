@@ -878,6 +878,15 @@ class PermissionsForm(forms.ModelForm):
                   'translate_policy', 'task_assign_policy', 'workflow_enabled',
                   'max_tasks_per_member', 'task_expiration',)
 
+    def __init__(self, *args, **kwargs):
+        super(PermissionsForm, self).__init__(*args, **kwargs)
+        self.initial_settings = self.instance.get_settings()
+
+    def save(self, user):
+        with transaction.atomic():
+            super(PermissionsForm, self).save()
+            self.instance.handle_settings_changes(user, self.initial_settings)
+
 class SimplePermissionsForm(forms.ModelForm):
     class Meta:
         model = Team
@@ -886,6 +895,15 @@ class SimplePermissionsForm(forms.ModelForm):
             'membership_policy': _('How can users join your team?'),
             'video_policy': _('Who can add/remove videos?'),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(SimplePermissionsForm, self).__init__(*args, **kwargs)
+        self.initial_settings = self.instance.get_settings()
+
+    def save(self, user):
+        with transaction.atomic():
+            super(SimplePermissionsForm, self).save()
+            self.instance.handle_settings_changes(user, self.initial_settings)
 
 class LanguagesForm(forms.Form):
     preferred = forms.MultipleChoiceField(required=False, choices=())

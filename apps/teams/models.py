@@ -433,7 +433,8 @@ class Team(models.Model):
 
     # Settings
     SETTINGS_ATTRIBUTES = set([
-        'description', 'is_visible', 'sync_metadata',
+        'description', 'is_visible', 'sync_metadata', 'membership_policy',
+        'video_policy',
     ])
     def get_settings(self):
         """Get the current settings for this team

@@ -348,7 +348,7 @@ def old_team_settings_workflows(request, team):
         workflow_form = WorkflowForm(request.POST, instance=workflow)
 
         if form.is_valid() and workflow_form.is_valid():
-            form.save()
+            form.save(request.user)
 
             if form.cleaned_data['workflow_enabled']:
                 workflow_form.save()
