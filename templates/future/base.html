@@ -52,8 +52,8 @@
             {% if not user.is_staff %}
               <ul class="col-xs-3">
                 <li>
-                  <a class="ajaxLink text" href="/ui/language-select/">
-                    <img width="25" height="25" src="/media/images/language-switch-globe.svg"/>
+                  <a class="ajaxLink text" data-href="/ui/language-select/">
+                    <img width="25" height="25" src="{{ STATIC_URL }}images/language-switch-globe.svg"/>
                     <strong>{% current_language_name %}</strong>
                   </a>
                 </li>
@@ -78,8 +78,8 @@
               {% else %}
               <ul class="col-xs-3">
                 <li>
-                  <a class="ajaxLink text" href="/ui/language-select/">
-                    <img width="25" height="25" src="/media/images/language-switch-globe.svg"/>
+                  <a class="ajaxLink text" data-href="/ui/language-select/">
+                    <img width="25" height="25" src="{{ STATIC_URL }}images/language-switch-globe.svg"/>
                     <strong>{% current_language_name %}</strong>
                   </a>
                 </li>

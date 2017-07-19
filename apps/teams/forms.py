@@ -224,6 +224,7 @@ class ProjectField(AmaraChoiceField):
     def setup(self, team, promote_main_project=False, initial=None, source_teams=None):
         self.team = team
         if source_teams:
+            self.source_teams = source_teams
             projects = []
             for team in source_teams:
                 projects += list(Project.objects.for_team(team))
@@ -236,15 +237,15 @@ class ProjectField(AmaraChoiceField):
                     projects.remove(main_project)
                     projects.insert(0, main_project)
                     if initial is None:
-                        initial = main_project.slug
+                        initial = main_project.id
             choices = []
             if not self.required:
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
-            # Only use the project name for now until we fix
-            # amara-enterprise#1495
-            #choices.extend((p.slug, team.name + ' - ' + p.name) for p in projects)
-            choices.extend((p.slug, p.name) for p in projects)
+            if source_teams and len(source_teams) > 1:
+                choices.extend((p.id, p.team.name + ' - ' + p.name) for p in projects)
+            else:
+                choices.extend((p.id, p.name) for p in projects)
             self.choices = choices
             if initial is None:
                 initial = choices[0][0]
@@ -261,14 +262,17 @@ class ProjectField(AmaraChoiceField):
             self._setup_widget_choices()
 
     def prepare_value(self, value):
-        return value.slug if isinstance(value, Project) else value
+        return value.id if isinstance(value, Project) else value
 
     def clean(self, value):
         if not self.enabled or value in EMPTY_VALUES or not self.team:
             return None
         if value == 'none':
-            # TODO: find a way to get collabs for all source team videos without a project
-            project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
+            if getattr(self, 'source_teams', None):
+                project = [p for p in Project.objects.filter(team__in=self.source_teams)
+                           if p.slug == Project.DEFAULT_NAME]
+            else:
+                project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
         else:
             project = Project.objects.get(id=value)
         return project
@@ -1650,7 +1654,7 @@ class EditVideosForm(VideoManagementForm):
     def setup_single_selection(self, video):
         team_video = video.teamvideo
         self.fields['project'].required = True
-        self.fields['project'].initial = team_video.project.slug
+        self.fields['project'].initial = team_video.project.id
         self.fields['project'].choices = self.fields['project'].choices[1:]
         self.fields['language'].set_placeholder(_('No language set'))
         self.fields['language'].initial = video.primary_audio_language_code
