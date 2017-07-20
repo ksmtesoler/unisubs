@@ -17,9 +17,9 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 import logging
-
+from django.http import Http404, HttpResponse
 from utils.decorators import staff_member_required
-
+from utils.one_time_data import get_one_time_data
 logger = logging.getLogger(__name__)
 
 @staff_member_required
@@ -32,3 +32,16 @@ def errortest(request):
         logging.error("Errortest: handled exception", exc_info=True)
 
     raise AssertionError("Errortest: unhandled exception")
+
+def one_time_url(request, token):
+    """
+    This is a view to host one-time, time limited URLs, used
+    to deliver non-public data to a third party website.
+    """
+    data = get_one_time_data(token)
+    if data is not None:
+        response = HttpResponse(data, mimetype="text/plain")
+        response['Content-Disposition'] = 'attachment'
+        return response
+    else:
+        raise Http404()

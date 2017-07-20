@@ -19,8 +19,10 @@
 """externalsites.syncing.brightcove -- Sync subtitles to/from brightcove"""
 
 import base64, json, requests
-from django.core.urlresolvers import reverse
+import babelsubs
 from externalsites.exceptions import SyncingError
+from utils.one_time_data import set_one_time_data
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -65,7 +67,8 @@ def _make_cms_request(account_id, client_id, client_secret, bc_video_id, languag
         if r.status_code != 200:
             raise SyncingError("Error while removing old Brightcove text track: %s" % r.text)
     if subtitle_version is not None:
-        url = subtitle_version.get_absolute_download_url(format="vtt")
+        subtitle_data = babelsubs.to(subtitle_version.get_subtitles(), "vtt", language=subtitle_version.language_code)
+        url = set_one_time_data(subtitle_data)
         label = 'Amara Captions - ' + subtitle_version.get_language_code_display()
         data = {
             "text_tracks": [
@@ -81,7 +84,7 @@ def _make_cms_request(account_id, client_id, client_secret, bc_video_id, languag
                           headers=authentication_header,
                           data=json.dumps(data))
         if r.status_code != 200:
-            raise SyncingError("Error whilea dding new Brightcove text track: %s" % r.text)
+            raise SyncingError("Error while adding new Brightcove text track: %s" % r.text)
 
 def update_subtitles_cms(account_id, client_id, client_secret, bc_video_id, subtitle_version):
     _make_cms_request(account_id, client_id, client_secret, bc_video_id, subtitle_version.language_code, subtitle_version)
