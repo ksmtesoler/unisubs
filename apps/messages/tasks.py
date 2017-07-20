@@ -95,16 +95,18 @@ def send_new_message_notification(message_id):
 
     if message.author:
         subject = _(u"New message from %(author)s on Amara: %(subject)s")
+        template_name = "messages/email/message_received.html"
     else:
         subject = _("New message on Amara: %(subject)s")
-    subject = fmt(subject, author=message.author, subject=message.subject)
+        template_name = "messages/email/message_received_no_author.html"
 
     context = {
         "message": message,
         "domain":  Site.objects.get_current().domain,
         "STATIC_URL": settings.STATIC_URL,
     }
-    send_templated_email(user, subject, "messages/email/message_received.html", context)
+    subject = fmt(subject, author=message.author, subject=message.subject)
+    send_templated_email(user, subject, template_name, context)
 
 @task()
 def team_invitation_sent(invite_pk):
