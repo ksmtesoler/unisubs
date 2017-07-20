@@ -501,7 +501,7 @@ var angular = angular || null;
             var closeSessionTimeout = $timeout(closeSessionTick, 1000);
 
             $scope.dialogManager.openDialog('sessionWillClose', {
-                resume: function() {
+                regainLock: function() {
                     if (closeSessionTimeout) {
                         $timeout.cancel(closeSessionTimeout);
                     }
@@ -516,7 +516,7 @@ var angular = angular || null;
             var dialogManager = $scope.dialogManager;
 
             dialogManager.openDialog('sessionEnded', {
-                resume: regainLockAfterIdle,
+                regainLock: regainLockAfterIdle,
                 closeEditor: $scope.exitEditor
             });
         }
