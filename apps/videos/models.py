@@ -165,12 +165,12 @@ EXISTS(
         return self.extra({ '_has_public_version': sql })
 
     def search(self, query):
-        # Search in video_id if only one query term.
-        # Otherwise only use terms with 3 or more chars.  Terms with less chars are not indexed, so they will never match anything.
+        # If only one query term, search normally,
+        # otherwise only use terms with 3 or more chars.
+        # Terms with less chars are not indexed, so they will never match anything.
         terms = get_terms(query)
         if len(terms) == 1 and len(terms[0]) > 2:
-            term = terms[0]
-            return self.filter(Q(index__text__search=query)|Q(video_id=term))
+            return self.filter(index__text__search=query)
         else:
             terms = [t for t in get_terms(query) if len(t) > 2]
             query = u' '.join(u'+"{}"'.format(t) for t in terms)
@@ -1325,6 +1325,7 @@ class VideoIndex(models.Model):
         parts = [
             video.title_display(),
             video.description,
+            video.video_id,
             video.meta_1_content,
             video.meta_2_content,
             video.meta_3_content,
