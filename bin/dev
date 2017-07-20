@@ -207,8 +207,8 @@ class DBDump(Command):
         except IndexError:
             print 'need to specify a file'
             return
-        mysql_cmd = ("mysqldump -u amara --host=$DB_1_PORT_3306_TCP_ADDR "
-                     "--port=$DB_1_PORT_3306_TCP_PORT amara --password=amara")
+        mysql_cmd = ("mysqldump -u amara --host=db "
+                     "--password=amara amara")
         with open(path, 'w') as f:
             subprocess.call(['docker-compose', 'run', '--rm',
                              '--entrypoint=bash', 'app', '-c', mysql_cmd], stdout=f)
