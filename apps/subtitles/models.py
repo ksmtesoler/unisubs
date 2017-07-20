@@ -24,6 +24,8 @@ import json
 import logging
 from datetime import datetime, date, timedelta
 
+
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -1976,6 +1978,14 @@ class SubtitleVersion(models.Model):
         return ('videos:subtitleversion_detail',
                 [self.video.video_id, self.language_code, self.subtitle_language.pk,
                  self.pk])
+
+    def get_absolute_download_url(self, format="vtt", filename="subtitles"):
+        return ''.join(['http://', Site.objects.get_current().domain,
+                        reverse("subtitles:download", kwargs={"video_id": self.video.video_id,
+                                                              "language_code": self.language_code,
+                                                              "version_number": self.version_number,
+                                                              "filename": filename,
+                                                              "format": format})])
 
 class SubtitleVersionMetadata(models.Model):
     """This model is used to add extra metadata to SubtitleVersions.

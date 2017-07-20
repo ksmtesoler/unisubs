@@ -328,6 +328,42 @@ class BrightcoveAccount(ExternalAccount):
             tags = tuple(path_parts[i+1:])
         return player_id, tags
 
+class BrightcoveCMSAccount(ExternalAccount):
+    account_type = 'C'
+    video_url_type = videos.models.VIDEO_TYPE_BRIGHTCOVE
+    publisher_id = models.CharField(max_length=100,
+                                    verbose_name=_('Publisher ID'))
+    client_id = models.CharField(max_length=100,
+                                    verbose_name=_('Client ID'))
+    client_secret = models.CharField(max_length=100,
+                                    verbose_name=_('Client Secret'))
+
+    class Meta:
+        verbose_name = _('Brightcove CMS account')
+        unique_together = [
+            ('type', 'owner_id')
+        ]
+
+    def __unicode__(self):
+        return "Brightcove CMS: %s" % (self.client_id)
+
+    def get_owner_display(self):
+        return fmt(_('client id %(client_id)s',
+                     client_id=self.client_id))
+
+    def do_update_subtitles(self, video_url, language, tip):
+        bc_video_id = video_url.get_video_type().brightcove_id
+        syncing.brightcove.update_subtitles_cms(self.publisher_id,
+                                     self.client_id,
+                                     self.client_secret,
+                                     bc_video_id, tip)
+
+    def do_delete_subtitles(self, video_url, language):
+        bc_video_id = video_url.get_video_type().brightcove_id
+        syncing.brightcove.delete_subtitles_cms(self.publisher_id,
+                                     self.client_id,
+                                     self.client_secret,
+                                     bc_video_id, language)
 
 class YouTubeAccountManager(ExternalAccountManager):
     def _get_sync_account_team_video(self, team_video, video_url):
