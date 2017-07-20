@@ -224,6 +224,7 @@ def add_team_videos(team_pk, user_pk, videos):
                 messages.append(fmt(
                     _(u"Video is already added to team: %(url)s\n"),
                     url=e.video_url))
+                continue
 
             if 'transcript' in video_item and len(video_item['transcript']) > 0 and video.primary_audio_language_code:
                 try:
