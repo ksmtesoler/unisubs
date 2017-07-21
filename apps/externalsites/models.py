@@ -565,6 +565,7 @@ class YouTubeAccount(ExternalAccount):
 account_models = [
     KalturaAccount,
     BrightcoveAccount,
+    BrightcoveCMSAccount,
     YouTubeAccount,
 ]
 _account_type_to_model = dict(
@@ -754,7 +755,7 @@ class SyncHistoryManager(models.Manager):
         else:
             return None
         accounts = []
-        for account_type in [YouTubeAccount, KalturaAccount, BrightcoveAccount]:
+        for account_type in [YouTubeAccount, KalturaAccount, BrightcoveAccount, BrightcoveCMSAccount]:
             for account_id in account_type.objects.for_owner(owner).values_list('id', flat=True):
                 accounts.append(account_id)
         qs = qs.filter(account_id__in=accounts)
