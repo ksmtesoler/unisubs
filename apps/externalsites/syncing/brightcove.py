@@ -46,6 +46,7 @@ def _get_cms_token(client_id, client_secret):
     return json.loads(r.text)['access_token']
 
 def _make_cms_request(account_id, client_id, client_secret, bc_video_id, language_code, subtitle_version=None):
+    logger.error("_make_cms_request")
     access_token = _get_cms_token(client_id, client_secret)
     authentication_header = {"Authorization": "Bearer " + access_token}
     r = requests.get(CMS_BASE_URL + "/accounts/" + account_id + "/videos/" + bc_video_id, headers=authentication_header)
@@ -58,6 +59,7 @@ def _make_cms_request(account_id, client_id, client_secret, bc_video_id, languag
         if language_code != track['srclang']:
             new_tracks.append(track)
     if len(tracks) != len(new_tracks):
+        logger.error("deleting track")
         data_clean = {
             "text_tracks": new_tracks
         }
@@ -65,10 +67,16 @@ def _make_cms_request(account_id, client_id, client_secret, bc_video_id, languag
                            headers=authentication_header,
                            data=json.dumps(data_clean))
         if r.status_code != 200:
+            logger.error("Error while removing old Brightcove text track: %s" % r.text)
             raise SyncingError("Error while removing old Brightcove text track: %s" % r.text)
     if subtitle_version is not None:
+        logger.error("Adding version")
         subtitle_data = babelsubs.to(subtitle_version.get_subtitles(), "vtt", language=subtitle_version.language_code)
+        logger.error("subtitle_data")
+        logger.error(subtitle_data)
         url = set_one_time_data(subtitle_data)
+        logger.error("one time url")
+        logger.error(url)
         label = 'Amara Captions - ' + subtitle_version.get_language_code_display()
         data = {
             "text_tracks": [
@@ -83,7 +91,10 @@ def _make_cms_request(account_id, client_id, client_secret, bc_video_id, languag
         r = requests.post(INGEST_BASE_URL + "/accounts/" + account_id + "/videos/" + bc_video_id + "/ingest-requests",
                           headers=authentication_header,
                           data=json.dumps(data))
+        logger.error("Done")
+        logger.error(r.text)
         if r.status_code != 200:
+            logger.error("Error while adding new Brightcove text track: %s" % r.text)
             raise SyncingError("Error while adding new Brightcove text track: %s" % r.text)
 
 def update_subtitles_cms(account_id, client_id, client_secret, bc_video_id, subtitle_version):
