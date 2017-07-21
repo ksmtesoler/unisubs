@@ -34,5 +34,6 @@ def set_one_time_data(data):
 def get_one_time_data(token):
     key = _mk_key(token)
     data = cache.get(key)
-    cache.delete(key)
+    # It seems like Brightcove wants to hit it twice
+    # cache.delete(key)
     return data
