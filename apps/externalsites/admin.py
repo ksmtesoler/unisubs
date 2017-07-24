@@ -115,6 +115,7 @@ class YouTubeAccountAdmin(admin.ModelAdmin):
 
 admin.site.register(models.KalturaAccount)
 admin.site.register(models.BrightcoveAccount)
+admin.site.register(models.BrightcoveCMSAccount)
 admin.site.register(models.YouTubeAccount, YouTubeAccountAdmin)
 admin.site.register(models.SyncedSubtitleVersion)
 admin.site.register(models.SyncHistory, SyncHistoryAdmin)

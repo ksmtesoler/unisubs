@@ -96,6 +96,27 @@ class KalturaAccountForm(AccountForm):
         model = models.KalturaAccount
         fields = ['partner_id', 'secret']
 
+class BrightcoveCMSAccountForm(AccountForm):
+    publisher_id = forms.IntegerField(label=ugettext_lazy("Publisher ID"))
+    client_id = forms.CharField(label=ugettext_lazy("Client ID"))
+    client_secret = forms.CharField(label=ugettext_lazy("Client Secret"))
+
+
+    class Meta:
+        model = models.BrightcoveCMSAccount
+        fields = ['publisher_id', 'client_id', 'client_secret' ]
+
+    def add_error(self, field_name, msg):
+        self._errors[field_name] = self.error_class([msg])
+        if field_name in self.cleaned_data:
+            del self.cleaned_data[field_name]
+
+    def save(self):
+        account = AccountForm.save(self)
+        if not self.cleaned_data['enabled']:
+            return None
+        return account
+
 class BrightcoveAccountForm(AccountForm):
     FEED_ALL_NEW = 'N'
     FEED_WITH_TAGS = 'T'
@@ -308,6 +329,7 @@ class AccountFormset(dict):
     def make_forms(self, owner):
         self.make_form('kaltura', KalturaAccountForm, owner)
         self.make_form('brightcove', BrightcoveAccountForm, owner)
+        self.make_form('brightcovecms', BrightcoveCMSAccountForm, owner)
         self.make_form('add_youtube', AddYoutubeAccountForm, owner)
         for account in models.YouTubeAccount.objects.for_owner(owner):
             name = 'youtube_%s' % account.id

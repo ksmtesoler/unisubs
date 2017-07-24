@@ -57,6 +57,17 @@
                 </div>
             </fieldset>
 
+            <fieldset class="brightcove{% if not forms.brightcovecms.enabled.value %} disabled{% endif %}">
+                <legend>{% trans "Brightcove CMS" %}</legend>
+                {{ forms.brightcovecms.non_field_errors }}
+                {% include "_form_field.html" with field=forms.brightcovecms.enabled widget_type="checkbox" %}
+                <div class="account-fields">
+                    {% include "_form_field.html" with field=forms.brightcovecms.publisher_id %}
+                    {% include "_form_field.html" with field=forms.brightcovecms.client_id %}
+                    {% include "_form_field.html" with field=forms.brightcovecms.client_secret %}
+                </div>
+            </fieldset>
+
             <fieldset class="brightcove{% if not forms.brightcove.enabled.value %} disabled{% endif %}">
                 <legend>{% trans "Brightcove" %}</legend>
                 {{ forms.brightcove.non_field_errors }}
