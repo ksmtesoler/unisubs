@@ -40,6 +40,9 @@ from videos.permissions import can_user_resync_own_video
 import videos.models
 import videos.tasks
 
+import logging
+logger = logging.getLogger(__name__)
+
 def now():
     # define now as a function so it can be patched in the unittests
     return datetime.datetime.now()
@@ -89,7 +92,10 @@ class ExternalAccountManager(models.Manager):
 
 class ExternalAccount(models.Model):
     account_type = NotImplemented
-    video_url_type = NotImplemented
+    # This will need to be refactored
+    # when we'll want several video types
+    # sync with several accounts
+    video_url_types = NotImplemented
 
     TYPE_USER = 'U'
     TYPE_TEAM = 'T'
@@ -129,7 +135,7 @@ class ExternalAccount(models.Model):
             return None
 
     def should_sync_video_url(self, video, video_url):
-        return video_url.type == self.video_url_type
+        return video_url.type in self.video_url_types
 
     def update_subtitles(self, video_url, language):
         version = language.get_public_tip()
@@ -196,7 +202,7 @@ class ExternalAccount(models.Model):
 
 class KalturaAccount(ExternalAccount):
     account_type = 'K'
-    video_url_type = videos.models.VIDEO_TYPE_KALTURA
+    video_url_types = [videos.models.VIDEO_TYPE_KALTURA]
 
     partner_id = models.CharField(max_length=100,
                                   verbose_name=_('Partner ID'))
@@ -234,7 +240,7 @@ class KalturaAccount(ExternalAccount):
 
 class BrightcoveAccount(ExternalAccount):
     account_type = 'B'
-    video_url_type = videos.models.VIDEO_TYPE_BRIGHTCOVE
+    video_url_types = [videos.models.VIDEO_TYPE_BRIGHTCOVE]
 
     publisher_id = models.CharField(max_length=100,
                                     verbose_name=_('Publisher ID'))
@@ -328,6 +334,58 @@ class BrightcoveAccount(ExternalAccount):
             tags = tuple(path_parts[i+1:])
         return player_id, tags
 
+class BrightcoveCMSAccount(ExternalAccount):
+    account_type = 'C'
+    video_url_types = [videos.models.VIDEO_TYPE_BRIGHTCOVE,
+                      videos.models.VIDEO_TYPE_HTML5]
+    publisher_id = models.CharField(max_length=100,
+                                    verbose_name=_('Publisher ID'))
+    client_id = models.CharField(max_length=100,
+                                    verbose_name=_('Client ID'))
+    client_secret = models.CharField(max_length=100,
+                                    verbose_name=_('Client Secret'))
+
+    class Meta:
+        verbose_name = _('Brightcove CMS account')
+        unique_together = [
+            ('type', 'owner_id')
+        ]
+
+    def __unicode__(self):
+        return "Brightcove CMS: %s" % (self.client_id)
+
+    def get_owner_display(self):
+        return fmt(_('client id %(client_id)s',
+                     client_id=self.client_id))
+
+    def _get_brightcove_id(self, video_url):
+        video_type = video_url.get_video_type()
+        if hasattr(video_type, 'brightcove_id'):
+            return video_type.brightcove_id
+        parsed_url = urlparse.urlparse(video_url.url)
+        if parsed_url.netloc.endswith('.akamaihd.net') and \
+           urlparse.parse_qs(parsed_url.query) and \
+           'videoId' in urlparse.parse_qs(parsed_url.query):
+            return urlparse.parse_qs(parsed_url.query)['videoId'][0]
+        return None
+
+    def do_update_subtitles(self, video_url, language, tip):
+        bc_video_id = self._get_brightcove_id(video_url)
+        if bc_video_id is None:
+            return
+        syncing.brightcove.update_subtitles_cms(self.publisher_id,
+                                     self.client_id,
+                                     self.client_secret,
+                                     bc_video_id, tip)
+
+    def do_delete_subtitles(self, video_url, language):
+        bc_video_id = self._get_brightcove_id(video_url)
+        if bc_video_id is None:
+            return
+        syncing.brightcove.delete_subtitles_cms(self.publisher_id,
+                                     self.client_id,
+                                     self.client_secret,
+                                     bc_video_id, language)
 
 class YouTubeAccountManager(ExternalAccountManager):
     def _get_sync_account_team_video(self, team_video, video_url):
@@ -382,7 +440,7 @@ class YouTubeAccount(ExternalAccount):
     the username attribute to lookup a specific account for a video.
     """
     account_type = 'Y'
-    video_url_type = videos.models.VIDEO_TYPE_YOUTUBE
+    video_url_types = [videos.models.VIDEO_TYPE_YOUTUBE]
 
     channel_id = models.CharField(max_length=255, unique=True)
     username = models.CharField(max_length=255)
@@ -453,7 +511,7 @@ class YouTubeAccount(ExternalAccount):
             return _('No username')
 
     def should_sync_video_url(self, video, video_url):
-        if not (video_url.type == self.video_url_type and
+        if not (video_url.type in self.video_url_types and
                 video_url.owner_username == self.channel_id):
             return False
         if self.type == ExternalAccount.TYPE_USER:
@@ -528,15 +586,18 @@ class YouTubeAccount(ExternalAccount):
 
 account_models = [
     KalturaAccount,
-    BrightcoveAccount,
+    BrightcoveCMSAccount,
     YouTubeAccount,
 ]
 _account_type_to_model = dict(
     (model.account_type, model) for model in account_models
 )
-_video_type_to_account_model = dict(
-    (model.video_url_type, model) for model in account_models
-)
+
+_video_type_to_account_model = {}
+for model in account_models:
+    for video_url_type in model.video_url_types:
+        _video_type_to_account_model[video_url_type] = model
+
 _account_type_choices = [
     (model.account_type, model._meta.verbose_name)
     for model in account_models
@@ -718,7 +779,7 @@ class SyncHistoryManager(models.Manager):
         else:
             return None
         accounts = []
-        for account_type in [YouTubeAccount, KalturaAccount, BrightcoveAccount]:
+        for account_type in [YouTubeAccount, KalturaAccount, BrightcoveAccount, BrightcoveCMSAccount]:
             for account_id in account_type.objects.for_owner(owner).values_list('id', flat=True):
                 accounts.append(account_id)
         qs = qs.filter(account_id__in=accounts)
