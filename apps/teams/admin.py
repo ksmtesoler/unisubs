@@ -130,7 +130,10 @@ class TeamMemberChangeList(ChangeList):
         team_qs = Team.objects.filter(id__in=team_ids)
         team_map = dict((u.id, u) for u in team_qs)
         for member in results:
-            member.team = team_map.get(member.team_id)
+            team = team_map.get(member.team_id)
+            if team is not None:
+                # Could be None if team marked as deleted
+                member.team = team
 
 class TeamMemberAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'team__name', 'user__first_name', 'user__last_name')
