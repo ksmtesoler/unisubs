@@ -92,6 +92,9 @@ class ExternalAccountManager(models.Manager):
 
 class ExternalAccount(models.Model):
     account_type = NotImplemented
+    # This will need to be refactored
+    # when we'll want several video types
+    # sync with several accounts
     video_url_types = NotImplemented
 
     TYPE_USER = 'U'
