@@ -260,14 +260,19 @@
             }
         };
 
+        // Create a dialog object for openDialog
         function makeGenericDialog(dialogName, callbacks, overrides) {
-            // Create a dialog object for openDialog
             if(callbacks === undefined) {
                 callbacks = {};
             }
             var dialogDef = Dialogs[dialogName];
             if(dialogDef === undefined) {
                 throw "no dialog named " + dialogName;
+            }
+            // Check if we were passed callbacks that don't correspond to a button
+            var extraCallbacks = _.difference(_.keys(callbacks), dialogDef.buttons);
+            if(extraCallbacks.length > 0) {
+                console.warn("extra callbacks for " + dialogName + ": " + extraCallbacks.join(", "));
             }
             var dialog = _.clone(dialogDef);
             if(overrides) {
