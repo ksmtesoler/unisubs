@@ -35,9 +35,11 @@ from utils.factories import *
 
 class GetSyncAccountTest(TestCase):
     def check_get_sync_accounts(self, video, account):
-        self.assertEquals(get_sync_accounts(video), [
-            (account, video.get_primary_videourl_obj())
-        ])
+        # Brightcove was disabled
+        self.assertEquals(get_sync_accounts(video), [])
+        #self.assertEquals(get_sync_accounts(video), [
+        #    (account, video.get_primary_videourl_obj())
+        #])
 
     def test_team_account(self):
         video = BrightcoveVideoFactory()
