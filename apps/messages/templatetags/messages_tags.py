@@ -55,6 +55,6 @@ def messages(context):
 def encode_html_email(message):
     return "<br/>".join(
         map(
-            lambda x: cgi.escape("\n".join(wrap(x, 40))).encode('ascii', 'xmlcharrefreplace'),
+            lambda x: cgi.escape("\n".join(wrap(x, 40, break_long_words=False))).encode('ascii', 'xmlcharrefreplace'),
             message.split("\n")
         ))
