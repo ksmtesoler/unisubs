@@ -343,6 +343,20 @@ class TeamVideoActivityTest(TestCase):
         assert_equal(record_to.team, team_2)
         assert_equal(record_to.get_related_obj(), team_1)
 
+    def test_team_settings_changed(self):
+        user = UserFactory()
+        team = TeamFactory(admin=user)
+        teams.signals.team_settings_changed.send(
+            sender=team, user=user, changed_settings={
+                'setting': 'new-value',
+            }, old_settings={
+                'setting': 'old-value',
+            })
+        record = ActivityRecord.objects.get(type='team-settings-changed')
+        assert_equal(record.user, user)
+        assert_equal(record.get_related_obj().get_changes(),
+                     {'setting': 'new-value'})
+
 class TestViewableByUser(TestCase):
     def setUp(self):
         self.user = UserFactory()

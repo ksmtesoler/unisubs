@@ -50,7 +50,7 @@ class SimpleTeamWorkflow(TeamWorkflow):
             form = forms.SimplePermissionsForm(instance=team,
                                                data=request.POST)
             if form.is_valid():
-                form.save()
+                form.save(request.user)
                 messages.success(request, _(u'Workflow updated'))
                 return redirect('teams:settings_workflows', team.slug)
             else:

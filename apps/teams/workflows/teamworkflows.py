@@ -221,6 +221,7 @@ class TeamWorkflow(object):
             'video-url-deleted',
             'video-moved-from-team',
             'video-moved-to-team',
+            'team-settings-changed',
         ]
 
     # these can be used to customize the content in the project/language
