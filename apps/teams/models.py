@@ -55,7 +55,8 @@ from teams import workflows
 from teams.exceptions import ApplicationInvalidException
 from teams.notifications import BaseNotification
 from teams.signals import (member_leave, api_subtitles_approved,
-                           api_subtitles_rejected, video_removed_from_team)
+                           api_subtitles_rejected, video_removed_from_team,
+                           team_settings_changed)
 from utils import DEFAULT_PROTOCOL
 from utils import translation
 from utils.amazon import S3EnabledImageField, S3EnabledFileField
@@ -429,6 +430,53 @@ class Team(models.Model):
             return None
         else:
             return get_authentication_provider(self.auth_provider_code)
+
+    # Settings
+    SETTINGS_ATTRIBUTES = set([
+        'description', 'is_visible', 'sync_metadata', 'membership_policy',
+        'video_policy',
+    ])
+    def get_settings(self):
+        """Get the current settings for this team
+
+        This isn't that useful by itself, but it's required in order to call
+        handle_settings_changes() later.
+        """
+        return {
+            name: getattr(self, name)
+            for name in self.SETTINGS_ATTRIBUTES
+        }
+
+    def handle_settings_changes(self, user, previous_settings):
+        """Handle team settings changes
+
+        A "setting" is a field on the Team model that we use to configure the
+        team and that can be changed by the team admins.
+
+        Call this after a team admin has potentially changed the team
+        settings.  This method takes care of a few things:
+
+            - Checks if any settings have changed from their previous value
+            - If there were changes, then emit the team_settings_changed
+            signal
+
+        Args:
+            user: user performing the action
+            previous_settings: return value from the get_settings() method
+        """
+        changed_settings = {}
+        old_settings = {}
+        for name, old_value in previous_settings.items():
+            current_value = getattr(self, name)
+            if old_value != current_value:
+                changed_settings[name] = current_value
+                old_settings[name] = old_value
+
+        if not changed_settings:
+            return
+        team_settings_changed.send(sender=self, user=user,
+                                   changed_settings=changed_settings,
+                                   old_settings=old_settings)
 
     # Thumbnails
     def logo_thumbnail(self):

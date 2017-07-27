@@ -36,6 +36,7 @@ from teams.models import Team, TeamMember, Task, Application
 from utils import test_utils
 from utils.test_utils.api import *
 from utils.factories import *
+import teams.signals
 
 class TeamAPITestBase(TestCase):
     permissions_to_mock = []
@@ -172,17 +173,25 @@ class TeamAPITest(TeamAPITestBase):
         })
         assert_equal(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_update_team(self):
-        team = TeamFactory()
+    @test_utils.mock_handler(teams.signals.team_settings_changed)
+    def test_update_team(self, settings_changed_handler):
+        team = TeamFactory(is_visible=False)
         response = self.client.put(self.detail_url(team), data={
-            'name': 'New Name',
-            'slug': 'new-name',
+            'is_visible': True,
         })
         assert_equal(response.status_code, status.HTTP_200_OK,
                      response.content)
         team = test_utils.reload_obj(team)
-        assert_equal(team.name, 'New Name')
-        assert_equal(team.slug, 'new-name')
+        assert_equal(team.is_visible, True)
+
+        assert_true(settings_changed_handler.called)
+        assert_equal(settings_changed_handler.call_args, mock.call(
+            signal=teams.signals.team_settings_changed,
+            sender=team,
+            user=self.user,
+            changed_settings={'is_visible': True},
+            old_settings={'is_visible': False}
+        ))
 
     def test_delete_team_not_allowed(self):
         team = TeamFactory()
