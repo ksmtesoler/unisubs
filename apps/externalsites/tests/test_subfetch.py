@@ -23,6 +23,7 @@ from django.test import TestCase
 from nose.tools import *
 import mock
 
+from externalsites.google import VideoInfo
 from externalsites.subfetch import should_fetch_subs, fetch_subs
 from subtitles import pipeline
 from subtitles.models import ORIGIN_IMPORTED
@@ -41,15 +42,20 @@ class ShouldFetchSubsTest(TestCase):
 
 
 class SubFetchTestCase(TestCase):
+    @test_utils.patch_for_test("externalsites.google.get_video_info")
     @test_utils.patch_for_test("externalsites.google.get_new_access_token")
     @test_utils.patch_for_test("externalsites.google.captions_list")
     @test_utils.patch_for_test("externalsites.google.captions_download")
     def setUp(self, mock_captions_download, mock_captions_list,
-              mock_get_new_access_token):
+              mock_get_new_access_token, mock_get_video_info):
         self.mock_captions_download = mock_captions_download
         self.mock_captions_list = mock_captions_list
         self.mock_get_new_access_token = mock_get_new_access_token
+        self.mock_get_video_info = mock_get_video_info
         self.mock_get_new_access_token.return_value = 'test-access-token'
+        self.mock_get_video_info.return_value = VideoInfo(
+            'username', 'test-title', 'test-description', 60,
+            'http://example.com/youtube-thumb.png')
         self.account = YouTubeAccountFactory(channel_id="username",
                                              user=UserFactory())
         self.video = YouTubeVideoFactory(channel_id="username")
