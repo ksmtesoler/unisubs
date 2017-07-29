@@ -2680,6 +2680,24 @@ class Task(models.Model):
             if previous:
                 return previous[0].assignee
 
+    def get_subtitler(self):
+        """For Approve tasks, return the last user to Review these subtitles.
+
+        May be None if this task is not an Approve task, or if we can't figure
+        out the last reviewer for any reason.
+
+        """
+        subtitling_tasks = Task.objects.complete().filter(
+            team_video=self.team_video,
+            language=self.language,
+            team=self.team,
+            type__in=[Task.TYPE_IDS['Translate'],
+            Task.TYPE_IDS['Subtitle']]).order_by('-completed')[:1]
+        if subtitling_tasks:
+            return subtitling_tasks[0].assignee
+        else:
+            return None
+
     def set_expiration(self):
         """Set the expiration_date of this task.  Does not save().
 
