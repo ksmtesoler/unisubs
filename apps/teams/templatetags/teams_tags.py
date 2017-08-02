@@ -40,6 +40,7 @@ from teams.permissions import (
     can_view_settings_tab as _can_view_settings_tab,
     can_view_stats_tab as _can_view_stats_tab,
     can_view_approve_tab as _can_view_approve_tab,
+    can_view_management_tab as _can_view_management_tab,
     can_edit_video as _can_edit_video,
     can_rename_team as _can_rename_team,
     can_perform_task as _can_perform_task,
@@ -348,6 +349,10 @@ def can_view_approve_tab(team, user):
    return _can_view_approve_tab(team, user)
 
 @register.filter
+def can_view_management_tab(team, user):
+   return _can_view_management_tab(team, user)
+
+@register.filter
 def can_rename_team(team, user):
     return _can_rename_team(team, user)
 
@@ -558,3 +563,19 @@ def extra_pages(team, user):
 @register.filter
 def extra_settings_pages(team, user):
     return team.new_workflow.extra_settings_pages(user)
+
+@register.filter
+def team_video_page_default(team, request):
+    return team.new_workflow.team_video_page_default(request)
+
+@register.filter
+def team_video_page_extra_tabs(team, request):
+    return team.new_workflow.team_video_page_extra_tabs(request)
+
+@register.filter
+def management_page_default(team, request):
+    return team.new_workflow.management_page_default(request)
+
+@register.filter
+def management_page_extra_tabs(team, request):
+    return team.new_workflow.management_page_extra_tabs(request)

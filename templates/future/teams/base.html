@@ -1,0 +1,11 @@
+{% extends "future/base.html" %}
+{% load i18n %}
+{% load url from future %}
+{% block header %}{% include "future/teams/header.html" %}{% endblock %}
+{% block page-controls %}
+  {% if perms.teams.edit_team %}
+  <li><a href="{% url "admin:teams_team_change" team.pk %}">{% trans 'Edit team' %}</a></li>
+  {% endif %}
+  <li><a href="{% url "teams:video-durations" team.slug %}">Video Durations</a></li>
+</ul>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% load media_bundle %}
+{% load url from future %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Amara Styleguide</title>
+    {% media_bundle "amara.css" %}
+    <link href='https://fonts.googleapis.com/css?family=Raleway:400,700|Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
+    {% media_bundle "amara.js" %}
+    {% js_i18n_catalog %}
+    {% js_language_data %}
+    <script>var userLanguages = [{% for language in user.get_languages %}"{{language }}"{% if not forloop.last %},{% endif %}{% endfor %}];</script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Amara styleguide</h1>
+      <hr>
+      <div class="row styleGuide">
+        <div class="col-md-3"> {{ styleguide.toc|safe }} </div>
+        <div class="col-md-9">
+          <div class="styleGuide-sections">
+            {% for section in styleguide.sections %}
+            <div class="styleGuide-section" id="{{ section.id }}">{{ section.content|safe }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

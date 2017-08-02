@@ -18,9 +18,10 @@ var THIS_JS_FILE = scriptFiles[scriptFiles.length-1].src;
 	    if (iframes[index].style.visibility == "visible")
                 iframes[index].parentNode.style.height = "";
 	    if (iframes[index].parentNode && iframes[index].parentNode.parentNode) {
-		var targetWidth = Math.min(iframes[index].parentNode.parentNode.clientWidth, parseInt(iframes[index].parentNode.dataset.width));
+                var containerSize = getSize(iframes[index].parentNode.parentNode);
+		var targetWidth = Math.min(containerSize[0], parseInt(iframes[index].parentNode.dataset.width));
 		var targetHeight = parseInt((height - toolbarHeight - transcriptHeight) * targetWidth / width) + toolbarHeight + transcriptHeight;
-		if ((width != targetWidth) || (targetHeight != iframes[index].parentNode.parentNode.clientHeight)) {
+		if ((width != targetWidth) || (targetHeight != containerSize[1])) {
 		    width = targetWidth;
 		    height = targetHeight;
 		    iframes[index].contentWindow.postMessage({resize: true, width: width, height: (height - toolbarHeight - transcriptHeight)}, iframeDomain);
@@ -30,6 +31,15 @@ var THIS_JS_FILE = scriptFiles[scriptFiles.length-1].src;
 		}
 	    }
 	};
+        var getSize = function(elt) {
+            var computedStyle = getComputedStyle(elt);
+            height = elt.clientHeight;  // height with padding
+            width = elt.clientWidth;   // width with padding
+            height -= parseFloat(computedStyle.paddingTop, 10) + parseFloat(computedStyle.paddingBottom, 10);
+            width -= parseFloat(computedStyle.paddingLeft, 10) + parseFloat(computedStyle.paddingRight, 10);
+            return [width, height];
+        }
+
 	var updateContent = function(index, content) {
 	    iframes[index].innerHTML = content;
 	};
@@ -68,10 +78,6 @@ var THIS_JS_FILE = scriptFiles[scriptFiles.length-1].src;
                 var loadingDiv = document.createElement("DIV");
                 if (currentDiv.dataset.noanalytics && (currentDiv.dataset.noanalytics == "true"))
                     noanalytics = true;
-                if (currentDiv.dataset.width)
-                    currentDiv.style.width = currentDiv.dataset.width;
-                if (currentDiv.dataset.height)
-                    currentDiv.style.height = (36 + parseInt(currentDiv.dataset.height)) + "px";
                 currentDiv.style.backgroundColor = "#1b1c1d";
                 currentDiv.style.color = "white";
                 if (currentDiv.dataset.height)

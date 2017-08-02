@@ -29,8 +29,11 @@ video_moved_from_team_to_team = dispatch.Signal(
         providing_args=["destination_team", "old_team", "video"])
 video_moved_from_project_to_project = dispatch.Signal(
         providing_args=["old_project", "new_project", "video"])
-build_video_page_forms = dispatch.Signal(
-    providing_args=['team', 'user', 'team_videos_qs'])
+team_settings_changed = dispatch.Signal(
+        providing_args=["user", "changed_settings", "old_settings"])
+# Called when we're creating forms for the team manage videos page.  The
+# sender will be the team.  Append new forms to the form_list parameter
+build_video_management_forms = dispatch.Signal(providing_args=['form_list'])
 
 # Notification-related signals
 

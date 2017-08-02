@@ -38,11 +38,12 @@ def recent_activity(user):
     }
 
 @register.inclusion_tag('videos/_video_activity.html')
-def video_activity(video, user):
+def video_activity(video, user, use_old_messages):
     qs = ActivityRecord.objects.for_video(video)
 
     return {
         'records': qs[:LIMIT],
         'video': video,
-        'user': user
+        'user': user,
+        'use_old_messages': use_old_messages
     }

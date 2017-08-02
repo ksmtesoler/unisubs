@@ -22,27 +22,27 @@ Extensible behavior functions
 This module allows one app to define a "behavior function", which other apps
 can then override to change the behavior.  This is the `Chain of responsibility pattern <http://http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern/>`_ which helps keep modules loosely coupled.
 
-A typical use for this is the title that we display on the video page.
-Normally we just print a simple video title, but if the video is part of
-certain teams we want to print a modified title.  Putting the code that deals
-with this inside the videos app is bad practice because:
+A typical use for this is the subtitle that we display for video cards,
+underneath the title.  Normally, we don't show anything there, but for TED we
+show the speaker name.  Putting the code that deals with this inside the
+videos app is bad practice because:
 
 - It's adding complexity to the videos app.  Handling team requirements is
   outside of its scope.
 - It requires importing from the teams app, but the teams app needs to import
   from the videos app.  So we now have a circular dependency.
 
-Instead, videos defines the `make_video_title` behavior, which can then be
+Instead, videos defines the `get_video_subtitle` behavior, which can then be
 overriden by other apps.  This allows us to change the behavior without having
 to add complexity/dependencies to the videos app.  The code works something
 like this.
 
 Example:
     >>> @behavior
-    ... def make_video_title(video)
+    ... def get_video_subtitle(video)
     ...     return video.title
-    >>> @make_video_title.override
-    ... def make_video_title_for_team_foo(video):
+    >>> @get_video_subtitle.override
+    ... def get_video_subtitle_for_team_foo(video):
     ...     team_video = video.get_team_video()
     ...     if team_video and team_video.slug == 'foo'
     ...         return 'My Team: %s' % video.title

@@ -27,10 +27,10 @@ class DebuggingTimer:
 
     def log_time(self, msg):
         current_time = time.time()
-        logger.debug("%s: %0.4f", msg, current_time - self.last_time)
+        logger.info("%s: %0.4f", msg, current_time - self.last_time)
         self.last_time = current_time
 
     def log_total_time(self, msg):
         current_time = time.time()
-        logger.debug("total time for %s: %0.3f", msg,
+        logger.info("total time for %s: %0.3f", msg,
                      current_time - self.start_time)

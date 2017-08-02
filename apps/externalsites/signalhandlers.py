@@ -45,8 +45,8 @@ def on_subtitles_published(signal, sender, version=None, **kwargs):
         raise ValueError("sender must be a SubtitleLanguage: %s" % sender)
     _update_subtitles_for_language(sender)
 
-@receiver(subtitles.signals.language_deleted)
-def on_language_deleted(signal, sender, **kwargs):
+@receiver(subtitles.signals.subtitles_deleted)
+def on_subtitles_deleted(signal, sender, **kwargs):
     if not isinstance(sender, SubtitleLanguage):
         raise ValueError("sender must be a SubtitleLanguage: %s" % sender)
     language = sender
@@ -65,4 +65,10 @@ def on_video_url_added(sender, video, **kwargs):
     if credit.should_add_credit_to_video_url(video_url, account):
         tasks.add_amara_credit.delay(video_url.pk)
     if subfetch.should_fetch_subs(video_url):
-        tasks.fetch_subs.delay(video_url.pk)
+        team = kwargs.pop('team', None)
+        if team is not None:
+            team = team.pk
+        user = kwargs.pop('user', None)
+        if user is not None:
+            user = user.pk
+        tasks.fetch_subs.delay(video_url.pk, user, team)

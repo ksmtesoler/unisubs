@@ -889,7 +889,7 @@ class Rpc(BaseRpc):
 
         if not workflow.requires_tasks:
             return 'public', False
-        elif language.has_version:
+        elif language.old_has_version:
             # If there are already active subtitles for this language, we're
             # dealing with an edit.
             if can_publish_edits_immediately(team_video, user, language.language_code):

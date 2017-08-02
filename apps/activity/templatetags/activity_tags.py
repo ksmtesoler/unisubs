@@ -23,3 +23,7 @@ register = template.Library()
 @register.filter
 def get_record_message(record, user):
     return record.get_message(user)
+
+@register.filter
+def get_old_record_message(record, user):
+    return record.get_old_message(user)

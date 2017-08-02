@@ -56,9 +56,9 @@ PASSWORD_HASHERS = (
 # logging at all, except if there's a test failure.
 del LOGGING
 
-NOSE_ARGS = ['--logging-filter=test_steps, -remote_connection, '
+NOSE_ARGS = ['--logging-clear-handlers',
              '-selenium.webdriver.remote.remote_connection',
-             '--with-xunit', '--logging-level=ERROR',
+             '--with-xunit', '--logging-level=WARN',
              '--xunit-file=nosetests.xml',
             ]
 

@@ -96,3 +96,8 @@ def on_team_member_deleted(sender, **kwargs):
 def on_video_moved_from_team_to_team(user, destination_team, old_team, video, **kwargs):
     ActivityRecord.objects.create_for_video_moved(video, user, from_team=old_team, to_team=destination_team)
     ActivityRecord.objects.move_video_records_to_team(video, destination_team)
+
+@receiver(teams.signals.team_settings_changed)
+def on_team_settings_changed(sender, user, changed_settings, **kwargs):
+    ActivityRecord.objects.create_for_team_settings_changed(sender, user,
+                                                            changed_settings)

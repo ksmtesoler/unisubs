@@ -30,10 +30,11 @@ specific command.
 """
 
 from datetime import date
-import sys
 import os
 import optparse
+import shutil
 import subprocess
+import sys
 
 def script_path():
     path = __file__
@@ -206,8 +207,8 @@ class DBDump(Command):
         except IndexError:
             print 'need to specify a file'
             return
-        mysql_cmd = ("mysqldump -u amara --host=$DB_1_PORT_3306_TCP_ADDR "
-                     "--port=$DB_1_PORT_3306_TCP_PORT amara --password=amara")
+        mysql_cmd = ("mysqldump -u amara --host=db "
+                     "--password=amara amara")
         with open(path, 'w') as f:
             subprocess.call(['docker-compose', 'run', '--rm',
                              '--entrypoint=bash', 'app', '-c', mysql_cmd], stdout=f)
@@ -261,6 +262,90 @@ class Up(Command):
         if options.dblog:
             env['DB_LOGGING'] = '1'
         subprocess.call(['docker-compose', 'up', 'app', 'worker'], env=env)
+
+class Design(Command):
+    """Dump the database to a flie."""
+
+    # match paths in unisubs to amara-design
+    PATHS = [
+        ('media/amara/css/', 'src/_sass/', []),
+        ('media/amara/js/', 'src/js/', ['lib']),
+        ('media/bower.json', 'bower.json', []),
+    ]
+
+    def iter_paths(self):
+        for unisubs_relpath, design_relpath, exclude_paths in self.PATHS:
+            yield (os.path.join(unisubs_root(), unisubs_relpath),
+                   os.path.join(self.design_path, design_relpath), exclude_paths)
+
+    def run_inner(self, args, options):
+        if not self.check_repo_path():
+            return
+        try:
+            command = args[0]
+        except IndexError:
+            print 'need to specify a command (diff, push, pull)'
+            return
+        if command == 'diff':
+            self.diff()
+        elif command == 'push':
+            self.push()
+        elif command == 'pull':
+            self.pull()
+        else:
+            print "Unknown command: {}".format(command)
+
+    def check_repo_path(self):
+        settings_file = os.path.join(unisubs_root(), 'dev_settings_local.py')
+        dev_settings_local = {}
+        try:
+            execfile(settings_file, dev_settings_local)
+            self.design_path = dev_settings_local['AMARA_DESIGN_PATH']
+        except (KeyError, IOError):
+            print ('AMARA_DESIGN_PATH not set.  Add that to '
+                   'dev_settings_local.py and set it to '
+                   'the amara-design repository path.')
+            return False
+        if not os.path.isdir(self.design_path):
+            print '{} not found'.format(self.design_path)
+            return False
+        return True
+
+    def diff(self):
+        for unisubs_path, design_path, exclude_paths in self.iter_paths():
+            subprocess.call(['diff', '-dur', unisubs_path, design_path])
+
+    def push(self):
+        for unisubs_path, design_path, exclude_paths in self.iter_paths():
+            self.sync(unisubs_path, design_path, exclude_paths)
+
+    def pull(self):
+        for unisubs_path, design_path, exclude_paths in self.iter_paths():
+            self.sync(design_path, unisubs_path, exclude_paths)
+        # pull in the fonts as well.  We can't include this in the PATHS
+        # variable because we have some extra fonts there.  This shouldn't be
+        # an issue in practice since occupop is the only one to change these
+        # files
+        self.sync_fonts()
+
+    def sync(self, src, dest, exclude_paths):
+        if os.path.isdir(src):
+            cmd = ['rsync', '-a', '--delete']
+            for exclude_path in exclude_paths:
+                cmd.append('--exclude')
+                cmd.append(exclude_path)
+            subprocess.check_call(cmd  + [src, dest])
+        else:
+            shutil.copyfile(src, dest)
+
+    def sync_fonts(self):
+        dest_dir = os.path.join(unisubs_root(), 'media/fonts')
+        src_dir = os.path.join(self.design_path, 'src/fonts')
+        for filename in os.listdir(src_dir):
+            src = os.path.join(src_dir, filename)
+            dest = os.path.join(dest_dir, filename)
+            if os.path.isfile(src):
+                shutil.copyfile(src, dest)
 
 class PrepDeploy(Command):
     """Start docker containers."""

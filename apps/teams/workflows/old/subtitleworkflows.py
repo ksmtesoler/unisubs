@@ -230,6 +230,13 @@ class TaskTeamSubtitlesWorkflow(TeamSubtitlesWorkflow):
             return (super(TaskTeamSubtitlesWorkflow, self)
                     .action_for_add_subtitles(user, language_code, complete))
 
+    def delete_subtitles_bullets(self, language_code):
+        default_bullets = super(TaskTeamSubtitlesWorkflow,
+                                self).delete_subtitles_bullets()
+        return default_bullets + [
+            _('Any tasks will be deleted'),
+        ]
+
 class NonTaskTeamPublish(subtitles.workflows.Publish):
     def perform(self, user, video, subtitle_language, saved_version):
         super(NonTaskTeamPublish, self).perform(

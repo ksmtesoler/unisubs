@@ -17,6 +17,7 @@
 # with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.html.
 
 import json
+from urllib import urlencode
 
 import babelsubs
 from django.contrib.auth.decorators import login_required
@@ -132,8 +133,12 @@ class SubtitleEditorBase(View):
     def get_redirect_url(self):
         if 'return_url' in self.request.GET:
             return self.request.GET['return_url']
-        else:
-            return self.video.get_absolute_url()
+        url = self.editing_language.get_absolute_url()
+        if 'team' in self.request.GET:
+            url += '?{}'.format(urlencode({
+                'team': self.request.GET['team']
+            }))
+        return url
 
     def get_custom_css(self):
         return ""
@@ -368,6 +373,11 @@ class SubtitleEditorBase(View):
         if (not self.check_can_edit() or
             not self.check_can_writelock() or
             not self.assign_task_for_editor()):
+            if 'team' in self.request.GET:
+                qs = '?{}'.format(urlencode({
+                    'team': self.request.GET['team']
+                }))
+                return redirect(self.video.get_absolute_url() + qs)
             return redirect(self.video)
 
         self.editing_language.writelock(self.user, self.request.browser_id,

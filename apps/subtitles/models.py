@@ -24,10 +24,13 @@ import json
 import logging
 from datetime import datetime, date, timedelta
 
+
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import query, Q
+from django.db.models import query, Q, Count
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 
@@ -44,8 +47,8 @@ from subtitles import signals
 from utils import dates
 from utils.compress import compress, decompress
 from utils.subtitles import create_new_subtitles
+from utils.text import fmt
 from utils import translation
-from videos.behaviors import make_video_title
 
 WRITELOCK_EXPIRATION = 30 # 30 seconds
 
@@ -634,6 +637,9 @@ class SubtitleLanguage(models.Model):
         else:
             return self.subtitleversion_set.extant()
 
+    def has_version(self, public=False, full=False):
+        return self.get_tip(public, full) is not None
+
     def get_versions(self, public=False, full=False, newest_first=False):
         """Get a list of versions for this subtitle language
 
@@ -883,7 +889,7 @@ EXISTS(
         for lang in languages:
             for sv in lang.subtitleversion_set.extant().all():
                 sv.unpublish(delete=True, signal=False)
-            signals.language_deleted.send(lang)
+            signals.subtitles_deleted.send(lang)
             from teams.signals import api_language_deleted
             api_language_deleted.send(lang)
         self.subtitles_complete = False
@@ -946,22 +952,11 @@ EXISTS(
         return self.video.primary_audio_language_code == self.language_code
 
     def versions_for_user(self, user):
-        from teams.models import TeamVideo
-        from teams.permissions import get_member
-
-        try:
-            team_video = (TeamVideo.objects.select_related('team')
-                                           .get(video=self.video))
-        except TeamVideo.DoesNotExist:
-            team_video = None
-
-        if team_video:
-            member = get_member(user, team_video.team)
-
-            if not member:
-                return self.subtitleversion_set.public()
-
-        return self.subtitleversion_set.extant()
+        workflow = self.video.get_workflow()
+        if workflow.user_can_view_private_subtitles(user, self.language_code):
+            return self.subtitleversion_set.extant()
+        else:
+            return self.subtitleversion_set.public()
 
     def version(self, public_only=True, version_number=None):
         """Return a SubtitleVersion of this language matching the arguments.
@@ -1122,8 +1117,7 @@ LIMIT 1;""", (self.id, self.id))
         self.save()
 
 
-    def get_widget_url(self):
-        """SHIM for getting the widget URL for this language."""
+    def editor_url(self):
         return reverse('subtitles:subtitle-editor', kwargs={
             'video_id': self.video.video_id,
             'language_code': self.language_code,
@@ -1135,7 +1129,8 @@ LIMIT 1;""", (self.id, self.id))
                 [self.video.video_id, self.language_code or 'unknown', self.pk])
 
     @property
-    def has_version(self):
+    def old_has_version(self):
+        # FIXME: remove this once we get rid of the RPC code that uses it
         """
         http://amara.readthedocs.org/en/latest/model-refactor.html#id4
         """
@@ -1189,6 +1184,24 @@ LIMIT 1;""", (self.id, self.id))
 
         return False
 
+    @classmethod
+    def count_completed_subtitles(cls, videos):
+        """Count the completed subtitles for a set of videos
+
+        Returns: dict mapping video.id to (incomplete_count, completed_count)
+        """
+        qs = (cls.objects.all().filter(video__in=videos)
+              .values('video_id', 'subtitles_complete')
+              .annotate(count=Count('id')))
+        count_map = {
+            (d['video_id'], d['subtitles_complete']): d['count']
+            for d in qs
+        }
+        return {
+            video.id: (count_map.get((video.id, False), 0),
+                       count_map.get((video.id, True), 0))
+            for video in videos
+        }
 
 # SubtitleVersions ------------------------------------------------------------
 class SubtitleVersionManager(models.Manager):
@@ -1343,13 +1356,13 @@ ORIGIN_WEB_EDITOR = 'web-editor'
 
 SUBTITLE_VERSION_ORIGINS = (
     (ORIGIN_API, _("API")),
-    (ORIGIN_LEGACY_EDITOR, _("Subtitle Editor")),
+    (ORIGIN_LEGACY_EDITOR, _("Edited (legacy editor)")),
     (ORIGIN_IMPORTED, _("Imported")),
     (ORIGIN_ROLLBACK, _("Rollback")),
     (ORIGIN_SCRIPTED, _("Scripted")),
     (ORIGIN_TERN, _("Tern")),
     (ORIGIN_UPLOAD, _("Uploaded")),
-    (ORIGIN_WEB_EDITOR, _("Through web editor")),
+    (ORIGIN_WEB_EDITOR, _("Edited")),
 )
 
 class SubtitleVersion(models.Model):
@@ -1446,8 +1459,7 @@ class SubtitleVersion(models.Model):
 
     def title_display(self):
         if self.title and self.title.strip():
-            return make_video_title(self.video, self.title,
-                                    self.get_metadata())
+            return self.title
         else:
             # fall back to the video title, but prevent infinite loops if we
             # are the primary audio language
@@ -1610,6 +1622,11 @@ class SubtitleVersion(models.Model):
             return 'rtl'
         else:
             return 'ltr'
+
+    def get_version_display(self):
+        return fmt(ugettext(u'%(subtitle_language)s (version %(number)s)'),
+                   subtitle_language=self.get_language_code_display(),
+                   number=self.version_number)
 
     def get_ancestors(self):
         """Return all ancestors of this version.  WARNING: MAY EAT YOUR DB!
@@ -1905,6 +1922,17 @@ class SubtitleVersion(models.Model):
     def is_synced(self):
         return self.get_subtitles().fully_synced
 
+    def is_synced_and_has_content(self):
+        subtitle_items = self.get_subtitles().subtitle_items()
+        if not subtitle_items:
+            return False
+        for item in subtitle_items:
+            if (item.start_time is None or
+                    item.end_time is None or
+                    item.text == ''):
+                return False
+        return True
+
     def publish(self):
         """Make this version publicly viewable."""
 
@@ -1932,7 +1960,7 @@ class SubtitleVersion(models.Model):
         :param delete: when set, flag the languages as deleted rather than
         private
         :param signal: when set we will emit the public_tip_changed() or
-        language_deleted signal
+        subtitles_deleted signal
         """
         if signal:
             was_tip = self.is_tip()
@@ -1943,13 +1971,21 @@ class SubtitleVersion(models.Model):
             self.subtitle_language.clear_tip_cache()
             new_tip = version=self.subtitle_language.get_tip(public=True)
             if new_tip is None:
-                signals.language_deleted.send(self.subtitle_language)
+                signals.subtitles_deleted.send(self.subtitle_language)
 
     @models.permalink
     def get_absolute_url(self):
         return ('videos:subtitleversion_detail',
                 [self.video.video_id, self.language_code, self.subtitle_language.pk,
                  self.pk])
+
+    def get_absolute_download_url(self, format="vtt", filename="subtitles"):
+        return ''.join(['http://', Site.objects.get_current().domain,
+                        reverse("subtitles:download", kwargs={"video_id": self.video.video_id,
+                                                              "language_code": self.language_code,
+                                                              "version_number": self.version_number,
+                                                              "filename": filename,
+                                                              "format": format})])
 
 class SubtitleVersionMetadata(models.Model):
     """This model is used to add extra metadata to SubtitleVersions.

@@ -23,8 +23,11 @@ from __future__ import absolute_import
 
 import datetime
 import hashlib
+import os
 
 from django.contrib.auth.hashers import make_password
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.defaultfilters import slugify
 import factory
 from factory import Factory
@@ -439,6 +442,13 @@ class SubtitleSetFactory(Factory):
             extracted = 10
         for i in xrange(extracted):
             self.append_subtitle(i*1000, i*1000 + 999, "Sub %s" % i)
+
+class UploadedFileFactory(SimpleUploadedFile):
+    def __init__(self):
+        p = os.path.join(settings.PROJECT_ROOT,
+                         'media/images/video-no-thumbnail-wide.png')
+        content = open(p).read()
+        super(UploadedFileFactory, self).__init__('thumb.png', content)
 
 def bulk_subs(sub_data):
     """Create a bunch of videos/languages/versions

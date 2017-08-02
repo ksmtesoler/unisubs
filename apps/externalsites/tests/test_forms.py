@@ -399,6 +399,7 @@ class AccountFormsetTest(TestCase):
         formset = forms.AccountFormset(user, team)
         assert_equal(set(formset.keys()), set([
             'brightcove',
+            'brightcovecms',
             'kaltura',
             'add_youtube',
             'youtube_1',

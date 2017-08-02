@@ -96,6 +96,27 @@ class KalturaAccountForm(AccountForm):
         model = models.KalturaAccount
         fields = ['partner_id', 'secret']
 
+class BrightcoveCMSAccountForm(AccountForm):
+    publisher_id = forms.IntegerField(label=ugettext_lazy("Publisher ID"))
+    client_id = forms.CharField(label=ugettext_lazy("Client ID"))
+    client_secret = forms.CharField(label=ugettext_lazy("Client Secret"))
+
+
+    class Meta:
+        model = models.BrightcoveCMSAccount
+        fields = ['publisher_id', 'client_id', 'client_secret' ]
+
+    def add_error(self, field_name, msg):
+        self._errors[field_name] = self.error_class([msg])
+        if field_name in self.cleaned_data:
+            del self.cleaned_data[field_name]
+
+    def save(self):
+        account = AccountForm.save(self)
+        if not self.cleaned_data['enabled']:
+            return None
+        return account
+
 class BrightcoveAccountForm(AccountForm):
     FEED_ALL_NEW = 'N'
     FEED_WITH_TAGS = 'T'
@@ -215,6 +236,8 @@ class YoutubeAccountForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         required=False)
     import_team = forms.ChoiceField(label='', required=False)
+    sync_subtitles = forms.BooleanField(label=ugettext_lazy('Sync subtitles from Amara to YouTube'), required=False)
+    fetch_initial_subtitles = forms.BooleanField(label=ugettext_lazy('Fetch initial subtitles from YouTube when videos are submitted to Amara'), required=False)
 
     def __init__(self, admin_user, account, data=None, **kwargs):
         super(YoutubeAccountForm, self).__init__(data=data, **kwargs)
@@ -222,6 +245,11 @@ class YoutubeAccountForm(forms.Form):
         self.admin_user = admin_user
         self.setup_sync_team()
         self.setup_import_team()
+        self.setup_account_options()
+
+    def setup_account_options(self):
+        self['sync_subtitles'].field.initial = self.account.sync_subtitles
+        self['fetch_initial_subtitles'].field.initial = self.account.fetch_initial_subtitles
 
     def setup_sync_team(self):
         choices = []
@@ -279,6 +307,8 @@ class YoutubeAccountForm(forms.Form):
                 self.account.import_team = None
             else:
                 self.account.import_team_id = self.cleaned_data['import_team']
+            self.account.sync_subtitles = self.cleaned_data['sync_subtitles']
+            self.account.fetch_initial_subtitles = self.cleaned_data['fetch_initial_subtitles']
             self.account.save()
 
     def show_sync_teams(self):
@@ -299,6 +329,7 @@ class AccountFormset(dict):
     def make_forms(self, owner):
         self.make_form('kaltura', KalturaAccountForm, owner)
         self.make_form('brightcove', BrightcoveAccountForm, owner)
+        self.make_form('brightcovecms', BrightcoveCMSAccountForm, owner)
         self.make_form('add_youtube', AddYoutubeAccountForm, owner)
         for account in models.YouTubeAccount.objects.for_owner(owner):
             name = 'youtube_%s' % account.id

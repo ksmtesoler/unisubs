@@ -87,6 +87,8 @@ VIDEO_META_TYPE_NAMES = {}
 VIDEO_META_TYPE_VARS = {}
 VIDEO_META_TYPE_IDS = {}
 
+def url_hash(url):
+    return hashlib.md5(url.encode("utf-8")).hexdigest()
 
 def update_metadata_choices():
     """Refresh the VIDEO_META_TYPE_* set of constants.
@@ -144,6 +146,9 @@ class VideoManager(models.Manager):
     def public(self):
         return self.filter(is_public=True)
 
+    def search(self, text):
+        return self.all().search(text)
+
 class VideoQueryset(query.QuerySet):
     def select_has_public_version(self):
         """Add a subquery to check if there is a public version for this video
@@ -160,10 +165,16 @@ EXISTS(
         return self.extra({ '_has_public_version': sql })
 
     def search(self, query):
-        # only use terms with 3 or more chars.  Terms with less chars are not indexed, so they will never match anything.
-        terms = [t for t in get_terms(query) if len(t) > 2]
-        query = u' '.join(u'+"{}"'.format(t) for t in terms)
-        return self.filter(index__text__search=query)
+        # If only one query term, search normally,
+        # otherwise only use terms with 3 or more chars.
+        # Terms with less chars are not indexed, so they will never match anything.
+        terms = get_terms(query)
+        if len(terms) == 1 and len(terms[0]) > 2:
+            return self.filter(index__text__search=query)
+        else:
+            terms = [t for t in get_terms(query) if len(t) > 2]
+            query = u' '.join(u'+"{}"'.format(t) for t in terms)
+            return self.filter(index__text__search=query)
 
     def add_num_completed_languages(self):
         sql = ("""
@@ -201,6 +212,9 @@ EXISTS(
                WHERE sl.video_id=videos_video.id AND
                sl.language_code=%s AND sl.subtitles_complete)""")
         return self.extra(where=[sql], params=[language_code])
+
+    def for_url(self, url):
+        return self.filter(videourl__url_hash=url_hash(url))
 
 class SubtitleLanguageFetcher(object):
     """Fetches/caches subtitle languages for videos."""
@@ -353,6 +367,7 @@ class Video(models.Model):
         blank=True,
         upload_to='video/thumbnail/',
         thumb_sizes=(
+            (720,405),
             (480,270),
             (288,162),
             (120,90),))
@@ -444,24 +459,15 @@ class Video(models.Model):
         audio language?
         """
         if self.title:
-            title = self.title
+            return self.title
+        video_url = self.get_primary_videourl_obj()
+        if video_url:
+            return make_title_from_url(video_url.url)
         else:
-            video_url = self.get_primary_videourl_obj()
-            if video_url:
-                title = make_title_from_url(video_url.url)
-            else:
-                title = 'No title'
-        return behaviors.make_video_title(self, title, self.get_metadata())
+            return 'No title'
 
-    def page_title(self):
-        """Get the title that should appear at the top of the video page."""
-        cached = self.cache.get('page-title')
-        if cached is not None:
-            return cached
-        title = fmt(ugettext('%(title)s with subtitles | Amara'),
-                     title=self.title_display())
-        self.cache.set('page-title', title)
-        return title
+    def get_subtitle(self):
+        return behaviors.get_video_subtitle(self, self.get_metadata())
 
     def get_download_filename(self):
         """Get the filename to download this video as
@@ -490,6 +496,20 @@ class Video(models.Model):
             return self.thumbnail
         if fallback:
             return "%simages/video-no-thumbnail-medium.png" % settings.STATIC_URL
+
+    def get_huge_thumbnail(self):
+        """Return a URL to a huge version of this video's thumbnail
+
+        This may be an absolute or relative URL, depending on whether the
+        thumbnail is stored in our media folder or on S3.
+
+        """
+        if self.s3_thumbnail:
+            return self.s3_thumbnail.thumb_url(720, 405)
+
+        if self.thumbnail:
+            return self.thumbnail
+        return "%simages/video-no-thumbnail-wide.png" % settings.STATIC_URL
 
     def get_wide_thumbnail(self):
         """Return a URL to a widescreen version of this video's thumbnail
@@ -627,6 +647,17 @@ class Video(models.Model):
             'lang': language_code,
         })
 
+    def get_language_url_with_id(self, language_code):
+        sl = self.subtitle_language(language_code)
+        if sl is None:
+            self.get_language_url(language_code)
+        else:
+            return reverse('videos:translation_history', kwargs={
+                'video_id': self.video_id,
+                'lang': language_code,
+                'lang_id': int(sl.id),
+            })
+
     def get_primary_videourl_obj(self):
         """Return the primary video URL for this video if one exists, otherwise None.
 
@@ -662,7 +693,7 @@ class Video(models.Model):
         return self.videourl_set.count()
 
     @staticmethod
-    def add(url, user, setup_callback=None):
+    def add(url, user, setup_callback=None, team=None):
         """
         Add a new Video
 
@@ -703,7 +734,7 @@ class Video(models.Model):
             video = Video.objects.create()
             vt, video_url = video._add_video_url(url, user, True)
             # okay, we can now run the setup
-            video.set_values(vt)
+            video.set_values(vt, user, team)
             video.user = user
             if setup_callback:
                 setup_callback(video, video_url)
@@ -718,12 +749,12 @@ class Video(models.Model):
         video.cache.invalidate()
         signals.video_added.send(sender=video, video_url=video_url)
         signals.video_url_added.send(sender=video_url, video=video,
-                                     new_video=True)
+                                     new_video=True, user=user, team=team)
 
         return (video, video_url)
 
-    def set_values(self, video_type):
-        video_type.set_values(self)
+    def set_values(self, video_type, user, team):
+        video_type.set_values(self, user, team)
         self.title = self.re_unicode.sub(u'\uFFFD', self.title)
         self.description = self.re_unicode.sub(u'\uFFFD', self.description)
 
@@ -918,6 +949,30 @@ class Video(models.Model):
         """Return all SubtitleLanguages for this video with the given language code."""
         return self.newsubtitlelanguage_set.filter(language_code=language_code)
 
+    def incomplete_languages(self):
+        return [
+            l for l in self.all_subtitle_languages() if not l.subtitles_complete
+        ]
+
+    def complete_languages(self):
+        return [
+            l for l in self.all_subtitle_languages() if l.subtitles_complete
+        ]
+
+    def incomplete_languages_with_public_versions(self):
+        self.prefetch_languages(with_public_tips=True)
+        return [
+            l for l in self.all_subtitle_languages()
+            if not l.subtitles_complete and l.get_public_tip() is not None
+        ]
+
+    def complete_languages_with_public_versions(self):
+        self.prefetch_languages(with_public_tips=True)
+        return [
+            l for l in self.all_subtitle_languages()
+            if l.subtitles_complete and l.get_public_tip() is not None
+        ]
+
     def get_merged_dfxp(self):
         """Get a DFXP file containing subtitles for all languages."""
         self.prefetch_languages(with_public_tips=True)
@@ -1098,6 +1153,9 @@ class Video(models.Model):
                 return True
         return False
 
+    def is_language_complete(self, lc):
+        return (lc in [sl.language_code for sl in self.completed_subtitle_languages()])
+
     def completed_subtitle_languages(self, public_only=True):
         return [sl for sl in self.newsubtitlelanguage_set.all()
                 if sl.is_complete_and_synced(public=public_only)]
@@ -1112,7 +1170,6 @@ class Video(models.Model):
         """
         l = self.subtitle_language()
         return l.get_description() if l else self.description
-
 
     @property
     def is_moderated(self):
@@ -1229,6 +1286,7 @@ class VideoIndex(models.Model):
         parts = [
             video.title_display(),
             video.description,
+            video.video_id,
             video.meta_1_content,
             video.meta_2_content,
             video.meta_3_content,
@@ -2063,6 +2121,20 @@ class UserTestResult(models.Model):
     task3 = models.TextField(blank=True)
     get_updates = models.BooleanField(default=False)
 
+class VideoUrlManager(models.Manager):
+    def get_query_set(self):
+        return VideoUrlQueryset(self.model, using=self._db)
+
+class VideoUrlQueryset(query.QuerySet):
+    def get(self, **kwargs):
+        if 'url' in kwargs:
+            kwargs['url_hash'] = url_hash(kwargs.pop('url'))
+        return super(VideoUrlQueryset, self).get(**kwargs)
+
+    def filter(self, **kwargs):
+        if 'url' in kwargs:
+            kwargs['url_hash'] = url_hash(kwargs.pop('url'))
+        return super(VideoUrlQueryset, self).filter(**kwargs)
 
 # VideoUrl
 class VideoUrl(models.Model):
@@ -2083,6 +2155,8 @@ class VideoUrl(models.Model):
     # this is the owner if the video is from a third party website
     # shuch as Youtube or Vimeo username
     owner_username = models.CharField(max_length=255, blank=True, null=True)
+
+    objects = VideoUrlManager()
 
     class Meta:
         ordering = ("video", "-primary",)
@@ -2195,7 +2269,7 @@ class VideoUrl(models.Model):
         assert self.type != '', "Can't set an empty type"
         if updates_timestamp:
             self.created = datetime.now()
-        self.url_hash = hashlib.md5(self.url.encode("utf-8")).hexdigest()
+        self.url_hash = url_hash(self.url)
         super(VideoUrl, self).save(*args, **kwargs)
 
 def video_url_remove_handler(sender, instance, **kwargs):

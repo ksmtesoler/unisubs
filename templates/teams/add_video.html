@@ -19,7 +19,7 @@
                 {% if team.has_projects %}
                     {% include "_form_field.html" with field=form.project %}
                 {% else %}
-                    <input type="hidden" name="project" value="{{ team.default_project.id }}" />
+                    <input type="hidden" name="project" value="{{ team.default_project.slug }}" />
                 {% endif %}
                 {% include "_form_field.html" with field=form.thumbnail %}
             </fieldset>

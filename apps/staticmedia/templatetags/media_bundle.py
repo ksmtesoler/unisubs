@@ -22,6 +22,7 @@ from django import template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import to_locale
+from utils.translation import get_language_label
 
 from staticmedia import bundles
 from staticmedia import utils
@@ -31,13 +32,7 @@ register = template.Library()
 @register.simple_tag
 def media_bundle(bundle_name):
     bundle = bundles.get_bundle(bundle_name)
-    url = bundle.get_url()
-    if isinstance(bundle, bundles.CSSBundle):
-        return '<link href="%s" rel="stylesheet" type="text/css" />' % url
-    elif isinstance(bundle, bundles.JavascriptBundle):
-        return '<script src="%s"></script>' % url
-    else:
-        raise TypeError("Unknown bundle type: %s" % bundle)
+    return bundle.get_html()
 
 @register.simple_tag
 def url_for(bundle_name):
@@ -64,3 +59,7 @@ def js_language_data(context):
     else:
         src = reverse('staticmedia:js_language_data', args=(locale,))
     return '<script type="text/javascript" src="{}"></script>'.format(src)
+
+@register.simple_tag(takes_context=True)
+def current_language_name(context):
+    return get_language_label(context['LANGUAGE_CODE'])

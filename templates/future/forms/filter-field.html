@@ -1,0 +1,11 @@
+<div class="filterList{% if widget_type == "select" or widget_type == "select-multiple" %} filterList-select{% endif %}">
+  <h3>{{ field.label }}</h3>
+  <div class="filterList-content scrollBars">
+    {{ field }}
+    {% if field.errors %}
+    {% include "_error-list.html" with errors=field.errors %}
+    {% elif field.help_text %}
+    <p class="help-block">{{ field.help_text }}</p>
+    {% endif %}
+  </div>
+</div>

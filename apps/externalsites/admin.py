@@ -102,6 +102,8 @@ class YouTubeAccountAdmin(admin.ModelAdmin):
         'import_team',
         'resync_subtitles',
         'enable_language_mapping',
+        'sync_subtitles',
+        'fetch_initial_subtitles',
     )
 
     def save_model(self, request, obj, form, change):
@@ -113,6 +115,7 @@ class YouTubeAccountAdmin(admin.ModelAdmin):
 
 admin.site.register(models.KalturaAccount)
 admin.site.register(models.BrightcoveAccount)
+admin.site.register(models.BrightcoveCMSAccount)
 admin.site.register(models.YouTubeAccount, YouTubeAccountAdmin)
 admin.site.register(models.SyncedSubtitleVersion)
 admin.site.register(models.SyncHistory, SyncHistoryAdmin)

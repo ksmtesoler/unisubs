@@ -16,8 +16,9 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.core.validators import EMPTY_VALUES
 from captcha.fields import CaptchaField
 from django.template import loader
 from django.utils.http import int_to_base36
@@ -25,6 +26,26 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
 from models import CustomUser as User
+
+class UserField(forms.Field):
+    default_error_messages = {
+        'invalid': _(u'Invalid user'),
+    }
+
+    def prepare_value(self, value):
+        if isinstance(value, User):
+            return value.username
+        return value
+
+    def to_python(self, value):
+        if value in EMPTY_VALUES:
+            return None
+        if isinstance(value, User):
+            return value
+        try:
+            return User.objects.get(username=value)
+        except User.DoesNotExist:
+            raise forms.ValidationError(self.error_messages['invalid'])
 
 class CustomUserCreationForm(UserCreationForm):
     captcha = CaptchaField()

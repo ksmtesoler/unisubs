@@ -32,7 +32,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from videos.templatetags.paginator import paginate
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -53,31 +53,38 @@ import widget
 from widget import rpc as widget_rpc
 from activity.models import ActivityRecord
 from auth.models import CustomUser as User
+from comments.models import Comment
+from comments.forms import CommentForm
 from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
                                    user_can_edit_subtitles)
-from subtitles.forms import SubtitlesUploadForm
+from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
+                             RollbackSubtitlesForm, SubtitlesNotesForm,
+                             ResyncSubtitlesForm)
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
 from teams.models import Task
+from ui.ajax import AJAXResponseRenderer
 from utils.decorators import staff_member_required
+from videos import behaviors
 from videos import permissions
 from videos.decorators import (get_video_revision, get_video_from_code,
                                get_cached_video_from_code)
 from videos.forms import (
     VideoForm, FeedbackForm, EmailFriendForm, UserTestResultForm,
-    CreateVideoUrlForm, AddFromFeedForm,
+    CreateVideoUrlForm, NewCreateVideoUrlForm, AddFromFeedForm,
     ChangeVideoOriginalLanguageForm, CreateSubtitlesForm,
 )
 from videos.models import (
     Video, VideoUrl, AlreadyEditingException
 )
+from videos import oldviews
 from videos.rpc import VideosApiClass
 from videos import share_utils
 from videos.tasks import video_changed_tasks
 from widget.views import base_widget_params
-from externalsites.models import can_sync_videourl, get_sync_account
+from externalsites.models import can_sync_videourl, get_sync_account, SyncHistory
 from utils import send_templated_email
 from utils.basexconverter import base62
 from utils.decorators import never_in_prod
@@ -92,6 +99,7 @@ from teams.permissions import can_edit_video, can_add_version, can_resync
 from . import video_size
 
 VIDEO_IN_ROW = 6
+ACTIVITY_PER_PAGE = 8
 
 rpc_router = RpcRouter('videos:rpc_router', {
     'VideosApi': VideosApiClass()
@@ -103,7 +111,7 @@ AVAILABLE_SUBTITLE_FORMATS_FOR_DISPLAY = [
     'dfxp',  'sbv', 'srt', 'ssa', 'txt', 'vtt',
 ]
 
-LanguageListItem = namedtuple("LanguageListItem", "name status tags url")
+LanguageListItem = namedtuple("LanguageListItem", "name status tags url code")
 
 class LanguageList(object):
     """List of languages for the video pages."""
@@ -117,16 +125,17 @@ class LanguageList(object):
                 # no versions in this language yet
                 continue
             language_name = get_language_label(lang.language_code)
+            code = lang.language_code
             status = self._calc_status(lang)
             tags = self._calc_tags(lang)
             url = lang.get_absolute_url()
-            item = LanguageListItem(language_name, status, tags, url)
+            item = LanguageListItem(language_name, status, tags, url, code)
             if lang.language_code == video.primary_audio_language_code:
                 original_languages.append(item)
             else:
                 other_languages.append(item)
-        original_languages.sort(key=lambda li: li.name)
-        other_languages.sort(key=lambda li: li.name)
+        original_languages.sort(key=lambda li: li.code)
+        other_languages.sort(key=lambda li: li.code)
         self.items = original_languages + other_languages
 
     def _calc_status(self, lang):
@@ -151,7 +160,7 @@ class LanguageList(object):
         if not lang.subtitles_complete:
             tags.append(ugettext(u'incomplete'))
         elif team_video is not None:
-            # subtiltes are complete, check if they are under review/approval.
+            # subtitles are complete, check if they are under review/approval.
             incomplete_tasks = (Task.objects.incomplete()
                                             .filter(team_video=team_video,
                                                     language=lang.language_code))
@@ -243,105 +252,181 @@ def shortlink(request, encoded_pk):
     video = get_object_or_404(Video, pk=pk)
     return redirect(video, video=video, permanent=True)
 
-class VideoPageContext(dict):
-    """Context dict for the video page."""
-    def __init__(self, request, video, video_url, tab, workflow,
-                 tab_only=False):
-        dict.__init__(self)
-        self.workflow = workflow
-        self['video'] = video
-        self['create_subtitles_form'] = CreateSubtitlesForm(
-            request, video, request.POST or None)
-        self['extra_tabs'] = workflow.extra_tabs(request.user)
-        if not tab_only:
-            self.setup(request, video, video_url)
-        self.setup_tab(request, video, video_url, tab)
-
-    def setup(self, request, video, video_url):
-        self['widget_settings'] = json.dumps(
-            widget_rpc.get_general_settings(request))
-        self['add_language_mode'] = self.workflow.get_add_language_mode(
-            request.user)
-
-        self['task'] =  _get_related_task(request)
-        team_video = video.get_team_video()
-        if team_video is not None:
-            self['team'] = team_video.team
-            self['team_video'] = team_video
-        else:
-            self['team'] = self['team_video'] = None
-
-    def setup_tab(self, request, video, video_url, tab):
-        for name, title in self['extra_tabs']:
-            if tab == name:
-                self['extra_tab'] = True
-                self.setup_extra_tab(request, video, video_url, tab)
-                return
-        self['extra_tab'] = False
-        method_name = 'setup_tab_%s' % tab
-        setup_tab_method = getattr(self, method_name, None)
-        if setup_tab_method:
-            setup_tab_method(request, video, video_url)
-
-    def setup_extra_tab(self, request, video, video_url, tab):
-        method_name = 'setup_tab_%s' % tab
-        setup_tab_method = getattr(self.workflow, method_name, None)
-        if setup_tab_method:
-            self.update(setup_tab_method(request, video, video_url))
-
-    def setup_tab_video(self, request, video, video_url):
-        self['width'] = video_size["large"]["width"]
-        self['height'] = video_size["large"]["height"]
-
-    def setup_tab_urls(self, request, video, video_url):
-        self['create_videourl_form'] = CreateVideoUrlForm(request.user, initial={
-            'video': video.pk,
-        })
-        self['video_urls'] = [
-            (vurl, get_sync_account(video, vurl))
-            for vurl in video.videourl_set.all()
-        ]
-
 @get_video_from_code
 def redirect_to_video(request, video):
-    return redirect(video, permanent=True)
+    qs = request.META['QUERY_STRING']
+    url = video.get_absolute_url()
+    if qs:
+        url += '?' + qs
+    return redirect(url, permanent=True)
 
-def calc_tab(request, workflow):
-    tab = request.GET.get('tab')
-    if tab in ('urls', 'comments', 'activity', 'video'):
-        return tab # default tab
-    for name, title in workflow.extra_tabs(request.user):
-        if name == tab:
-            # workflow extra tab
-            return tab
-    # invalid tab, force it to be video
-    return 'video'
+def should_use_old_view(request):
+    return 'team' not in request.GET
 
-@get_cached_video_from_code('video-page')
-def video(request, video, video_url=None, title=None):
-    """
-    If user is about to perform a task on this video, then t=[task.pk]
-    will be passed to as a url parameter.
-    """
+def video(request, video_id, video_url=None, title=None):
+    if should_use_old_view(request):
+        return oldviews.video(request, video_id, video_url, title)
+    if request.is_ajax() and 'form' in request.POST:
+        return video_ajax_form(request, video_id)
+    request.use_cached_user()
+    try:
+        video = Video.cache.get_instance_by_video_id(video_id, 'video-page')
+    except Video.DoesNotExist:
+        raise Http404
+    if not video.can_user_see(request.user):
+        raise PermissionDenied()
 
     if video_url:
-        video_url = get_object_or_404(VideoUrl, pk=video_url)
-
-    # FIXME: what is this crazy mess?
-    if not video_url and ((video.title_for_url() and not video.title_for_url() == title) or (not video.title and title)):
-        return redirect(video, permanent=True)
+        video_url = get_object_or_404(video.videourl_set, pk=video_url)
+    else:
+        video_url = video.get_primary_videourl_obj()
 
     workflow = video.get_workflow()
+    if workflow.user_can_edit_video(request.user):
+        create_subtitles_form = CreateSubtitlesForm(request, video)
+    else:
+        create_subtitles_form = None
+    if request.user.is_authenticated():
+        comment_form = CommentForm(video)
+    else:
+        comment_form = None
+    if permissions.can_user_edit_video_urls(video, request.user):
+        create_url_form = NewCreateVideoUrlForm(video, request.user)
+        allow_delete = allow_make_primary = True
+    else:
+        create_url_form = None
+        allow_delete = allow_make_primary = False
 
-    tab = calc_tab(request, workflow)
-    template_name = 'videos/video-%s.html' % tab
-    context = VideoPageContext(request, video, video_url, tab, workflow)
-    context['tab'] = tab
+    customization = behaviors.video_page_customize(request, video)
+    all_activities = ActivityRecord.objects.for_video(
+        video, customization.team)
 
-    if context['create_subtitles_form'].is_valid():
-        return context['create_subtitles_form'].handle_post()
+    if request.is_ajax() and request.GET.get('show-all', None):
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#video_activity', "future/videos/tabs/activity.html", {
+                'activity': all_activities,
+            },
+        )
+        return response_renderer.render()
 
-    return render(request, template_name, context)
+    activity = all_activities[:ACTIVITY_PER_PAGE]
+    show_all = False if len(activity) >= len(all_activities) else True
+    return render(request, 'future/videos/video.html', {
+        'video': video,
+        'player_url': video_url.url,
+        'team_video': video.get_team_video(),
+        'tab': request.GET.get('tab', 'info'),
+        'allow_delete': allow_delete,
+        'allow_make_primary': allow_make_primary,
+        'create_subtitles_form': create_subtitles_form,
+        'comment_form': comment_form,
+        'create_url_form': create_url_form,
+        'comments': Comment.get_for_object(video),
+        'activity': activity,
+        'activity_count': 1,
+        'show_all': show_all,
+        'metadata': video.get_metadata().convert_for_display(),
+        'custom_sidebar': customization.sidebar,
+        'header': customization.header,
+        'use_old_messages': True,
+    })
+
+def video_ajax_form(request, video_id):
+    form = request.POST.get('form')
+    video = get_object_or_404(Video, video_id=video_id)
+    if form == 'comment':
+        return comments_form(request, video, '#video_comments')
+    elif form == 'add-url':
+        return video_add_url_form(request, video)
+    elif form == 'make-url-primary':
+        return video_make_url_primary_form(request, video)
+    elif form == 'delete-url':
+        return video_delete_url_form(request, video)
+    else:
+        return redirect(video.get_absolute_url())
+
+def comments_form(request, obj, replace_id):
+    if not request.user.is_authenticated():
+        raise PermissionDenied()
+    comment_form = CommentForm(obj, data=request.POST)
+    success = comment_form.is_valid()
+    if success:
+        comment_form.save(request.user)
+        # reset the comment form to a fresh state
+        comment_form = CommentForm(obj)
+
+    if request.is_ajax():
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            replace_id, 'future/videos/tabs/comments.html', {
+                'comments': Comment.get_for_object(obj),
+                'comment_form': comment_form,
+            })
+        return response_renderer.render()
+    else:
+        return redirect(request.get_full_path())
+
+def video_add_url_form(request, video):
+    if not permissions.can_user_edit_video_urls(video, request.user):
+        raise PermissionDenied()
+    create_url_form = NewCreateVideoUrlForm(video, request.user,
+                                            data=request.POST)
+    response_renderer = AJAXResponseRenderer(request)
+    if create_url_form.is_valid():
+        create_url_form.save()
+        response_renderer.clear_form('#add-url-form form')
+        response_renderer.replace(*urls_tab_replacement_data(request, video))
+        response_renderer.hide_modal('#add-url-dialog')
+    else:
+        response_renderer.replace(
+            '#add-url-form', "future/videos/forms/create-url.html", {
+                'create_url_form': create_url_form,
+            })
+
+    return response_renderer.render()
+
+def video_delete_url_form(request, video):
+    if not permissions.can_user_edit_video_urls(video, request.user):
+        raise PermissionDenied()
+    try:
+        video_url = video.videourl_set.get(id=request.POST.get('id', -1))
+    except VideoUrl.DoesNotExist:
+        success = False
+    else:
+        video_url.remove(request.user)
+        success = True
+
+    response_renderer = AJAXResponseRenderer(request)
+    if success:
+        response_renderer.replace(*urls_tab_replacement_data(request, video))
+        response_renderer.hide_modal('#delete-url-dialog')
+    return response_renderer.render()
+
+def video_make_url_primary_form(request, video):
+    if not permissions.can_user_edit_video_urls(video, request.user):
+        raise PermissionDenied()
+    try:
+        video_url = video.videourl_set.get(id=request.POST.get('id', -1))
+    except VideoUrl.DoesNotExist:
+        success = False
+    else:
+        video_url.make_primary(request.user)
+        success = True
+
+    response_renderer = AJAXResponseRenderer(request)
+    if success:
+        response_renderer.replace(*urls_tab_replacement_data(request, video))
+        response_renderer.hide_modal('#make-url-primary-dialog')
+    return response_renderer.render()
+
+def urls_tab_replacement_data(request, video):
+    return ('#video_urls', 'future/videos/tabs/urls.html', {
+            'video': video,
+            'allow_delete': True,
+            'allow_make_primary': True,
+            'create_url_form': NewCreateVideoUrlForm(video, request.user),
+        })
 
 def _get_related_task(request):
     """
@@ -365,7 +450,8 @@ def activity(request, video_id):
     qs = ActivityRecord.objects.for_video(video)
 
     extra_context = {
-        'video': video
+        'video': video,
+        'use_old_messages': True
     }
 
     return object_list(request, queryset=qs, allow_empty=True,
@@ -440,214 +526,235 @@ def feedback(request, hide_captcha=False):
     return HttpResponse(json.dumps(output), "text/javascript")
 
 @get_video_from_code
-def legacy_history(request, video, lang=None):
+def legacy_history(request, video, lang):
     """
     In the old days we allowed only one translation per video.
     Therefore video urls looked like /vfjdh2/en/
     Now that this constraint is removed we need to redirect old urls
     to the new view, that needs
     """
+    language, created = SubtitleLanguage.objects.get_or_create(
+        video=video, language_code=lang)
+
+    url = reverse("videos:translation_history", kwargs={
+        'video_id': video.video_id,
+        'lang_id': language.pk,
+        'lang': language.language_code,
+    })
+    if request.META['QUERY_STRING']:
+        url = '{}?{}'.format(url, request.META['QUERY_STRING'])
+
+    return HttpResponseRedirect(url)
+
+def subtitles(request, video_id, lang, lang_id, version_id=None):
+    if should_use_old_view(request):
+        return oldviews.language_subtitles(request, video_id, lang, lang_id,
+                                           version_id)
+    request.use_cached_user()
     try:
-        language = video.subtitle_language(lang)
-        if language is None:
-            raise SubtitleLanguage.DoesNotExist("No such language")
-    except SubtitleLanguage.DoesNotExist:
+        video, subtitle_language, version = get_objects_for_subtitles_page(
+            request.user, video_id, lang, lang_id, version_id)
+    except ObjectDoesNotExist:
         raise Http404()
 
-    return HttpResponseRedirect(reverse("videos:translation_history", kwargs={
-            'video_id': video.video_id,
-            'lang_id': language.pk,
-            'lang': language.language_code,
-            }))
+    # Fetch the comments now.  We only support posting new comments if the
+    # subtitles already have comments on them
+    comments = Comment.get_for_object(subtitle_language)
 
-class LanguagePageContext(dict):
-    """Context dict for language pages
-
-    This class defines the base class that sets up the variables we use for
-    all the languages classes.  For the specific language pages (subtitles,
-    comments, revisions), we use a subclass of this.
-    """
-    def __init__(self, request, video, lang_code, lang_id, version_id,
-                 tab_only=False):
-        dict.__init__(self)
-        language = self._get_language(video, lang_code, lang_id)
-        self.public_only = self.calc_public_only(request, video,
-                                                 language.language_code)
-        version = self._get_version(request, video, language, version_id)
-        self['video'] = video
-        self['language'] = language
-        self['version'] = version
-        self['user'] = request.user
-        self['create_subtitles_form'] = CreateSubtitlesForm(
-            request, video, request.POST or None)
-        if not tab_only:
-            self.setup(request, video, language, version)
-        self.setup_tab(request, video, language, version)
-
-    def _get_language(self, video, lang_code, lang_id):
-        """Get a language for the language page views.
-
-        For historical reasons, we normally specify both a language code and a
-        language id.  This method takes both of those and returns a
-        SubtitleLanguage.
-        """
-        try:
-            language = video.language_with_pk(lang_id)
-        except SubtitleLanguage.DoesNotExist:
-            raise Http404
-        if language.language_code != lang_code:
-            raise Http404
-        return language
-
-    def calc_public_only(self, request, video, language_code):
-        return not user_can_view_private_subtitles(request.user, video,
-                                                   language_code)
-
-    def _get_version(self, request, video, language, version_id):
-        """Get the SubtitleVersion to use for a language page."""
-        team_video = video.get_team_video()
-        if version_id:
-            try:
-                return language.get_version_by_id(version_id,
-                                                  public=self.public_only)
-            except SubtitleVersion.DoesNotExist:
-                raise Http404
-        else:
-            return language.get_tip(public=self.public_only)
-
-    def setup(self, request, video, language, version):
-        """Setup context variables."""
-
-        self['revision_count'] = language.version_count()
-        self['page_title'] = self.page_title(language)
-        self['edit_url'] = language.get_widget_url()
-        self['width'] = video_size["thumb"]["width"]
-        self['height'] = video_size["thumb"]["height"]
-        self['video_url'] = video.get_video_url()
-        self['language'] = language
-        share_utils.add_share_panel_context_for_history(self, video, language)
-        if video.get_team_video() is not None:
-            self['team'] = video.get_team_video().team
-        else:
-            self['team'] = None
-        if version is not None:
-            self['metadata'] = version.get_metadata().convert_for_display()
-        else:
-            self['metadata'] = video.get_metadata().convert_for_display()
-
-        self['rollback_allowed'] = self.calc_rollback_allowed(
-            request, video, version, language)
-
-    def calc_rollback_allowed(self, request, video, version, language):
-        if version and version.next_version():
-            return user_can_edit_subtitles(request.user, video,
-                                           language.language_code)
-        else:
-            return False
-
-    def setup_tab(self, request, video, language, video_url):
-        """Setup tab-specific variables."""
-        pass
-
-    @staticmethod
-    def page_title(language):
-        return fmt(ugettext('%(title)s with subtitles | Amara'),
-                   title=language.title_display())
-
-class LanguagePageContextSubtitles(LanguagePageContext):
-    def setup_tab(self, request, video, language, version):
-        team_video = video.get_team_video()
-        user_can_edit = user_can_edit_subtitles(request.user, video,
-                                                language.language_code)
-        public_langs = (video.newsubtitlelanguage_set
-                        .having_public_versions().count())
-        downloadable_formats = AVAILABLE_SUBTITLE_FORMATS_FOR_DISPLAY
-        downloadable_formats_set = set(downloadable_formats)
-        for format in SubtitleFormatList.for_staff():
-            if user_can_access_subtitles_format(request.user, format):
-                downloadable_formats_set.add(format)
-        downloadable_formats = list(downloadable_formats_set)
-        self['downloadable_formats'] = downloadable_formats
-        self['edit_disabled'] = not user_can_edit
-        self['show_download_all'] = public_langs > 1
-        # If there are tasks for this language, the user has to go through the
-        # tasks panel to edit things instead of doing it directly from here.
-        if user_can_edit and video.get_team_video():
-            has_open_task = (Task.objects.incomplete()
-                             .filter(team_video=video.get_team_video(),
-                                     language=language.language_code)
-                             .exists())
-            if has_open_task:
-                self['edit_disabled'] = True
-                self['must_use_tasks'] = True
-        if 'rollback_allowed' not in self:
-            self['rollback_allowed'] = self.calc_rollback_allowed(
-                request, video, version, language)
-
-class LanguagePageContextComments(LanguagePageContext):
-    pass
-
-class LanguagePageContextRevisions(LanguagePageContext):
-    REVISIONS_PER_PAGE = 10
-
-    def setup_tab(self, request, video, language, version):
-        if self.public_only:
-            revisions_qs = language.subtitleversion_set.public()
-        else:
-            revisions_qs = language.subtitleversion_set.extant()
-        revisions_qs = revisions_qs.order_by('-version_number')
-        revisions_per_page =  request.GET.get('revisions_per_page') or self.REVISIONS_PER_PAGE
-        revisions, pagination_info = paginate(
-            revisions_qs, revisions_per_page, request.GET.get('page'))
-        self.update(pagination_info)
-        self['more'] = int(revisions_per_page) + 10
-        self['revisions'] = language.optimize_versions(revisions)
-
-class LanguagePageContextSyncHistory(LanguagePageContext):
-    def setup_tab(self, request, video, language, version):
-        self['sync_history'] = (language.synchistory_set
-                                .select_related('version')
-                                .fetch_with_accounts())
-        self['current_version'] = language.get_public_tip()
-        synced_versions = []
-        for video_url in video.get_video_urls():
-            if not can_sync_videourl(video_url):
-                continue
-            try:
-                version = (language.syncedsubtitleversion_set.
-                           select_related('version').
-                           get(video_url=video_url)).version
-            except ObjectDoesNotExist:
-                version = None
-            synced_versions.append({
-                'video_url': video_url,
-                'version': version,
-                'syncable': get_sync_account(video, video_url),
-            })
-        self['synced_versions'] = synced_versions
-
-@get_video_from_code
-def language_subtitles(request, video, lang, lang_id, version_id=None):
-    tab = request.GET.get('tab')
-    if tab == 'revisions':
-        ContextClass = LanguagePageContextRevisions
-    elif tab == 'comments':
-        ContextClass = LanguagePageContextComments
-    elif tab == 'sync-history':
-        if not permissions.can_user_resync(video, request.user):
-            return redirect_to_login(request.build_absolute_uri())
-        ContextClass = LanguagePageContextSyncHistory
+    if 'form' in request.GET:
+        return subtitles_ajax_form(request, video, subtitle_language, version)
+    elif request.POST.get('form') == 'comment' and comments:
+        # Handle the comments form specially, and only handle it if there are
+        # already comments on the video
+        return comments_form(request, subtitle_language,
+                             '#subtitles_comments')
+    workflow = video.get_workflow()
+    if request.user.is_authenticated() and comments:
+        comment_form = CommentForm(subtitle_language)
     else:
-        # force tab to be subtitles if it doesn't match either of the other
-        # tabs
-        tab = 'subtitles'
-        ContextClass = LanguagePageContextSubtitles
-    template_name = 'videos/language-%s.html' % tab
-    context = ContextClass(request, video, lang, lang_id, version_id)
-    context['tab'] = tab
-    if context['create_subtitles_form'].is_valid():
-        return context['create_subtitles_form'].handle_post()
-    return render(request, template_name, context)
+        comment_form = None
+
+    customization = behaviors.subtitles_page_customize(request, video, subtitle_language)
+    all_activities = (ActivityRecord.objects.for_video(video, customization.team)
+                .filter(language_code=lang))
+
+    if request.is_ajax() and request.GET.get('show-all', None):
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#subtitles_activity', "future/videos/tabs/activity.html", {
+                'activity': all_activities,
+            },
+        )
+        return response_renderer.render()
+
+    all_subtitle_versions = subtitle_language.versions_for_user(
+            request.user).order_by('-version_number')
+    team_video = video.get_team_video()
+    activity = all_activities[:ACTIVITY_PER_PAGE]
+    show_all = False if len(activity) >= len(all_activities) else True
+    context = {
+        'video': video,
+        'team_video': team_video,
+        'metadata': video.get_metadata().convert_for_display(),
+        'subtitle_language': subtitle_language,
+        'subtitle_version': version,
+        'enable_delete_subtitles': workflow.user_can_delete_subtitles(
+                request.user, subtitle_language.language_code),
+        'show_rollback': version and not version.is_tip(public=False),
+        'all_subtitle_versions': all_subtitle_versions,
+        'enabled_compare': len(all_subtitle_versions) >= 2,
+        'has_private_version': any(v.is_private() for v in
+                                   all_subtitle_versions),
+        'downloadable_formats': downloadable_formats(request.user),
+        'activity': activity,
+        'activity_count': 1,
+        'show_all': show_all,
+        'comments': comments,
+        'comment_form': comment_form,
+        'enable_edit_in_admin': request.user.is_superuser,
+        'steps': customization.steps,
+        'cta': customization.cta,
+        'due_date': customization.due_date,
+        'can_edit': workflow.user_can_edit_subtitles(
+            request.user, subtitle_language.language_code),
+        'header': customization.header,
+    }
+    if workflow.user_can_view_notes(request.user, subtitle_language.language_code):
+        editor_notes = workflow.get_editor_notes(request.user, subtitle_language.language_code)
+        if editor_notes:
+            context['show_notes'] = True
+            context['notes'] = editor_notes.fetch_notes()
+            if workflow.user_can_post_notes(request.user, subtitle_language.language_code):
+                context['notes_form'] = SubtitlesNotesForm(
+                    request.user, video, subtitle_language, version)
+        else:
+            context['show_notes'] = False
+    else:
+        context['show_notes'] = False
+    if team_video and can_resync(team_video.team, request.user):
+        context.update(sync_history_context(video, subtitle_language))
+        context['show_sync_history'] = True
+    else:
+        context['show_sync_history'] = False
+        context['can_resync'] = False
+    return render(request, 'future/videos/subtitles.html', context)
+
+def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
+                                   version_id):
+    """Fetch the Video and SubtitleVersion objects for the subtitles page.
+    """
+
+    video = Video.cache.get_instance_by_video_id(video_id, 'subtitles-page')
+
+    workflow = video.get_workflow()
+    if not workflow.user_can_view_video(user):
+        raise PermissionDenied()
+
+    language, _ = SubtitleLanguage.objects.get_or_create(
+        video=video, language_code=language_code)
+
+    public_only = not workflow.user_can_view_private_subtitles(user,
+                                                               language_code)
+
+    if version_id is None:
+        version = language.get_tip(public=public_only)
+    else:
+        version = language.get_version_by_id(version_id, public=public_only)
+
+    if version is not None:
+        # Set up some relationships that we know to avoid an extra DB fetch
+        version.subtitle_language = language
+        version.video = language.video = video
+
+    return video, language, version
+
+def sync_history_context(video, subtitle_language):
+    context = {}
+    sync_history = SyncHistory.objects.get_sync_history_for_subtitle_language(subtitle_language)
+    context['sync_history'] = sync_history
+    context['can_resync'] = (len(sync_history) > 0) and not sync_history[0]['account'].should_skip_syncing()
+    context['current_version'] = subtitle_language.get_public_tip()
+    synced_versions = []
+    for video_url in video.get_video_urls():
+        if not can_sync_videourl(video_url):
+            continue
+        try:
+            version = (subtitle_language.syncedsubtitleversion_set.
+                       select_related('version').
+                       get(video_url=video_url)).version
+        except ObjectDoesNotExist:
+            version = None
+        synced_versions.append({
+            'video_url': video_url,
+            'version': version,
+            'syncable': get_sync_account(video, video_url),
+        })
+    context['synced_versions'] = synced_versions
+    return context
+
+def downloadable_formats(user):
+    downloadable_formats = AVAILABLE_SUBTITLE_FORMATS_FOR_DISPLAY
+    downloadable_formats_set = set(downloadable_formats)
+    for format in SubtitleFormatList.for_staff():
+        if user_can_access_subtitles_format(user, format):
+            downloadable_formats_set.add(format)
+    return list(downloadable_formats_set)
+
+subtitles_form_map = {
+    'delete': DeleteSubtitlesForm,
+    'rollback': RollbackSubtitlesForm,
+    'notes': SubtitlesNotesForm,
+    'resync': ResyncSubtitlesForm,
+}
+
+def subtitles_ajax_form(request, video, subtitle_language, version):
+    try:
+        form_name = request.GET['form']
+        FormClass = subtitles_form_map[form_name]
+    except KeyError:
+        raise Http404()
+    if form_name == 'notes' and request.POST['body'] == '':
+        return AJAXResponseRenderer(request).render()
+    form = FormClass(request.user, video, subtitle_language, version,
+                     data=request.POST if request.method == 'POST' else None)
+    if not form.check_permissions():
+        raise PermissionDenied()
+
+    if request.is_ajax():
+        if form.is_bound and form.is_valid():
+            form.submit(request)
+            return handle_subtitles_ajax_form_success(
+                request, video, subtitle_language, version, form_name, form)
+        response_renderer = AJAXResponseRenderer(request)
+        template = 'future/videos/subtitles-forms/{}.html'.format(
+            form_name)
+        response_renderer.show_modal(template, {
+            'video': video,
+            'subtitle_language': subtitle_language,
+            'version': version,
+            'form': form,
+        })
+        return response_renderer.render()
+    else:
+        # TODO implement the not-AJAX case
+        return redirect(request.get_full_path())
+
+def handle_subtitles_ajax_form_success(request, video, subtitle_language,
+                                       version, form_name, form):
+    response_renderer = AJAXResponseRenderer(request)
+    if form_name == 'notes':
+        notes = (video.get_workflow()
+                 .get_editor_notes(request.user, subtitle_language.language_code)
+                 .fetch_notes())
+        response_renderer.replace(
+            '#subtitles_notes', 'future/videos/tabs/notes.html', {
+                'notes': notes,
+                'notes_form': SubtitlesNotesForm(
+                    request.user, video, subtitle_language, version)
+            })
+    else:
+        response_renderer.reload_page()
+    return response_renderer.render()
 
 def _widget_params(request, video, version_no=None, language=None, video_url=None, size=None):
     primary_url = video_url or video.get_video_url()
@@ -671,23 +778,26 @@ def _widget_params(request, video, version_no=None, language=None, video_url=Non
 @login_required
 @get_video_revision
 def rollback(request, version):
-    is_writelocked = version.subtitle_language.is_writelocked
-    if not user_can_edit_subtitles(request.user, version.video,
-                                   version.subtitle_language.language_code):
-        messages.error(request, _(u"You don't have permission to rollback "
-                                  "this language"))
-    elif is_writelocked:
-        messages.error(request, u'Can not rollback now, because someone is editing subtitles.')
-    elif not version.next_version():
-        messages.error(request, message=u'Can not rollback to the last version')
-    else:
-        messages.success(request, message=u'Rollback successful')
-        version = rollback_to(version.video,
-                version.subtitle_language.language_code,
-                version_number=version.version_number,
-                rollback_author=request.user)
-        video_changed_tasks.delay(version.video.id, version.id)
-        return redirect(version.subtitle_language.get_absolute_url()+'#revisions')
+    # Normally, we only accept POST methods, but the old template code uses
+    # GET, so we allow that too.
+    if should_use_old_view(request) or request.method == 'POST':
+        is_writelocked = version.subtitle_language.is_writelocked
+        if not user_can_edit_subtitles(request.user, version.video,
+                                       version.subtitle_language.language_code):
+            messages.error(request, _(u"You don't have permission to rollback "
+                                      "this language"))
+        elif is_writelocked:
+            messages.error(request, u'Can not rollback now, because someone is editing subtitles.')
+        elif not version.next_version():
+            messages.error(request, message=u'Can not rollback to the last version')
+        else:
+            messages.success(request, message=u'Rollback successful')
+            version = rollback_to(version.video,
+                    version.subtitle_language.language_code,
+                    version_number=version.version_number,
+                    rollback_author=request.user)
+            video_changed_tasks.delay(version.video.id, version.id)
+            return redirect(version.subtitle_language.get_absolute_url()+'#revisions')
     return redirect(version)
 
 @get_video_revision

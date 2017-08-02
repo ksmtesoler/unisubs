@@ -56,6 +56,9 @@ DriveFileInfo = namedtuple(
 OpenIDProfile = namedtuple('OpenIDProfile',
                            'sub email full_name first_name last_name')
 
+DRIVE_URL_PATTERN = re.compile(r'/d/(.*?)/')
+
+
 logger = logging.getLogger(__name__)
 
 def youtube_scopes():
@@ -417,7 +420,13 @@ def get_openid_profile(access_token):
         response_data.get('family_name', ''),
     )
 
-def get_video_info(video_id):
+def get_video_info(video_id, accounts=[]):
+    for account in accounts:
+        try:
+            access_token = get_new_access_token(account.oauth_refresh_token)
+            return _get_video_info(video_id, access_token)
+        except Exception, e:
+            pass
     try:
         logger.info("youtube.get_video_info()", extra={
             'stack': True,
@@ -431,8 +440,8 @@ def get_video_info(video_id):
         except:
             raise e
 
-def _get_video_info(video_id):
-    response = video_get(None, video_id, ['snippet', 'contentDetails'])
+def _get_video_info(video_id, access_token=None):
+    response = video_get(access_token, video_id, ['snippet', 'contentDetails'])
     try:
         response_data = response.json()
         snippet = response_data['items'][0]['snippet']
@@ -527,12 +536,43 @@ def _make_drive_api_request(method, access_token, url_path, **kwargs):
     return _make_api_request(method, access_token, url, **kwargs)
 
 def drive_file_get(access_token, drive_file_id, fields):
-    params = {
-        'fields': ','.join(fields),
-    }
+    params = {}
+    if fields is not None:
+        params['fields'] = ','.join(fields)
     return _make_drive_api_request('get', access_token,
                                    'files/{}'.format(drive_file_id),
                                    params=params)
+
+def get_drive_file_id(url):
+        parsed_url = urlparse.urlparse(url)
+        if parsed_url.scheme == 'drive':
+            # Handle drive:///[file_id] schemes (see convert_to_video_url)
+            return parsed_url.path[1:]
+        match = DRIVE_URL_PATTERN.search(parsed_url.path)
+        if match:
+            return match.group(1)
+        else:
+            raise ValueError("Unknown video id")
+def matches_drive_url(url):
+        parsed_url = urlparse.urlparse(url)
+        return (parsed_url.scheme == 'drive' or
+                parsed_url.netloc == 'drive.google.com')
+
+def get_drive_file(drive_file_id, fields=None):
+    access_token = get_service_account_access_token(
+        'https://www.googleapis.com/auth/drive.readonly')
+    return drive_file_get(access_token, drive_file_id, fields)
+
+def get_drive_file_content(drive_file_id):
+    response = get_drive_file(drive_file_id, ['size'])
+    try:
+        size = int(response.json()['size'])
+    except StandardError, e:
+        raise APIError("get_drive_file_content size: {} ({})".format(
+            e, response.content))
+    if size > 2000000:
+        raise APIError("File above the 2MB limit")
+    return get_drive_file(drive_file_id+"?alt=media").text
 
 def get_drive_file_info(drive_file_id):
     """Get info on a drive file
@@ -547,9 +587,7 @@ def get_drive_file_info(drive_file_id):
         'name', 'description', 'mimeType', 'webContentLink', 'thumbnailLink',
         'videoMediaMetadata',
     ]
-    access_token = get_service_account_access_token(
-        'https://www.googleapis.com/auth/drive.readonly')
-    response = drive_file_get(access_token, drive_file_id, fields)
+    response = get_drive_file(drive_file_id, fields)
     embed_url = 'https://drive.google.com/file/d/{}/preview'.format(
         drive_file_id)
     try:

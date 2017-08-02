@@ -44,3 +44,39 @@ class AmaraPaginator(Paginator):
     def make_page_link(self, page_number, query):
         query['page'] = page_number
         return '?' + query.urlencode()
+
+class AmaraPaginatorFuture(Paginator):
+    """Version of the amara paginator for the future API.  Once we switch
+    over, this can replace the current one
+    """
+    def get_page(self, request):
+        page = request.GET.get('page')
+        try:
+            page = self.page(page)
+        except PageNotAnInteger:
+            page = self.page(1)
+        except EmptyPage:
+            page = self.page(self.num_pages)
+        self.add_links_to_page(page, request)
+        return page
+
+    def add_links_to_page(self, page, request):
+        query = request.GET.copy()
+
+        start_page = max(1, min(page.number - 2, self.num_pages - 4))
+        end_page = min(start_page + 5, self.num_pages)
+
+        page.nearest_page_links = [
+            (i, self.make_page_link(i, query))
+            for i in range(start_page, end_page + 1)
+        ]
+
+    def make_page_link(self, page_number, query):
+        query['page'] = page_number
+        return '?' + query.urlencode()
+
+    def make_next_previous_page_links(self, page, request):
+        query = request.GET.copy()
+        next_url = self.make_page_link(page.number+1, query) if page.number < self.num_pages else ''
+        prev_url = self.make_page_link(page.number-1, query) if page.number > 1 else ''
+        return (next_url, prev_url)

@@ -64,6 +64,10 @@ class TestVideoUrl(TestCase):
         self.primary_url.save()
         self.assertEqual(unicode_url, self.primary_url.url)
 
+    def test_unique_error_message(self):
+        self.assertEqual(self.url.unique_error_message(None, ['url']),
+                         ('This URL already <a href="{}">exists</a> as its own video in our system. ' +
+                         'You can\'t add it as a secondary URL.').format(self.url.get_absolute_url()))
 class TestVideo(TestCase):
     def setUp(self):
         self.user = UserFactory()
@@ -572,7 +576,7 @@ class AddVideoTest(TestCase):
         assert_equal(on_video_url_added.call_count, 1)
         assert_equal(on_video_url_added.call_args,
                      mock.call(signal=signals.video_url_added,
-                               sender=video_url, video=video, new_video=True))
+                               sender=video_url, video=video, new_video=True, team=None, user=self.user))
 
 class AddVideoTestWithTransactions(TransactionTestCase):
     # These tests is split off from the others because it needs to be inside a

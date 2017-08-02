@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load to_json i18n messages_tags media_bundle recent_activity auth_tags profiles_tags teams_tags query_string videos_tags %}
+{% load to_json i18n messages_tags media_bundle recent_activity auth_tags profiles_tags teams_tags old_query_string videos_tags %}
 {% load url from future %}
 
 {% block body_attrs %}class="v1 dashboard"{% endblock %}
@@ -96,7 +96,7 @@
             {% if video_activity %}
                 <ul class="listing activity">
                     {% for record in video_activity %}
-                    <li>{% include "activity/record.html" %}</li>
+                    <li>{% include "activity/old_record.html" %}</li>
                     {% endfor %}
                 </ul>
             {% else %}
@@ -122,7 +122,7 @@
             {% if team_activity %}
                 <ul class="listing activity">
                     {% for record in team_activity %}
-                    <li>{% include "activity/record.html" %}</li>
+                    <li>{% include "activity/old_record.html" %}</li>
                     {% endfor %}
                 </ul>
             {% else %}

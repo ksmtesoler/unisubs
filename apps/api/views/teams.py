@@ -570,7 +570,11 @@ class TeamViewSet(mixins.CreateModelMixin,
         if not team_permissions.can_change_team_settings(serializer.instance,
                                                          self.request.user):
             raise PermissionDenied()
-        serializer.save()
+        team = serializer.instance
+        initial_settings = team.get_settings()
+        with transaction.atomic():
+            serializer.save()
+            team.handle_settings_changes(self.request.user, initial_settings)
 
     def perform_destroy(self, instance):
         if not team_permissions.can_delete_team(instance, self.request.user):

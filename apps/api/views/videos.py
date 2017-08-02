@@ -308,6 +308,11 @@ class TeamSerializer(serializers.CharField):
         except Team.DoesNotExist:
             self.fail('unknown-team', team=slug)
 
+class TeamTypeSerializer(serializers.CharField):
+    def get_attribute(self, video):
+        team_video = video.get_team_video()
+        return team_video.team.workflow_type if team_video else None
+
 class ProjectSerializer(serializers.CharField):
     def get_attribute(self, video):
         team_video = video.get_team_video()
@@ -367,6 +372,7 @@ class VideoSerializer(serializers.Serializer):
     thumbnail = VideoThumbnailField(required=False, allow_blank=True)
     created = TimezoneAwareDateTimeField(read_only=True)
     team = TeamSerializer(required=False, allow_null=True)
+    team_type = TeamTypeSerializer(required=False, allow_null=True)
     project = ProjectSerializer(required=False, allow_null=True)
     all_urls = serializers.SerializerMethodField()
     metadata = VideoMetadataSerializer(required=False)
@@ -486,8 +492,12 @@ class VideoSerializer(serializers.Serializer):
                                       commit=False)
             self._update_team(video, validated_data)
         try:
+            if 'team' in validated_data:
+                team = validated_data['team']
+            else:
+                team = None
             return Video.add(validated_data['video_url'],
-                             self.context['user'], setup_video)[0]
+                             self.context['user'], setup_video, team)[0]
         except VideoTypeError:
             self.fail('invalid-url', url=validated_data['video_url'])
         except Video.UrlAlreadyAdded:
@@ -576,9 +586,9 @@ class VideoViewSet(mixins.CreateModelMixin,
         if 'video_url' in query_params:
             vt = video_type_registrar.video_type_for_url(query_params['video_url'])
             if vt:
-                qs = qs.filter(videourl__url=vt.convert_to_video_url())
+                qs = qs.for_url(vt.convert_to_video_url())
             else:
-                qs = qs.filter(videourl__url=query_params['video_url'])
+                qs = qs.for_url(query_params['video_url'])
         return qs
 
     def get_videos_for_user(self):
@@ -738,6 +748,23 @@ class VideoDurationView(views.APIView):
                 return Response("Duration is missing", status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("Duration already set", status=status.HTTP_304_NOT_MODIFIED)
+
+class VideoFollowerView(views.APIView):
+    def get(self, request, video_id, *args, **kwargs):
+        video = Video.objects.get(video_id=video_id)
+        return Response({'follow': video.user_is_follower(request.user)}, status=status.HTTP_200_OK)
+
+    def post(self, request, video_id, *args, **kwargs):
+        video = Video.objects.get(video_id=video_id)
+        follow = True if request.data.get('follow', "off") == "on" else False
+        if follow == video.user_is_follower(request.user):
+            return Response("Not modified", status=status.HTTP_304_NOT_MODIFIED)
+        else:
+            if follow:
+                video.followers.add(request.user)
+            else:
+                video.followers.remove(request.user)
+            return Response({'follow': follow}, status=status.HTTP_200_OK)
 
 class VideoURLViewSet(viewsets.ModelViewSet):
     serializer_class = VideoURLSerializer

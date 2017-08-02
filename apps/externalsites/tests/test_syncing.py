@@ -77,7 +77,7 @@ class SyncingTriggerTest(TestCase):
 
     def test_delete_subititles_on_language_deleted(self):
         lang = self.video.subtitle_language('en')
-        subtitles.signals.language_deleted.send(lang)
+        subtitles.signals.subtitles_deleted.send(lang)
 
         self.assertEqual(self.mock_delete_subtitles.delay.call_count, 1)
         self.mock_delete_subtitles.delay.assert_called_with(
@@ -863,7 +863,7 @@ class RefetchYoutubeChannelIDTest(TestCase):
         self.check_username_fixed()
 
     def check_username_fixed(self):
-        self.mock_get_video_info.assert_called_with(self.video_url.videoid)
+        self.mock_get_video_info.assert_called_with(self.video_url.videoid, [])
         self.assertEquals(
             self.video.get_primary_videourl_obj().owner_username,
             'test-channel-id')
