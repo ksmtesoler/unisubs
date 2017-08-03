@@ -587,6 +587,14 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         )
         return response_renderer.render()
 
+    if request.is_ajax() and request.GET.get('update-sync-history', None):
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#subtitles_sync_history', "future/videos/tabs/sync-history.html",
+            sync_history_context(video, subtitle_language),
+        )
+        return response_renderer.render()
+
     all_subtitle_versions = subtitle_language.versions_for_user(
             request.user).order_by('-version_number')
     team_video = video.get_team_video()
