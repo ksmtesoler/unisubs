@@ -1,7 +1,4 @@
 """
-Caching
--------
-
 Amara uses a couple tricks for caching things.
 
 .. automodule:: caching.cachegroup

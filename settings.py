@@ -106,6 +106,7 @@ COMPRESS_OUTPUT_DIRNAME = "static-cache"
 
 
 USER_LANGUAGES_COOKIE_NAME = 'unisub-languages-cookie'
+LANGUAGE_COOKIE_NAME = 'language'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -139,6 +140,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'middleware.AmaraSecurityMiddleware',
+    'caching.middleware.AmaraCachingMiddleware',
     'middleware.LogRequest',
     'middleware.StripGoogleAnalyticsCookieMiddleware',
     'utils.ajaxmiddleware.AjaxErrorMiddleware',
@@ -151,7 +153,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'openid_consumer.middleware.OpenIDMiddleware',
     'middleware.P3PHeaderMiddleware',
-    'middleware.UserUUIDMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'api.middleware.CORSMiddleware',
 )
@@ -320,6 +321,9 @@ AUTHENTICATION_BACKENDS = (
    'auth.backends.OpenIdBackend',
    'django.contrib.auth.backends.ModelBackend',
 )
+
+# Use cookie storage always since it works the best with our caching system
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 
 SKIP_SOUTH_TESTS = True
 SOUTH_TESTS_MIGRATE = False

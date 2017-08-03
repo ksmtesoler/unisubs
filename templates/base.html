@@ -53,7 +53,6 @@
 </head>
 
 <body {% block body_attrs %}{% endblock %}>
-    {% csrf_token %}
     {% announcement %}
     {% if user.is_authenticated %}
         {% messages %}

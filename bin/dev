@@ -432,6 +432,12 @@ class PrepDeploy(Command):
         print "Pushing {}".format(branch)
         self.run_git('push', 'origin', branch)
 
+class VarnishLogs(Command):
+    """Follow logs for varnish."""
+
+    def run_inner(self, args, options):
+        subprocess.call(['docker-compose', 'exec', 'varnish', 'varnishlog'])
+
 NEEDS_ROOT = [
     'build_docs',
     'update_api_docs',

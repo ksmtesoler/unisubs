@@ -47,7 +47,6 @@
 </head>
 
 <body>
-  {% csrf_token %}
     {% new_announcement %}
     {% if user.is_authenticated %}
         {% messages %}
