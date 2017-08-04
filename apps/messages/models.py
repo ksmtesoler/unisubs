@@ -221,7 +221,7 @@ class Message(models.Model):
                 previous_in_thread.has_reply_for_author = True
                 previous_in_thread.has_reply_for_user = True
                 previous_in_thread.save()
-        super (Message, self).save(*args, **kwargs)
+        super(Message, self).save(*args, **kwargs)
 
     def auto_truncate_subject(self):
          max_length = self._meta.get_field('subject').max_length
