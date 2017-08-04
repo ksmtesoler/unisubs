@@ -1262,6 +1262,7 @@ def leave_team(request, slug):
         tm_user_pk = member.user.pk
         team_pk = member.team.pk
         member.leave_team()
+        member.delete()
         [application.on_member_leave(request.user, "web UI") for application in \
          member.team.applications.filter(status=Application.STATUS_APPROVED)]
 
