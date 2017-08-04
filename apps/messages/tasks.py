@@ -622,21 +622,19 @@ def approved_notification(task_pk, published=False):
             "subs_url": subs_url,
             "reviewer_message_url": reviewer_message_url,
         }
-        template_name = template_html
         for user in users_to_notify:
             context['user'] = user
             msg = None
             if user.notify_by_message:
-                template_name = template_txt
                 msg = Message()
                 msg.message_type = 'S'
                 msg.subject = subject
-                msg.content = render_to_string(template_name, context)
+                msg.content = render_to_string(template_txt, context)
                 msg.user = user
                 msg.object = task.team
                 msg.save()
 
-            email_res =  send_templated_email(user, subject, template_name, context)
+            email_res =  send_templated_email(user, subject, template_html, context)
 
 @task
 def send_reject_notification(task_pk, sent_back):
