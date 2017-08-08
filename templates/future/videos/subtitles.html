@@ -33,7 +33,7 @@
             <li><a href="#subtitles_notes" data-toggle="tab">{% trans "Subtitle Notes" %}</a></li>
             {% endif %}
             {% if show_sync_history %}
-            <li><a href="#subtitles_sync_history" data-toggle="tab">{% trans "Sync History" %}</a></li>
+            <li><a href="#subtitles_sync_history" class="ajaxLink" role="button" data-nav="true" data-toggle="tab" data-href="{% query_string update-sync-history=1 %}">{% trans "Sync History" %}</a></li>
             {% endif %}
           </ul>
           <div class="tab-content">
