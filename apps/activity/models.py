@@ -166,7 +166,10 @@ class ActivityMessageDict(object):
         elif key == 'team':
             return self.record.team
         elif key == 'user':
-            return self.record.user.username
+            if self.record.user is None:
+                return _("Somebody (possibly automatically)")
+            else:
+                return self.record.user.username
         else:
             # Like the fmt() function, display something in the message rather
             # than raise an exception
