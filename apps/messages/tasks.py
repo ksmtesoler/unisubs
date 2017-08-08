@@ -570,6 +570,14 @@ def approved_notification(task_pk, published=False):
         return False
     # some tasks are being created without subtitles version, see
     # https://unisubs.sifterapp.com/projects/12298/issues/552092/comments
+    users_to_notify = set()
+    version = task.get_subtitle_version()
+    if task.new_review_base_version:
+        user = task.new_review_base_version.author
+    else:
+        user = version.author
+    if user.is_active:
+        users_to_notify.add(user)
 
     if published:
         subject = ugettext(u"Your subtitles have been approved and published!")
@@ -577,60 +585,56 @@ def approved_notification(task_pk, published=False):
         template_html ="messages/email/team-task-approved-published.html"
         # Not sure whether it is the right place to send notification
         # but should work around the approval when there is no new sub version
-        version = task.get_subtitle_version()
         TeamNotificationSetting.objects.notify_team(task.team.pk, TeamNotificationSetting.EVENT_SUBTITLE_APPROVED,
                                                     video_id=version.video.video_id,
                                                     language_pk=version.subtitle_language.pk, version_pk=version.pk)
+        subtitler = task.get_subtitler()
+        if subtitler is not None and \
+           subtitler.is_active:
+            users_to_notify.add(subtitler)
+
     else:
         template_txt = "messages/team-task-approved-sentback.txt"
         template_html ="messages/email/team-task-approved-sentback.html"
         subject = ugettext(u"Your subtitles have been returned for further editing")
-    version = task.get_subtitle_version()
-    if task.new_review_base_version:
-        user = task.new_review_base_version.author
-    else:
-        user = version.author
-    if not user.is_active:
-        return False
-    task_language = get_language_label(task.language)
+
     reviewer = task.assignee
-    video = task.team_video.video
-    subs_url = "%s%s" % (get_url_base(), reverse("videos:translation_history", kwargs={
-        'video_id': video.video_id,
-        'lang': task.language,
-        'lang_id': version.subtitle_language.pk,
-
-    }))
-    reviewer_message_url = "%s%s?user=%s" % (
-        get_url_base(), reverse("messages:new"), reviewer.username)
-
-    context = {
-        "team":task.team,
-        "title": version.subtitle_language.get_title(),
-        "user":user,
-        "task_language": task_language,
-        "url_base":get_url_base(),
-        "task":task,
-        "reviewer":reviewer,
-        "note":task.body,
-        "subs_url": subs_url,
-        "reviewer_message_url": reviewer_message_url,
-    }
-    msg = None
-    if user.notify_by_message:
-        template_name = template_txt
-        msg = Message()
-        msg.message_type = 'S'
-        msg.subject = subject
-        msg.content = render_to_string(template_name,context)
-        msg.user = user
-        msg.object = task.team
-        msg.save()
-
-    template_name = template_html
-    email_res =  send_templated_email(user, subject, template_name, context)
     ActivityRecord.objects.create_for_version_approved(version, reviewer)
-    return msg, email_res
+    if len(users_to_notify) > 0:
+        task_language = get_language_label(task.language)
+        video = task.team_video.video
+        subs_url = "%s%s" % (get_url_base(), reverse("videos:translation_history", kwargs={
+            'video_id': video.video_id,
+            'lang': task.language,
+            'lang_id': version.subtitle_language.pk,
+        }))
+        reviewer_message_url = "%s%s?user=%s" % (
+            get_url_base(), reverse("messages:new"), reviewer.username)
+
+        context = {
+            "team": task.team,
+            "title": version.subtitle_language.get_title(),
+            "task_language": task_language,
+            "url_base": get_url_base(),
+            "task": task,
+            "reviewer": reviewer,
+            "note": task.body,
+            "subs_url": subs_url,
+            "reviewer_message_url": reviewer_message_url,
+        }
+        for user in users_to_notify:
+            context['user'] = user
+            msg = None
+            if user.notify_by_message:
+                msg = Message()
+                msg.message_type = 'S'
+                msg.subject = subject
+                msg.content = render_to_string(template_txt, context)
+                msg.user = user
+                msg.object = task.team
+                msg.save()
+
+            email_res =  send_templated_email(user, subject, template_html, context)
 
 @task
 def send_reject_notification(task_pk, sent_back):
