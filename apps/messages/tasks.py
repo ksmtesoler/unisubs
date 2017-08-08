@@ -39,7 +39,7 @@ from auth.models import CustomUser as User, UserLanguage
 from localeurl.utils import universal_url
 from teams.moderation_const import REVIEWED_AND_PUBLISHED, \
      REVIEWED_AND_PENDING_APPROVAL, REVIEWED_AND_SENT_BACK
-from messages.models import Message
+from messages.models import Message, SYSTEM_NOTIFICATION
 from utils import send_templated_email
 from utils.text import fmt
 from utils.translation import get_language_label
@@ -91,6 +91,9 @@ def send_new_message_notification(message_id):
     user = message.user
 
     if not user.email or not user.is_active or not user.notify_by_email:
+        return
+
+    if message.message_type == SYSTEM_NOTIFICATION:
         return
 
     if message.author:
