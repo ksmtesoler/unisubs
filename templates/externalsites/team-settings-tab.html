@@ -35,6 +35,8 @@
                         Linked Account: <a style="color:#0f80e2" href="{{ channel_url }}">{{ account_name }}</a>
                         {% endblocktrans %}
                     </h3>
+                    {% include "_field.html" with field=form.sync_subtitles %}
+                    {% include "_field.html" with field=form.fetch_initial_subtitles %}
                     {% if form.show_sync_teams %}
                         <h4>{% trans "Sync videos from these teams:" %}</h4>
                         {{ form.sync_teams }}
