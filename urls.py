@@ -58,6 +58,7 @@ urlpatterns = patterns('',
     url(r'^crossdomain.xml$',
         'crossdomain_views.root_crossdomain'),
     url(r'^$', 'videos.views.index', name="home"),
+    url(r'^newhome/$', 'videos.views.newhome', name="newhome"),
     url(r'^comments/',
         include('comments.urls', namespace='comments')),
     url(r'^messages/',
@@ -174,7 +175,10 @@ urlpatterns = patterns('',
     url(r'^api/', include('api.urls', namespace='api')),
     url(r'^api2/partners/', include('api.urls', namespace='api')),
     ## Video shortlinks
-    url(r'^v/(?P<encoded_pk>\w+)/$', 'videos.views.shortlink', name='shortlink')
+    url(r'^v/(?P<encoded_pk>\w+)/$', 'videos.views.shortlink',
+        name='shortlink'),
+    # ESI includes
+    url(r'^esi/user-menu/$', 'views.user_menu_esi'),
 )
 
 urlpatterns += optionalapps.get_urlpatterns()

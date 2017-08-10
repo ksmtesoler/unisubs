@@ -191,6 +191,12 @@ def index(request):
                               context_instance=RequestContext(request))
 
 @cache_page(minutes=60)
+def newhome(request):
+    return render(request, 'newhome.html', {
+        'user_menu_esi': True
+    })
+
+@cache_page(minutes=60)
 def watch_page(request):
     return render(request, 'videos/watch-home.html', {
         'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],

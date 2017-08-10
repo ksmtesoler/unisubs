@@ -21,7 +21,11 @@
             <li><a href="{% url "videos:watch_page" %}">Search</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
+            {% if user_menu_esi %}
+            <esi:include src="/{{ LANGUAGE_CODE }}/esi/user-menu/">
+            {% else %}
             {% include "future/user-menu.html" %}
+            {% endif %}
           </ul>
         </div>
       </nav>

@@ -17,7 +17,10 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 import logging
+
 from django.http import Http404, HttpResponse
+from django.shortcuts import render
+
 from utils.decorators import staff_member_required
 from utils.one_time_data import get_one_time_data
 logger = logging.getLogger(__name__)
@@ -49,3 +52,11 @@ def one_time_url(request, token):
         return response
     else:
         raise Http404()
+
+def user_menu_esi(request):
+    """
+    Render the user menu HTML snippet only
+
+    We use this so that we can use it as as edge-side include with Varnish.
+    """
+    return render(request, "future/user-menu.html")

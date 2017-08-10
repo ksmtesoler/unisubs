@@ -1,0 +1,16 @@
+{% extends "future/base.html" %}
+{% load cache %}
+{% block body_attrs %}id="index"{% endblock %}
+
+{% block user-menu %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Placeholder</h1>
+  <p>
+  This is our homepage, but there's no content in it.  That's because the homepage for amara.org is not served by this app.  The reverse proxy in front of our app routes it to a different app.
+  
+  You should only be seeing this page if If you're running in a dev environment.
+  </p>
+</div>
+{% endblock %}
