@@ -10,6 +10,7 @@
 # Andrea_Pio <ivan.schepens@wynns.be>, 2012
 # Johan Uytterhoeven, 2012,2014,2016
 # kajraatjes <kajraatjes@gmail.com>, 2014
+# Mirjam van Dijk <mirjamvandijk@gmail.com>, 2017
 # Rodolfo_Jadon, 2014
 # Ruben Dijkstra <ruben_dijkstra123@hotmail.com>, 2011
 # tkfanmail <tkfanmail@gmail.com>, 2011, 2012
@@ -20,8 +21,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Amara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-13 15:37-0500\n"
-"PO-Revision-Date: 2017-07-13 20:37+0000\n"
+"POT-Creation-Date: 2017-08-10 08:47-0500\n"
+"PO-Revision-Date: 2017-08-10 13:47+0000\n"
 "Last-Translator: bendk <ben@pculture.org>\n"
 "Language-Team: Dutch (http://www.transifex.com/universalsubtitles/universalsubtitles/language/nl/)\n"
 "MIME-Version: 1.0\n"
@@ -105,7 +106,7 @@ msgstr "Alle talen"
 msgid "Popular Languages"
 msgstr ""
 
-#: apps/api/views/subtitles.py:596 apps/subtitles/models.py:1356
+#: apps/api/views/subtitles.py:596 apps/subtitles/models.py:1354
 #: templates/videos/language-revisions-tab.html:42
 msgid "API"
 msgstr "API"
@@ -122,48 +123,76 @@ msgstr ""
 msgid "Upload"
 msgstr "Uploaden"
 
-#: apps/activity/models.py:127
+#: apps/activity/models.py:63
+msgid "Videos Public"
+msgstr ""
+
+#: apps/activity/models.py:86
+#, python-format
+msgid "%(setting)s changed to %(value)s"
+msgstr ""
+
+#: apps/activity/models.py:93
+#, python-format
+msgid "%(count)s miscellaneous setting changed"
+msgid_plural "%(count)s miscellaneous settings changed"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/activity/models.py:100
+msgid "true"
+msgstr ""
+
+#: apps/activity/models.py:102
+msgid "false"
+msgstr ""
+
+#: apps/activity/models.py:170
+msgid "Somebody (possibly automatically)"
+msgstr ""
+
+#: apps/activity/models.py:180
 msgid "Video Added"
 msgstr "Video toegevoegd"
 
-#: apps/activity/models.py:132
+#: apps/activity/models.py:185
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> added a video: <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:137
+#: apps/activity/models.py:190
 #, python-format
 msgid "added a video: <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:140
+#: apps/activity/models.py:193
 msgid "added"
 msgstr ""
 
-#: apps/activity/models.py:144
+#: apps/activity/models.py:197
 msgid "Video Title Changed"
 msgstr "Video titel is veranderd"
 
-#: apps/activity/models.py:151
+#: apps/activity/models.py:204
 #, python-format
 msgid "<strong>%(user)s</strong> edited a video title"
 msgstr ""
 
-#: apps/activity/models.py:156
+#: apps/activity/models.py:209
 msgid "edited a video title"
 msgstr ""
 
-#: apps/activity/models.py:159
+#: apps/activity/models.py:212
 msgid "changed title"
 msgstr ""
 
-#: apps/activity/models.py:163
+#: apps/activity/models.py:216
 msgid "Comment added"
 msgstr ""
 
-#: apps/activity/models.py:169
+#: apps/activity/models.py:222
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> commented on <a "
@@ -171,110 +200,110 @@ msgid ""
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:173
+#: apps/activity/models.py:226
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> commented on <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:178
+#: apps/activity/models.py:231
 #, python-format
 msgid ""
 "commented on <a href=\"%(language_url)s\">%(language)s subtitles</a> for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:182
+#: apps/activity/models.py:235
 #, python-format
 msgid "commented on <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:185
+#: apps/activity/models.py:238
 msgid "commented"
 msgstr ""
 
-#: apps/activity/models.py:189
+#: apps/activity/models.py:242
 msgid "Version added"
 msgstr ""
 
-#: apps/activity/models.py:193
+#: apps/activity/models.py:246
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> edited <a href=\"%(language_url)s\">%(language)s "
 "subtitles</a> for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:198
+#: apps/activity/models.py:251
 #, python-format
 msgid ""
 "edited <a href=\"%(language_url)s\">%(language)s subtitles</a> for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:202
+#: apps/activity/models.py:255
 msgid "edited"
 msgstr ""
 
-#: apps/activity/models.py:206
+#: apps/activity/models.py:259
 msgid "Video URL added"
 msgstr ""
 
-#: apps/activity/models.py:212
+#: apps/activity/models.py:265
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> added new URL for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:217
+#: apps/activity/models.py:270
 #, python-format
 msgid "added new URL for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:220
+#: apps/activity/models.py:273
 msgid "added URL"
 msgstr ""
 
-#: apps/activity/models.py:224
+#: apps/activity/models.py:277
 msgid "Translation URL added"
 msgstr ""
 
-#: apps/activity/models.py:231
+#: apps/activity/models.py:284
 #, python-format
 msgid "<strong>%(user)s</strong> added a translation"
 msgstr ""
 
-#: apps/activity/models.py:235
+#: apps/activity/models.py:288
 msgid "added a translation"
 msgstr ""
 
-#: apps/activity/models.py:238 templates/teams/tasks.html:276
+#: apps/activity/models.py:291 templates/teams/tasks.html:276
 msgid "translated"
 msgstr "vertaald"
 
-#: apps/activity/models.py:242
+#: apps/activity/models.py:295
 msgid "Subtitle request created"
 msgstr ""
 
-#: apps/activity/models.py:249
+#: apps/activity/models.py:302
 #, python-format
 msgid "<strong>%(user)s</strong> created a subtitle request"
 msgstr ""
 
-#: apps/activity/models.py:253
+#: apps/activity/models.py:306
 msgid "created a subtitle request"
 msgstr ""
 
-#: apps/activity/models.py:256
+#: apps/activity/models.py:309
 msgid "requested"
 msgstr ""
 
-#: apps/activity/models.py:260
+#: apps/activity/models.py:313
 msgid "Version approved"
 msgstr ""
 
-#: apps/activity/models.py:264
+#: apps/activity/models.py:317
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> approved <a "
@@ -282,44 +311,44 @@ msgid ""
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:269
+#: apps/activity/models.py:322
 #, python-format
 msgid ""
 "approved <a href=\"%(language_url)s\">%(language)s</a> subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:273
+#: apps/activity/models.py:326
 msgid "approved"
 msgstr ""
 
-#: apps/activity/models.py:277
+#: apps/activity/models.py:330
 msgid "Member Joined"
 msgstr ""
 
-#: apps/activity/models.py:291
+#: apps/activity/models.py:344
 #, python-format
 msgid "<strong>%(user)s</strong> joined the %(team)s team as a %(role)s"
 msgstr ""
 
-#: apps/activity/models.py:296 apps/videos/models.py:1812
+#: apps/activity/models.py:349 apps/videos/models.py:1738
 #, python-format
 msgid "joined the %(team)s team as a %(role)s"
 msgstr "heeft zich bij het team %(team)s gevoegd als %(role)s"
 
-#: apps/activity/models.py:300 amara-enterprise/collab/models.py:2490
+#: apps/activity/models.py:353 amara-enterprise/collab/models.py:2488
 msgid "joined"
 msgstr ""
 
-#: apps/activity/models.py:310
+#: apps/activity/models.py:363
 msgid "Unknown role"
 msgstr ""
 
-#: apps/activity/models.py:314
+#: apps/activity/models.py:367
 msgid "Version Rejected"
 msgstr ""
 
-#: apps/activity/models.py:318
+#: apps/activity/models.py:371
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> rejected <a "
@@ -327,40 +356,40 @@ msgid ""
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:323
+#: apps/activity/models.py:376
 #, python-format
 msgid ""
 "rejected <a href=\"%(language_url)s\">%(language)s</a> subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:327
+#: apps/activity/models.py:380
 msgid "rejected"
 msgstr ""
 
-#: apps/activity/models.py:331
+#: apps/activity/models.py:384
 msgid "Member Left"
 msgstr ""
 
-#: apps/activity/models.py:334
+#: apps/activity/models.py:387
 #, python-format
 msgid "<strong>%(user)s</strong> left the %(team)s team"
 msgstr ""
 
-#: apps/activity/models.py:337 apps/videos/models.py:1816
+#: apps/activity/models.py:390 apps/videos/models.py:1742
 #, python-format
 msgid "left the %(team)s team"
 msgstr ""
 
-#: apps/activity/models.py:340 amara-enterprise/collab/models.py:2509
+#: apps/activity/models.py:393 amara-enterprise/collab/models.py:2507
 msgid "left"
 msgstr ""
 
-#: apps/activity/models.py:344
+#: apps/activity/models.py:397
 msgid "Version Reviewed"
 msgstr ""
 
-#: apps/activity/models.py:351
+#: apps/activity/models.py:404
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> reviewed <a "
@@ -368,22 +397,22 @@ msgid ""
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:356
+#: apps/activity/models.py:409
 #, python-format
 msgid ""
 "reviewed <a href=\"%(language_url)s\">%(language)s</a> subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:360 templates/teams/tasks.html:285
+#: apps/activity/models.py:413 templates/teams/tasks.html:285
 msgid "reviewed"
 msgstr "nagekeken"
 
-#: apps/activity/models.py:364
+#: apps/activity/models.py:417
 msgid "Version Accepted"
 msgstr ""
 
-#: apps/activity/models.py:368
+#: apps/activity/models.py:421
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> accepted <a "
@@ -391,22 +420,22 @@ msgid ""
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:373
+#: apps/activity/models.py:426
 #, python-format
 msgid ""
 "accepted <a href=\"%(language_url)s\">%(language)s</a> subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:377
+#: apps/activity/models.py:430
 msgid "accepted"
 msgstr ""
 
-#: apps/activity/models.py:381
+#: apps/activity/models.py:434
 msgid "Version Declined"
 msgstr ""
 
-#: apps/activity/models.py:385
+#: apps/activity/models.py:438
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> declined <a "
@@ -414,44 +443,44 @@ msgid ""
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:390
+#: apps/activity/models.py:443
 #, python-format
 msgid ""
 "declined <a href=\"%(language_url)s\">%(language)s</a> subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:394
+#: apps/activity/models.py:447
 msgid "declined"
 msgstr ""
 
-#: apps/activity/models.py:398
+#: apps/activity/models.py:451
 msgid "Video deleted"
 msgstr ""
 
-#: apps/activity/models.py:406 apps/activity/models.py:415
+#: apps/activity/models.py:459 apps/activity/models.py:468
 msgid "Unknown video"
 msgstr ""
 
-#: apps/activity/models.py:407
+#: apps/activity/models.py:460
 #, python-format
 msgid "<strong>%(user)s</strong> deleted a video: %(title)s"
 msgstr ""
 
-#: apps/activity/models.py:416
+#: apps/activity/models.py:469
 #, python-format
 msgid "deleted a video: %(title)s"
 msgstr ""
 
-#: apps/activity/models.py:420
+#: apps/activity/models.py:473
 msgid "deleted"
 msgstr ""
 
-#: apps/activity/models.py:424
+#: apps/activity/models.py:477
 msgid "Video URL edited"
 msgstr ""
 
-#: apps/activity/models.py:430
+#: apps/activity/models.py:483
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> changed primary url from <a "
@@ -459,161 +488,179 @@ msgid ""
 "href=\"%(new_url)s\">%(new_url)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:435
+#: apps/activity/models.py:488
 #, python-format
 msgid "<strong>%(user)s</strong> changed the primary url"
 msgstr ""
 
-#: apps/activity/models.py:441
+#: apps/activity/models.py:494
 #, python-format
 msgid ""
 "changed primary url from <a href=\"%(old_url)s\">%(old_url)s</a> to <a "
 "href=\"%(new_url)s\">%(new_url)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:446
+#: apps/activity/models.py:499
 msgid "changed the primary url"
 msgstr ""
 
-#: apps/activity/models.py:450
+#: apps/activity/models.py:503
 msgid "made URL primary"
 msgstr ""
 
-#: apps/activity/models.py:454
+#: apps/activity/models.py:507
 msgid "Video URL deleted"
 msgstr ""
 
-#: apps/activity/models.py:459
+#: apps/activity/models.py:512
 #, python-format
 msgid "<strong>%(user)s</strong> deleted url <a href=\"%(url)s\">%(url)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:464
+#: apps/activity/models.py:517
 #, python-format
 msgid "deleted url <a href=\"%(url)s\">%(url)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:468
+#: apps/activity/models.py:521
 msgid "deleted URL"
 msgstr ""
 
-#: apps/activity/models.py:472
+#: apps/activity/models.py:525
 msgid "Video moved to team"
 msgstr ""
 
-#: apps/activity/models.py:478
+#: apps/activity/models.py:531
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> moved <a href=\"%(video_url)s\">%(video)s</a> to "
 "%(to_team)s"
 msgstr ""
 
-#: apps/activity/models.py:482
+#: apps/activity/models.py:535
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> moved <a href=\"%(video_url)s\">%(video)s</a> to "
 "%(to_team)s from <a href=\"%(from_team_url)s\">%(from_team_name)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:486
+#: apps/activity/models.py:539
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> moved <a href=\"%(video_url)s\">%(video)s</a> to "
 "%(to_team)s from another team"
 msgstr ""
 
-#: apps/activity/models.py:494
+#: apps/activity/models.py:547
 #, python-format
 msgid "moved <a href=\"%(video_url)s\">%(video)s</a> to %(to_team)s"
 msgstr ""
 
-#: apps/activity/models.py:498
+#: apps/activity/models.py:551
 #, python-format
 msgid ""
 "moved <a href=\"%(video_url)s\">%(video)s</a> to %(to_team)s from <a "
 "href=\"%(from_team_url)s\">%(from_team_name)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:502
+#: apps/activity/models.py:555
 #, python-format
 msgid ""
 "moved <a href=\"%(video_url)s\">%(video)s</a> to %(to_team)s from another "
 "team"
 msgstr ""
 
-#: apps/activity/models.py:508
+#: apps/activity/models.py:561
 msgid "moved video to team"
 msgstr ""
 
-#: apps/activity/models.py:512
+#: apps/activity/models.py:565
 msgid "Video moved from team"
 msgstr ""
 
-#: apps/activity/models.py:518
+#: apps/activity/models.py:571
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> removed <a href=\"%(video_url)s\">%(video)s</a> "
 "from %(from_team)s"
 msgstr ""
 
-#: apps/activity/models.py:522
+#: apps/activity/models.py:575
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> moved <a href=\"%(video_url)s\">%(video)s</a> from"
 " %(from_team)s to <a href=\"%(to_team_url)s\">%(to_team_name)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:526
+#: apps/activity/models.py:579
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> moved <a href=\"%(video_url)s\">%(video)s</a> from"
 " %(from_team)s to another team"
 msgstr ""
 
-#: apps/activity/models.py:534
+#: apps/activity/models.py:587
 #, python-format
 msgid "removed <a href=\"%(video_url)s\">%(video)s</a> from %(from_team)s"
 msgstr ""
 
-#: apps/activity/models.py:538
+#: apps/activity/models.py:591
 #, python-format
 msgid ""
 "moved <a href=\"%(video_url)s\">%(video)s</a> from %(from_team)s to <a "
 "href=\"%(to_team_url)s\">%(to_team_name)s</a>"
 msgstr ""
 
-#: apps/activity/models.py:542
+#: apps/activity/models.py:595
 #, python-format
 msgid ""
 "moved <a href=\"%(video_url)s\">%(video)s</a> from %(from_team)s to another "
 "team"
 msgstr ""
 
-#: apps/activity/models.py:548
+#: apps/activity/models.py:601
 msgid "moved video from team"
 msgstr ""
 
-#: apps/videos/oldviews.py:149 apps/videos/views.py:156
+#: apps/activity/models.py:605
+msgid "Team settings changed"
+msgstr ""
+
+#: apps/activity/models.py:610
+#, python-format
+msgid "<strong>%(user)s</strong> changed team settings: %(change_list)s"
+msgstr ""
+
+#: apps/activity/models.py:618
+#, python-format
+msgid "changed team settings: %(change_list)s"
+msgstr ""
+
+#: apps/activity/models.py:624
+msgid "changed team setting"
+msgstr ""
+
+#: apps/videos/oldviews.py:149 apps/videos/views.py:157
 msgid "original"
 msgstr "origineel"
 
-#: apps/videos/oldviews.py:154 apps/videos/views.py:161
+#: apps/videos/oldviews.py:154 apps/videos/views.py:162
 msgid "incomplete"
 msgstr "onvoltooid"
 
-#: apps/videos/oldviews.py:162 apps/videos/views.py:169
+#: apps/videos/oldviews.py:162 apps/videos/views.py:170
 msgid "needs review"
 msgstr "beoordeling nodig"
 
-#: apps/videos/oldviews.py:165 apps/videos/views.py:172
+#: apps/videos/oldviews.py:165 apps/videos/views.py:173
 msgid "needs approval"
 msgstr "goedkeuring nodig"
 
-#: apps/videos/oldviews.py:170 apps/videos/views.py:177
+#: apps/videos/oldviews.py:170 apps/videos/views.py:178
 msgid "needs editing"
 msgstr "bewerking nodig"
 
-#: apps/videos/oldviews.py:209 apps/videos/views.py:238
+#: apps/videos/oldviews.py:209 apps/videos/views.py:242
 msgid ""
 "Here is the subtitle workspace for your video.\n"
 "        You can share the video with friends, or get an embed code for your site. To start\n"
@@ -627,11 +674,11 @@ msgid ""
 "                content warnings."
 msgstr "U hebt een video ingediend\n                die over http wordt verzonden. Uw browser kan waarschuwingen\n                over gemengde inhoud weergeven."
 
-#: apps/videos/oldviews.py:222 apps/videos/views.py:243
+#: apps/videos/oldviews.py:222 apps/videos/views.py:247
 msgid "Existing subtitles will be imported in a few minutes."
 msgstr "Bestaande ondertitels worden binnen een paar minuten geïmporteerd. "
 
-#: apps/videos/oldviews.py:409 apps/videos/views.py:504
+#: apps/videos/oldviews.py:409 apps/videos/views.py:508
 msgid ""
 "Thank you for uploading. It may take a minute or so for your subtitles to "
 "appear."
@@ -642,24 +689,24 @@ msgstr "Bedankt voor het uploaden. Het  kan een paar minuten duren voordat uw on
 msgid "%(title)s with subtitles | Amara"
 msgstr ""
 
-#: apps/videos/oldviews.py:670 apps/videos/views.py:787
+#: apps/videos/oldviews.py:670 apps/videos/views.py:799
 msgid "You don't have permission to rollback this language"
 msgstr "U hebt geen rechten om deze taal terug te zetten"
 
-#: apps/videos/oldviews.py:766 apps/videos/views.py:883
+#: apps/videos/oldviews.py:766 apps/videos/views.py:895
 msgid "You have not permission change this URL"
 msgstr "U hebt geen rechten om deze URL te wijzigen"
 
 #: apps/videos/oldviews.py:771 apps/videos/oldviews.py:795
-#: apps/videos/views.py:888 apps/videos/views.py:912
+#: apps/videos/views.py:900 apps/videos/views.py:924
 msgid "Object does not exist"
 msgstr "Object bestaat niet"
 
-#: apps/videos/oldviews.py:786 apps/videos/views.py:903
+#: apps/videos/oldviews.py:786 apps/videos/views.py:915
 msgid "You have not permission delete this URL"
 msgstr "U hebt geen rechten om deze URL te verwijderen"
 
-#: apps/videos/oldviews.py:911 apps/videos/views.py:1028
+#: apps/videos/oldviews.py:911 apps/videos/views.py:1040
 #, python-format
 msgid "The language for %(video)s has been changed"
 msgstr ""
@@ -672,21 +719,21 @@ msgstr ""
 msgid "Location"
 msgstr "Locatie"
 
-#: apps/videos/views.py:211 templates/videos/watch-home.html:19
+#: apps/videos/views.py:215 templates/videos/watch-home.html:19
 msgid "Featured Videos"
 msgstr "Aanbevolen video’s"
 
-#: apps/videos/views.py:215 templates/videos/watch-home.html:34
+#: apps/videos/views.py:219 templates/videos/watch-home.html:34
 #: templates/new-teams/landing-page.html:5
 msgid "Latest Videos"
 msgstr "Nieuwste video’s"
 
-#: apps/videos/views.py:221
+#: apps/videos/views.py:225
 #, python-format
 msgid "Searching for \"%(query)s\""
 msgstr ""
 
-#: apps/videos/views.py:225 apps/teams/forms.py:1237
+#: apps/videos/views.py:229 apps/teams/forms.py:1264
 #: amara-enterprise/collab/forms/search.py:150
 msgid "Search for videos"
 msgstr ""
@@ -886,232 +933,232 @@ msgstr "U volgt deze ondertitels nu."
 msgid "You stopped following this subtitles now."
 msgstr "U volgt deze ondertitels nu niet meer."
 
-#: apps/videos/models.py:355
+#: apps/videos/models.py:353
 msgid "in seconds"
 msgstr "in seconden"
 
-#: apps/videos/models.py:393
+#: apps/videos/models.py:391
 msgid "Views"
 msgstr "Weergaven"
 
-#: apps/videos/models.py:683
+#: apps/videos/models.py:681
 msgid "No Video URL"
 msgstr "Geen video URL"
 
-#: apps/videos/models.py:1717
+#: apps/videos/models.py:1643
 #, python-format
 msgid ""
 "  reviewed <a href=\"%(language_url)s\">%(new_language)s</a> subtitles for "
 "<a href=\"%(video_url)s\"> %(video_name)s</a>"
 msgstr ""
 
-#: apps/videos/models.py:1722
+#: apps/videos/models.py:1648
 #, python-format
 msgid ""
 "  accepted <a href=\"%(language_url)s\">%(new_language)s</a> subtitles for "
 "<a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "  heeft ondertitels in het <a href=\"%(language_url)s\">%(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> geaccepteerd"
 
-#: apps/videos/models.py:1727
+#: apps/videos/models.py:1653
 #, python-format
 msgid ""
 "  rejected <a href=\"%(language_url)s\">%(new_language)s</a> subtitles for "
 "<a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "  heeft ondertitels in het <a href=\"%(language_url)s\">%(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> geweigerd"
 
-#: apps/videos/models.py:1732
+#: apps/videos/models.py:1658
 #, python-format
 msgid ""
 "  approved <a href=\"%(language_url)s\">%(new_language)s</a> subtitles for "
 "<a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "  heeft ondertitels in het <a href=\"%(language_url)s\">%(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> goedgekeurd"
 
-#: apps/videos/models.py:1737
+#: apps/videos/models.py:1663
 #, python-format
 msgid ""
 "  declined <a href=\"%(language_url)s\">%(new_language)s</a> subtitles for "
 "<a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "  heeft ondertitels in het <a href=\"%(language_url)s\">%(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> geweigerd"
 
-#: apps/videos/models.py:1743
+#: apps/videos/models.py:1669
 #, python-format
 msgid "  deleted a video: \"%(title)s\""
 msgstr "  heeft een video verwijderd: \"%(title)s\""
 
-#: apps/videos/models.py:1748
+#: apps/videos/models.py:1674
 #, python-format
 msgid "added <a href=\"%(video_url)s\">&#8220;%(video_name)s&#8221;</a> to Amara"
 msgstr "heeft <a href=\"%(video_url)s\">&#8220;%(video_name)s&#8221;</a> aan Amara toegevoegd"
 
-#: apps/videos/models.py:1750
+#: apps/videos/models.py:1676
 #, python-format
 msgid "<a href=\"%(video_url)s\">%(video_name)s</a> added to Amara"
 msgstr "<a href=\"%(video_url)s\">%(video_name)s</a> aan Amara toegevoegd"
 
-#: apps/videos/models.py:1756
+#: apps/videos/models.py:1682
 #, python-format
 msgid "changed title for <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "heeft de titel voor <a href=\"%(video_url)s\">%(video_name)s</a> gewijzigd"
 
-#: apps/videos/models.py:1758
+#: apps/videos/models.py:1684
 #, python-format
 msgid "Title was changed for <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "De titel van <a href=\"%(video_url)s\">%(video_name)s</a> is gewijzigd"
 
-#: apps/videos/models.py:1772
+#: apps/videos/models.py:1698
 #, python-format
 msgid ""
 "commented on <a href=\"%(comments_url)s\">%(new_language)s subtitles</a> for"
 " <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "heeft op <a href=\"%(comments_url)s\">ondertitels in het %(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> gereageerd"
 
-#: apps/videos/models.py:1774
+#: apps/videos/models.py:1700
 #, python-format
 msgid ""
 "Comment added for <a href=\"%(comments_url)s\">%(new_language)s "
 "subtitles</a> for <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "Reactie toegevoegd voor <a href=\"%(comments_url)s\">ondertitels in het %(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a>"
 
-#: apps/videos/models.py:1777
+#: apps/videos/models.py:1703
 #, python-format
 msgid "commented on <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "heeft gereageerd op <a href=\"%(video_url)s\">%(video_name)s</a>"
 
-#: apps/videos/models.py:1779
+#: apps/videos/models.py:1705
 #, python-format
 msgid "Comment added for <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "Reactie toegevoegd voor <a href=\"%(video_url)s\">%(video_name)s</a>"
 
-#: apps/videos/models.py:1787
+#: apps/videos/models.py:1713
 #, python-format
 msgid ""
 "started <a href=\"%(language_url)s\">%(new_language)s subtitles</a> for <a "
 "href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "is begonnen met <a href=\"%(language_url)s\">ondertitels in het %(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a>"
 
-#: apps/videos/models.py:1789
+#: apps/videos/models.py:1715
 #, python-format
 msgid ""
 "<a href=\"%(language_url)s\">%(new_language)s subtitles</a> started for <a "
 "href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "Er is met <a href=\"%(language_url)s\">ondertitels in het %(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> begonnen"
 
-#: apps/videos/models.py:1797
+#: apps/videos/models.py:1723
 #, python-format
 msgid ""
 "edited <a href=\"%(language_url)s\">%(new_language)s subtitles</a> for <a "
 "href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "heeft <a href=\"%(language_url)s\">ondertitels in het %(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> bewerkt"
 
-#: apps/videos/models.py:1799
+#: apps/videos/models.py:1725
 #, python-format
 msgid ""
 "<a href=\"%(language_url)s\">%(new_language)s subtitles</a> edited for <a "
 "href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "<a href=\"%(language_url)s\">Ondertitels in het %(new_language)s</a> voor <a href=\"%(video_url)s\">%(video_name)s</a> zijn bewerkt"
 
-#: apps/videos/models.py:1805
+#: apps/videos/models.py:1731
 #, python-format
 msgid "added new URL for <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "heeft een nieuwe URL toegevoegd voor <a href=\"%(video_url)s\">%(video_name)s</a>"
 
-#: apps/videos/models.py:1807
+#: apps/videos/models.py:1733
 #, python-format
 msgid "New URL added for <a href=\"%(video_url)s\">%(video_name)s</a>"
 msgstr "Nieuwe URL toegevoegd voor <a href=\"%(video_url)s\">%(video_name)s</a>"
 
-#: apps/videos/models.py:1828
+#: apps/videos/models.py:1754
 #, python-format
 msgid ""
 "  changed primary url from <a href=\"%(old_url)s\">%(old_url)s</a> to <a "
 "href=\"%(new_url)s\">%(new_url)s</a>"
 msgstr "heeft primaire url van <a href=\"%(old_url)s\">%(old_url)s</a> naar <a href=\"%(new_url)s\">%(new_url)s</a> gewijzigd"
 
-#: apps/videos/models.py:1834
+#: apps/videos/models.py:1760
 #, python-format
 msgid "  deleted url <a href=\"%(title)s\">%(title)s</a>"
 msgstr "heeft url <a href=\"%(title)s\">%(title)s</a> verwijderd"
 
-#: apps/videos/models.py:1879
+#: apps/videos/models.py:1805
 msgid "add video"
 msgstr "video toevoegen"
 
-#: apps/videos/models.py:1880
+#: apps/videos/models.py:1806
 msgid "change title"
 msgstr "titel wijzigen"
 
-#: apps/videos/models.py:1881
+#: apps/videos/models.py:1807
 msgid "comment"
 msgstr "reactie"
 
-#: apps/videos/models.py:1882
+#: apps/videos/models.py:1808
 msgid "add version"
 msgstr "versie toevoegen"
 
-#: apps/videos/models.py:1883
+#: apps/videos/models.py:1809
 msgid "add translation"
 msgstr "vertaling toevoegen"
 
-#: apps/videos/models.py:1884
+#: apps/videos/models.py:1810
 msgid "add video url"
 msgstr "video-url toevoegen"
 
-#: apps/videos/models.py:1885
+#: apps/videos/models.py:1811
 msgid "request subtitles"
 msgstr "ondertitels aanvragen"
 
-#: apps/videos/models.py:1886
+#: apps/videos/models.py:1812
 msgid "approve version"
 msgstr "goedgekeurde versie"
 
-#: apps/videos/models.py:1887
+#: apps/videos/models.py:1813
 msgid "add contributor"
 msgstr "medewerker toevoegen"
 
-#: apps/videos/models.py:1888
+#: apps/videos/models.py:1814
 msgid "remove contributor"
 msgstr "medewerker verwijderen"
 
-#: apps/videos/models.py:1889
+#: apps/videos/models.py:1815
 msgid "reject version"
 msgstr "versie verwerpen"
 
-#: apps/videos/models.py:1890
+#: apps/videos/models.py:1816
 msgid "review version"
 msgstr "versie beoordelen"
 
-#: apps/videos/models.py:1891
+#: apps/videos/models.py:1817
 msgid "accept version"
 msgstr "versie accepteren"
 
-#: apps/videos/models.py:1892
+#: apps/videos/models.py:1818
 msgid "decline version"
 msgstr "versie weigeren"
 
-#: apps/videos/models.py:1893
+#: apps/videos/models.py:1819
 msgid "delete video"
 msgstr "video verwijderen"
 
-#: apps/videos/models.py:1894
+#: apps/videos/models.py:1820
 msgid "edit url"
 msgstr "url bewerken"
 
-#: apps/videos/models.py:1895
+#: apps/videos/models.py:1821
 msgid "delete url"
 msgstr "url verwijderen"
 
-#: apps/videos/models.py:2177
+#: apps/videos/models.py:2103
 msgid "Unknown video type"
 msgstr "Onbekende video soort"
 
-#: apps/videos/models.py:2187
+#: apps/videos/models.py:2113
 #, python-format
 msgid ""
 "This URL already <a href=\"%(url)s\">exists</a> as its own video in our "
 "system. You can't add it as a secondary URL."
 msgstr "Deze URL <a href=\"%(url)s\">verwijst</a> al naar een video op ons systeem. Je kan hem niet toevoegen als bijkomende URL."
 
-#: apps/videos/models.py:2221
+#: apps/videos/models.py:2147
 msgid "Can't remove the primary video URL"
 msgstr "Kan niet de primaire video URL verwijderen"
 
@@ -1125,10 +1172,10 @@ msgstr "Ondertitels bewerken"
 
 #: apps/videos/templatetags/videos_tags.py:125
 #: amara-enterprise/collab/models.py:1050
-#: amara-enterprise/collab/models.py:2273
-#: amara-enterprise/collab/models.py:2288
-#: amara-enterprise/collab/models.py:2873
-#: amara-enterprise/collab/models.py:2880
+#: amara-enterprise/collab/models.py:2271
+#: amara-enterprise/collab/models.py:2286
+#: amara-enterprise/collab/models.py:2871
+#: amara-enterprise/collab/models.py:2878
 #: amara-enterprise/collab/forms/oldsearch.py:204
 #: amara-enterprise/collab/forms/oldsearch.py:346
 msgid "Unknown"
@@ -1235,19 +1282,19 @@ msgstr "en gepubliceerd"
 msgid "Needed: additional changes on your subtitles!"
 msgstr ""
 
-#: apps/messages/tasks.py:575
+#: apps/messages/tasks.py:583
 msgid "Your subtitles have been approved and published!"
 msgstr "Uw ondertiteling is goedgekeurd en gepubliceerd!"
 
-#: apps/messages/tasks.py:587
+#: apps/messages/tasks.py:599
 msgid "Your subtitles have been returned for further editing"
 msgstr "Uw ondertiteling is teruggestuurd voor verdere bewerking"
 
-#: apps/messages/tasks.py:655
+#: apps/messages/tasks.py:659
 msgid "Your subtitles were not accepted"
 msgstr "Uw ondertitels zijn niet geaccepteerd."
 
-#: apps/messages/tasks.py:759
+#: apps/messages/tasks.py:763
 #, python-format
 msgid "%(user)s left a comment on the video %(title)s"
 msgstr "%(user)s heeft een reactie achtergelaten op de video %(title)s"
@@ -1279,7 +1326,7 @@ msgstr ""
 
 #: apps/ui/views.py:49 apps/teams/subtitle_actions.py:29
 #: apps/teams/workflows/old/subtitleworkflows.py:76
-#: amara-enterprise/collab/const.py:114 amara-enterprise/collab/models.py:1989
+#: amara-enterprise/collab/const.py:114 amara-enterprise/collab/models.py:1987
 #: amara-enterprise/collab/ui.py:120 amara-enterprise/collab/ui.py:332
 #: amara-enterprise/collab/state_pipeline.py:370
 #: amara-enterprise/collab/forms/management.py:515
@@ -1432,15 +1479,15 @@ msgstr "Team mogelijkheden geven"
 msgid "Unfeature teams"
 msgstr "Team geen mogelijkheden meer geven"
 
-#: apps/teams/admin.py:151 apps/teams/admin.py:168 apps/teams/admin.py:284
-#: apps/teams/models.py:296 apps/externalsites/models.py:98
+#: apps/teams/admin.py:154 apps/teams/admin.py:171 apps/teams/admin.py:287
+#: apps/teams/models.py:297 apps/externalsites/models.py:104
 #: amara-enterprise/billing/templatetags/billing.py:15
 #: templates/teams/_subnav_activity.html:6
 msgid "Team"
 msgstr "Team"
 
-#: apps/teams/admin.py:157 apps/teams/admin.py:290
-#: apps/externalsites/models.py:97 templates/new-teams/admin-list.html:11
+#: apps/teams/admin.py:160 apps/teams/admin.py:293
+#: apps/externalsites/models.py:103 templates/new-teams/admin-list.html:11
 #: amara-enterprise/providers/templates/providers/queue.html:23
 msgid "User"
 msgstr "Gebruiker"
@@ -1605,7 +1652,7 @@ msgstr ""
 msgid "Video Feeds"
 msgstr ""
 
-#: apps/teams/new_views.py:980 apps/teams/views.py:1936
+#: apps/teams/new_views.py:980 apps/teams/views.py:1939
 msgid "Project added."
 msgstr "Het project is toegevoegd."
 
@@ -1613,7 +1660,7 @@ msgstr "Het project is toegevoegd."
 msgid "Project updated."
 msgstr "Project bijgewerkt."
 
-#: apps/teams/new_views.py:1006 apps/teams/views.py:1964
+#: apps/teams/new_views.py:1006 apps/teams/views.py:1967
 msgid "Project deleted."
 msgstr "Project verwijderd."
 
@@ -1629,7 +1676,7 @@ msgstr "Projecten"
 #: apps/teams/oldforms.py:1381 apps/teams/oldforms.py:1493
 #: apps/teams/oldforms.py:1543 apps/teams/oldforms.py:1562
 #: apps/teams/forms.py:219 apps/teams/forms.py:286 apps/teams/forms.py:401
-#: apps/teams/forms.py:492 apps/teams/forms.py:1638 apps/teams/forms.py:1735
+#: apps/teams/forms.py:492 apps/teams/forms.py:1665 apps/teams/forms.py:1762
 #: apps/teams/templatetags/teams_tags.py:192
 #: amara-enterprise/billing/templatetags/billing.py:19
 #: amara-enterprise/collab/forms/oldsearch.py:194
@@ -1657,7 +1704,7 @@ msgid "No project"
 msgstr "Geen project"
 
 #: apps/teams/oldforms.py:233 apps/teams/forms.py:394 apps/teams/forms.py:485
-#: apps/teams/forms.py:1238 apps/teams/forms.py:1294
+#: apps/teams/forms.py:1265 apps/teams/forms.py:1321
 #: amara-enterprise/collab/forms/search.py:154
 #: amara-enterprise/providers/forms.py:163
 msgid "Video language"
@@ -1794,49 +1841,49 @@ msgstr "Maximaal 940 x 235"
 msgid "Recommended size: 100 x 100"
 msgstr "Aanbevolen grootte: 100 x 100"
 
-#: apps/teams/oldforms.py:610 apps/teams/forms.py:877
-#: amara-enterprise/collab/forms/workflow.py:30
-#: amara-enterprise/collab/forms/workflow.py:98
+#: apps/teams/oldforms.py:610 apps/teams/forms.py:895
+#: amara-enterprise/collab/forms/workflow.py:31
+#: amara-enterprise/collab/forms/workflow.py:102
 #: templates/teams/settings-workflows.html:29
 msgid "How can users join your team?"
 msgstr "Hoe kunnen gebruikers zich bij uw team aansluiten?"
 
-#: apps/teams/oldforms.py:611 apps/teams/forms.py:878
-#: amara-enterprise/collab/forms/workflow.py:33
-#: amara-enterprise/collab/forms/workflow.py:101
+#: apps/teams/oldforms.py:611 apps/teams/forms.py:896
+#: amara-enterprise/collab/forms/workflow.py:34
+#: amara-enterprise/collab/forms/workflow.py:105
 #: templates/teams/settings-workflows.html:32
 msgid "Who can add/remove videos?"
 msgstr "Wie kan video’s toevoegen/verwijderen?"
 
-#: apps/teams/oldforms.py:630 apps/teams/forms.py:897
+#: apps/teams/oldforms.py:630 apps/teams/forms.py:924
 msgid "You cannot blacklist a preferred language."
 msgstr "U kunt een taal van uw voorkeur niet op de zwarte lijst zetten."
 
 #: apps/teams/oldforms.py:637 apps/teams/oldforms.py:677
-#: apps/teams/forms.py:904 apps/teams/forms.py:944
+#: apps/teams/forms.py:931 apps/teams/forms.py:971
 #: templates/teams/invite_members.html:38
 msgid "Assign a role"
 msgstr "Een rol toewijzen"
 
-#: apps/teams/oldforms.py:640 apps/teams/forms.py:907
+#: apps/teams/oldforms.py:640 apps/teams/forms.py:934
 msgid "Users to add to team"
 msgstr ""
 
-#: apps/teams/oldforms.py:670 apps/teams/forms.py:937
+#: apps/teams/oldforms.py:670 apps/teams/forms.py:964
 msgid "User is already a member of this team"
 msgstr "De gebruiker is al lid van dit team"
 
-#: apps/teams/oldforms.py:674 apps/teams/forms.py:941
+#: apps/teams/oldforms.py:674 apps/teams/forms.py:968
 msgid "Message to user"
 msgstr "Bericht naar gebruiker"
 
 #: apps/teams/oldforms.py:718 apps/teams/oldforms.py:755
-#: apps/teams/forms.py:985 apps/teams/forms.py:1022
+#: apps/teams/forms.py:1012 apps/teams/forms.py:1049
 msgid "There's already a project with this name"
 msgstr "Er is al een project met deze naam"
 
 #: apps/teams/oldforms.py:798 apps/teams/oldforms.py:839
-#: apps/teams/forms.py:1065 apps/teams/forms.py:1106
+#: apps/teams/forms.py:1092 apps/teams/forms.py:1133
 #, python-format
 msgid "%(user)s is not a manager"
 msgstr ""
@@ -1847,8 +1894,8 @@ msgid ""
 "continue"
 msgstr "Typ “Ja, ik wil deze taal verwijderen” als u zeker weet dat u wilt doorgaan."
 
-#: apps/teams/oldforms.py:851 apps/teams/forms.py:1691
-#: apps/subtitles/forms.py:435
+#: apps/teams/oldforms.py:851 apps/teams/forms.py:1718
+#: apps/subtitles/forms.py:431
 msgid "Are you sure?"
 msgstr "Weet u het zeker?"
 
@@ -1868,23 +1915,23 @@ msgstr "Deze ondertiteling staat niet onder controle van een team."
 msgid "You do not have permission to delete this language."
 msgstr "U hebt geen rechten om deze taal te verwijderen."
 
-#: apps/teams/oldforms.py:923 apps/teams/forms.py:1127
+#: apps/teams/oldforms.py:923 apps/teams/forms.py:1154
 msgid "You cannot perform that task."
 msgstr "U kunt die taak niet uitvoeren."
 
-#: apps/teams/oldforms.py:926 apps/teams/forms.py:1130
+#: apps/teams/oldforms.py:926 apps/teams/forms.py:1157
 msgid "Mismatched video and task!"
 msgstr "Video en taak komen niet overeen!"
 
-#: apps/teams/oldforms.py:936 apps/teams/forms.py:1140
+#: apps/teams/oldforms.py:936 apps/teams/forms.py:1167
 msgid "Task has been deleted"
 msgstr "Taak is verwijderd"
 
-#: apps/teams/oldforms.py:942 apps/teams/forms.py:1146
+#: apps/teams/oldforms.py:942 apps/teams/forms.py:1173
 msgid "The selected language does not match the task."
 msgstr "De geselecteerde taal komt niet overeen met de taak."
 
-#: apps/teams/oldforms.py:950 apps/teams/forms.py:1154
+#: apps/teams/oldforms.py:950 apps/teams/forms.py:1181
 #, python-format
 msgid ""
 "The selected source language %(from_code)s does not match the existing "
@@ -1903,27 +1950,27 @@ msgstr ""
 msgid "Missing completed language"
 msgstr ""
 
-#: apps/teams/oldforms.py:1048 apps/teams/forms.py:1245
+#: apps/teams/oldforms.py:1048 apps/teams/forms.py:1272
 msgid "Name, a-z"
 msgstr "Naam, a-z"
 
-#: apps/teams/oldforms.py:1049 apps/teams/forms.py:1246
+#: apps/teams/oldforms.py:1049 apps/teams/forms.py:1273
 msgid "Name, z-a"
 msgstr "Naam, z-a"
 
-#: apps/teams/oldforms.py:1050 apps/teams/forms.py:1244
+#: apps/teams/oldforms.py:1050 apps/teams/forms.py:1271
 msgid "Time, oldest"
 msgstr ""
 
-#: apps/teams/oldforms.py:1051 apps/teams/forms.py:1243
+#: apps/teams/oldforms.py:1051 apps/teams/forms.py:1270
 msgid "Time, newest"
 msgstr ""
 
-#: apps/teams/oldforms.py:1052 apps/teams/forms.py:1247
+#: apps/teams/oldforms.py:1052 apps/teams/forms.py:1274
 msgid "Most completed languages"
 msgstr ""
 
-#: apps/teams/oldforms.py:1053 apps/teams/forms.py:1248
+#: apps/teams/oldforms.py:1053 apps/teams/forms.py:1275
 msgid "Least completed languages"
 msgstr ""
 
@@ -1931,46 +1978,46 @@ msgstr ""
 msgid "No Project"
 msgstr "Geen project"
 
-#: apps/teams/oldforms.py:1144 apps/teams/forms.py:1319
+#: apps/teams/oldforms.py:1144 apps/teams/forms.py:1346
 #: templates/teams/tasks.html:127
 msgid "date, newest"
 msgstr "datum, meest recent"
 
-#: apps/teams/oldforms.py:1145 apps/teams/forms.py:1320
+#: apps/teams/oldforms.py:1145 apps/teams/forms.py:1347
 #: templates/teams/tasks.html:131
 msgid "date, oldest"
 msgstr "datum, oudste"
 
-#: apps/teams/oldforms.py:1148 apps/teams/forms.py:1323
+#: apps/teams/oldforms.py:1148 apps/teams/forms.py:1350
 msgid "Activity Type"
 msgstr ""
 
-#: apps/teams/oldforms.py:1151 apps/teams/forms.py:1326
-#: apps/teams/forms.py:1635 amara-enterprise/collab/forms/management.py:67
+#: apps/teams/oldforms.py:1151 apps/teams/forms.py:1353
+#: apps/teams/forms.py:1662 amara-enterprise/collab/forms/management.py:67
 #: amara-enterprise/collab/forms/management.py:221
 #: amara-enterprise/prorequests/forms.py:204
 #: templates/videos/_upload_subtitles.html:32 templates/teams/tasks.html:375
 msgid "Video Language"
 msgstr "Taal van de video"
 
-#: apps/teams/oldforms.py:1154 apps/teams/forms.py:1329
+#: apps/teams/oldforms.py:1154 apps/teams/forms.py:1356
 msgid "Subtitle Language"
 msgstr ""
 
-#: apps/teams/oldforms.py:1157 apps/teams/forms.py:1332
+#: apps/teams/oldforms.py:1157 apps/teams/forms.py:1359
 msgid "Sorted by"
 msgstr "Gesorteerd op"
 
-#: apps/teams/oldforms.py:1177 apps/teams/forms.py:1352
+#: apps/teams/oldforms.py:1177 apps/teams/forms.py:1379
 msgid "Any type"
 msgstr ""
 
-#: apps/teams/oldforms.py:1214 apps/teams/forms.py:1389
+#: apps/teams/oldforms.py:1214 apps/teams/forms.py:1416
 msgid "Any language"
 msgstr ""
 
-#: apps/teams/oldforms.py:1217 apps/teams/forms.py:1392
-#: templates/new-base.html:97 templates/base.html:137 templates/footer.html:37
+#: apps/teams/oldforms.py:1217 apps/teams/forms.py:1419
+#: templates/new-base.html:96 templates/base.html:136 templates/footer.html:37
 #: templates/future/base.html:69 templates/future/base.html:95
 #: templates/search/_search_form.html:32
 #: amara-enterprise/collab/templates/collab/_collab-search-form.html:27
@@ -1978,54 +2025,54 @@ msgstr ""
 msgid "Search"
 msgstr "Zoeken"
 
-#: apps/teams/oldforms.py:1220 apps/teams/forms.py:1395
+#: apps/teams/oldforms.py:1220 apps/teams/forms.py:1422
 msgid "All roles"
 msgstr "Alle rollen"
 
-#: apps/teams/oldforms.py:1221 apps/teams/forms.py:1396
+#: apps/teams/oldforms.py:1221 apps/teams/forms.py:1423
 msgid "Admins"
 msgstr "Beheerders"
 
-#: apps/teams/oldforms.py:1222 apps/teams/forms.py:1397
+#: apps/teams/oldforms.py:1222 apps/teams/forms.py:1424
 #: templates/new-teams/project-page.html:16
 #: templates/new-teams/language-page.html:11
 msgid "Managers"
 msgstr "Beheerders"
 
-#: apps/teams/oldforms.py:1223 apps/teams/forms.py:1398
+#: apps/teams/oldforms.py:1223 apps/teams/forms.py:1425
 msgid "Contributors"
 msgstr ""
 
-#: apps/teams/oldforms.py:1226 apps/teams/forms.py:1401
+#: apps/teams/oldforms.py:1226 apps/teams/forms.py:1428
 msgid "Language spoken"
 msgstr ""
 
-#: apps/teams/oldforms.py:1229 apps/teams/forms.py:1404
+#: apps/teams/oldforms.py:1229 apps/teams/forms.py:1431
 msgid "Date joined, most recent"
 msgstr ""
 
-#: apps/teams/oldforms.py:1230 apps/teams/forms.py:1405
+#: apps/teams/oldforms.py:1230 apps/teams/forms.py:1432
 msgid "Date joined, oldest"
 msgstr ""
 
 #: apps/teams/oldforms.py:1285 apps/teams/permissions_const.py:47
-#: apps/teams/forms.py:1460 apps/teams/models.py:1405
+#: apps/teams/forms.py:1487 apps/teams/models.py:1453
 msgid "Contributor"
 msgstr "Medewerker"
 
 #: apps/teams/oldforms.py:1286 apps/teams/permissions_const.py:46
-#: apps/teams/forms.py:1461 apps/teams/models.py:1403
+#: apps/teams/forms.py:1488 apps/teams/models.py:1451
 msgid "Manager"
 msgstr "Beheerder"
 
 #: apps/teams/oldforms.py:1287 apps/teams/permissions_const.py:44
-#: apps/teams/forms.py:1462 apps/teams/models.py:1404
-#: templates/new-base.html:108 templates/base.html:168
-#: templates/hands_base.html:96
+#: apps/teams/forms.py:1489 apps/teams/models.py:1452
+#: templates/new-base.html:107 templates/base.html:167
+#: templates/hands_base.html:95
 msgid "Admin"
 msgstr "Beheer"
 
-#: apps/teams/oldforms.py:1288 apps/teams/forms.py:1463
+#: apps/teams/oldforms.py:1288 apps/teams/forms.py:1490
 msgid "Member Role"
 msgstr ""
 
@@ -2034,22 +2081,22 @@ msgstr ""
 msgid "Include all %(count)s videos"
 msgstr ""
 
-#: apps/teams/oldforms.py:1380 apps/teams/forms.py:1734
+#: apps/teams/oldforms.py:1380 apps/teams/forms.py:1761
 msgid "New Team"
 msgstr "Nieuw team"
 
 #: apps/teams/oldforms.py:1397 apps/teams/oldforms.py:1399
 #: apps/teams/oldforms.py:1553 apps/teams/oldforms.py:1586
-#: apps/teams/forms.py:1752 amara-enterprise/collab/models.py:53
+#: apps/teams/forms.py:1779 amara-enterprise/collab/models.py:53
 #: templates/videos/language-sync-history-tab.html:24
 msgid "None"
 msgstr "Geen"
 
-#: apps/teams/oldforms.py:1432 apps/teams/forms.py:1786
+#: apps/teams/oldforms.py:1432 apps/teams/forms.py:1813
 msgid "Invalid project"
 msgstr "Ongeldig project"
 
-#: apps/teams/oldforms.py:1435 apps/teams/forms.py:1789
+#: apps/teams/oldforms.py:1435 apps/teams/forms.py:1816
 msgid "Project is not part of team"
 msgstr "Project is geen onderdeel van team"
 
@@ -2082,7 +2129,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: apps/teams/oldforms.py:1495 apps/teams/oldforms.py:1564
-#: apps/teams/forms.py:1640
+#: apps/teams/forms.py:1667
 msgid "Change thumbnail"
 msgstr "Verander thumbnail"
 
@@ -2097,19 +2144,19 @@ msgstr[1] ""
 msgid "Video updated."
 msgstr "Video bijgewerkt."
 
-#: apps/teams/oldforms.py:1641 apps/teams/forms.py:1524
+#: apps/teams/oldforms.py:1641 apps/teams/forms.py:1551
 #, python-format
 msgid ""
 "Tell us a little bit about yourself and why you're interested in translating"
 " with %(team)s.  This should be 3-5 sentences, no longer!"
 msgstr ""
 
-#: apps/teams/oldforms.py:1700 apps/teams/forms.py:1583
+#: apps/teams/oldforms.py:1700 apps/teams/forms.py:1610
 #, python-format
 msgid "Video %(url)s already in the %(team)s Team"
 msgstr ""
 
-#: apps/teams/oldforms.py:1703 apps/teams/forms.py:1586
+#: apps/teams/oldforms.py:1703 apps/teams/forms.py:1613
 #, python-format
 msgid "Video %(url)s already in another team"
 msgstr ""
@@ -2118,7 +2165,7 @@ msgstr ""
 msgid "CSV file"
 msgstr "CSV-bestand"
 
-#: apps/teams/permissions_const.py:45 apps/teams/models.py:1402
+#: apps/teams/permissions_const.py:45 apps/teams/models.py:1450
 msgid "Owner"
 msgstr "Eigenaar"
 
@@ -2176,157 +2223,157 @@ msgstr ""
 msgid "You do not have permission to delete this team."
 msgstr "U hebt geen rechten om dit team te verwijderen."
 
-#: apps/teams/views.py:798
+#: apps/teams/views.py:800
 msgid "You can't add that video to this team/project."
 msgstr "U kunt die video niet aan dit team/project toevoegen."
 
-#: apps/teams/views.py:831
+#: apps/teams/views.py:833
 msgid "The video has been moved to the new team."
 msgstr "De video is naar het nieuwe team verplaatst."
 
-#: apps/teams/views.py:844
+#: apps/teams/views.py:846
 msgid "You can't add videos to this team/project."
 msgstr "U kunt geen video’s aan dit team/project toevoegen."
 
-#: apps/teams/views.py:864
+#: apps/teams/views.py:866
 msgid "You can't edit this video."
 msgstr "U kunt deze video niet bewerken."
 
-#: apps/teams/views.py:873
+#: apps/teams/views.py:875
 msgid "Video has been updated."
 msgstr "De video is bijgewerkt."
 
-#: apps/teams/views.py:898
+#: apps/teams/views.py:900
 msgid "Request must be a POST request."
 msgstr "Het request moet een POST-request zijn."
 
-#: apps/teams/views.py:906
+#: apps/teams/views.py:908
 msgid "You can't delete that video."
 msgstr "U kunt die video niet verwijderen."
 
-#: apps/teams/views.py:910
+#: apps/teams/views.py:912
 msgid "You can't remove that video."
 msgstr "U kunt die video niet verwijderen."
 
-#: apps/teams/views.py:919
+#: apps/teams/views.py:921
 msgid "Video has been deleted from Amara."
 msgstr "Video is van Amara verwijderd."
 
-#: apps/teams/views.py:922
+#: apps/teams/views.py:924
 msgid "Video has been removed from the team."
 msgstr "De video is bij het team weggehaald."
 
-#: apps/teams/views.py:1038
+#: apps/teams/views.py:1040
 msgid "Member has been removed from the team."
 msgstr "Het lid werd uit het team verwijderd."
 
-#: apps/teams/views.py:1041
+#: apps/teams/views.py:1043
 msgid "Use the \"Leave this team\" button to remove yourself from this team."
 msgstr "Gebruik de knop \"Dit team verlaten\" om uzelf uit dit team uit te schrijven."
 
-#: apps/teams/views.py:1044
+#: apps/teams/views.py:1046
 msgid "You don't have permission to remove this member from the team."
 msgstr "U hebt geen rechten om dit lid uit het team te verwijderen."
 
-#: apps/teams/views.py:1085
+#: apps/teams/views.py:1087
 msgid "Invalid task to approve"
 msgstr ""
 
-#: apps/teams/views.py:1138 apps/teams/views.py:1181
+#: apps/teams/views.py:1140 apps/teams/views.py:1183
 msgid "You can't approve applications."
 msgstr "U kunt geen aanvragen goedkeuren."
 
-#: apps/teams/views.py:1140 apps/teams/views.py:1197
+#: apps/teams/views.py:1142 apps/teams/views.py:1199
 msgid "You can't deny applications."
 msgstr "U kunt geen aanvragen weigeren."
 
-#: apps/teams/views.py:1146 apps/teams/views.py:1186 apps/teams/views.py:1202
+#: apps/teams/views.py:1148 apps/teams/views.py:1188 apps/teams/views.py:1204
 msgid "Application does not exist."
 msgstr "Aanvraag bestaat niet."
 
-#: apps/teams/views.py:1149 apps/teams/views.py:1188 apps/teams/views.py:1204
+#: apps/teams/views.py:1151 apps/teams/views.py:1190 apps/teams/views.py:1206
 msgid "Application already processed."
 msgstr "Aanvraag reeds verwerkt."
 
-#: apps/teams/views.py:1152
+#: apps/teams/views.py:1154
 msgid "Applications approved."
 msgstr ""
 
-#: apps/teams/views.py:1154
+#: apps/teams/views.py:1156
 msgid "Applications denied."
 msgstr ""
 
-#: apps/teams/views.py:1184
+#: apps/teams/views.py:1186
 msgid "Application approved."
 msgstr "Aanvraag goedgekeurd."
 
-#: apps/teams/views.py:1200
+#: apps/teams/views.py:1202
 msgid "Application denied."
 msgstr "Aanvraag geweigerd."
 
-#: apps/teams/views.py:1219
+#: apps/teams/views.py:1221
 msgid "This invite is no longer valid"
 msgstr "Deze uitnodiging is niet meer geldig"
 
-#: apps/teams/views.py:1266
+#: apps/teams/views.py:1269
 msgid "You have left this team."
 msgstr "U hebt dit tam verlaten."
 
-#: apps/teams/views.py:1322
+#: apps/teams/views.py:1325
 msgid "Member saved."
 msgstr "Lid opgeslagen."
 
-#: apps/teams/views.py:1547
+#: apps/teams/views.py:1550
 msgid "You cannot view this team's tasks."
 msgstr "U hebt geen inzage in de taken van dit team."
 
-#: apps/teams/views.py:1711 apps/teams/views.py:1714
+#: apps/teams/views.py:1714 apps/teams/views.py:1717
 msgid "You are not allowed to perform this task."
 msgstr "U mag deze taak niet uitvoeren."
 
-#: apps/teams/views.py:1789
+#: apps/teams/views.py:1792
 msgid "Task deleted."
 msgstr "Taak verwijderd."
 
-#: apps/teams/views.py:1791
+#: apps/teams/views.py:1794
 msgid "You cannot delete this task."
 msgstr "U kunt deze taak niet verwijderen."
 
-#: apps/teams/views.py:1816
+#: apps/teams/views.py:1819
 msgid "Task declined."
 msgstr "Taak afgewezen."
 
-#: apps/teams/views.py:1818
+#: apps/teams/views.py:1821
 msgid "Task assigned."
 msgstr "Taak toegewezen."
 
-#: apps/teams/views.py:1820
+#: apps/teams/views.py:1823
 msgid "You cannot assign this task."
 msgstr "U kunt deze taak niet toewijzen."
 
-#: apps/teams/views.py:1862
+#: apps/teams/views.py:1865
 msgid "Draft uploaded successfully."
 msgstr "Concept met succes geüpload."
 
-#: apps/teams/views.py:1879
+#: apps/teams/views.py:1882
 msgid "You are not allowed to download this transcript."
 msgstr "U bent niet bevoegd om deze transcriptie te downloaden."
 
-#: apps/teams/views.py:1953
+#: apps/teams/views.py:1956
 msgid "You cannot edit that project."
 msgstr "U kunt dat project niet bewerken."
 
-#: apps/teams/views.py:1982
+#: apps/teams/views.py:1985
 msgid "Project saved."
 msgstr "Project opgeslagen."
 
-#: apps/teams/views.py:2264
+#: apps/teams/views.py:2267
 #, python-format
 msgid ""
 "Someone else is currently editing %(language)s. Please try again later."
 msgstr ""
 
-#: apps/teams/views.py:2302
+#: apps/teams/views.py:2305
 msgid "Successfully deleted language."
 msgstr "Taal met succes verwijderd."
 
@@ -2342,8 +2389,8 @@ msgstr "Opslaan"
 #: apps/teams/workflows/old/subtitleworkflows.py:181
 #: amara-enterprise/collab/subtitle_workflow.py:312
 #: amara-enterprise/collab/models.py:1042
-#: amara-enterprise/collab/models.py:2002
-#: amara-enterprise/collab/models.py:2284 amara-enterprise/collab/ui.py:76
+#: amara-enterprise/collab/models.py:2000
+#: amara-enterprise/collab/models.py:2282 amara-enterprise/collab/ui.py:76
 #: amara-enterprise/collab/forms/dashboard.py:103
 #: amara-enterprise/collab/forms/search.py:292
 #: amara-enterprise/vimeo/workflows.py:83 templates/teams/applications.html:62
@@ -2399,7 +2446,7 @@ msgstr ""
 msgid "Please input valid video URLs"
 msgstr ""
 
-#: apps/teams/forms.py:1239 apps/teams/forms.py:1296
+#: apps/teams/forms.py:1266 apps/teams/forms.py:1323
 #: amara-enterprise/collab/forms/dashboard.py:82
 #: amara-enterprise/collab/forms/search.py:153
 #: amara-enterprise/collab/forms/search.py:155
@@ -2408,15 +2455,15 @@ msgstr ""
 msgid "All languages"
 msgstr "Alle talen"
 
-#: apps/teams/forms.py:1298
+#: apps/teams/forms.py:1325
 msgid "Completed subtitles"
 msgstr ""
 
-#: apps/teams/forms.py:1301
+#: apps/teams/forms.py:1328
 msgid "Needs subtitles"
 msgstr ""
 
-#: apps/teams/forms.py:1632 amara-enterprise/collab/forms/management.py:451
+#: apps/teams/forms.py:1659 amara-enterprise/collab/forms/management.py:451
 #: amara-enterprise/collab/forms/management.py:672
 #: templates/profiles/view.html:35 templates/teams/_team_video_detail.html:48
 #: templates/teams/_team_video_summary.html:48
@@ -2426,28 +2473,28 @@ msgstr ""
 msgid "Edit"
 msgstr "Bewerken"
 
-#: apps/teams/forms.py:1637 apps/teams/forms.py:1639
+#: apps/teams/forms.py:1664 apps/teams/forms.py:1666
 #: amara-enterprise/billing/forms.py:155
 #: amara-enterprise/collab/forms/management.py:429
 msgid "No change"
 msgstr ""
 
-#: apps/teams/forms.py:1650
+#: apps/teams/forms.py:1677
 msgid "No language set"
 msgstr ""
 
-#: apps/teams/forms.py:1674
+#: apps/teams/forms.py:1701
 #, python-format
 msgid "Video has been edited"
 msgid_plural "%(count)s videos have been edited"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/teams/forms.py:1680
+#: apps/teams/forms.py:1707
 msgid "Yes, I want to delete this video"
 msgstr ""
 
-#: apps/teams/forms.py:1683 amara-enterprise/collab/models.py:3047
+#: apps/teams/forms.py:1710 amara-enterprise/collab/models.py:3045
 #: templates/profiles/account.html:83 templates/profiles/account.html:94
 #: templates/videos/video-urls-tab.html:38
 #: templates/teams/_team_video_detail.html:56
@@ -2462,34 +2509,34 @@ msgstr ""
 msgid "Remove"
 msgstr "Verwijderen"
 
-#: apps/teams/forms.py:1688
+#: apps/teams/forms.py:1715
 msgid "Delete entirely"
 msgstr ""
 
-#: apps/teams/forms.py:1689
+#: apps/teams/forms.py:1716
 msgid "Delete videos rather than moving them to the public area"
 msgstr ""
 
-#: apps/teams/forms.py:1698
+#: apps/teams/forms.py:1725
 #, python-format
 msgid "Please type: \"%(words)s\""
 msgstr ""
 
-#: apps/teams/forms.py:1721
+#: apps/teams/forms.py:1748
 #, python-format
 msgid "Video has been deleted."
 msgid_plural "%(count)s videos have been deleted."
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/teams/forms.py:1725
+#: apps/teams/forms.py:1752
 #, python-format
 msgid "Video has been removed."
 msgid_plural "%(count)s videos have been removed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/teams/forms.py:1732 amara-enterprise/collab/models.py:3051
+#: apps/teams/forms.py:1759 amara-enterprise/collab/models.py:3049
 #: templates/new-teams/videos.html:101
 #: templates/new-teams/videos-forms/move.html:32
 #: amara-enterprise/collab/templates/collab/_collaborations-admin-forms.html:8
@@ -2498,28 +2545,28 @@ msgstr[1] ""
 msgid "Move"
 msgstr "Verplaatsen"
 
-#: apps/teams/forms.py:1810
+#: apps/teams/forms.py:1837
 #, python-format
 msgid "Video has been removed from project"
 msgid_plural "%(count)s videos have been removed from projects"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/teams/forms.py:1815
+#: apps/teams/forms.py:1842
 #, python-format
 msgid "Video has been moved to project %(project)s"
 msgid_plural "%(count)s videos have been moved to project %(project)s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/teams/forms.py:1821
+#: apps/teams/forms.py:1848
 #, python-format
 msgid "Video has been moved to %(team_link)s"
 msgid_plural "%(count)s videos have been moved to %(team_link)s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/teams/forms.py:1826
+#: apps/teams/forms.py:1853
 #, python-format
 msgid "Video has been moved to %(team_link)s, project %(project)s"
 msgid_plural ""
@@ -2552,7 +2599,7 @@ msgstr "Het veld “Over u” is verplicht om u kandidaat te stellen."
 msgid "You have already applied to this team."
 msgstr "U hebt al een aanvraag voor dit team ingediend."
 
-#: apps/teams/rpc.py:60 apps/teams/models.py:1671
+#: apps/teams/rpc.py:60 apps/teams/models.py:1719
 msgid "Your application has been denied."
 msgstr "Uw aanvraag is afgewezen."
 
@@ -2596,186 +2643,186 @@ msgstr "Rol van het teamlid aangepast."
 msgid "You cannot assign that role to that member."
 msgstr "U kunt die rol niet aan dat lid toekennen."
 
-#: apps/teams/models.py:172
+#: apps/teams/models.py:173
 msgid "Open"
 msgstr "Openen"
 
-#: apps/teams/models.py:173
+#: apps/teams/models.py:174
 msgid "Application"
 msgstr "Toepassing"
 
-#: apps/teams/models.py:174
+#: apps/teams/models.py:175
 msgid "Invitation by any team member"
 msgstr "Uitnodiging door een teamlid"
 
-#: apps/teams/models.py:175
+#: apps/teams/models.py:176
 msgid "Invitation by manager"
 msgstr "Uitnodiging door beheerder"
 
-#: apps/teams/models.py:176
+#: apps/teams/models.py:177
 msgid "Invitation by admin"
 msgstr "Uitnodiging door admin"
 
-#: apps/teams/models.py:183
+#: apps/teams/models.py:184
 msgid "Any team member"
 msgstr "Elk teamlid"
 
-#: apps/teams/models.py:184
+#: apps/teams/models.py:185
 msgid "Managers and admins"
 msgstr "Beheerders en admins"
 
-#: apps/teams/models.py:185
+#: apps/teams/models.py:186
 msgid "Admins only"
 msgstr "Alleen admins"
 
-#: apps/teams/models.py:208
+#: apps/teams/models.py:209
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: apps/teams/models.py:209
+#: apps/teams/models.py:210
 msgid "Hourly"
 msgstr "Elk uur"
 
-#: apps/teams/models.py:212 apps/teams/models.py:3612
+#: apps/teams/models.py:213 apps/teams/models.py:3678
 msgid "name"
 msgstr "naam"
 
-#: apps/teams/models.py:213 apps/teams/models.py:3613
+#: apps/teams/models.py:214 apps/teams/models.py:3679
 msgid "slug"
 msgstr "Slak"
 
-#: apps/teams/models.py:214
+#: apps/teams/models.py:215
 msgid "description"
 msgstr "beschrijven"
 
-#: apps/teams/models.py:214
+#: apps/teams/models.py:215
 msgid ""
 "All urls will be converted to links. Line breaks and HTML not supported."
 msgstr "Alle URL’s zullen naar koppelingen worden omgezet. Regeleinden en HTML worden niet ondersteund."
 
-#: apps/teams/models.py:216
+#: apps/teams/models.py:217
 msgid "logo"
 msgstr "logo"
 
-#: apps/teams/models.py:221
+#: apps/teams/models.py:222
 msgid "square logo"
 msgstr "vierkant logo"
 
-#: apps/teams/models.py:226
+#: apps/teams/models.py:227
 msgid "videos public?"
 msgstr "video’s openbaar?"
 
-#: apps/teams/models.py:227
+#: apps/teams/models.py:228
 msgid "Sync metadata when available (Youtube)?"
 msgstr ""
 
-#: apps/teams/models.py:228 templates/teams/project_list.html:12
+#: apps/teams/models.py:229 templates/teams/project_list.html:12
 #: templates/search/search.html:144
 msgid "videos"
 msgstr "video’s"
 
-#: apps/teams/models.py:229
+#: apps/teams/models.py:230
 msgid "users"
 msgstr "gebruikers"
 
-#: apps/teams/models.py:232
+#: apps/teams/models.py:233
 msgid "applicants"
 msgstr "kandidaten"
 
-#: apps/teams/models.py:235
+#: apps/teams/models.py:236
 msgid "Intro Video"
 msgstr "Introductievideo"
 
-#: apps/teams/models.py:237
+#: apps/teams/models.py:238
 msgid "Page content"
 msgstr "Pagina-inhoud"
 
-#: apps/teams/models.py:237
+#: apps/teams/models.py:238
 msgid "You can use markdown. This will replace Description."
 msgstr "U kunt markdown gebruiken. Dit zal Beschrijving vervangen."
 
-#: apps/teams/models.py:239
+#: apps/teams/models.py:240
 msgid "HTML that appears at the top of the teams page."
 msgstr "HTML-code die bovenaan de teampagina komt."
 
-#: apps/teams/models.py:245
+#: apps/teams/models.py:246
 msgid "authentication provider code"
 msgstr "code van authenticatieprovider"
 
-#: apps/teams/models.py:262
+#: apps/teams/models.py:263
 msgid "membership policy"
 msgstr "lidmaatschapsbeleid"
 
-#: apps/teams/models.py:265
+#: apps/teams/models.py:266
 msgid "video policy"
 msgstr "videobeleid"
 
-#: apps/teams/models.py:271
+#: apps/teams/models.py:272
 msgid "task assignment policy"
 msgstr "taaktoewijzingsbeleid"
 
-#: apps/teams/models.py:274
+#: apps/teams/models.py:275
 msgid "subtitling policy"
 msgstr "beleid rond ondertiteling"
 
-#: apps/teams/models.py:277
+#: apps/teams/models.py:278
 msgid "translation policy"
 msgstr "beleid rond vertaling"
 
-#: apps/teams/models.py:280
+#: apps/teams/models.py:281
 msgid "maximum tasks per member"
 msgstr "maximumaantal taken per lid"
 
-#: apps/teams/models.py:282
+#: apps/teams/models.py:283
 msgid "task expiration (days)"
 msgstr "taakverval (dagen)"
 
-#: apps/teams/models.py:297 templates/profiles/_teams_list.html:3
+#: apps/teams/models.py:298 templates/profiles/_teams_list.html:3
 #: templates/teams/teams-list.html:7
 msgid "Teams"
 msgstr "Teams"
 
-#: apps/teams/models.py:784
+#: apps/teams/models.py:832
 msgid "> 1000"
 msgstr ">1000"
 
-#: apps/teams/models.py:1030
+#: apps/teams/models.py:1078
 msgid ""
 "Use this space to explain why you or your team need to caption or subtitle "
 "this video. Adding a note makes volunteers more likely to help out!"
 msgstr "Gebruik deze ruimte om uit te leggen waarom u of uw team deze video moet ondertitelen. Het toevoegen van een notitie zorgt ervoor dat vrijwilligers sneller helpen!"
 
-#: apps/teams/models.py:1034
+#: apps/teams/models.py:1082
 msgid "We automatically grab thumbnails for certain sites, e.g. Youtube"
 msgstr "We halen automatisch miniaturen op voor bepaalde websites, bv. YouTube"
 
-#: apps/teams/models.py:1036
+#: apps/teams/models.py:1084
 msgid "Need help with all languages"
 msgstr "Heeft hulp nodig met alle talen"
 
-#: apps/teams/models.py:1037
+#: apps/teams/models.py:1085
 msgid "If you check this, other languages will not be displayed."
 msgstr "Als u dit aanvinkt, zullen andere talen niet worden weergegeven."
 
-#: apps/teams/models.py:1666
+#: apps/teams/models.py:1714
 #, python-format
 msgid "You already have a pending application to %(team)s."
 msgstr ""
 
-#: apps/teams/models.py:1675
+#: apps/teams/models.py:1723
 #, python-format
 msgid "You have been removed from %(team)s."
 msgstr ""
 
-#: apps/teams/models.py:2642
+#: apps/teams/models.py:2690
 msgid "Resume"
 msgstr "Hervatten"
 
-#: apps/teams/models.py:2644
+#: apps/teams/models.py:2692
 msgid "Start now"
 msgstr "Nu beginnen"
 
-#: apps/teams/models.py:2844
+#: apps/teams/models.py:2910
 #, python-format
 msgid "Help %(team)s reach a world audience"
 msgstr ""
@@ -2895,8 +2942,8 @@ msgstr ""
 #: amara-enterprise/collab/const.py:112
 #: amara-enterprise/collab/subtitle_workflow.py:310
 #: amara-enterprise/collab/models.py:1039
-#: amara-enterprise/collab/models.py:2001
-#: amara-enterprise/collab/models.py:2282 amara-enterprise/collab/ui.py:57
+#: amara-enterprise/collab/models.py:1999
+#: amara-enterprise/collab/models.py:2280 amara-enterprise/collab/ui.py:57
 #: amara-enterprise/collab/ui.py:75
 #: amara-enterprise/collab/forms/management.py:518
 #: amara-enterprise/collab/forms/dashboard.py:100
@@ -2935,7 +2982,7 @@ msgstr "Die taak is al voltooid."
 msgid "Video embedding disabled by owner"
 msgstr "Insluiten van video’s uitgeschakeld door eigenaar"
 
-#: apps/widget/rpc.py:1025 apps/widget/rpc.py:1062
+#: apps/widget/rpc.py:1024 apps/widget/rpc.py:1061
 msgid "\n"
 msgstr "\n"
 
@@ -3083,98 +3130,94 @@ msgstr ""
 msgid "Can not detect file encoding"
 msgstr "Kan bestandscodering niet detecteren."
 
-#: apps/subtitles/forms.py:213
-msgid "Somebody is subtitling this video right now. Try later."
-msgstr "Iemand is bezig met het ondertitelen van deze video. Probeer het later."
-
-#: apps/subtitles/forms.py:225
+#: apps/subtitles/forms.py:221
 #, python-format
 msgid "Invalid from language: %(language)s"
 msgstr "Ongeldige brontaal: %(language)s"
 
-#: apps/subtitles/forms.py:230
+#: apps/subtitles/forms.py:226
 #, python-format
 msgid "%(language)s has no public versions"
 msgstr "%(language)s heeft geen openbare versies"
 
-#: apps/subtitles/forms.py:262
+#: apps/subtitles/forms.py:258
 msgid ""
 "Sorry, we can't upload your subtitles because this language is moderated."
 msgstr ""
 
-#: apps/subtitles/forms.py:428
+#: apps/subtitles/forms.py:424
 msgid "Subtitles are currently being edited"
 msgstr ""
 
-#: apps/subtitles/forms.py:434
+#: apps/subtitles/forms.py:430
 msgid "Yes, I want to delete this language"
 msgstr ""
 
-#: apps/subtitles/forms.py:440
+#: apps/subtitles/forms.py:436
 #, python-format
 msgid "Type \"%(words)s\" if you are sure you wish to continue"
 msgstr ""
 
-#: apps/subtitles/forms.py:459
+#: apps/subtitles/forms.py:455
 msgid "You do not have permission to delete the subtitles"
 msgstr ""
 
-#: apps/subtitles/forms.py:465
+#: apps/subtitles/forms.py:461
 msgid "Subtitles deleted"
 msgstr ""
 
-#: apps/subtitles/forms.py:479
+#: apps/subtitles/forms.py:475
 msgid "Rollback successful"
 msgstr ""
 
-#: apps/subtitles/forms.py:482
+#: apps/subtitles/forms.py:478
 msgid "Can not rollback to the last version"
 msgstr ""
 
-#: apps/subtitles/forms.py:490
+#: apps/subtitles/forms.py:486
 msgid "Resync started, this may take a few minutes"
 msgstr ""
 
-#: apps/subtitles/forms.py:493
+#: apps/subtitles/forms.py:489
 msgid "Error while attempting to resync"
 msgstr ""
 
-#: apps/subtitles/forms.py:498
+#: apps/subtitles/forms.py:494
 #: amara-enterprise/collab/templates/collab/collaboration-details.html:79
 msgid "Post new note"
 msgstr ""
 
-#: apps/subtitles/models.py:1357
+#: apps/subtitles/models.py:1355
 msgid "Edited (legacy editor)"
 msgstr ""
 
-#: apps/subtitles/models.py:1358
+#: apps/subtitles/models.py:1356
 msgid "Imported"
 msgstr "Geïmporteerd"
 
-#: apps/subtitles/models.py:1359
+#: apps/subtitles/models.py:1357
 #: templates/future/videos/subtitles-forms/rollback.html:13
 msgid "Rollback"
 msgstr "Terugdraaien"
 
-#: apps/subtitles/models.py:1360
+#: apps/subtitles/models.py:1358
 msgid "Scripted"
 msgstr "Via scripts"
 
-#: apps/subtitles/models.py:1361
+#: apps/subtitles/models.py:1359
 msgid "Tern"
 msgstr "Tern"
 
-#: apps/subtitles/models.py:1362
+#: apps/subtitles/models.py:1360
 #: templates/videos/language-revisions-tab.html:40
 msgid "Uploaded"
 msgstr "Geüpload"
 
-#: apps/subtitles/models.py:1363
+#: apps/subtitles/models.py:1361
 msgid "Edited"
 msgstr ""
 
-#: apps/subtitles/models.py:1625
+#: apps/subtitles/models.py:1623
 #, python-format
 msgid "%(subtitle_language)s (version %(number)s)"
 msgstr ""
@@ -3277,27 +3320,27 @@ msgstr ""
 msgid "Hide"
 msgstr "Verbergen"
 
-#: apps/auth/views.py:114
+#: apps/auth/views.py:127
 msgid "Confirmation key expired."
 msgstr "De sleutel voor de bevestiging is te oud."
 
-#: apps/auth/views.py:116
+#: apps/auth/views.py:129
 msgid "Email is confirmed."
 msgstr "E-mailadres is bevestigd."
 
-#: apps/auth/views.py:128
+#: apps/auth/views.py:141
 msgid "Confirmation email was sent."
 msgstr "Er is een bevestigings-e-mail verstuurd."
 
-#: apps/auth/views.py:130
+#: apps/auth/views.py:143
 msgid "You email is empty or already confirmed."
 msgstr "Uw e-mailbericht is leeg of al bevestigd."
 
-#: apps/auth/views.py:165
+#: apps/auth/views.py:178
 msgid "Your account was deleted."
 msgstr "Uw account is verwijderd. "
 
-#: apps/auth/views.py:169
+#: apps/auth/views.py:182
 msgid "Incorrect Password"
 msgstr "Onjuist wachtwoord"
 
@@ -3421,132 +3464,150 @@ msgstr ""
 msgid "That youtube account has already been linked to the %(team)s team."
 msgstr ""
 
-#: apps/externalsites/google.py:150
+#: apps/externalsites/google.py:151
 #, python-format
 msgid "Youtube error: %(error)s"
 msgstr ""
 
-#: apps/externalsites/google.py:155
+#: apps/externalsites/google.py:156
 msgid "Error while linking.  Please try again."
 msgstr ""
 
-#: apps/externalsites/forms.py:103
-msgid "Import all new videos"
-msgstr "Importeer alle nieuwe video's"
-
-#: apps/externalsites/forms.py:104
-msgid "Import videos with tags:"
-msgstr "Importeer video's met labels:"
-
-#: apps/externalsites/forms.py:107 apps/externalsites/models.py:240
+#: apps/externalsites/forms.py:100 apps/externalsites/forms.py:128
+#: apps/externalsites/models.py:246 apps/externalsites/models.py:342
 msgid "Publisher ID"
 msgstr ""
 
-#: apps/externalsites/forms.py:109
+#: apps/externalsites/forms.py:101 apps/externalsites/models.py:344
+msgid "Client ID"
+msgstr ""
+
+#: apps/externalsites/forms.py:102 apps/externalsites/models.py:346
+msgid "Client Secret"
+msgstr ""
+
+#: apps/externalsites/forms.py:124
+msgid "Import all new videos"
+msgstr "Importeer alle nieuwe video's"
+
+#: apps/externalsites/forms.py:125
+msgid "Import videos with tags:"
+msgstr "Importeer video's met labels:"
+
+#: apps/externalsites/forms.py:130
 msgid "Sync subtitles with this write token"
 msgstr ""
 
-#: apps/externalsites/forms.py:112
+#: apps/externalsites/forms.py:133
 msgid "Import Videos From Feed"
 msgstr ""
 
-#: apps/externalsites/forms.py:114
+#: apps/externalsites/forms.py:135
 msgid "Player ID"
 msgstr ""
 
-#: apps/externalsites/forms.py:148
+#: apps/externalsites/forms.py:169
 msgid "Must specify a player id to import from a feed"
 msgstr ""
 
-#: apps/externalsites/forms.py:152
+#: apps/externalsites/forms.py:173
 msgid "Must specify a feed type for import"
 msgstr ""
 
-#: apps/externalsites/forms.py:156
+#: apps/externalsites/forms.py:177
 msgid "Must specify tags to import"
 msgstr ""
 
-#: apps/externalsites/forms.py:188
+#: apps/externalsites/forms.py:209
 msgid "Add YouTube account"
 msgstr "YouTube account toevoegen"
 
-#: apps/externalsites/forms.py:212
+#: apps/externalsites/forms.py:233
 #: templates/profiles/remove-third-party.html:24
 msgid "Remove account"
 msgstr "Account verwijderen"
 
-#: apps/externalsites/forms.py:218
+#: apps/externalsites/forms.py:239
 msgid "Sync subtitles from Amara to YouTube"
 msgstr ""
 
-#: apps/externalsites/forms.py:219
+#: apps/externalsites/forms.py:240
 msgid ""
 "Fetch initial subtitles from YouTube when videos are submitted to Amara"
 msgstr ""
 
-#: apps/externalsites/forms.py:258
+#: apps/externalsites/forms.py:279
 #, python-format
 msgid "Import Videos into %(team)s"
 msgstr ""
 
-#: apps/externalsites/forms.py:260
+#: apps/externalsites/forms.py:281
 msgid "Disable Video Import"
 msgstr ""
 
-#: apps/externalsites/models.py:202
+#: apps/externalsites/models.py:208
 msgid "Partner ID"
 msgstr "Partner-ID"
 
-#: apps/externalsites/models.py:204
+#: apps/externalsites/models.py:210
 msgid "Secret"
 msgstr "Geheim"
 
-#: apps/externalsites/models.py:205
+#: apps/externalsites/models.py:211
 msgid ""
 "Administrator secret found in Settings -> Integration on your Kaltura "
 "control panel"
 msgstr "Beheerdersgeheim gevonden in Instellingen -> Integratie op uw Kaltura-configuratiescherm"
 
-#: apps/externalsites/models.py:209
+#: apps/externalsites/models.py:215
 msgid "Kaltura account"
 msgstr "Kaltura-account"
 
-#: apps/externalsites/models.py:218
+#: apps/externalsites/models.py:224
 #, python-format
 msgid "partner id %(partner_id)s"
 msgstr ""
 
-#: apps/externalsites/models.py:246
+#: apps/externalsites/models.py:252
 msgid "Brightcove account"
 msgstr ""
 
-#: apps/externalsites/models.py:255
+#: apps/externalsites/models.py:261
 #, python-format
 msgid "publisher id %(publisher_id)s"
 msgstr ""
 
-#: apps/externalsites/models.py:402
+#: apps/externalsites/models.py:349
+msgid "Brightcove CMS account"
+msgstr ""
+
+#: apps/externalsites/models.py:358
+#, python-format
+msgid "client id %(client_id)s"
+msgstr ""
+
+#: apps/externalsites/models.py:460
 msgid "YouTube account"
 msgstr "YouTube account"
 
-#: apps/externalsites/models.py:453
+#: apps/externalsites/models.py:511
 msgid "No username"
 msgstr "Geen gebruikersnaam"
 
-#: apps/externalsites/models.py:554
+#: apps/externalsites/models.py:615
 msgid "deleted account"
 msgstr "verwijderd account"
 
-#: apps/externalsites/models.py:819
+#: apps/externalsites/models.py:880
 msgid "Success"
 msgstr "Succes"
 
-#: apps/externalsites/models.py:820
+#: apps/externalsites/models.py:881
 #: templates/externalsites/_sync-errors-form.html:14
 msgid "Error"
 msgstr "Fout"
 
-#: apps/externalsites/models.py:839
+#: apps/externalsites/models.py:900
 msgid "Sync history"
 msgstr "Geschiedenis synchroniseren"
 
@@ -3600,8 +3661,8 @@ msgid "Current Collaborations"
 msgstr ""
 
 #: amara-enterprise/reports/startup.py:7 amara-enterprise/billing/startup.py:9
-#: templates/new-base.html:113 templates/base.html:177
-#: templates/hands_base.html:105 templates/future/base.html:111
+#: templates/new-base.html:112 templates/base.html:176
+#: templates/hands_base.html:104 templates/future/base.html:111
 msgid "Billing"
 msgstr "Facturering"
 
@@ -3816,7 +3877,7 @@ msgstr ""
 msgid "Assignment deadline elapsed: %(title)s"
 msgstr ""
 
-#: amara-enterprise/collab/const.py:110 amara-enterprise/collab/models.py:1987
+#: amara-enterprise/collab/const.py:110 amara-enterprise/collab/models.py:1985
 #: amara-enterprise/collab/forms/management.py:524
 #: amara-enterprise/collab/forms/search.py:66
 #: amara-enterprise/collab/forms/search.py:96
@@ -3934,7 +3995,7 @@ msgstr ""
 
 #: amara-enterprise/collab/views.py:156
 #: amara-enterprise/collab/team_workflow.py:82
-#: amara-enterprise/collab/models.py:1983
+#: amara-enterprise/collab/models.py:1981
 msgid "Evaluations"
 msgstr ""
 
@@ -4019,7 +4080,7 @@ msgid "Endorsing"
 msgstr ""
 
 #: amara-enterprise/collab/subtitle_workflow.py:123
-#: amara-enterprise/collab/models.py:3049
+#: amara-enterprise/collab/models.py:3047
 #: amara-enterprise/collab/templates/collab/_collaborations-admin-forms.html:122
 msgid "Send back"
 msgstr ""
@@ -4057,7 +4118,7 @@ msgstr ""
 
 #: amara-enterprise/collab/subtitle_workflow.py:315
 #: amara-enterprise/collab/models.py:1047
-#: amara-enterprise/collab/models.py:2003 amara-enterprise/collab/ui.py:77
+#: amara-enterprise/collab/models.py:2001 amara-enterprise/collab/ui.py:77
 #: amara-enterprise/collab/ui.py:78 amara-enterprise/collab/ui.py:79
 #: amara-enterprise/collab/forms/search.py:294
 msgid "Evaluate"
@@ -4145,13 +4206,13 @@ msgid "Due now"
 msgstr ""
 
 #: amara-enterprise/collab/models.py:976
-#: amara-enterprise/collab/models.py:3107
+#: amara-enterprise/collab/models.py:3105
 #, python-format
 msgid "%(language)s captions"
 msgstr ""
 
 #: amara-enterprise/collab/models.py:978
-#: amara-enterprise/collab/models.py:3109
+#: amara-enterprise/collab/models.py:3107
 #, python-format
 msgid "%(language)s translation"
 msgstr ""
@@ -4161,8 +4222,8 @@ msgid "Now"
 msgstr "Nu"
 
 #: amara-enterprise/collab/models.py:1031
-#: amara-enterprise/collab/models.py:1999
-#: amara-enterprise/collab/models.py:2278 amara-enterprise/collab/ui.py:73
+#: amara-enterprise/collab/models.py:1997
+#: amara-enterprise/collab/models.py:2276 amara-enterprise/collab/ui.py:73
 #: amara-enterprise/collab/forms/search.py:286 templates/teams/tasks.html:68
 #: templates/teams/tasks.html:228
 msgid "Transcribe"
@@ -4174,8 +4235,8 @@ msgid "Transcription"
 msgstr ""
 
 #: amara-enterprise/collab/models.py:1035
-#: amara-enterprise/collab/models.py:2000
-#: amara-enterprise/collab/models.py:2280 amara-enterprise/collab/ui.py:74
+#: amara-enterprise/collab/models.py:1998
+#: amara-enterprise/collab/models.py:2278 amara-enterprise/collab/ui.py:74
 #: amara-enterprise/collab/forms/search.py:287
 #: templates/editor/workflow-normal.html:5 templates/teams/tasks.html:70
 #: amara-enterprise/services/templates/services/translation_request.html:7
@@ -4193,749 +4254,749 @@ msgstr "Vertaling"
 msgid "Evaluation #%(number)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1366
+#: amara-enterprise/collab/models.py:1364
 msgid "No assignment available"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1369
+#: amara-enterprise/collab/models.py:1367
 msgid "You don't have permission to take this assignment"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1372
+#: amara-enterprise/collab/models.py:1370
 msgid "You already have an assignment for this subtitle request."
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1375
+#: amara-enterprise/collab/models.py:1373
 msgid ""
 "You've reached your max number of assignments. Please endorse a current "
 "assignment before starting a new one."
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1980
+#: amara-enterprise/collab/models.py:1978
 msgid "Local"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1981
+#: amara-enterprise/collab/models.py:1979
 msgid "Incoming"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1982
+#: amara-enterprise/collab/models.py:1980
 msgid "Outgoing"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1988
+#: amara-enterprise/collab/models.py:1986
 msgid "In Progress"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1990
+#: amara-enterprise/collab/models.py:1988
 msgid "upcoming"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:1991
+#: amara-enterprise/collab/models.py:1989
 msgid "In Evaluation"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2223
+#: amara-enterprise/collab/models.py:2221
 msgid "Subtitler"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2224
-#: amara-enterprise/collab/models.py:2267 amara-enterprise/collab/ui.py:95
+#: amara-enterprise/collab/models.py:2222
+#: amara-enterprise/collab/models.py:2265 amara-enterprise/collab/ui.py:95
 #: amara-enterprise/collab/forms/management.py:455
 msgid "Reviewer"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2225
-#: amara-enterprise/collab/models.py:2269 amara-enterprise/collab/ui.py:96
+#: amara-enterprise/collab/models.py:2223
+#: amara-enterprise/collab/models.py:2267 amara-enterprise/collab/ui.py:96
 #: amara-enterprise/collab/forms/management.py:456
 msgid "Approver"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2226 amara-enterprise/collab/ui.py:97
+#: amara-enterprise/collab/models.py:2224 amara-enterprise/collab/ui.py:97
 msgid "Evaluator #1"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2227 amara-enterprise/collab/ui.py:98
+#: amara-enterprise/collab/models.py:2225 amara-enterprise/collab/ui.py:98
 msgid "Evaluator #2"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2228 amara-enterprise/collab/ui.py:99
+#: amara-enterprise/collab/models.py:2226 amara-enterprise/collab/ui.py:99
 msgid "Evaluator #3"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2263 amara-enterprise/collab/ui.py:93
+#: amara-enterprise/collab/models.py:2261 amara-enterprise/collab/ui.py:93
 #: amara-enterprise/collab/forms/management.py:487
 msgid "Transcriber"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2265 amara-enterprise/collab/ui.py:94
+#: amara-enterprise/collab/models.py:2263 amara-enterprise/collab/ui.py:94
 #: amara-enterprise/collab/forms/management.py:489
 msgid "Translator"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2271
+#: amara-enterprise/collab/models.py:2269
 msgid "Evalutor"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2286
+#: amara-enterprise/collab/models.py:2284
 msgid "Evalute"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2423
+#: amara-enterprise/collab/models.py:2421
 msgid "transcribe"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2425
+#: amara-enterprise/collab/models.py:2423
 msgid "translate"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2427
+#: amara-enterprise/collab/models.py:2425
 msgid "review"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2429
+#: amara-enterprise/collab/models.py:2427
 msgid "approve"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2431
+#: amara-enterprise/collab/models.py:2429
 msgid "evaluate"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2433
+#: amara-enterprise/collab/models.py:2431
 msgid "evaluate #2"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2435
+#: amara-enterprise/collab/models.py:2433
 msgid "evaluate #3"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2437
-#: amara-enterprise/collab/models.py:2465
+#: amara-enterprise/collab/models.py:2435
+#: amara-enterprise/collab/models.py:2463
 msgid "unknown"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2451
+#: amara-enterprise/collab/models.py:2449
 msgid "transcriber"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2453
+#: amara-enterprise/collab/models.py:2451
 msgid "translator"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2455
-#: amara-enterprise/collab/models.py:3096
+#: amara-enterprise/collab/models.py:2453
+#: amara-enterprise/collab/models.py:3094
 msgid "reviewer"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2457
-#: amara-enterprise/collab/models.py:3097
+#: amara-enterprise/collab/models.py:2455
+#: amara-enterprise/collab/models.py:3095
 msgid "approver"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2459
+#: amara-enterprise/collab/models.py:2457
 msgid "evaluator"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2461
+#: amara-enterprise/collab/models.py:2459
 msgid "evaluator #2"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2463
+#: amara-enterprise/collab/models.py:2461
 msgid "evaluator #3"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2487
+#: amara-enterprise/collab/models.py:2485
 msgid "Collaboration joined"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2493
+#: amara-enterprise/collab/models.py:2491
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> started working as %(role)s on %(language)s for <a"
 " href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2499
+#: amara-enterprise/collab/models.py:2497
 #, python-format
 msgid ""
 "started working as %(role)s on %(language)s for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2506
+#: amara-enterprise/collab/models.py:2504
 msgid "Collaboration left"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2512
+#: amara-enterprise/collab/models.py:2510
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> stopped working as %(role)s on %(language)s for <a"
 " href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2518
+#: amara-enterprise/collab/models.py:2516
 #, python-format
 msgid ""
 "stopped working as %(role)s on %(language)s for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2525
+#: amara-enterprise/collab/models.py:2523
 msgid "Collaboration assigned"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2531
+#: amara-enterprise/collab/models.py:2529
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> assigned the %(language)s %(assignment_type)s "
 "assignment to %(assignee)s for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2539
+#: amara-enterprise/collab/models.py:2537
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> assigned a %(language)s assignment for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2546
+#: amara-enterprise/collab/models.py:2544
 #, python-format
 msgid ""
 "assigned the %(language)s %(assignment_type)s assignment to %(assignee)s for"
 " <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2554
+#: amara-enterprise/collab/models.py:2552
 #, python-format
 msgid ""
 "assigned a %(language)s assignment for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2560
+#: amara-enterprise/collab/models.py:2558
 msgid "Collaboration reassigned"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2566
+#: amara-enterprise/collab/models.py:2564
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> reassigned the %(language)s %(assignment_type)s "
 "assignment to %(assignee)s for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2574
+#: amara-enterprise/collab/models.py:2572
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> reassigned a assignment for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2581
+#: amara-enterprise/collab/models.py:2579
 #, python-format
 msgid ""
 "reassigned the %(language)s %(assignment_type)s assignment to %(assignee)s "
 "for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2589
+#: amara-enterprise/collab/models.py:2587
 #, python-format
 msgid "reassigned a assignment for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2595
+#: amara-enterprise/collab/models.py:2593
 msgid "Collaboration unassigned"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2601
+#: amara-enterprise/collab/models.py:2599
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> unassigned the %(language)s %(assignment_type)s "
 "assignment from %(assignee)s for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2609
+#: amara-enterprise/collab/models.py:2607
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> unassigned a %(language)s assignment for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2616
+#: amara-enterprise/collab/models.py:2614
 #, python-format
 msgid ""
 "unassigned the %(language)s %(assignment_type)s assignment from %(assignee)s"
 " for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2624
+#: amara-enterprise/collab/models.py:2622
 #, python-format
 msgid ""
 "unassigned a %(language)s assignment for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2630
+#: amara-enterprise/collab/models.py:2628
 msgid "Collaboration automatically unassigned"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2636
+#: amara-enterprise/collab/models.py:2634
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> was auto-unassigned from the %(language)s "
 "%(assignment_type)s assignment for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2644
+#: amara-enterprise/collab/models.py:2642
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> was auto-unassigned from a %(language)s assignment"
 " for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2651
+#: amara-enterprise/collab/models.py:2649
 #, python-format
 msgid ""
 "was auto-unassigned from the %(language)s %(assignment_type)s assignment for"
 " <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2659
+#: amara-enterprise/collab/models.py:2657
 #, python-format
 msgid ""
 "was auto-unassigned from a %(language)s assignment for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2665
+#: amara-enterprise/collab/models.py:2663
 msgid "Collaboration endorsed"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2668
+#: amara-enterprise/collab/models.py:2666
 msgid "endorsed"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2671
+#: amara-enterprise/collab/models.py:2669
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> endorsed the %(language)s subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a> (%(role)s)"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2679
+#: amara-enterprise/collab/models.py:2677
 #, python-format
 msgid ""
 "endorsed the %(language)s subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a> (%(role)s)"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2688
+#: amara-enterprise/collab/models.py:2686
 msgid "Collaboration sent back"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2691
+#: amara-enterprise/collab/models.py:2689
 msgid "sent back"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2694
+#: amara-enterprise/collab/models.py:2692
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> sent back the %(language)s subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a> (%(role)s)"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2702
+#: amara-enterprise/collab/models.py:2700
 #, python-format
 msgid ""
 "sent back the %(language)s subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a> (%(role)s)"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2711
+#: amara-enterprise/collab/models.py:2709
 msgid "Collaboration marked complete"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2714
+#: amara-enterprise/collab/models.py:2712
 msgid "marked complete"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2717
+#: amara-enterprise/collab/models.py:2715
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> marked the %(language)s subtitles complete for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2722
+#: amara-enterprise/collab/models.py:2720
 #, python-format
 msgid ""
 "marked the %(language)s subtitles complete for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2728
+#: amara-enterprise/collab/models.py:2726
 msgid "Collaboration moved from team"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2736
-#: amara-enterprise/collab/models.py:2746
-#: amara-enterprise/collab/models.py:2763
-#: amara-enterprise/collab/models.py:2773
+#: amara-enterprise/collab/models.py:2734
+#: amara-enterprise/collab/models.py:2744
+#: amara-enterprise/collab/models.py:2761
+#: amara-enterprise/collab/models.py:2771
 msgid "an unknown team"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2737
+#: amara-enterprise/collab/models.py:2735
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> moved the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a> to %(new_team)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2747
+#: amara-enterprise/collab/models.py:2745
 #, python-format
 msgid ""
 "moved the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a> to %(new_team)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2755
+#: amara-enterprise/collab/models.py:2753
 msgid "Collaboration moved to team"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2764
+#: amara-enterprise/collab/models.py:2762
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> moved the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a> from %(old_team)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2774
+#: amara-enterprise/collab/models.py:2772
 #, python-format
 msgid ""
 "moved the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a> from %(old_team)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2782
+#: amara-enterprise/collab/models.py:2780
 msgid "Collaboration deleted"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2785
+#: amara-enterprise/collab/models.py:2783
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> deleted the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2790
+#: amara-enterprise/collab/models.py:2788
 #, python-format
 msgid ""
 "deleted the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2796
+#: amara-enterprise/collab/models.py:2794
 msgid "Collaboration accepted by provider"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2799
+#: amara-enterprise/collab/models.py:2797
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> provider accepted the %(language)s subtitles "
 "request for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2804
+#: amara-enterprise/collab/models.py:2802
 #, python-format
 msgid ""
 "provider accepted the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2810
+#: amara-enterprise/collab/models.py:2808
 msgid "Collaboration submitted by provider"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2813
+#: amara-enterprise/collab/models.py:2811
 #, python-format
 msgid ""
 "Provider submitted the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2818
+#: amara-enterprise/collab/models.py:2816
 #, python-format
 msgid ""
 "provider submitted the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2824
+#: amara-enterprise/collab/models.py:2822
 msgid "Collaboration unassigned from provider"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2827
+#: amara-enterprise/collab/models.py:2825
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> unassigned the provider for the %(language)s "
 "subtitles request for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2833
+#: amara-enterprise/collab/models.py:2831
 #, python-format
 msgid ""
 "unassigned the provider for the %(language)s subtitles request for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2840
+#: amara-enterprise/collab/models.py:2838
 msgid "Collaboration evaluation teams set"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2847
+#: amara-enterprise/collab/models.py:2845
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> set the %(language)s evaluation teams to %(team1)s"
 " %(team2)s %(team3)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2855
+#: amara-enterprise/collab/models.py:2853
 #, python-format
 msgid "set the %(language)s evaluation teams to %(team1)s %(team2)s %(team3)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2864
+#: amara-enterprise/collab/models.py:2862
 msgid "Collaboration change State"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2867
+#: amara-enterprise/collab/models.py:2865
 msgid "changed state"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2870
+#: amara-enterprise/collab/models.py:2868
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> changed the %(language)s subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a> to %(state)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2877
+#: amara-enterprise/collab/models.py:2875
 #, python-format
 msgid ""
 "changed the %(language)s subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a> to %(state)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2887
+#: amara-enterprise/collab/models.py:2885
 msgid "Collaboration team change"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2893
+#: amara-enterprise/collab/models.py:2891
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> set %(assigned_team)s as the %(team_role)s on "
 "%(language)s subtitles for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2897
+#: amara-enterprise/collab/models.py:2895
 #, python-format
 msgid ""
 "<strong>%(user)s</strong> unset %(assigned_team)s as the %(team_role)s on "
 "%(language)s subtitles for <a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2907
+#: amara-enterprise/collab/models.py:2905
 #, python-format
 msgid ""
 "set %(assigned_team)s as the %(team_role)s on %(language)s subtitles for <a "
 "href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:2911
+#: amara-enterprise/collab/models.py:2909
 #, python-format
 msgid ""
 "unset %(assigned_team)s as the %(team_role)s on %(language)s subtitles for "
 "<a href=\"%(video_url)s\">%(video)s</a>"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3043
+#: amara-enterprise/collab/models.py:3041
 #: templates/messages/email/team-you-have-been-invited.html:19
 #: amara-enterprise/collab/templates/collab/collaboration-details.html:31
 msgid "Join"
 msgstr "Lid worden"
 
-#: amara-enterprise/collab/models.py:3044
+#: amara-enterprise/collab/models.py:3042
 msgid "Leave"
 msgstr "Verlaten"
 
-#: amara-enterprise/collab/models.py:3045 templates/teams/tasks.html:506
+#: amara-enterprise/collab/models.py:3043 templates/teams/tasks.html:506
 #: amara-enterprise/collab/templates/collab/_collaborations-admin-forms.html:25
 msgid "Assign"
 msgstr "Toewijzen"
 
-#: amara-enterprise/collab/models.py:3046
+#: amara-enterprise/collab/models.py:3044
 msgid "Re-Assign"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3048
+#: amara-enterprise/collab/models.py:3046
 msgid "Endorsement"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3050
+#: amara-enterprise/collab/models.py:3048
 msgid "Mark complete"
 msgstr "Markeren als voltooid"
 
-#: amara-enterprise/collab/models.py:3052
+#: amara-enterprise/collab/models.py:3050
 msgid "Delete collaboration"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3053
+#: amara-enterprise/collab/models.py:3051
 msgid "Provider Accept"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3054
+#: amara-enterprise/collab/models.py:3052
 msgid "Provider Submit"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3055
+#: amara-enterprise/collab/models.py:3053
 msgid "Unassign Provider"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3081
+#: amara-enterprise/collab/models.py:3079
 #: amara-enterprise/collab/templates/collab/video-collaborations-rows.html:26
 msgid "join"
 msgstr "lid worden"
 
-#: amara-enterprise/collab/models.py:3082
+#: amara-enterprise/collab/models.py:3080
 msgid "leave"
 msgstr "verlaten"
 
-#: amara-enterprise/collab/models.py:3083
+#: amara-enterprise/collab/models.py:3081
 msgid "assign"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3084
+#: amara-enterprise/collab/models.py:3082
 msgid "remove"
 msgstr "verwijderen"
 
-#: amara-enterprise/collab/models.py:3085
+#: amara-enterprise/collab/models.py:3083
 msgid "endorsement"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3086
+#: amara-enterprise/collab/models.py:3084
 msgid "send back"
 msgstr "terugsturen"
 
-#: amara-enterprise/collab/models.py:3087
+#: amara-enterprise/collab/models.py:3085
 msgid "mark complete"
 msgstr "markeren als voltooid"
 
-#: amara-enterprise/collab/models.py:3088
+#: amara-enterprise/collab/models.py:3086
 msgid "move"
 msgstr "verplaatsen"
 
-#: amara-enterprise/collab/models.py:3089
+#: amara-enterprise/collab/models.py:3087
 msgid "delete collaboration"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3095
+#: amara-enterprise/collab/models.py:3093
 msgid "subtitler"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3129
+#: amara-enterprise/collab/models.py:3127
 #, python-format
 msgid "%(action)s by %(role)s "
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3133
+#: amara-enterprise/collab/models.py:3131
 #, python-format
 msgid "Admin move to %(team)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3136
+#: amara-enterprise/collab/models.py:3134
 msgid "Joined Collaboration"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3138
+#: amara-enterprise/collab/models.py:3136
 msgid "Left Collaboration"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3140
+#: amara-enterprise/collab/models.py:3138
 #: amara-enterprise/collab/forms/admin.py:138
 #, python-format
 msgid "Assigned %(user)s as %(role)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3144
+#: amara-enterprise/collab/models.py:3142
 #, python-format
 msgid "Re-assigned %(user)s as %(role)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3148
+#: amara-enterprise/collab/models.py:3146
 #, python-format
 msgid "Removed %(user)s (%(role)s)"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3153
+#: amara-enterprise/collab/models.py:3151
 msgid "Provider accepted job"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3158
-#: amara-enterprise/collab/models.py:3161
-#: amara-enterprise/collab/models.py:3209
+#: amara-enterprise/collab/models.py:3156
+#: amara-enterprise/collab/models.py:3159
+#: amara-enterprise/collab/models.py:3207
 msgid "Provider submitted subtitles"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3163
+#: amara-enterprise/collab/models.py:3161
 #, python-format
 msgid "Unassigned provider: %(user)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3171
+#: amara-enterprise/collab/models.py:3169
 #, python-format
 msgid "%(role)s %(action)s by %(user)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3176
+#: amara-enterprise/collab/models.py:3174
 #, python-format
 msgid "Move to %(team)s by %(user)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3179
+#: amara-enterprise/collab/models.py:3177
 #, python-format
 msgid "%(user)s joined as %(role)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3182
+#: amara-enterprise/collab/models.py:3180
 #, python-format
 msgid "%(user)s left (%(role)s)"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3186
+#: amara-enterprise/collab/models.py:3184
 #, python-format
 msgid "%(user)s assigned %(other_user)s as %(role)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3191
+#: amara-enterprise/collab/models.py:3189
 #, python-format
 msgid "%(user)s re-assigned %(other_user)s as %(role)s"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3196
+#: amara-enterprise/collab/models.py:3194
 #, python-format
 msgid "%(user)s removed %(other_user)s (%(role)s)"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3201
+#: amara-enterprise/collab/models.py:3199
 #, python-format
 msgid "Provider %(user)s accepted job"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3206
+#: amara-enterprise/collab/models.py:3204
 #, python-format
 msgid "Provider %(user)s submitted subtitles"
 msgstr ""
 
-#: amara-enterprise/collab/models.py:3212
+#: amara-enterprise/collab/models.py:3210
 #, python-format
 msgid "%(user)s unassigned provider %(other_user)s"
 msgstr ""
@@ -5551,42 +5612,42 @@ msgstr ""
 msgid "Subtitle creation"
 msgstr ""
 
-#: amara-enterprise/collab/forms/workflow.py:21
+#: amara-enterprise/collab/forms/workflow.py:22
 msgid "Never"
 msgstr "Nooit"
 
-#: amara-enterprise/collab/forms/workflow.py:24
+#: amara-enterprise/collab/forms/workflow.py:25
 #, python-format
 msgid "After %(number)s day"
 msgid_plural "After %(number)s days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: amara-enterprise/collab/forms/workflow.py:34
+#: amara-enterprise/collab/forms/workflow.py:35
 msgid "Peer-review needed"
 msgstr ""
 
-#: amara-enterprise/collab/forms/workflow.py:36
+#: amara-enterprise/collab/forms/workflow.py:37
 msgid "Manager approval needed"
 msgstr ""
 
-#: amara-enterprise/collab/forms/workflow.py:40
+#: amara-enterprise/collab/forms/workflow.py:41
 msgid "Collaborations due"
 msgstr ""
 
-#: amara-enterprise/collab/forms/workflow.py:43
+#: amara-enterprise/collab/forms/workflow.py:44
 msgid "Auto-create collaborations to transcribe videos"
 msgstr ""
 
-#: amara-enterprise/collab/forms/workflow.py:47
+#: amara-enterprise/collab/forms/workflow.py:48
 msgid "Auto-create collaborations to translate videos into these languages:"
 msgstr ""
 
-#: amara-enterprise/collab/forms/workflow.py:49
+#: amara-enterprise/collab/forms/workflow.py:50
 msgid "Subtitle Visibility"
 msgstr "Zichtbaarheid van ondertitel"
 
-#: amara-enterprise/collab/forms/workflow.py:53
+#: amara-enterprise/collab/forms/workflow.py:54
 msgid "Dashboard default config"
 msgstr ""
 
@@ -6296,18 +6357,18 @@ msgid ""
 msgstr ""
 
 #: templates/new-header.html:12 templates/header.html:18
-#: templates/base.html:75 templates/future/header.html:18
+#: templates/base.html:74 templates/future/header.html:18
 msgid "Subtitle Video"
 msgstr ""
 
 #: templates/new-header.html:15 templates/header.html:21
-#: templates/base.html:76 templates/hands_main.html:67
+#: templates/base.html:75 templates/hands_main.html:67
 #: templates/future/header.html:19
 msgid "Community"
 msgstr ""
 
 #: templates/new-header.html:18 templates/header.html:24
-#: templates/base.html:77 templates/hands_main.html:82
+#: templates/base.html:76 templates/hands_main.html:82
 #: templates/hands_main.html:86 templates/future/header.html:20
 msgid "Professional Solutions"
 msgstr ""
@@ -6317,38 +6378,38 @@ msgstr ""
 msgid "Caption, translate, subtitle and transcribe video."
 msgstr "Video overtypen, ondertitelen en vertalen."
 
-#: templates/new-base.html:82 templates/base.html:154 templates/footer.html:54
+#: templates/new-base.html:81 templates/base.html:153 templates/footer.html:54
 #: templates/future/base.html:44
 msgid "Terms"
 msgstr "Voorwaarden"
 
-#: templates/new-base.html:83 templates/base.html:155 templates/footer.html:55
+#: templates/new-base.html:82 templates/base.html:154 templates/footer.html:55
 #: templates/future/base.html:45
 msgid "Privacy"
 msgstr "Privacy"
 
-#: templates/new-base.html:84 templates/base.html:156 templates/footer.html:56
+#: templates/new-base.html:83 templates/base.html:155 templates/footer.html:56
 #: templates/future/base.html:46
 msgid "Security"
 msgstr "Beveiliging"
 
-#: templates/new-base.html:91 templates/base.html:131 templates/footer.html:31
+#: templates/new-base.html:90 templates/base.html:130 templates/footer.html:31
 #: templates/future/base.html:63 templates/future/base.html:89
 msgid "Blog"
 msgstr "Blog"
 
-#: templates/new-base.html:92 templates/base.html:132 templates/footer.html:32
+#: templates/new-base.html:91 templates/base.html:131 templates/footer.html:32
 #: templates/future/base.html:64 templates/future/base.html:90
 msgid "Help"
 msgstr "Hulp"
 
-#: templates/new-base.html:93 templates/base.html:133 templates/footer.html:33
+#: templates/new-base.html:92 templates/base.html:132 templates/footer.html:33
 #: templates/future/base.html:65 templates/future/base.html:91
 msgid "Contact"
 msgstr ""
 
-#: templates/new-base.html:96 templates/new-user-menu.html:14
-#: templates/base.html:136 templates/footer.html:36
+#: templates/new-base.html:95 templates/new-user-menu.html:14
+#: templates/base.html:135 templates/footer.html:36
 #: templates/profiles/_tabs.html:12 templates/profiles/_user_menu.html:22
 #: templates/future/user-menu.html:15 templates/future/base.html:68
 #: templates/future/base.html:94 templates/future/teams/header.html:25
@@ -6362,28 +6423,28 @@ msgstr ""
 msgid "Videos"
 msgstr "Video’s"
 
-#: templates/new-base.html:98 templates/base.html:138 templates/footer.html:38
+#: templates/new-base.html:97 templates/base.html:137 templates/footer.html:38
 #: templates/future/base.html:70 templates/future/base.html:96
 msgid "Browse"
 msgstr ""
 
-#: templates/new-base.html:99 templates/base.html:139 templates/footer.html:39
+#: templates/new-base.html:98 templates/base.html:138 templates/footer.html:39
 #: templates/future/base.html:71 templates/future/base.html:97
 msgid "Featured"
 msgstr ""
 
-#: templates/new-base.html:102 templates/base.html:142
+#: templates/new-base.html:101 templates/base.html:141
 #: templates/footer.html:42 templates/future/base.html:74
 #: templates/future/base.html:100
 msgid "More"
 msgstr "Meer"
 
-#: templates/new-base.html:109 templates/future/base.html:107
+#: templates/new-base.html:108 templates/future/base.html:107
 msgid "Site Admin"
 msgstr ""
 
-#: templates/new-base.html:112 templates/base.html:174
-#: templates/hands_base.html:102 templates/future/base.html:110
+#: templates/new-base.html:111 templates/base.html:173
+#: templates/hands_base.html:101 templates/future/base.html:110
 msgid "Impersonate"
 msgstr "Imiteren"
 
@@ -6876,29 +6937,29 @@ msgid ""
 "        "
 msgstr "\n<h2>Over Amara</h2>\n<p>Amara laat individuen, gemeenschappen en grotere organisaties de grenzen overstijgen die online video stelt op het vlak van toegankelijkheid en taal. De aangeboden hulpmiddelen zijn vrij en open source en maken het ondertitelen en vertalen eenvoudiger, aantrekkelijker en bovenal een middel voor samenwerking.</p>\n<p>De voordelen van ondertitels en vertalingen zijn enorm:\n                <ul>\n                    <li>Ondertiteling maakt video toegankelijk voor dove en slechthorende bezoekers</li>\n                    <li>Vertalingen zorgen ervoor dat we allemaal naar video’s kunnen kijken in een taal die we niet spreken</li>\n                    <li>De makers van video’s krijgen: een betere positie in zoekresultaten, meer views,  toegang tot een veel ruimer publiek (mogelijk meertalig en van over de hele wereld), toegang voor doven en slechthorenden, en nog veel meer</li>\n                </ul>\n            </p>\n            <p>\n                Amara bestaat uit drie delen:\n                <ul>\n                    <li>Een hulpmiddel voor het maken en weergeven van ondertitels (bekend als “de widget”)</li>\n                    <li>Een website om samen te werken aan ondertiteling </li>\n                    <li>Een open protocol voor het opzoeken en aanleveren van ondertitels</li>\n                </ul>\n            </p>\n            <p>\n                Alles wat we doen is beschikbaar onder de opensource-<a href=\"http://www.gnu.org/licenses/agpl-3.0.html\">AGPL</a>-licentie.\n            </p>\n            <h2>Onze organisatie</h2>\n            <p><a href=\"http://www.pculture.org/\">Participatory Culture Foundation</a> is een non-profitorganisatie die vrije en open hulpmiddelen bouwt met het oog op meer democratische en decentrale media. Andere projecten van ons zijn onder meer <a href=\"http://www.getmiro.com/\">Miro</a>,  <a href=\"http://www.mirovideoconverter.com/\">Miro Video Converter</a>, <a href=\"http://www.mirocommunity.org/\">Miro Community</a> en <a href=\"http://www.openvideoalliance.org/\">Open Video Alliance</a>.</p>\n            <p>\n                Amara is een projectrealisatie van \n<a href=\"http://www.drumbeat.org/\">Mozilla Drumbeat</a>,  en de Mozilla Foundation zorgde voor ondersteuning bij de ontwikkeling. Open Society Institute en de MacArthur Foundation hebben het project financieel ondersteund. </p>\n            <h2>Diensten voor publicisten en ondernemingen</h2>\n            <p>Amara biedt een set professionele hulpmiddelen en diensten die het voor publicisten en videoplatformen mogelijk maakt om kwaliteitsvolle ondertiteling te maken en te beheren. Met Amara kunt u een gemeenschap van vrijwilligers opbouwen die uw content ondertitelt, deze samenbrengen met een professionele dienstverlening en gebruikmaken van een krachtig systeem van kwaliteitscontrole om op die manier kwaliteit van wereldklasse te leveren. Wilt u hierover meer weten? Lees de <a href=\"http://www.universalsubtitles.org/en/enterprise/\">enterprise services</a> en neem contact op met Dean Jansen, <a href=\"mailto:dean@pculture.org\">dean@pculture.org</a>.\n            </p>\n       "
 
-#: templates/base.html:68
+#: templates/base.html:67
 msgid "Get Help"
 msgstr "Hulp verkrijgen"
 
-#: templates/base.html:101
+#: templates/base.html:100
 msgid "Got a YouTube account?"
-msgstr "Hebt u een YouTube account?"
+msgstr "Hebt u een YouTube-account?"
 
-#: templates/base.html:102
+#: templates/base.html:101
 msgid ""
 "New: enable viewer-created translations and captions on your YouTube "
 "channel!"
 msgstr "Nieuw: door kijkers aangemaakte vertalingen en ondertitels inschakelen op uw YouTube-kanaal!"
 
-#: templates/base.html:104
+#: templates/base.html:103
 msgid "Connect to YouTube"
 msgstr "Koppelen met YouTube"
 
-#: templates/base.html:105
+#: templates/base.html:104
 msgid "No thanks"
 msgstr "Nee, bedankt"
 
-#: templates/base.html:171 templates/hands_base.html:99
+#: templates/base.html:170 templates/hands_base.html:98
 msgid "Amara Logs"
 msgstr ""
 
@@ -6996,7 +7057,7 @@ msgstr "Huidige foto verwijderen"
 #: templates/profiles/edit.html:73 templates/profiles/view.html:46
 #: templates/profiles/account.html:32 templates/profiles/account.html:110
 #: templates/teams/settings-workflows.html:118
-#: templates/externalsites/new-team-settings-tab.html:85
+#: templates/externalsites/new-team-settings-tab.html:96
 #: templates/new-teams/settings.html:43
 #: templates/new-teams/settings-messages.html:50
 #: templates/new-teams/settings-lang-messages.html:31
@@ -7056,8 +7117,8 @@ msgstr "Insturen"
 #: templates/future/videos/subtitles-forms/delete.html:17
 #: templates/teams/feed.html:67 templates/teams/settings-projects-add.html:68
 #: templates/teams/tasks.html:592 templates/auth/delete_user.html:18
-#: templates/externalsites/team-settings-tab.html:102
-#: templates/externalsites/new-team-settings-tab.html:94
+#: templates/externalsites/team-settings-tab.html:113
+#: templates/externalsites/new-team-settings-tab.html:105
 #: templates/new-teams/application.html:49
 #: amara-enterprise/collab/templates/collab/leave-dialog.html:15
 #: amara-enterprise/ondemand/templates/ondemand/edit-batch.html:17
@@ -8346,8 +8407,8 @@ msgstr "Voeg een nieuwe taal toe!"
 
 #: templates/videos/_multi-video-create-subtitles-form.html:13
 #: templates/videos/_create-subtitles-modal.html:19
-#: templates/externalsites/team-settings-tab.html:101
-#: templates/externalsites/new-team-settings-tab.html:93
+#: templates/externalsites/team-settings-tab.html:112
+#: templates/externalsites/new-team-settings-tab.html:104
 msgid "Continue"
 msgstr "Doorgaan"
 
@@ -9759,6 +9820,10 @@ msgstr ""
 msgid "Post comment"
 msgstr ""
 
+#: templates/future/videos/tabs/sync-history.html:5
+msgid "Refresh"
+msgstr ""
+
 #: templates/future/teams/member_profile.html:22
 msgid "See team activity"
 msgstr ""
@@ -9876,7 +9941,7 @@ msgstr "Teamvideo bewerken"
 
 #: templates/teams/team_video.html:41 templates/teams/add_video.html:28
 #: templates/teams/add_videos.html:19 templates/teams/create_task.html:86
-#: templates/externalsites/team-settings-tab.html:91
+#: templates/externalsites/team-settings-tab.html:102
 #: amara-enterprise/prorequests/templates/prorequests/edit-rule-table.html:61
 msgid "Save"
 msgstr "Opslaan"
@@ -11467,21 +11532,26 @@ msgstr "Kaltura"
 
 #: templates/externalsites/team-settings-tab.html:61
 #: templates/externalsites/new-team-settings-tab.html:55
+msgid "Brightcove CMS"
+msgstr ""
+
+#: templates/externalsites/team-settings-tab.html:72
+#: templates/externalsites/new-team-settings-tab.html:66
 msgid "Brightcove"
 msgstr ""
 
-#: templates/externalsites/team-settings-tab.html:81
-#: templates/externalsites/new-team-settings-tab.html:75
+#: templates/externalsites/team-settings-tab.html:92
+#: templates/externalsites/new-team-settings-tab.html:86
 msgid "separate tags with commas"
 msgstr ""
 
-#: templates/externalsites/team-settings-tab.html:98
-#: templates/externalsites/new-team-settings-tab.html:90
+#: templates/externalsites/team-settings-tab.html:109
+#: templates/externalsites/new-team-settings-tab.html:101
 msgid "About to delete account settings"
 msgstr ""
 
-#: templates/externalsites/team-settings-tab.html:99
-#: templates/externalsites/new-team-settings-tab.html:91
+#: templates/externalsites/team-settings-tab.html:110
+#: templates/externalsites/new-team-settings-tab.html:102
 msgid ""
 "You have disabled an account that was previously enabled.  If you continue, "
 "then the settings for that account will be lost."
