@@ -59,4 +59,6 @@ def user_menu_esi(request):
 
     We use this so that we can use it as as edge-side include with Varnish.
     """
-    return render(request, "future/user-menu.html")
+    return render(request, "future/user-menu.html", {
+        'next': request.GET.get('next')
+    })
