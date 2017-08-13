@@ -633,12 +633,12 @@ class KalturaSyncingTest(TestCase):
                               self.partner_id, self.secret, self.video_id,
                               'pt-br', "CaptionData")
 
-class BrightcoveAccountSyncingTest(TestCase):
-    # Test that the BrightcoveAccount model makes the correct calls in
+class BrightcoveCMSAccountSyncingTest(TestCase):
+    # Test that the BrightcoveCMSAccount model makes the correct calls in
     # response to update_subtitles() and delete_subtitles()
 
     def setUp(self):
-        self.account = BrightcoveAccountFactory(team=TeamFactory())
+        self.account = BrightcoveCMSAccountFactory(team=TeamFactory())
         self.video_id = '1234'
         self.video = BrightcoveVideoFactory(brightcove_id=self.video_id,
                                             primary_audio_language_code='en')
@@ -658,47 +658,6 @@ class BrightcoveAccountSyncingTest(TestCase):
         language.nuke_language()
         self.video.clear_language_cache()
         self.account.delete_subtitles(self.video_url, language)
-
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.update_subtitles')
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.delete_subtitles')
-    def test_brightcove_account_syncing(self, mock_delete_subtitles,
-                                        mock_update_subtitles):
-        # when we add subtitles, update_subtitles() should be called.
-        self.add_subtitles('en')
-        mock_update_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id, self.video)
-        mock_update_subtitles.reset()
-        self.add_subtitles('fr')
-        mock_update_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id, self.video)
-        mock_update_subtitles.reset()
-        # when we delete subtitles, we should still call update_subtitles()
-        # since we are updating the entire set of subtitles
-        self.delete_subtitles('fr')
-        mock_update_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id, self.video)
-        mock_update_subtitles.reset()
-        # until we delete the last language, then we should call
-        # delete_subtitles()
-        self.delete_subtitles('en')
-        mock_delete_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id)
-
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.update_subtitles')
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.delete_subtitles')
-    def test_no_write_token(self, mock_delete_subtitles,
-                            mock_update_subtitles):
-        # if we don't have a write token set, we should skip syncing
-        self.account.write_token = ''
-        self.account.save()
-        self.add_subtitles('en')
-        self.assertEquals(mock_update_subtitles.call_count, 0)
-        # we shouldn't record sync history either in this case
-        self.assertEquals(SyncHistory.objects.count(), 0)
-        # the same should happen on delete
-        self.delete_subtitles('en')
-        self.assertEquals(mock_delete_subtitles.call_count, 0)
-        self.assertEquals(SyncHistory.objects.count(), 0)
 
 class BrightcoveAPITest(TestCase):
     WRITE_URL = 'https://api.brightcove.com/services/post'
