@@ -103,7 +103,7 @@
     module.controller('PlaybackModeController', ['$scope', '$timeout', 'VideoPlayer', 'EditorData', 'PreferencesService',
                       function($scope, $timeout, VideoPlayer, EditorData, PreferencesService) {
         function ModeHandler() {}
-        ModeHandler.prototype = { 
+        ModeHandler.prototype = {
             onActivate: function() {},
             onDeactivate: function() {},
             onTextEditKeystroke: function() {},
@@ -250,7 +250,7 @@
         StandardModeHandler.prototype = Object.create(ModeHandler.prototype);
 
         function BeginnerModeHandler() {}
-        BeginnerModeHandler.prototype = Object.create(BeginnerModeHandler.prototype);
+        BeginnerModeHandler.prototype = Object.create(ModeHandler.prototype);
         _.extend(BeginnerModeHandler.prototype, {
             playbackTimeout: null,
             playbackTimeoutStartTime: -1,
@@ -288,14 +288,6 @@
             }
         });
 
-        // Set the view's playbackMode based on preferences data from the backend
-        var initialPlaybackModeId = EditorData.preferences.playbackModeId;
-        $.each(EditorData.playbackModes, function(index, mode) {
-            if(mode.id === initialPlaybackModeId) {
-                $scope.playbackMode = mode;
-            }
-        });
-
         // Map playback mode id strings to modes
         var playbackModes = {};
         $.each(EditorData.playbackModes, function(index, mode) {
@@ -308,6 +300,26 @@
         modeHandlers[playbackModes.standard.id] = new StandardModeHandler();
         modeHandlers[playbackModes.beginner.id] = new BeginnerModeHandler();
 
+        function setStagePlaybackMode() {
+            if (typeof $scope.workflow  === "undefined") {
+                return;
+            }
+            if ($scope.workflow.stage == "typing") {
+                $scope.stagePlaybackMode = $scope.playbackMode;
+            } else {
+                $scope.stagePlaybackMode = playbackModes.standard;
+            }
+        }
+
+        // Set the view's playbackMode based on preferences data from the backend
+        var initialPlaybackModeId = EditorData.preferences.playbackModeId;
+        $.each(EditorData.playbackModes, function(index, mode) {
+            if(mode.id === initialPlaybackModeId) {
+                $scope.playbackMode = mode;
+                setStagePlaybackMode();
+            }
+        });
+
         var currentModeHandler = modeHandlers[$scope.playbackMode.id];
         currentModeHandler.onActivate();
 
@@ -319,18 +331,28 @@
             currentModeHandler.onVideoPlaybackChanges();
         });
 
+        $scope.$watch('workflow.stage', function(newStage, oldStage) {
+            if(newStage != oldStage) {
+                setStagePlaybackMode();
+            }
+        });
+
         $scope.$watch('playbackMode', function(newMode, oldMode) {
+            if(newMode != oldMode) {
+                setStagePlaybackMode();
+                // Save the new playbackMode preference server-side
+                PreferencesService.setPlaybackMode(newMode.id);
+            }
+        });
+
+        $scope.$watch('stagePlaybackMode', function(newMode, oldMode) {
             if(newMode === oldMode) {
                 return;
             }
-
             VideoPlayer.pause();
             currentModeHandler.onDeactivate();
             currentModeHandler = modeHandlers[newMode.id];
             currentModeHandler.onActivate();
-
-            // Save the new playbackMode preference server-side
-            PreferencesService.setPlaybackMode(newMode.id);
         });
     }]);
 }).call(this);
