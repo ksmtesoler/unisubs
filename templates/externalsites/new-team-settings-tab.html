@@ -53,6 +53,7 @@
 
   <fieldset class="brightcove{% if not forms.brightcovecms.enabled.value %} disabled{% endif %}">
     <legend>{% trans "Brightcove CMS" %}</legend>
+    <label>{% trans "Syncs subtitles for videos hosted on Brightcove as well as now-deprecated old Brightcove player videos." %}</label>
     {% include "_checkbox_field.html" with field=forms.brightcovecms.enabled %}
     {{ forms.brightcovecms.non_field_errors }}
     <div class="account-fields">
