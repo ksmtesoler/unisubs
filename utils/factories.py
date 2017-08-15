@@ -397,11 +397,12 @@ class OldSubtitleVersionFactory(DjangoModelFactory):
     description = 'Description'
     datetime_started = datetime.datetime(2000, 1, 1)
 
-class BrightcoveAccountFactory(DjangoModelFactory):
-    FACTORY_FOR = externalsites.models.BrightcoveAccount
+class BrightcoveCMSAccountFactory(DjangoModelFactory):
+    FACTORY_FOR = externalsites.models.BrightcoveCMSAccount
 
     publisher_id = 'publisher'
-    write_token = 'write-token'
+    client_id = 'client_id'
+    client_secret = 'client_secret'
 
 class KalturaAccountFactory(DjangoModelFactory):
     FACTORY_FOR = externalsites.models.KalturaAccount

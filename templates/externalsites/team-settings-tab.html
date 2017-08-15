@@ -59,42 +59,13 @@
 
             <fieldset class="brightcove{% if not forms.brightcovecms.enabled.value %} disabled{% endif %}">
                 <legend>{% trans "Brightcove CMS" %}</legend>
+                <label>{% trans "Syncs subtitles for videos hosted on Brightcove as well as now-deprecated old Brightcove player videos." %}</label>
                 {{ forms.brightcovecms.non_field_errors }}
                 {% include "_form_field.html" with field=forms.brightcovecms.enabled widget_type="checkbox" %}
                 <div class="account-fields">
                     {% include "_form_field.html" with field=forms.brightcovecms.publisher_id %}
                     {% include "_form_field.html" with field=forms.brightcovecms.client_id %}
                     {% include "_form_field.html" with field=forms.brightcovecms.client_secret %}
-                </div>
-            </fieldset>
-
-            <fieldset class="brightcove{% if not forms.brightcove.enabled.value %} disabled{% endif %}">
-                <legend>{% trans "Brightcove" %}</legend>
-                {{ forms.brightcove.non_field_errors }}
-                {% include "_form_field.html" with field=forms.brightcove.enabled widget_type="checkbox" %}
-                <div class="account-fields">
-                    {% include "_form_field.html" with field=forms.brightcove.publisher_id %}
-                    {% include "_form_field.html" with field=forms.brightcove.write_token %}
-                    {% if forms.brightcove.import_feed %}
-                    <a class="import-feed" href="{% url "teams:video_feed" slug=team.slug feed_id=forms.brightcove.import_feed.id %}">View feed</a>
-                    {% endif %}
-                    {% include "_form_field.html" with field=forms.brightcove.feed_enabled widget_type="checkbox" %}
-                    <fieldset class="feed-fields">
-                    {% include "_form_field.html" with field=forms.brightcove.player_id %}
-                    {{ forms.brightcove.feed_tags.errors }}
-                    {{ forms.brightcove.feed_type.errors }}
-                    <ul class="feed-import">
-                    {% for choice in forms.brightcove.feed_type %}
-                        <li>
-                        {{ choice.tag }} {{ choice.choice_label }}
-                        {% if choice.choice_value == "T" %}
-                            {{ forms.brightcove.feed_tags }}
-                            <em>{% trans "separate tags with commas" %}</em>
-                        {% endif %}
-                        </li>
-                    {% endfor %}
-                    </ul>
-                </fieldset>
                 </div>
             </fieldset>
 

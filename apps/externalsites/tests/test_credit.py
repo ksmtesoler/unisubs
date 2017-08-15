@@ -33,7 +33,7 @@ from utils.factories import *
 class ShouldAddCreditTest(TestCase):
     def test_non_youtube_video(self):
         user = UserFactory()
-        account = BrightcoveAccountFactory(user=user)
+        account = BrightcoveCMSAccountFactory(user=user)
         video_url = BrightcoveVideoFactory().get_primary_videourl_obj()
         self.assertEqual(should_add_credit_to_video_url(video_url, account),
                          False)
@@ -180,7 +180,7 @@ class AddCreditScheduleTest(BaseCreditTest):
 
     def test_dont_add_credit_to_non_youtube_videos(self):
         team = TeamFactory()
-        account = BrightcoveAccountFactory(team=team)
+        account = BrightcoveCMSAccountFactory(team=team)
         video = BrightcoveVideoFactory()
         TeamVideoFactory(team=team, video=video)
         self.assertEqual(self.mock_add_amara_credit.delay.call_count, 0)
