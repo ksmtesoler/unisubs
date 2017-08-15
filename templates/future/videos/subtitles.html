@@ -199,4 +199,7 @@
   {% if subtitle_version and perms.subtitles.edit_subtitleversion %}
   <li><a href="{% url "admin:subtitles_subtitleversion_change" subtitle_version.pk %}" target="blank">{% trans 'Edit SubtitleVersion' %}</a></li>
   {% endif %}
+  {% for link in extra_page_controls %}
+  <li>{{ link }}</li>
+  {% endfor %}
 {% endblock %}
