@@ -301,13 +301,13 @@
         modeHandlers[playbackModes.beginner.id] = new BeginnerModeHandler();
 
         function setStagePlaybackMode() {
-            if (typeof $scope.workflow  === "undefined") {
+            if (typeof $scope.timelineShown  === "undefined") {
                 return;
             }
-            if ($scope.workflow.stage == "typing") {
-                $scope.stagePlaybackMode = $scope.playbackMode;
-            } else {
+            if ($scope.timelineShown) {
                 $scope.stagePlaybackMode = playbackModes.standard;
+            } else {
+                $scope.stagePlaybackMode = $scope.playbackMode;
             }
         }
 
@@ -331,8 +331,8 @@
             currentModeHandler.onVideoPlaybackChanges();
         });
 
-        $scope.$watch('workflow.stage', function(newStage, oldStage) {
-            if(newStage != oldStage) {
+        $scope.$watch('timelineShown', function(newShown, oldShown) {
+            if(newShown != oldShown) {
                 setStagePlaybackMode();
             }
         });

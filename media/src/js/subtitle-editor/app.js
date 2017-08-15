@@ -97,7 +97,6 @@ var angular = angular || null;
         $scope.isTyping = function() {return (!$scope.translating()) && ($scope.workflow.stage == "typing");};
         $scope.isSyncing = function() {return (!$scope.translating()) && ($scope.workflow.stage == "syncing");};
         $scope.isReviewing = function() {return (!$scope.translating()) && ($scope.workflow.stage == "review");};
-        $scope.isTypingOrTranslating = function() {return ($scope.workflow.stage == "typing");};
         $scope.analytics = function() {
             if (typeof sendAnalytics !== 'undefined')
 		sendAnalytics.apply(this, Array.prototype.slice.call(arguments, 0));
