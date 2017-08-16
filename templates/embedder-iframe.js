@@ -130,7 +130,7 @@ var THIS_JS_FILE = scriptFiles[scriptFiles.length-1].src;
 	window.addEventListener('message', controller.resizeReceiver, false);
 	controller.initIframes(document.getElementsByClassName("amara-embed"));
 	controller.initResize();
-	document.addEventListener("DOMNodeInserted", function(event) {
+	var nodesAddedAndRemovedCallback = function(records) {
 	    var elements = document.getElementsByClassName("amara-embed");
 	    var emptyElements = [];
 	    for (var i = 0 ; i < elements.length ; i++) {
@@ -140,8 +140,8 @@ var THIS_JS_FILE = scriptFiles[scriptFiles.length-1].src;
 	    if (emptyElements.length > 0)
 		controller.initIframes(emptyElements);
 	    controller.initResize();
-
-	});
+	};
+	new MutationObserver(nodesAddedAndRemovedCallback).observe(document.body, { childList: true, subtree: true });
 
     };
     window.initIframeController = initIframeController;
