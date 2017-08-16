@@ -332,9 +332,7 @@
         });
 
         $scope.$watch('timelineShown', function(newShown, oldShown) {
-            if(newShown != oldShown) {
-                setStagePlaybackMode();
-            }
+            setStagePlaybackMode();
         });
 
         $scope.$watch('playbackMode', function(newMode, oldMode) {
@@ -346,9 +344,6 @@
         });
 
         $scope.$watch('stagePlaybackMode', function(newMode, oldMode) {
-            if(newMode === oldMode) {
-                return;
-            }
             VideoPlayer.pause();
             currentModeHandler.onDeactivate();
             currentModeHandler = modeHandlers[newMode.id];
