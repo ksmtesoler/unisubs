@@ -5,7 +5,7 @@ import itertools
 
 from django.test import TestCase
 
-from teams.models import BillingRecord, BillingReport, Task
+from teams.models import BillingRecord, BillingReport, BillToClient, Task
 from subtitles.pipeline import add_subtitles
 from teams.permissions_const import (ROLE_CONTRIBUTOR, ROLE_MANAGER,
                                      ROLE_ADMIN)
@@ -184,6 +184,22 @@ class BillingRecordTest(TestCase):
         # always round up, so both should count as 2 minutes
         self.assertEquals(data[video.video_id, 'en']['Minutes'], 2)
         self.assertEquals(data[video.video_id, 'fr']['Minutes'], 2)
+
+    def test_record_bill_to(self):
+        client_team = BillToClient(client="Test Billable Client Team")
+        client_project = BillToClient(client="Test Billable Client Project")
+        team = TeamFactory()
+        project = ProjectFactory(team=team)
+        record = BillingRecord(team=team, project=project)
+
+        # If no project or team is associated, bill_to is blank.
+        self.assertEqual(record.bill_to, '')
+        # If only the record's team has a BillToClient, return it
+        team.bill_to = client_team
+        self.assertEqual(record.bill_to, "Test Billable Client Team")
+        # If a record's team and project both have BillToClients, return the project's
+        project.bill_to = client_project
+        self.assertEqual(record.bill_to, "Test Billable Client Project")
 
 class ProcessReportTest(TestCase):
     def setUp(self):

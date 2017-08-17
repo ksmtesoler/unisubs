@@ -245,6 +245,7 @@ class Team(models.Model):
 
     auth_provider_code = models.CharField(_(u'authentication provider code'),
                                           max_length=24, blank=True, default="")
+    bill_to = models.ForeignKey('BillToClient', blank=True, null=True)
 
     # code value from one the TeamWorkflow subclasses
     # Since other apps can add workflow types, let's use this system to avoid
@@ -972,6 +973,8 @@ class Project(models.Model):
     workflow_enabled = models.BooleanField(default=False)
 
     objects = ProjectManager()
+
+    bill_to = models.ForeignKey('BillToClient', blank=True, null=True)
 
     def __unicode__(self):
         if self.is_default_project:
@@ -3408,6 +3411,14 @@ class BillingReport(models.Model):
     def end_str(self):
         return self.end_date.strftime("%Y%m%d")
 
+class BillToClient(models.Model):
+    """Billable client for a billing record."""
+
+    client = models.CharField(max_length=255, unique=True)
+
+    def __unicode__(self):
+        return self.client
+
 class BillingReportGenerator(object):
     def __init__(self, all_records, add_header=True):
         if add_header:
@@ -3439,6 +3450,7 @@ class BillingReportGenerator(object):
             'Created',
             'Source',
             'User',
+            'Bill To',
         ]
 
     def make_row(self, video, record):
@@ -3454,6 +3466,7 @@ class BillingReportGenerator(object):
             record.created.strftime('%Y-%m-%d %H:%M:%S'),
             record.source,
             record.user.username,
+            record.bill_to,
         ]
 
     def make_language_number_map(self, records):
@@ -3500,6 +3513,7 @@ NOT EXISTS (
             0,
             'unknown',
             language.created.strftime('%Y-%m-%d %H:%M:%S'),
+            'unknown',
             'unknown',
             'unknown',
         ]
@@ -3670,6 +3684,15 @@ class BillingRecord(models.Model):
         assert self.minutes is not None
 
         return super(BillingRecord, self).save(*args, **kwargs)
+
+    @property
+    def bill_to(self):
+        if self.project.bill_to:
+             return self.project.bill_to.client
+        elif self.team.bill_to:
+             return self.team.bill_to.client
+        else:
+             return ''
 
     def get_minutes(self):
         return get_minutes_for_version(self.new_subtitle_version, True)
