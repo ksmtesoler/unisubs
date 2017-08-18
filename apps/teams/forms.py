@@ -1408,7 +1408,7 @@ class ActivityFiltersForm(forms.Form):
         if subtitle_language:
             qs = qs.filter(language_code=subtitle_language)
         if video_language:
-            qs = qs.filter(video__primary_audio_language_code=video_language)
+            qs = qs.filter(video_language_code=video_language)
         return qs.order_by(sort)
 
 class MemberFiltersForm(forms.Form):

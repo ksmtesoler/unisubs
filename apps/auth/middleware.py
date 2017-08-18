@@ -20,6 +20,18 @@ import functools
 
 from django.contrib import auth
 from django.contrib.auth.models import AnonymousUser
+from django.utils.functional import SimpleLazyObject
+
+def get_user(request):
+    # Copy of get_user from contrib.auth that also checks is_active
+    if not hasattr(request, '_cached_user'):
+        user = auth.get_user(request)
+        if user.is_active:
+            request._cached_user = user
+        else:
+            request._cached_user = AnonymousUser()
+    return request._cached_user
+
 
 from auth.models import CustomUser as User
 
@@ -48,3 +60,4 @@ class AmaraAuthenticationMiddleware(object):
         # that.
         request.use_cached_user = functools.partial(self.use_cached_user,
                                                     request)
+        request.user = SimpleLazyObject(lambda: get_user(request))
