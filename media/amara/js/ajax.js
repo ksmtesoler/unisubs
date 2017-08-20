@@ -86,7 +86,8 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
                   window.location.pathname + '?' + form.formSerialize()
         var page = window.location.search.match(/page=(\d+)/)
         if ((!resetPage) && page && (page.length == 2)) url += '&page=' + page[1];
-        history.pushState(null, "", url);
+        if (url != history.state)
+            history.pushState(url, "", url);
     }
 
     function ajaxForm(form) {
