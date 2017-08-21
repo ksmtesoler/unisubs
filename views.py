@@ -21,9 +21,16 @@ import logging
 from django.http import Http404, HttpResponse
 from django.shortcuts import render
 
+from caching.decorators import cache_page
 from utils.decorators import staff_member_required
 from utils.one_time_data import get_one_time_data
 logger = logging.getLogger(__name__)
+
+@cache_page(minutes=60)
+def home(request):
+    return render(request, 'home.html', {
+        'user_menu_esi': request.GET.get('esi'),
+    })
 
 @staff_member_required
 def errortest(request):
