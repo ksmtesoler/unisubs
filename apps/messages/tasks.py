@@ -39,7 +39,7 @@ from auth.models import CustomUser as User, UserLanguage
 from localeurl.utils import universal_url
 from teams.moderation_const import REVIEWED_AND_PUBLISHED, \
      REVIEWED_AND_PENDING_APPROVAL, REVIEWED_AND_SENT_BACK
-from messages.models import Message
+from messages.models import Message, SYSTEM_NOTIFICATION
 from utils import send_templated_email
 from utils.text import fmt
 from utils.translation import get_language_label
@@ -93,18 +93,23 @@ def send_new_message_notification(message_id):
     if not user.email or not user.is_active or not user.notify_by_email:
         return
 
+    if message.message_type == SYSTEM_NOTIFICATION:
+        return
+
     if message.author:
         subject = _(u"New message from %(author)s on Amara: %(subject)s")
+        template_name = "messages/email/message_received.html"
     else:
         subject = _("New message on Amara: %(subject)s")
-    subject = fmt(subject, author=message.author, subject=message.subject)
+        template_name = "messages/email/message_received_no_author.html"
 
     context = {
         "message": message,
         "domain":  Site.objects.get_current().domain,
         "STATIC_URL": settings.STATIC_URL,
     }
-    send_templated_email(user, subject, "messages/email/message_received.html", context)
+    subject = fmt(subject, author=message.author, subject=message.subject)
+    send_templated_email(user, subject, template_name, context)
 
 @task()
 def team_invitation_sent(invite_pk):
