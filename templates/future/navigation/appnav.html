@@ -1,0 +1,11 @@
+{% load i18n %}
+{% load url from future %}
+<nav class="appnav">
+  <ul class="nav">
+    {% if user_menu_esi %}
+    <esi:include src="/{{ LANGUAGE_CODE }}/esi/user-menu/?next={{ request.path_info|urlencode }}" />
+    {% else %}
+    {% include "future/user-menu.html" %}
+    {% endif %}
+  </ul>
+</nav>

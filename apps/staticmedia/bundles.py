@@ -297,7 +297,7 @@ class RequireJSBundle(Bundle):
         """HTML for a local dev server."""
 
         return """\
-<script src="/media/js/require.js"></script>'
+<script src="/media/js/require.js"></script>
 <script>
   require.config({config});
   {config_module}

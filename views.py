@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 @cache_page(minutes=60)
 def home(request):
     return render(request, 'home.html', {
-        'user_menu_esi': request.GET.get('esi'),
+        'user_menu_esi': 'esi' in request.GET,
     })
 
 @staff_member_required
