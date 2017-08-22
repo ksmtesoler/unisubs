@@ -130,6 +130,8 @@ USE_I18N = True
 STATIC_ROOT = rel('media')+'/'
 MEDIA_ROOT  = rel('user-data')+'/'
 CSS_ROOT = os.path.join(STATIC_ROOT, 'amara/css')
+LOGO_URL = "https://s3.amazonaws.com/amara/assets/LogoAndWordmark.svg"
+PCF_LOGO_URL = "https://s3.amazonaws.com/amara/assets/PCFLogo.png"
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
