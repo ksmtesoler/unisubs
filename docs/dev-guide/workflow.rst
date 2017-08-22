@@ -81,15 +81,19 @@ Exception Logging
 When catching exceptions, be sure to log these with a descriptive message
 and the stacktrace. Exceptions should be caught whenever it's necessary
 for flow control, an exception is expected, or where user input may cause
-unexpected behavior (such as forms).
+unexpected behavior (such as forms). In the case where a caught exception is
+an expected part of flow control, such as making an invalid choice in a form,
+logging isn't necessary and doesn't need to be included.
 
 As an example, here is a function that logs exceptions:
 
 ::
 
-    def foo(a, b):
+    def foo(self, a, b):
         try:
-            do_something(a, b)
+            self.do_something(a, b)
+        except InvalidChoiceError:
+            self.invalid_choice_count += 1
         except ValueError:
             logger.error("Invalid input type in Class.foo()", exc_info=True)
         except Exception:
