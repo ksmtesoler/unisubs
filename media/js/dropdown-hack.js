@@ -1,5 +1,5 @@
 $(function() {
-    $('a.dropdown-toggle').click(function() {
+    $('.dropdown-toggle').click(function() {
         var link = $(this);
         var dropdown = link.closest('.dropdown');
         if(dropdown.hasClass('open')) {

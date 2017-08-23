@@ -3293,6 +3293,10 @@ a.truncated-expand {
     padding-top: 100px;
 }
 
+.container {
+    position: relative;
+}
+
 header a:link, footer a:link {
     text-decoration: none;
 }
@@ -3304,12 +3308,19 @@ header a:link, footer a:link {
     width: auto;
 
     li {
-        float: none;
         a {
             float: none;
             background-image: none;
         }
     }
+
+    .dropdown {
+        position: relative;
+    }
+
+}
+#page-header .nav li {
+        float: none;
 }
 
 #page-footer {
@@ -3333,4 +3344,8 @@ header a:link, footer a:link {
     display: block;
     max-width: 100%;
     height: auto;
+}
+
+#mainnav .primarynav ul li {
+    padding: 0;
 }
