@@ -95,6 +95,7 @@
       font-weight: 700;
     }
     ul {
+      display: inline-block;
       li.dropdown {
         &.open {
           ul.dropdown-menu {
