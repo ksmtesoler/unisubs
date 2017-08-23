@@ -471,6 +471,15 @@ MEDIA_BUNDLES = {
             "css/watch.css",
             "css/v1.scss",
             "css/bootstrap.css",
+            # Hack to make the new headers/footers work
+            "amara/css/variables.scss",
+            "amara/css/mixins.scss",
+            "amara/css/global/grid.scss",
+            "amara/css/global/dropdowns.scss",
+            "amara/css/elements/_navigation.scss",
+            "amara/css/elements/_page_header.scss",
+            "amara/css/elements/_consolidate-header.scss",
+            "amara/css/elements/page_footer.scss",
         ),
     },
     "new-base.css": {
@@ -538,6 +547,7 @@ MEDIA_BUNDLES = {
             "js/jquery.input_replacement.min.js",
             "js/messages.js",
             "js/escape.js",
+            "js/dropdown-hack.js",
             "js/libs/chosen.jquery.min.js",
             "js/libs/chosen.ajax.jquery.js",
             "js/libs/jquery.cookie.js",
