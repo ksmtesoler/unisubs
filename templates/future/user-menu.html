@@ -44,5 +44,5 @@
   </div>
 </li>
 {% else %}
-<li><a href="{% url "auth:login" %}?next={% firstof next request.path_info|urlencode %}">{% trans 'Sign in / Sign up' %}</a></li>
+<li><a href="{% url "auth:login" %}?next={% firstof next request.path_info|urlencode %}">{% trans 'Login' %}</a></li>
 {% endif %}
