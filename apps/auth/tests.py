@@ -22,6 +22,8 @@ from nose.tools import *
 import mock
 import re
 
+
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core import mail
@@ -33,6 +35,33 @@ from auth.models import LoginToken
 from caching.tests.utils import assert_invalidates_model_cache
 from utils.factories import *
 from utils import test_utils
+
+
+class UserSpammingTest(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+    def test_de_activate_users(self):
+        self.assertEqual(self.user.is_active, True)
+        self.user.de_activate()
+        self.assertEqual(self.user.is_active, False)
+        self.user.is_superuser = True
+        self.user.is_active = True
+        self.user.de_activate()
+        self.assertEqual(self.user.is_active, True)
+        
+    @test_utils.patch_for_test('utils.dates.now')
+    def test_spamming_user_deactivated(self, mock_now):
+        mock_now.return_value = datetime(2017, 1, 1)
+        self.assertEqual(self.user.is_active, True)
+        for message in range(settings.MESSAGES_SENT_LIMIT):
+            self.user.sent_message()
+        self.assertEqual(self.user.is_active, True)
+        self.user.sent_message()
+        self.assertEqual(self.user.is_active, False)
+        self.user.is_active = True
+        mock_now.return_value += timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES, seconds=1)
+        self.user.sent_message()
+        self.assertEqual(self.user.is_active, True)
 
 class VideosFieldTest(TestCase):
     def setUp(self):

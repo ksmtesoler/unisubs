@@ -16,6 +16,7 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
+from collections import deque
 from datetime import datetime, timedelta
 import hashlib
 import hmac
@@ -44,6 +45,7 @@ from tastypie.models import ApiKey
 from auth import signals
 from caching import CacheGroup, ModelCacheManager
 from utils.amazon import S3EnabledImageField
+from utils import dates
 from utils import secureid
 from utils import translation
 from utils.tasks import send_templated_email_async
@@ -204,6 +206,36 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
             return self.full_name
         else:
             return self.username
+
+    def sent_message(self):
+        """
+        Should be called each time a user sends a message.
+        This is used to control if a user is spamming.
+        """
+        if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
+           hasattr(settings, 'MESSAGES_SENT_LIMIT'):
+            if hasattr(self, '_cached_sent_messages') and \
+               self._cached_sent_messages is not None:
+                self._cached_sent_messages.append(dates.now())
+            else:
+                self._cached_sent_messages = deque([dates.now()])
+            self._check_sent_messages()
+
+    def _check_sent_messages(self):
+        if hasattr(self, '_cached_sent_messages') and \
+           self._cached_sent_messages is not None and \
+           hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
+           hasattr(settings, 'MESSAGES_SENT_LIMIT'):
+            now = dates.now()
+            while self._cached_sent_messages[0] < \
+                  (now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)):
+                self._cached_sent_messages.popleft()
+            if len(self._cached_sent_messages) > settings.MESSAGES_SENT_LIMIT:
+                self.de_activate()
+
+    def de_activate(self):
+        if not self.is_superuser:
+            self.is_active = False
 
     def has_fullname_set(self):
         return any([self.first_name, self.last_name, self.full_name])
