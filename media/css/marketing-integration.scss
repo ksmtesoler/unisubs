@@ -1,0 +1,69 @@
+// Hacks to integrate the new header/footer
+.content {
+    padding-top: 100px;
+}
+
+.container {
+    position: relative;
+}
+
+header a:link, footer a:link {
+    text-decoration: none;
+}
+
+#page-header .nav,  #page-footer .nav {
+    margin: 0;
+    padding: 0;
+    float: none;
+    width: auto;
+
+    li {
+        a {
+            float: none;
+            background-image: none;
+        }
+    }
+
+    .dropdown {
+        position: relative;
+
+        .caret {
+            float: none;
+        }
+    }
+
+}
+#page-header .nav li {
+        float: none;
+}
+
+#page-footer {
+
+    nav {
+        display: block;
+
+    }
+    ul.nav:after {
+        content: " ";
+        display: table;
+    }
+
+    .navbar-nav a {
+        padding: 15px;
+        font-size: 14px;
+    }
+
+    section {
+        padding: 30px 0;
+    }
+}
+
+.img-responsive {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+#mainnav .primarynav ul li {
+    padding: 0;
+}
