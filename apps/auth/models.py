@@ -236,6 +236,8 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def de_activate(self):
         if not self.is_superuser:
             self.is_active = False
+            import tasks
+            tasks.notify_blocked_user.delay(self)
 
     def has_fullname_set(self):
         return any([self.first_name, self.last_name, self.full_name])

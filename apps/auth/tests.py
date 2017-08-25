@@ -48,7 +48,7 @@ class UserSpammingTest(TestCase):
         self.user.is_active = True
         self.user.de_activate()
         self.assertEqual(self.user.is_active, True)
-        
+
     @test_utils.patch_for_test('utils.dates.now')
     def test_spamming_user_deactivated(self, mock_now):
         mock_now.return_value = datetime(2017, 1, 1)
