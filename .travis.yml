@@ -6,4 +6,3 @@ before_install:
 - bin/dev dbreset
 script:
 - bin/dev up
-language: python
