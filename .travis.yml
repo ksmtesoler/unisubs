@@ -1,4 +1,5 @@
 sudo: required
+language: python
 services:
   - docker
 before_install:
@@ -6,3 +7,4 @@ before_install:
 - bin/dev dbreset
 script:
 - bin/dev up
+- manage.py test
