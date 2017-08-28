@@ -474,7 +474,6 @@ MEDIA_BUNDLES = {
             # Hack to make the new headers/footers work
             "amara/css/variables.scss",
             "amara/css/mixins.scss",
-            "amara/css/global/grid.scss",
             "amara/css/global/dropdowns.scss",
             "amara/css/elements/_navigation.scss",
             "amara/css/elements/_page_header.scss",
@@ -543,7 +542,6 @@ MEDIA_BUNDLES = {
         "files": (
             "js/hands-plugins.js",
             "js/hands-modernizr-2.6.2.min.js",
-            "js/dropdown-hack.js",
          )
     },
     "site.js": {
