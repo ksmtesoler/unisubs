@@ -3504,6 +3504,7 @@ NOT EXISTS (
 
     def make_row_for_lang_without_record(self, video, language):
         return [
+            'unknown',
             video.title_display(),
             video.video_id,
             'none',
@@ -3513,7 +3514,6 @@ NOT EXISTS (
             0,
             'unknown',
             language.created.strftime('%Y-%m-%d %H:%M:%S'),
-            'unknown',
             'unknown',
             'unknown',
         ]
