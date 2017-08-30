@@ -83,6 +83,7 @@ $outer-margin: 2rem !default;
 // Syntax:
 // name SIZErem,
 $breakpoints:
+  xs 768px 750px,
   sm 768px 750px,
   md 992px 970px,
   lg 1430px 1400px !default;
@@ -141,7 +142,7 @@ $half-gutter-width: $gutter-width * .5;
   $size: nth($breakpoint, 2);
   $container: nth($breakpoint, 3);
   @media only screen and (min-width: $size) {
-    #page-header, #page-footer {
+    #page-header, #page-footer, .newgrid {
       .container {
         width: $container;
       }

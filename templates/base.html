@@ -54,14 +54,16 @@
 </head>
 
 <body {% block body_attrs %}{% endblock %}>
-    {% announcement %}
-    {% if user.is_authenticated %}
-        {% messages %}
-        {% block email_confirmation_block %}
-            {% email_confirmation_notification %}
-        {% endblock %}
-    {% endif %}
-    {% require_email_dialog %}
+    <div class="newgrid">
+      {% announcement %}
+      {% if user.is_authenticated %}
+          {% messages %}
+          {% block email_confirmation_block %}
+              {% email_confirmation_notification %}
+          {% endblock %}
+      {% endif %}
+      {% require_email_dialog %}
+    </div>
     {% include "future/header.html" with no_language_switcher=1 %}
 
     <div class="content container_12 wrapper clearfix">
