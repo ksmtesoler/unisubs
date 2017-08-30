@@ -68,7 +68,7 @@ def group_report_rows(report_rows, key_columns):
             key = tuple(row_data[c] for c in key_columns)
         else:
             key = row_data[key_columns[0]]
-        assert key not in rv, "Duplicate key: %s" % key
+        assert key not in rv, "Duplicate key: {}".format(key)
         rv[key] = row_data
     return rv
 
