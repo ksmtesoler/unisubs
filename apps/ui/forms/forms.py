@@ -274,7 +274,7 @@ class ManagementFormList(object):
     def exclude(self, form):
         """Returns a copy of the current ManagementFormList without the given
         form."""
-        form_list = self
+        form_list = ManagementFormList(self.forms.values())
         try:
             del form_list.forms[form]
         except KeyError:
