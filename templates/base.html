@@ -93,7 +93,7 @@
         {% block main_content %}{% endblock %}
     </div>
 
-    {% include "future/footer.html" %}
+    {% include "future/footer.html" with language_switcher=1 %}
 
     {% if user.is_staff %}
         <div id="admin_controls">
