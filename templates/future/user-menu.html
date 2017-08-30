@@ -2,6 +2,7 @@
 {% load url from future %}
 <ul class="nav">
   {% if user.is_authenticated %}
+  {% cache-by-user new-top-panel %}
   <li class="dropdown">
     <button id="user-menu" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user }} <span class="caret"></span></button>
     <ul class="dropdown-menu collapse" aria-labeledby="user-menu">
@@ -42,6 +43,7 @@
       {% endif %}
     </ul>
   </li>
+  {% endcache %}
   {% else %}
   <li><a class="button" href="{% url "auth:login" %}?next={% firstof next request.path_info|urlencode %}">{% trans 'Login' %}</a></li>
   {% endif %}
