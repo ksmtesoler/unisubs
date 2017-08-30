@@ -83,6 +83,7 @@ define([
       options.data = Languages.languageChoiceData(select);
       options.type = 'language';
       options.allowClear = select.data('languageOptions').indexOf('null') > -1;
+      options.tokenSeparators = [',', ' '];
     } else {
       var blankOptions = $('option', select).filter(function() {
         return !this.value;

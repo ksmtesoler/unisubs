@@ -41,7 +41,8 @@ define([
     'select2/utils',
     'select2/data/array',
     'select2/data/ajax',
-], function($, _, Utils, ArrayData, AjaxData) {
+    'select2/data/tokenizer',
+], function($, _, Utils, ArrayData, AjaxData, Tokenizer) {
     function AmaraArrayData($element, data) {
         AmaraArrayData.__super__.constructor.call(this, $element, data);
 
@@ -117,6 +118,8 @@ define([
         } else {
             var adapter = AmaraArrayData;
         }
+
+        adapter = Utils.Decorate(adapter, Tokenizer);
         return adapter;
     }
 
