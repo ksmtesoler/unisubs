@@ -430,6 +430,9 @@ MEDIA_BUNDLES = {
             "amara/bootstrap/bootstrap.min.css",
             "amara/css/main.scss",
         ],
+        "include_paths": [
+            "amara/css/",
+        ],
     },
     "amara.js": {
         "use_requirejs": True,
