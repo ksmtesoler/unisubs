@@ -61,8 +61,11 @@ class CacheNode(template.Node):
             return self.nodelist.render(context)
         content = cache_group.get(self.key)
         if content is None:
+            print 'cache miss: {}'.format(self.key)
             content = self.nodelist.render(context)
             cache_group.set(self.key, content)
+        else:
+            print 'cache hit: {}'.format(self.key)
         return content
 
 class CacheByUserNode(CacheNode):
