@@ -251,6 +251,10 @@ from videos.models import Video
 from videos.types import video_type_registrar, VideoTypeError
 import videos.tasks
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class VideoLanguageShortSerializer(serializers.Serializer):
     code = serializers.CharField(source='language_code')
     name = serializers.CharField(source='get_language_code_display')
@@ -597,9 +601,18 @@ class VideoViewSet(mixins.CreateModelMixin,
             members = self.request.user.team_members.all()
             visibility = visibility | Q(id__in=members.values_list('team_id'))
         user_visible_teams = Team.objects.filter(visibility)
-        return Video.objects.filter(
-            Q(teamvideo__isnull=True) |
-            Q(teamvideo__team__in=user_visible_teams))
+        try:
+            from collab.models import Collaboration
+            collabs = Collaboration.objects.get_query_set().user_in_any_team(self.request.user)
+            collab_videos = [c.video.id for c in collabs]
+        except:
+            logger.error("Exception while getting collaboration videos", exc_info=True)
+            collab_videos = []
+        videos = Video.objects.filter(
+                Q(teamvideo__isnull=True) |
+                Q(teamvideo__team__in=user_visible_teams) |
+                Q(id__in=collab_videos))
+        return videos
 
     def get_videos_for_team(self, query_params):
         try:
