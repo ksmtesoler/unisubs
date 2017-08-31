@@ -5,6 +5,3 @@ services:
 before_install:
 - bin/dev build
 - bin/dev dbreset
-script:
-- bin/dev up
-- manage.py test
