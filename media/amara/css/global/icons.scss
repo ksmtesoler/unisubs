@@ -102,6 +102,66 @@
 //     <i class="icon icon-edit"></i>
 //     <span>icon-edit</span>
 //   </li>
+//   <li>
+//     <i class="icon icon-caret"></i>
+//     <span>icon-caret</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-download"></i>
+//     <span>icon-download</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-external"></i>
+//     <span>icon-external</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-facebook"></i>
+//     <span>icon-facebook</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-instagram"></i>
+//     <span>icon-instagram</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-linkedin"></i>
+//     <span>icon-linkedin</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-mail"></i>
+//     <span>icon-mail</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-pin"></i>
+//     <span>icon-pin</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-play"></i>
+//     <span>icon-play</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-print"></i>
+//     <span>icon-print</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-search"></i>
+//     <span>icon-search</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-share"></i>
+//     <span>icon-share</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-trash"></i>
+//     <span>icon-trash</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-twitter"></i>
+//     <span>icon-twitter</span>
+//   </li>
+//   <li>
+//     <i class="icon icon-youtube"></i>
+//     <span>icon-youtube</span>
+//   </li>
 // </ul>
 //
 // Example:
@@ -158,60 +218,60 @@ i {
 
 ///////////////////////////
 .icon-alert:before {
-  content: "\e912";
+  content: "\e901";
 }
 .icon-approve:before {
-  content: "\e900";
-}
-.icon-approve_outline:before {
-  content: "\e909";
-}
-.icon-incomplete:before {
-  content: "\e911";
-}
-.icon-complete:before {
-  content: "\e90c";
-}
-.icon-deny:before {
   content: "\e90a";
 }
-.icon-evaluate:before {
-  content: "\e90b";
-}
-.icon-review:before {
-  content: "\e904";
-}
-.icon-transcribe:before {
+.icon-approve_outline:before {
   content: "\e907";
 }
+.icon-incomplete:before {
+  content: "\e915";
+}
+.icon-complete:before {
+  content: "\e912";
+}
+.icon-deny:before {
+  content: "\e913";
+}
+.icon-evaluate:before {
+  content: "\e914";
+}
+.icon-review:before {
+  content: "\e919";
+}
+.icon-transcribe:before {
+  content: "\e91c";
+}
 .icon-translate:before {
-  content: "\e908";
+  content: "\e91d";
 }
 .icon-initial-work:before {
-  content: "\e90f";
+  content: "\e917";
 }
 .icon-provider-request:before {
 // This is still to be implemented.  Let's use the transcribe icon as a
 // placeholder
-  content: "\e907";
+  content: "\e91c";
 }
 
 
 .icon-clock:before {
-  content: "\e902";
+  content: "\e911";
 }
 .icon-mail:before {
-  content: "\e903";
+  content: "\e918";
   color: $teal !important;
 }
 .icon-search:before {
-  content: "\e905";
+  content: "\e91a";
 }
 .icon-star:before {
-  content: "\e906";
+  content: "\e91b";
 }
 .icon-trash:before {
-  content: "\e910";
+  content: "\e91e";
 }
 
 .icon-loading:before {
@@ -223,25 +283,72 @@ i {
 
 // Arrows
 .icon-arrow:before {
-  content: "\e901";
+  content: "\e90c";
 }
 .icon-forward:before {
-  content: "\e901";
+  content: "\e90c";
 }
 .icon-back:before {
-  content: "\e901";
+  content: "\e90c";
   display: inline-block;
   transform: rotate(180deg);
 }
 .icon-up:before {
-  content: "\e901";
+  content: "\e90c";
   display: inline-block;
   transform: rotate(-90deg);
 }
 .icon-down:before {
-  content: "\e901";
+  content: "\e90c";
   display: inline-block;
   transform: rotate(90deg);
+}
+
+// From the marketing pages
+.icon-caret:before {
+  content: "\e900";
+}
+.icon-download:before {
+  content: "\e901";
+}
+.icon-external:before {
+  content: "\e902";
+}
+.icon-facebook:before {
+  content: "\e903";
+}
+.icon-instagram:before {
+  content: "\e904";
+}
+.icon-linkedin:before {
+  content: "\e905";
+}
+.icon-mail:before {
+  content: "\e906";
+}
+.icon-pin:before {
+  content: "\e907";
+}
+.icon-play:before {
+  content: "\e908";
+}
+.icon-print:before {
+  content: "\e909";
+}
+.icon-search:before {
+  content: "\e90a";
+}
+.icon-share:before {
+  content: "\e90b";
+}
+.icon-trash:before {
+  content: "\e90c";
+}
+.icon-twitter:before {
+  content: "\e90d";
+}
+.icon-youtube:before {
+  content: "\e90e";
 }
 
 
@@ -250,15 +357,15 @@ i {
 // These may need to be removed or refactored at some point to avoid confusion
 
 .icon-check:before {
-  content: "\e900";
-}
-
-.icon-close:before {
   content: "\e90a";
 }
 
+.icon-close:before {
+  content: "\e913";
+}
+
 .icon-edit:before {
-  content: "\e907";
+  content: "\e91c";
 }
 
 // sizes
