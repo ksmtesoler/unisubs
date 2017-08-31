@@ -130,6 +130,8 @@ USE_I18N = True
 STATIC_ROOT = rel('media')+'/'
 MEDIA_ROOT  = rel('user-data')+'/'
 CSS_ROOT = os.path.join(STATIC_ROOT, 'amara/css')
+LOGO_URL = "https://s3.amazonaws.com/amara/assets/LogoAndWordmark.svg"
+PCF_LOGO_URL = "https://s3.amazonaws.com/amara/assets/PCFLogo.png"
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -428,6 +430,9 @@ MEDIA_BUNDLES = {
             "amara/bootstrap/bootstrap.min.css",
             "amara/css/main.scss",
         ],
+        "include_paths": [
+            "amara/css/",
+        ],
     },
     "amara.js": {
         "use_requirejs": True,
@@ -469,6 +474,16 @@ MEDIA_BUNDLES = {
             "css/watch.css",
             "css/v1.scss",
             "css/bootstrap.css",
+            # Hack to make the new headers/footers work
+            "amara/css/variables.scss",
+            "amara/css/mixins.scss",
+            "amara/css/global/dropdowns.scss",
+            "amara/css/global/icons.scss",
+            "amara/css/elements/_navigation.scss",
+            "amara/css/elements/_page_header.scss",
+            "amara/css/elements/_consolidate-header.scss",
+            "amara/css/elements/page_footer.scss",
+            "css/marketing-integration.scss",
         ),
     },
     "new-base.css": {
@@ -510,6 +525,17 @@ MEDIA_BUNDLES = {
         "files": (
             "css/hands-static.css",
             "css/hands-main.css",
+            # Hack to make the new headers/footers work
+            "amara/css/variables.scss",
+            "amara/css/mixins.scss",
+            "amara/css/global/grid.scss",
+            "amara/css/global/dropdowns.scss",
+            "amara/css/global/icons.scss",
+            "amara/css/elements/_navigation.scss",
+            "amara/css/elements/_page_header.scss",
+            "amara/css/elements/_consolidate-header.scss",
+            "amara/css/elements/page_footer.scss",
+            "css/marketing-integration.scss",
          )
     },
     "api.css": {
@@ -536,6 +562,7 @@ MEDIA_BUNDLES = {
             "js/jquery.input_replacement.min.js",
             "js/messages.js",
             "js/escape.js",
+            "js/dropdown-hack.js",
             "js/libs/chosen.jquery.min.js",
             "js/libs/chosen.ajax.jquery.js",
             "js/libs/jquery.cookie.js",

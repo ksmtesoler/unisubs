@@ -32,92 +32,31 @@
       {% endif %}
       {% block content %}{% endblock %}
     </main>
-    <div class="pageFooter">
-      <div class="container">
-        <div class="row">
-          <div class="col-xs-10 col-sm-6">
-            <div class="content">
-              <p>
-                <img src="{{ STATIC_URL }}images/amara-logotype.png" alt="Amara logo" />
-              </p>
-              <p class="footerNav">
-                <a href="//about.amara.org/tos/">{% trans "Terms" %}</a>
-                <a href="//pculture.org/pcf/websites-privacy/">{% trans "Privacy" %}</a>
-                <a href="//amara.org/security">{% trans "Security" %}</a>
-              </p>
-            </div>
+    {% block footer %}{% include "future/footer.html" %}{% endblock %}
+    {% if user.is_staff %}
+    <div id="staff-controls" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="dialogHeader">
+            <h4 class="dialogTitle">{% trans "Staff Controls" %}</h4>
           </div>
-          <nav class="col-xs-12 col-sm-6">
-            <div class="row start-xs">
-            {% if not user.is_staff %}
-              <ul class="col-xs-3">
-                <li>
-                  <a class="ajaxLink text" data-href="/ui/language-select/">
-                    <img width="25" height="25" src="{{ STATIC_URL }}images/language-switch-globe.svg"/>
-                    <strong>{% current_language_name %}</strong>
-                  </a>
-                </li>
-              </ul>
-              <ul class="col-xs-3">
-                <li><strong>{% trans "Amara" %}</strong></li>
-                <li><a href="//about.amara.org/">{% trans "Blog" %}</a></li>
-                <li><a href="//support.amara.org/solution/categories/13504">{% trans "Help" %}</a></li>
-                <li><a href="//support.amara.org/support/solutions/articles/35517--i-have-a-non-technical-question-about">{% trans "Contact" %}</a></li>
-              </ul>
-              <ul class="col-xs-3">
-                <li><strong>{% trans "Videos" %}</strong></li>
-                <li><a href="//amara.org/search/#/?q=">{% trans "Search" %}</a></li>
-                <li><a href="//amara.org/videos/watch/">{% trans "Browse" %}</a></li>
-                <li><a href="//amara.org/videos/watch/featured/">{% trans "Featured" %}</a></li>
-              </ul>
-              <ul class="col-xs-3">
-                <li><strong>{% trans "More" %}</strong></li>
-                <li><a href="//twitter.com/AmaraSubs/">{% trans "Twitter" %}</a></li>
-                <li><a href="//facebook.com/Amara.Community">{% trans "Facebook" %}</a></li>
-              </ul>
-              {% else %}
-              <ul class="col-xs-3">
-                <li>
-                  <a class="ajaxLink text" data-href="/ui/language-select/">
-                    <img width="25" height="25" src="{{ STATIC_URL }}images/language-switch-globe.svg"/>
-                    <strong>{% current_language_name %}</strong>
-                  </a>
-                </li>
-              </ul>
-              <ul class="col-xs-2">
-                <li><strong>{% trans "Amara" %}</strong></li>
-                <li><a href="//about.amara.org/">{% trans "Blog" %}</a></li>
-                <li><a href="//support.amara.org/solution/categories/13504">{% trans "Help" %}</a></li>
-                <li><a href="//support.amara.org/support/solutions/articles/35517--i-have-a-non-technical-question-about">{% trans "Contact" %}</a></li>
-              </ul>
-              <ul class="col-xs-2">
-                <li><strong>{% trans "Videos" %}</strong></li>
-                <li><a href="//amara.org/search/#/?q=">{% trans "Search" %}</a></li>
-                <li><a href="//amara.org/videos/watch/">{% trans "Browse" %}</a></li>
-                <li><a href="//amara.org/videos/watch/featured/">{% trans "Featured" %}</a></li>
-              </ul>
-              <ul class="col-xs-2">
-                <li><strong>{% trans "More" %}</strong></li>
-                <li><a href="//twitter.com/AmaraSubs/">{% trans "Twitter" %}</a></li>
-                <li><a href="//facebook.com/Amara.Community">{% trans "Facebook" %}</a></li>
-              </ul>
-              <ul class="col-xs-2">
-                <li><strong>{% trans 'Staff' %}</strong></li>
-                <li><a target="_blank" href="{% url "staff:index" %}">{% trans 'Dashboard' %}</a></li>
-                <li><a target="_blank" href="{% url "admin:index" %}">{% trans 'Site Admin' %}</a></li>
-                <li><a href="//github.com/pculture/unisubs/commit/{{ LAST_COMMIT_GUID }}" title="{{ LAST_COMMIT_GUID }}">Github</a></li>
-                {% if user.is_superuser %}
-                <li><a target="_blank" href="{% url "auth:login_trap" %}">{% trans 'Impersonate' %}</a></li>
-                <li><a target="_blank" href="{% url "billing" %}">{% trans 'Billing' %}</a></li>
-                {% endif %}
-                {% block page-controls %}{% endblock %}
-              </ul>
-              {% endif %}
-            </div>
-          </nav>
+          <ul>
+            <li><a target="_blank" href="{% url "staff:index" %}">{% trans 'Dashboard' %}</a></li>
+            <li><a target="_blank" href="{% url "admin:index" %}">{% trans 'Site Admin' %}</a></li>
+            <li><a href="//github.com/pculture/unisubs/commit/{{ LAST_COMMIT_GUID }}" title="{{ LAST_COMMIT_GUID }}">Github</a></li>
+            {% if user.is_superuser %}
+            <li><a target="_blank" href="{% url "auth:login_trap" %}">{% trans 'Impersonate' %}</a></li>
+            <li><a target="_blank" href="{% url "billing" %}">{% trans 'Billing' %}</a></li>
+            {% endif %}
+            {% block page-controls %}{% endblock %}
+          </ul>
+          <div class="modal-footer">
+            <button type="button" class="button" data-dismiss="modal">{% trans "Close" %}</button>
+          </div>
         </div>
       </div>
     </div>
+    {% endif %}
     {% block bottom %}{% endblock %}
   </body>
 </html>
