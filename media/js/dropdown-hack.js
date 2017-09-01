@@ -21,7 +21,7 @@ $(function() {
             return false;
         });
         $('body').click(function(evt) {
-            if(dropdown.hasClass('open') && !dropdown.has(evt.target)) {
+            if(dropdown.hasClass('open') && dropdown.has(evt.target).length == 0) {
                 closeMenu();
                 evt.preventDefault();
                 return false;
