@@ -21,6 +21,7 @@
 - - Buttons
   - buttonTags
   - buttonOptions
+  - asyncButton
 - - Forms
   - fields
   - fileUpload

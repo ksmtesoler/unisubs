@@ -46,8 +46,11 @@ $teal:              #1d806a;
 $magenta:           #e61972;
 $turquoise:         #3da285;
 $plum:              #632e50;
-$lime-green:         #77a841;
-
+$lime-green:        #77a841;
+$cream:             #fffdf8;
+$amaranth:          #f3254d;
+$lime:              #80bd3e;
+$brand-primary:     $plum;
 
 // Form states and alerts
 // Define colors for form feedback states and, by default, alerts.
@@ -99,6 +102,23 @@ $input-border-radius:       none;
 $base-line-height:        32px;
 
 // Media Queries
+$screen-lg-max:           1399px;
 $screen-md-max:           1199px;
 $screen-sm-max:           1023px;
 $screen-xs-max:           767px;
+
+$screen-xl-min:           1400px;
+$screen-lg-min:           1200px;
+$screen-md-min:           1024px;
+$screen-sm-min:           768px;
+
+// z-index
+$z-index-behind: -1;
+// page layer
+$z-index-menu: 20;
+$z-index-action-bar: 30;
+// modal dialog layer
+$z-index-overlay: 100;
+$z-index-modal: 110;
+// top layer
+$z-index-tooltip: 200;

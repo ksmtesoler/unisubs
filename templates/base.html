@@ -21,6 +21,7 @@
 
     <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}images/favicon.png" />
     <link rel="icon" type="image/png" href="{{ STATIC_URL }}images/favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     {% block css %}{% media_bundle "base.css" %}{% endblock %}
 
     <!--[if IE]>
@@ -53,45 +54,18 @@
 </head>
 
 <body {% block body_attrs %}{% endblock %}>
-    {% announcement %}
-    {% if user.is_authenticated %}
-        {% messages %}
-        {% block email_confirmation_block %}
-            {% email_confirmation_notification %}
-        {% endblock %}
-    {% endif %}
-    {% require_email_dialog %}
+    <div class="newgrid">
+      {% announcement %}
+      {% if user.is_authenticated %}
+          {% messages %}
+          {% block email_confirmation_block %}
+              {% email_confirmation_notification %}
+          {% endblock %}
+      {% endif %}
+      {% require_email_dialog %}
+    </div>
+    {% include "future/header.html" with no_language_switcher=1 %}
 
-
-    <div class="help-tab">
-      <a target="_blank" href="http://support.amara.org/support/solutions">{% trans 'Get Help' %}</a>
-    </div>
-    <div id="main_bar">
-      <div id="bar_wrap" class="clearfix">
-        <a href="/"><img class="navbar-brand" src="{{ STATIC_URL }}images/amara-o.png" /></a>
-        <div id="bar_right">
-          <ul id="bar_menu" class="clearfix">
-            <li id="nav_submit"><a href="{% url "videos:create" %}">{% trans 'Subtitle Video' %}</a></li>
-            <li><a href="/community">{% trans "Community" %}</a></li>
-            <li><a id="proamara-link" href="//pro.amara.org">{% trans "Professional Solutions" %}</a></li>
-            <li>
-              <a class="navbar-search" href="{% url "videos:watch_page" %}">
-                <img alt="Search" src="{{ STATIC_URL }}images/glyphicons_027_search-light.png">
-              </a>
-            </li>
-            {% include "profiles/_user_menu.html" %}
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- Temporary until we change the banner design -->
-    <div id="lang_bar">
-    </div>
-
-    <!-- empty block for banner above page content -->
-    <div>
-    {% block amara-pro  %} {% endblock %}
-    </div>
     <div class="content container_12 wrapper clearfix">
         {% block youtube_prompt %}
         {% if request|show_youtube_prompt and not hide_prompt %}
@@ -119,46 +93,7 @@
         {% block main_content %}{% endblock %}
     </div>
 
-    <div id="footer">
-      <div id="footer-base">
-        <div class="container">
-          <div class="row">
-            <div id="footer-nav" class="col-sm-7 col-sm-push-5">
-              <span>
-                <ul>
-                  <li><strong>Amara</strong></li>
-                  <li><a href="http://about.amara.org/">{% trans 'Blog' %}</a></li>
-                  <li><a href="http://support.amara.org/solution/categories/13504">{% trans 'Help' %}</a></li>
-                  <li><a href="http://support.amara.org/support/solutions/articles/35517--i-have-a-non-technical-question-about">{% trans 'Contact' %}</a></li>
-                </ul>
-                <ul>
-                  <li><strong>{% trans 'Videos' %}</strong></li>
-                  <li><a href="{% url "search:index" %}">{% trans 'Search' %}</a></li>
-                  <li><a href="{% url "videos:watch_page" %}">{% trans 'Browse' %}</a></li>
-                  <li><a href="{% url "videos:featured_videos" %}">{% trans 'Featured' %}</a></li>
-                </ul>
-                <ul>
-                  <li><strong>{% trans 'More' %}</strong></li>
-                  <li><a href="//twitter.com/AmaraSubs/">Twitter</a></li>
-                  <li><a href="//facebook.com/Amara.Community">Facebook</a></li>
-                </ul>
-                <div class="clearfix">
-                  <select class="languageSwitcher"></select>
-                </div>
-              </span>
-            </div>
-            <div id="footer-terms" class="col-sm-5 col-sm-pull-7">
-              <a href="//amara.org"><img src="{{ STATIC_URL }}images/amara-logotype.png" alt="Amara's green circle logotype" /></a>
-              <ul>
-                <li><a href="//about.amara.org/tos/">{% trans 'Terms' %}</a></li>
-                <li><a href="//pculture.org/pcf/websites-privacy/">{% trans 'Privacy' %}</a></li>
-                <li><a href="/security">{% trans 'Security' %}</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    {% include "future/footer.html" with language_switcher=1 %}
 
     {% if user.is_staff %}
         <div id="admin_controls">
