@@ -29,6 +29,11 @@
         </a>
       </li>
       <li>
+        <a href="{% url "videos:create" %}">
+          {% trans "Subtitle video" %}
+        </a>
+      </li>
+      <li>
         <a href="{% url "logout" %}?next=/">{% trans 'Logout' %}</a>
       </li>
       {% if user.teams.all %}
