@@ -779,54 +779,6 @@ class BrightcoveAPITest(TestCase):
             }
         }
 
-class RefetchYoutubeChannelIDTest(TestCase):
-    # test re-fetching youtube channel for VideoUrl where username is
-    # NULL.
-    #
-    # This is mostly for a particular case: when we moved the youtube
-    # syncing code to the externalsites app, we also changed from using
-    # youtube usernames to using google channel ids which are more
-    # general.  For the existing VideoUrl objects, we set the username to
-    # NULL with the expectation that it would be refetched on the next
-    # sync
-    @patch_for_test('externalsites.google.get_video_info')
-    def setUp(self, mock_get_video_info):
-        mock_get_video_info.return_value = externalsites.google.VideoInfo(
-            'test-channel-id', 'title', 'description', 10,
-            'http://example.com/thumbnail.png')
-        self.mock_get_video_info = mock_get_video_info
-        self.user = UserFactory()
-        self.video = YouTubeVideoFactory(user=self.user)
-        pipeline.add_subtitles(self.video, 'en', None)
-        self.video_url = self.video.get_primary_videourl_obj()
-        self.video_url.username = None
-        self.video_url.save()
-        self.account = YouTubeAccountFactory(user=self.user,
-                                             channel_id='test-channel-id')
-
-    def test_get_sync_account(self):
-        # the normal case is that we refetch the channel ID in
-        # get_sync_account()
-        account = get_sync_account(self.video, self.video_url)
-        self.assertEquals(account, self.account)
-        self.check_username_fixed()
-
-    def test_update_all_subtitles(self):
-        # we also need to refetch the id in update_all_subtitles(), which
-        # bypasses get_sync_account()
-        test_utils.update_all_subtitles.original_func.apply(
-            args=(self.account.account_type, self.account.id))
-        test_utils.update_subtitles.delay.assert_called_with(
-            self.account.account_type, self.account.id,
-            self.video_url.id, self.video.subtitle_language('en').id)
-        self.check_username_fixed()
-
-    def check_username_fixed(self):
-        self.mock_get_video_info.assert_called_with(self.video_url.videoid, [])
-        self.assertEquals(
-            self.video.get_primary_videourl_obj().owner_username,
-            'test-channel-id')
-
 class ResyncTest(TestCase):
     def setUp(self):
         self.account = YouTubeAccountFactory(user=UserFactory(),

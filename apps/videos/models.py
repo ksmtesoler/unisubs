@@ -2159,7 +2159,8 @@ class VideoUrl(models.Model):
         we need to use the username, we call fix_owner_username() and fix it
         then.
         """
-
+        # We should not do that as it calls the API each time
+        return
         types_to_fix = (
             VIDEO_TYPE_YOUTUBE,
         )

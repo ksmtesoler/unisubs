@@ -297,7 +297,7 @@ class RequireJSBundle(Bundle):
         """HTML for a local dev server."""
 
         return """\
-<script src="/media/js/require.js"></script>'
+<script src="/media/js/require.js"></script>
 <script>
   require.config({config});
   {config_module}
@@ -334,6 +334,10 @@ class CSSBundle(Bundle):
     bundle_type = 'css'
 
     def include_paths(self):
+        if 'include_paths' in self.config:
+            return [
+                self.path(path) for path in self.config['include_paths']
+            ]
         seen = set()
         rv = []
         def add_paths(paths):
