@@ -3439,6 +3439,7 @@ class BillingReportGenerator(object):
 
     def header(self):
         return [
+            'Bill To',
             'Video Title',
             'Video ID',
             'Project',
@@ -3450,11 +3451,11 @@ class BillingReportGenerator(object):
             'Created',
             'Source',
             'User',
-            'Bill To',
         ]
 
     def make_row(self, video, record):
         return [
+            record.bill_to,
             (video and video.title_display()) or "----",
             (video and video.video_id) or "deleted",
             (record.project.name if record.project else 'none'),
@@ -3466,7 +3467,6 @@ class BillingReportGenerator(object):
             record.created.strftime('%Y-%m-%d %H:%M:%S'),
             record.source,
             record.user.username,
-            record.bill_to,
         ]
 
     def make_language_number_map(self, records):
@@ -3504,6 +3504,7 @@ NOT EXISTS (
 
     def make_row_for_lang_without_record(self, video, language):
         return [
+            'unknown',
             video.title_display(),
             video.video_id,
             'none',
@@ -3513,7 +3514,6 @@ NOT EXISTS (
             0,
             'unknown',
             language.created.strftime('%Y-%m-%d %H:%M:%S'),
-            'unknown',
             'unknown',
             'unknown',
         ]

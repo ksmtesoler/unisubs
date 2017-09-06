@@ -491,9 +491,12 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def get_absolute_url(self):
         return ('profiles:profile', [urlquote(self.username)])
 
-    def send_message_url(self):
-        return '{}?user={}'.format(reverse('messages:new'),
-                                   urlquote(self.username))
+    def send_message_url(self, absolute_url=False):
+        url = '{}?user={}'.format(reverse('messages:new'),
+                                  urlquote(self.username))
+        if absolute_url:
+            url = "http://" + Site.objects.get_current().domain + url
+        return url
 
     @property
     def language(self):

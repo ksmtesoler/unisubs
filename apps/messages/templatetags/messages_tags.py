@@ -19,6 +19,7 @@ import cgi
 from textwrap import wrap
 from django import template
 from django.template.loader import render_to_string
+from django.utils.translation import get_language
 
 from messages.models import Message
 
@@ -32,7 +33,8 @@ def messages(context):
     if not user.is_authenticated():
         return ''
 
-    cached = user.cache.get('messages')
+    cache_key = 'messages-{}'.format(get_language())
+    cached = user.cache.get(cache_key)
     if isinstance(cached, tuple) and cached[0] == hidden_message_id:
         return cached[1]
 
@@ -48,7 +50,7 @@ def messages(context):
         'last_unread': last_unread,
         'cookie_name': Message.hide_cookie_name
     })
-    user.cache.set('messages', (hidden_message_id, content), 30 * 60)
+    user.cache.set(cache_key, (hidden_message_id, content), 30 * 60)
     return content
 
 @register.filter

@@ -24,4 +24,6 @@ def staticmedia(request):
     return {
         'MEDIA_URL': settings.MEDIA_URL,
         'STATIC_URL': utils.static_url(),
+        'LOGO_URL': settings.LOGO_URL,
+        'PCF_LOGO_URL': settings.PCF_LOGO_URL,
     }
