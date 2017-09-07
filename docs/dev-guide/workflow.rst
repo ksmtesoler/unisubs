@@ -75,6 +75,30 @@ issue you're working on before you start any code.  Write code that makes the
 test pass.  Then consider refactoring code to fix the problem in a cleaner
 way.
 
+Exception Logging
+-----------------
+
+When catching exceptions, be sure to log these with a descriptive message
+and the stacktrace. Exceptions should be caught whenever it's necessary
+for flow control, an exception is expected, or where user input may cause
+unexpected behavior (such as forms). In the case where a caught exception is
+an expected part of flow control, such as making an invalid choice in a form,
+logging isn't necessary and doesn't need to be included.
+
+As an example, here is a function that logs exceptions:
+
+::
+
+    def foo(self, a, b):
+        try:
+            self.do_something(a, b)
+        except InvalidChoiceError:
+            self.invalid_choice_count += 1
+        except ValueError:
+            logger.error("Invalid input type in Class.foo()", exc_info=True)
+        except Exception:
+            logger.error("General exception in foo()", exc_info=True)
+
 .. _workflow:
 
 Workflow

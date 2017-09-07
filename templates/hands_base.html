@@ -35,6 +35,7 @@
 
   <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}images/favicon.png" />
   <link rel="icon" type="image/png" href="{{ STATIC_URL }}images/favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
   {% js_language_data %}
 
   <!--[if IE]>
@@ -72,43 +73,40 @@
 </head>
 
 <body {% block body_attrs %}{% endblock %}>
-  {% csrf_token %}
     {% announcement %}
     {% if user.is_authenticated %}
         {% messages %}
         {% new_user_notification %}
     {% endif %}
-  {% include 'header.html' %}
+    {% include "future/header.html" with no_language_switcher=1 %}
 
 <div>
   {% block main_content %}{% endblock %}
 </div>
 
 <div>
-  {% block footer %}
-      {% include 'footer.html' %}
-  {% endblock %}
+    {% include "future/footer.html" with language_switcher=1 %}
 </div>
-  {% if user.is_staff %}
-    <div id="admin_controls">
-      <ul id="site_controls">
-        {% if user.is_staff %}
-          <li><a target="_blank" href="{% url "admin:index" %}">{% trans 'Admin' %}</a></li>
-        {% endif %}
-        {% if user.is_superuser %}
-          <li><a target="_blank" href="https://logs.amara.org">{% trans 'Amara Logs' %}</a></li>
-        {% endif %}
-        {% if user.is_superuser %}
-          <li><a target="_blank" href="{% url "auth:login_trap" %}">{% trans 'Impersonate' %}</a></li>
-        {% endif %}
-        {% if user.is_superuser %}
-          <li><a target="_blank" href="{% url "billing" %}">{% trans 'Billing' %}</a></li>
-        {% endif %}
-        <li><a href="//github.com/pculture/unisubs/commit/{{ LAST_COMMIT_GUID }}" title="{{ LAST_COMMIT_GUID }}">Github</a></li>
-      </ul>
-        {% block page_controls %}{% endblock %}
-    </div>
-  {% endif %}
+    {% if user.is_staff %}
+        <div id="admin_controls">
+            <ul id="site_controls">
+                {% if user.is_staff %}
+                    <li><a target="_blank" href="{% url "admin:index" %}">{% trans 'Admin' %}</a></li>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <li><a target="_blank" href="https://logs.amara.org">{% trans 'Amara Logs' %}</a></li>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <li><a target="_blank" href="{% url "auth:login_trap" %}">{% trans 'Impersonate' %}</a></li>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <li><a target="_blank" href="{% url "billing" %}">{% trans 'Billing' %}</a></li>
+                {% endif %}
+                <li><a href="https://github.com/pculture/unisubs/commit/{{ LAST_COMMIT_GUID }}" title="{{ LAST_COMMIT_GUID }}">Github</a></li>
+            </ul>
+            {% block page_controls %}{% endblock %}
+        </div>
+    {% endif %}
   {% block bottom_scripts %}{% endblock %}
 
   {% include "_analytics.html" %}

@@ -22,13 +22,14 @@ Amara uses [Docker](http://docker.io).  For ease of development, we use the dock
 
         bin/dev build
 
-4. Start Amara Containers:
+4. Configure Database:
+
+        bin/dev dbreset
+
+5. Start Amara Containers:
 
         bin/dev up
 
-5. Configure Database:
-
-        bin/dev dbreset
 
 6. Add `unisubs.example.com` to your hosts file, pointing at `127.0.0.1`.  This
    is necessary for Twitter and Facebook oauth to work correctly.

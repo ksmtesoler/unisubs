@@ -246,6 +246,7 @@ class Team(models.Model):
 
     auth_provider_code = models.CharField(_(u'authentication provider code'),
                                           max_length=24, blank=True, default="")
+    bill_to = models.ForeignKey('BillToClient', blank=True, null=True)
 
     # code value from one the TeamWorkflow subclasses
     # Since other apps can add workflow types, let's use this system to avoid
@@ -1016,6 +1017,8 @@ class Project(models.Model):
     workflow_enabled = models.BooleanField(default=False)
 
     objects = ProjectManager()
+
+    bill_to = models.ForeignKey('BillToClient', blank=True, null=True)
 
     def __unicode__(self):
         if self.is_default_project:
@@ -2779,6 +2782,24 @@ class Task(models.Model):
             if previous:
                 return previous[0].assignee
 
+    def get_subtitler(self):
+        """For Approve tasks, return the last user to Review these subtitles.
+
+        May be None if this task is not an Approve task, or if we can't figure
+        out the last reviewer for any reason.
+
+        """
+        subtitling_tasks = Task.objects.complete().filter(
+            team_video=self.team_video,
+            language=self.language,
+            team=self.team,
+            type__in=[Task.TYPE_IDS['Translate'],
+            Task.TYPE_IDS['Subtitle']]).order_by('-completed')[:1]
+        if subtitling_tasks:
+            return subtitling_tasks[0].assignee
+        else:
+            return None
+
     def set_expiration(self):
         """Set the expiration_date of this task.  Does not save().
 
@@ -3441,6 +3462,14 @@ class BillingReport(models.Model):
     def end_str(self):
         return self.end_date.strftime("%Y%m%d")
 
+class BillToClient(models.Model):
+    """Billable client for a billing record."""
+
+    client = models.CharField(max_length=255, unique=True)
+
+    def __unicode__(self):
+        return self.client
+
 class BillingReportGenerator(object):
     def __init__(self, all_records, add_header=True):
         if add_header:
@@ -3461,6 +3490,7 @@ class BillingReportGenerator(object):
 
     def header(self):
         return [
+            'Bill To',
             'Video Title',
             'Video ID',
             'Project',
@@ -3476,6 +3506,7 @@ class BillingReportGenerator(object):
 
     def make_row(self, video, record):
         return [
+            record.bill_to,
             (video and video.title_display()) or "----",
             (video and video.video_id) or "deleted",
             (record.project.name if record.project else 'none'),
@@ -3524,6 +3555,7 @@ NOT EXISTS (
 
     def make_row_for_lang_without_record(self, video, language):
         return [
+            'unknown',
             video.title_display(),
             video.video_id,
             'none',
@@ -3703,6 +3735,15 @@ class BillingRecord(models.Model):
         assert self.minutes is not None
 
         return super(BillingRecord, self).save(*args, **kwargs)
+
+    @property
+    def bill_to(self):
+        if self.project.bill_to:
+             return self.project.bill_to.client
+        elif self.team.bill_to:
+             return self.team.bill_to.client
+        else:
+             return ''
 
     def get_minutes(self):
         return get_minutes_for_version(self.new_subtitle_version, True)

@@ -345,7 +345,7 @@ def _writelocked_store_langs(video_id, langs):
     return langs
 
 def writelocked_langs(video_id):
-    from videos.models import WRITELOCK_EXPIRATION, Video
+    from subtitles.models import WRITELOCK_EXPIRATION, Video
     cache_key = _video_writelocked_langs_key(video_id)
     value = cache.get(cache_key)
 

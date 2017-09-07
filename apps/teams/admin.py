@@ -29,7 +29,7 @@ from teams.models import (
     Team, TeamMember, TeamVideo, Workflow, Task, Setting, MembershipNarrowing,
     Project, TeamLanguagePreference, TeamNotificationSetting, BillingReport,
     Partner, Application, ApplicationInvalidException, Invite, BillingRecord,
-    LanguageManager
+    LanguageManager, BillToClient
 )
 from utils.text import fmt
 from videos.models import SubtitleLanguage
@@ -337,6 +337,7 @@ admin.site.register(Setting, SettingAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(TeamNotificationSetting)
 admin.site.register(BillingReport, BillingReportAdmin)
+admin.site.register(BillToClient)
 admin.site.register(Partner)
 admin.site.register(Invite, InviteAdmin)
 admin.site.register(Application, ApplicationAdmin)

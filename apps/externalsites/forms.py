@@ -117,93 +117,6 @@ class BrightcoveCMSAccountForm(AccountForm):
             return None
         return account
 
-class BrightcoveAccountForm(AccountForm):
-    FEED_ALL_NEW = 'N'
-    FEED_WITH_TAGS = 'T'
-    FEED_CHOICES = (
-        (FEED_ALL_NEW, ugettext_lazy('Import all new videos')),
-        (FEED_WITH_TAGS, ugettext_lazy('Import videos with tags:')),
-    )
-
-    publisher_id = forms.IntegerField(label=ugettext_lazy("Publisher ID"))
-    write_token = forms.CharField(
-        label=ugettext_lazy("Sync subtitles with this write token"),
-        required=False)
-    feed_enabled = forms.BooleanField(
-        required=False, label=ugettext_lazy("Import Videos From Feed"))
-    player_id = forms.CharField(
-        required=False, label=ugettext_lazy("Player ID"))
-    feed_type = forms.ChoiceField(choices=FEED_CHOICES,
-                                  initial=FEED_ALL_NEW,
-                                  widget=forms.RadioSelect,
-                                  required=False)
-    feed_tags = forms.CharField(required=False)
-
-    class Meta:
-        model = models.BrightcoveAccount
-        fields = ['publisher_id', 'write_token' ]
-
-    def __init__(self, team, data=None, **kwargs):
-        AccountForm.__init__(self, team, data, **kwargs)
-        if self.instance.import_feed is not None:
-            self.fields['feed_enabled'].initial = True
-            player_id, tags = self.instance.feed_info()
-            self.fields['player_id'].initial = player_id
-            if tags is not None:
-                self.fields['feed_type'].initial = self.FEED_WITH_TAGS
-                self.fields['feed_tags'].initial = ', '.join(tags)
-            else:
-                self.fields['feed_type'].initial = self.FEED_ALL_NEW
-                self.fields['feed_tags'].initial = ''
-
-    def add_error(self, field_name, msg):
-        self._errors[field_name] = self.error_class([msg])
-        if field_name in self.cleaned_data:
-            del self.cleaned_data[field_name]
-
-    def clean(self):
-        if self.cleaned_data['feed_enabled']:
-            if not self.cleaned_data['player_id']:
-                self.add_error(
-                    'player_id',
-                    _('Must specify a player id to import from a feed'))
-            if not self.cleaned_data['feed_type']:
-                self.add_error(
-                    'player_id',
-                    _('Must specify a feed type for import'))
-            if (self.cleaned_data['feed_type'] == self.FEED_WITH_TAGS and
-                not self.cleaned_data['feed_tags']):
-                self.add_error('feed_tags',
-                               _('Must specify tags to import'))
-        return self.cleaned_data
-
-    def save(self):
-        account = AccountForm.save(self)
-        if not self.cleaned_data['enabled']:
-            return None
-        if self.cleaned_data['feed_enabled']:
-            feed_changed = account.make_feed(self.cleaned_data['player_id'],
-                                             self._calc_feed_tags())
-            if feed_changed:
-                videos.tasks.import_videos_from_feed.delay(
-                    account.import_feed.id)
-        else:
-            account.remove_feed()
-        return account
-
-    def _calc_feed_tags(self):
-        if self.cleaned_data['feed_type'] == self.FEED_ALL_NEW:
-            return None
-        elif self.cleaned_data['feed_type'] == self.FEED_WITH_TAGS:
-            return [tag.strip()
-                    for tag in self.cleaned_data['feed_tags'].split(',')]
-
-    def import_feed(self):
-        if self.instance:
-            return self.instance.import_feed
-        else:
-            return None
-
 class AddYoutubeAccountForm(forms.Form):
     add_button = SubmitButtonField(
         label=ugettext_lazy('Add YouTube account'),
@@ -328,7 +241,6 @@ class AccountFormset(dict):
 
     def make_forms(self, owner):
         self.make_form('kaltura', KalturaAccountForm, owner)
-        self.make_form('brightcove', BrightcoveAccountForm, owner)
         self.make_form('brightcovecms', BrightcoveCMSAccountForm, owner)
         self.make_form('add_youtube', AddYoutubeAccountForm, owner)
         for account in models.YouTubeAccount.objects.for_owner(owner):

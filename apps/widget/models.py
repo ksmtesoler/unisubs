@@ -38,6 +38,3 @@ class SubtitlingSession(models.Model):
     def matches_request(self, request):
         if request.user.is_authenticated() and self.user:
             return self.user == request.user
-        else:
-            return request.browser_id == self.browser_id
-

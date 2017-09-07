@@ -125,6 +125,14 @@ Update an existing video
     As with creating video, an update can not override the duration received
     from the provider or specified in the file header.
 
+Delete an existing video
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. http:delete:: /api/videos/(video-id)/
+
+   This deletes a video.
+
+   If there are any subtitles/collaborations on the video, they will also be deleted.
 
 Moving videos between teams and projects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -160,6 +168,8 @@ List URLs for a video
     :>json boolean primary: is this the primary URL for the video?
     :>json boolean original: was this the URL that was created with the video?
     :>json uri resource_uri: Video URL Resource
+    :>json string videoid: ID on the Hosting platform
+    :>json string type: Video type (Youtube, Vimeo, HTML5, etc.)
     :>json integer id: Internal ID for the object **(deprecated, use
       resource_uri rather than trying to construct API URLs yourself)**.
 
@@ -238,7 +248,7 @@ Listing languages for a video
     :>json boolean subtitles_complete: Are the subtitles complete for this
         language?
     :>json integer subtitle_count: Number of subtitles for this language
-    :>json string reviewer: Username of the reviewer fro task-based teams
+    :>json string reviewer: Username of the reviewer for task-based teams
     :>json string approver: Username of the approver for task-based teams
     :>json boolean is_translation: Is this language translated from other
         languages? **(deprecated)**
@@ -277,7 +287,7 @@ Creating subtitle languages
 .. http:post:: /api/videos/(video-id)/languages/
 
     :<json string language_code: bcp-47 code for the language
-    :<json boolean is_primary_audio_language: Is this is the primary spoken
+    :<json boolean is_primary_audio_language: Is this the primary spoken
         language of the video? *(optional)*.
     :<json boolean subtitles_complete: Are the subtitles for this
        language complete? *(optional)*.
@@ -330,14 +340,14 @@ Fetching subtitles for a given language
     **Language data:**
 
     :>json bcp-47 code: Language of the subtitles
-    :>json string name: Human readable name for the language
+    :>json string name: Human-readable name for the language
     :>json string dir: Language direction ("ltr" or "rtl")
 
 Getting subtitle data only
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Sometimes you want just subtitles data without the rest of the data.  This
-is possible using a special Accept headers or the `format` query
+is possible using a special Accept header or the `format` query
 parameter.  This can be used to download a DFXP, SRT, or any other
 subtitle format that Amara supports.  If one of these is used, then the
 sub_format param will be ignored.
@@ -368,8 +378,10 @@ Creating new subtitles
 
 .. http:post:: /api/videos/(video-id)/languages/(language-code)/subtitles/
 
-    :<json object subtitles: The subtitles to submit.  The format depends on
-        the sub_format param.
+    :<json object subtitles: The subtitles to submit, as a string. The
+        format depends on the sub_format param.
+    :<json object subtitles_url: Alternatively, subtitles can be given
+        as a text file URL.  The format depends on the sub_format param.
     :<json string sub_format: The format used to parse the subs. The same
         formats as for fetching subtitles are accepted. Optional - defaults to
         "dfxp".
@@ -793,7 +805,7 @@ Get a list of teams
         - ``collaboration`` -- collaboration team
 
     :>json string description: Team description
-    :>json boolean is_visible: Should this team's videos be publicly visible?
+    :>json boolean is_visible: Should this team's videos be publicly visible (True by default)?
     :>json string membership_policy: Team membership policy. One of:
 
         - ``Open``
@@ -1374,6 +1386,12 @@ Updating Requests
     :<json user evaluator: *(evaluation teams only)* User to assign as the
       evaluator, or null to unassign the current evaluator (see
       :ref:`user_ids`).
+
+Deleting Requests
+*****************
+
+.. http:delete:: /api/teams/(team-slug)/subtitle-requests/(job-id)/
+
 
 **Assigning a user:**
 

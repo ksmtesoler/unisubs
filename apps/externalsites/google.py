@@ -58,6 +58,7 @@ OpenIDProfile = namedtuple('OpenIDProfile',
 
 DRIVE_URL_PATTERN = re.compile(r'/d/(.*?)/')
 
+YOUTUBE_TITLE_MAX_LENGTH = 100
 
 logger = logging.getLogger(__name__)
 
@@ -489,7 +490,7 @@ def update_video_metadata(video_id, access_token, primary_audio_language_code, l
         snippet = item['snippet']
     if 'localizations' in item:
         localizations = response.json()['items'][0]['localizations']
-        localizations[language_code] = {"title": title, "description": description}
+        localizations[language_code] = {"title": title[:YOUTUBE_TITLE_MAX_LENGTH], "description": description}
         result = video_put(access_token, video_id, localizations=localizations)
 
 def get_service_account_access_token(scope):

@@ -149,3 +149,24 @@ button {
     }
   }
 }
+
+// Async Buttons
+//
+// Used to provide user interaction feedback for buttons that fire asynchronous events
+//
+// Example:
+// <a class="button asyncButton" href="#" role="button">Link</a>
+// <a class="button asyncButton active" href="#" role="button">Link</a>
+//
+// Styleguide asyncButton
+
+.asyncButton {
+  &.active {
+    color: transparent;
+    background-image: url(/images/loading_ellipsis.gif);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 25px;
+    pointer-events: none;
+  }
+}

@@ -53,6 +53,7 @@ import widget
 from widget import rpc as widget_rpc
 from activity.models import ActivityRecord
 from auth.models import CustomUser as User
+from caching.decorators import cache_page
 from comments.models import Comment
 from comments.forms import CommentForm
 from subtitles.models import SubtitleLanguage, SubtitleVersion
@@ -184,16 +185,14 @@ class LanguageList(object):
     def __len__(self):
         return len(self.items)
 
-def index(request):
-    return render_to_response('index.html', {},
-                              context_instance=RequestContext(request))
-
+@cache_page(minutes=60)
 def watch_page(request):
     return render(request, 'videos/watch-home.html', {
         'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
         'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
     })
 
+@cache_page(minutes=60)
 def video_listing_page(request, subheader, video_qs, query=None,
                        force_pages=None):
     paginator = AmaraPaginator(video_qs, VIDEO_IN_ROW * 3)
@@ -601,6 +600,14 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         )
         return response_renderer.render()
 
+    if request.is_ajax() and request.GET.get('update-sync-history', None):
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#subtitles_sync_history', "future/videos/tabs/sync-history.html",
+            sync_history_context(video, subtitle_language),
+        )
+        return response_renderer.render()
+
     all_subtitle_versions = subtitle_language.versions_for_user(
             request.user).order_by('-version_number')
     team_video = video.get_team_video()
@@ -632,6 +639,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'can_edit': workflow.user_can_edit_subtitles(
             request.user, subtitle_language.language_code),
         'header': customization.header,
+        'extra_page_controls': customization.extra_page_controls,
     }
     if workflow.user_can_view_notes(request.user, subtitle_language.language_code):
         editor_notes = workflow.get_editor_notes(request.user, subtitle_language.language_code)

@@ -10,6 +10,7 @@ codebase.
 
    workflow
    testing
+   db-migrations
    caching
    teams
    editor

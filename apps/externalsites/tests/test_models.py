@@ -24,7 +24,7 @@ from nose.tools import *
 import mock
 
 from externalsites.exceptions import YouTubeAccountExistsError
-from externalsites.models import (BrightcoveAccount, YouTubeAccount,
+from externalsites.models import (BrightcoveCMSAccount, YouTubeAccount,
                                   get_sync_accounts, account_models,
                                   SyncHistory, SyncedSubtitleVersion)
 from subtitles import pipeline
@@ -35,28 +35,26 @@ from utils.factories import *
 
 class GetSyncAccountTest(TestCase):
     def check_get_sync_accounts(self, video, account):
-        # Brightcove was disabled
-        self.assertEquals(get_sync_accounts(video), [])
-        #self.assertEquals(get_sync_accounts(video), [
-        #    (account, video.get_primary_videourl_obj())
-        #])
+        self.assertEquals(get_sync_accounts(video), [
+            (account, video.get_primary_videourl_obj())
+        ])
 
     def test_team_account(self):
         video = BrightcoveVideoFactory()
         team_video = TeamVideoFactory(video=video)
-        account = BrightcoveAccountFactory(team=team_video.team)
+        account = BrightcoveCMSAccountFactory(team=team_video.team)
         self.check_get_sync_accounts(video, account)
 
     def test_user_account(self):
         user = UserFactory()
         video = BrightcoveVideoFactory(user=user)
-        account = BrightcoveAccountFactory(user=user)
+        account = BrightcoveCMSAccountFactory(user=user)
         self.check_get_sync_accounts(video, account)
 
     def test_is_for_video_url(self):
         user = UserFactory()
         video = BrightcoveVideoFactory(user=user)
-        account = BrightcoveAccountFactory(user=user)
+        account = BrightcoveCMSAccountFactory(user=user)
         self.assertTrue(account.should_sync_video_url(
             video, video.get_primary_videourl_obj()))
 
@@ -214,65 +212,6 @@ class YouTubeSyncTeamsTest(TestCase):
         user_account = YouTubeAccountFactory(user=self.user)
         self.assertRaises(ValueError, user_account.set_sync_teams,
                           self.user, [self.team])
-
-
-class BrightcoveAccountTest(TestCase):
-    def setUp(self):
-        self.team = TeamFactory()
-        self.account = BrightcoveAccountFactory.create(team=self.team,
-                                                       publisher_id='123')
-        self.player_id = '456'
-
-    def check_feed(self, feed_url):
-        self.assertEquals(self.account.import_feed.url, feed_url)
-        self.assertEquals(self.account.import_feed.user, None)
-        self.assertEquals(self.account.import_feed.team, self.team)
-
-    def test_make_feed(self):
-        self.assertEquals(self.account.import_feed, None)
-        self.account.make_feed(self.player_id)
-        self.check_feed(
-            'http://link.brightcove.com/services/mrss/player456/123/new')
-        self.account.make_feed(self.player_id, ['cats', 'dogs'])
-        self.check_feed(
-            'http://link.brightcove.com/services/mrss/player456/123/tags/cats/dogs')
-        # test with chars that need to be quoted
-        self.account.make_feed(self.player_id, ['~cats and dogs'])
-        self.check_feed(
-            'http://link.brightcove.com/services/mrss/player456/123/tags/%7Ecats+and+dogs')
-
-    def test_make_feed_again(self):
-        # test calling make feed twice.  We should use the same VideoFeed
-        # object and change its URL.
-        self.assertEquals(self.account.import_feed, None)
-        self.account.make_feed(self.player_id)
-        first_import_feed_id = self.account.import_feed.id
-        self.account.make_feed(self.player_id, ['cats'])
-        self.assertEquals(self.account.import_feed.id, first_import_feed_id)
-
-    def test_remove_feed(self):
-        self.account.make_feed(self.player_id)
-        self.account.remove_feed()
-        self.assertEquals(self.account.import_feed, None)
-
-    def test_feed_info(self):
-        self.assertEquals(self.account.feed_info(), None)
-
-        self.account.make_feed(self.player_id)
-        self.assertEquals(self.account.feed_info(), (self.player_id, None))
-
-        self.account.make_feed(self.player_id, ['cats', 'dogs'])
-        self.assertEquals(self.account.feed_info(),
-                          (self.player_id, ('cats', 'dogs')))
-
-    def test_feed_removed_externally(self):
-        # test what happens if the feed is deleted not through
-        # BrightcoveAccount.remove_feed()
-        self.account.make_feed(self.player_id)
-        self.account.import_feed.delete()
-
-        account = BrightcoveAccount.objects.get(id=self.account.id)
-        self.assertEquals(account.import_feed, None)
 
 class YoutubeAccountTest(TestCase):
     def test_revoke_token_on_delete(self):

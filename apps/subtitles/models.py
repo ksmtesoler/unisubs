@@ -446,11 +446,11 @@ class SubtitleLanguage(models.Model):
         seconds = delta.days * 24 * 60 * 60 + delta.seconds
         return seconds < WRITELOCK_EXPIRATION
 
-    def can_writelock(self, key):
+    def can_writelock(self, user):
         """Return whether a user with the session key can writelock this language."""
-        return self.writelock_session_key == key or not self.is_writelocked
+        return self.writelock_owner == user or not self.is_writelocked
 
-    def writelock(self, user, key, save=True):
+    def writelock(self, user, save=True):
         """Writelock this language for subtitling and save it.
 
         This method does NO permission checking.  If you want that you'll need
@@ -458,8 +458,6 @@ class SubtitleLanguage(models.Model):
         a transaction).
 
         `user` is the User who should own the lock.
-
-        `key` is their session key which you can get through request.browser_id
 
         `save` determines whether this method will save the SubtitleLanguage for
         you.  Pass False if you want to handle saving yourself.
@@ -470,7 +468,6 @@ class SubtitleLanguage(models.Model):
         else:
             self.writelock_owner = None
 
-        self.writelock_session_key = key
         self.writelock_time = datetime.now()
 
         if save:
@@ -484,7 +481,6 @@ class SubtitleLanguage(models.Model):
 
         """
         self.writelock_owner = None
-        self.writelock_session_key = ''
         self.writelock_time = None
 
         if save:

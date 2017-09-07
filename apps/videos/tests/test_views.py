@@ -100,9 +100,6 @@ class TestViews(WebUseTest):
         response = self.client.post(url, data)
         self.assertEqual(video.videourl_set.count(), 2)
 
-    def test_index(self):
-        self._simple_test('videos.views.index')
-
     def test_feedback(self):
         data = {
             'email': 'test@test.com',

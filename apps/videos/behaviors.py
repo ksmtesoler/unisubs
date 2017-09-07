@@ -60,6 +60,8 @@ class SubtitlesPageCustomization(object):
         header: HTML to display in the header
         team: team context to show.  We include activity private to this team
             when showing activity records
+        extra_page_controls: Extra links to display in the page control
+            area for site admins
     """
     def __init__(self, user, video, subtitle_language):
         workflow = video.get_workflow()
@@ -67,6 +69,7 @@ class SubtitlesPageCustomization(object):
         self.due_date = None
         self.header = None
         self.team = None
+        self.extra_page_controls = []
         if workflow.user_can_edit_subtitles(
                 user, subtitle_language.language_code):
             self.cta = CTA(_("Edit Subtitles"), 'icon-edit',

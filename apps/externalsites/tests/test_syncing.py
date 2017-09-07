@@ -633,12 +633,12 @@ class KalturaSyncingTest(TestCase):
                               self.partner_id, self.secret, self.video_id,
                               'pt-br', "CaptionData")
 
-class BrightcoveAccountSyncingTest(TestCase):
-    # Test that the BrightcoveAccount model makes the correct calls in
+class BrightcoveCMSAccountSyncingTest(TestCase):
+    # Test that the BrightcoveCMSAccount model makes the correct calls in
     # response to update_subtitles() and delete_subtitles()
 
     def setUp(self):
-        self.account = BrightcoveAccountFactory(team=TeamFactory())
+        self.account = BrightcoveCMSAccountFactory(team=TeamFactory())
         self.video_id = '1234'
         self.video = BrightcoveVideoFactory(brightcove_id=self.video_id,
                                             primary_audio_language_code='en')
@@ -658,47 +658,6 @@ class BrightcoveAccountSyncingTest(TestCase):
         language.nuke_language()
         self.video.clear_language_cache()
         self.account.delete_subtitles(self.video_url, language)
-
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.update_subtitles')
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.delete_subtitles')
-    def test_brightcove_account_syncing(self, mock_delete_subtitles,
-                                        mock_update_subtitles):
-        # when we add subtitles, update_subtitles() should be called.
-        self.add_subtitles('en')
-        mock_update_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id, self.video)
-        mock_update_subtitles.reset()
-        self.add_subtitles('fr')
-        mock_update_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id, self.video)
-        mock_update_subtitles.reset()
-        # when we delete subtitles, we should still call update_subtitles()
-        # since we are updating the entire set of subtitles
-        self.delete_subtitles('fr')
-        mock_update_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id, self.video)
-        mock_update_subtitles.reset()
-        # until we delete the last language, then we should call
-        # delete_subtitles()
-        self.delete_subtitles('en')
-        mock_delete_subtitles.assert_called_with(self.account.write_token,
-                                                 self.video_id)
-
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.update_subtitles')
-    @test_utils.patch_for_test('externalsites.syncing.brightcove.delete_subtitles')
-    def test_no_write_token(self, mock_delete_subtitles,
-                            mock_update_subtitles):
-        # if we don't have a write token set, we should skip syncing
-        self.account.write_token = ''
-        self.account.save()
-        self.add_subtitles('en')
-        self.assertEquals(mock_update_subtitles.call_count, 0)
-        # we shouldn't record sync history either in this case
-        self.assertEquals(SyncHistory.objects.count(), 0)
-        # the same should happen on delete
-        self.delete_subtitles('en')
-        self.assertEquals(mock_delete_subtitles.call_count, 0)
-        self.assertEquals(SyncHistory.objects.count(), 0)
 
 class BrightcoveAPITest(TestCase):
     WRITE_URL = 'https://api.brightcove.com/services/post'
@@ -819,54 +778,6 @@ class BrightcoveAPITest(TestCase):
                 'name': 'IllegalValueError',
             }
         }
-
-class RefetchYoutubeChannelIDTest(TestCase):
-    # test re-fetching youtube channel for VideoUrl where username is
-    # NULL.
-    #
-    # This is mostly for a particular case: when we moved the youtube
-    # syncing code to the externalsites app, we also changed from using
-    # youtube usernames to using google channel ids which are more
-    # general.  For the existing VideoUrl objects, we set the username to
-    # NULL with the expectation that it would be refetched on the next
-    # sync
-    @patch_for_test('externalsites.google.get_video_info')
-    def setUp(self, mock_get_video_info):
-        mock_get_video_info.return_value = externalsites.google.VideoInfo(
-            'test-channel-id', 'title', 'description', 10,
-            'http://example.com/thumbnail.png')
-        self.mock_get_video_info = mock_get_video_info
-        self.user = UserFactory()
-        self.video = YouTubeVideoFactory(user=self.user)
-        pipeline.add_subtitles(self.video, 'en', None)
-        self.video_url = self.video.get_primary_videourl_obj()
-        self.video_url.username = None
-        self.video_url.save()
-        self.account = YouTubeAccountFactory(user=self.user,
-                                             channel_id='test-channel-id')
-
-    def test_get_sync_account(self):
-        # the normal case is that we refetch the channel ID in
-        # get_sync_account()
-        account = get_sync_account(self.video, self.video_url)
-        self.assertEquals(account, self.account)
-        self.check_username_fixed()
-
-    def test_update_all_subtitles(self):
-        # we also need to refetch the id in update_all_subtitles(), which
-        # bypasses get_sync_account()
-        test_utils.update_all_subtitles.original_func.apply(
-            args=(self.account.account_type, self.account.id))
-        test_utils.update_subtitles.delay.assert_called_with(
-            self.account.account_type, self.account.id,
-            self.video_url.id, self.video.subtitle_language('en').id)
-        self.check_username_fixed()
-
-    def check_username_fixed(self):
-        self.mock_get_video_info.assert_called_with(self.video_url.videoid, [])
-        self.assertEquals(
-            self.video.get_primary_videourl_obj().owner_username,
-            'test-channel-id')
 
 class ResyncTest(TestCase):
     def setUp(self):

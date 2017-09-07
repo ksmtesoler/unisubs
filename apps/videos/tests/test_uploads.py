@@ -98,9 +98,6 @@ class UploadSubtitlesTest(WebUseTest):
 
         video = refresh(video)
 
-        # The writelock should be gone once the subtitles have been uploaded.
-        self.assertFalse(video.is_writelocked)
-
         # The video should now have a primary audio language, since it was set
         # as part of the upload process.
         self.assertEqual(video.primary_audio_language_code, 'en')
@@ -145,9 +142,6 @@ class UploadSubtitlesTest(WebUseTest):
         self.assertEqual(response.status_code, 200)
 
         video = refresh(video)
-
-        # The writelock should be gone once the subtitles have been uploaded.
-        self.assertFalse(video.is_writelocked)
 
         # The video should now have a primary audio language, since it was set
         # as part of the upload process.
