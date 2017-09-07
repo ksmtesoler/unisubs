@@ -317,6 +317,7 @@ def video(request, video_id, video_url=None, title=None):
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
+        'team': video.get_team(),
         'team_video': video.get_team_video(),
         'tab': request.GET.get('tab', 'info'),
         'allow_delete': allow_delete,

@@ -210,12 +210,17 @@
             initialize: function() {
 
                 var video = this;
-                var apiURL = '/api/videos/?extra=player_urls&video_url=';
+                var apiURL = '/api/videos/?extra=player_urls&video_url=' + encodeURIComponent(this.get('url'));
+                if(this.get('team')) {
+                    apiURL += '&team=' + encodeURIComponent(this.get('team'));
+                } else if(this.get('team') === null) {
+                    apiURL += '&team=null';
+                }
                 this.subtitles = new that.Subtitles();
                 // Make a call to the Amara API to get attributes like available languages,
                 // internal ID, description, etc.
                 _$.ajax({
-                    url: apiURL + encodeURIComponent(this.get('url')),
+                    url: apiURL,
                     success: function(resp) {
                         if (resp.objects.length) {
                             // The video exists on Amara.
@@ -1203,6 +1208,7 @@
                         'div': this,
                         'initial_language': $div.data('initial-language'),
                         'url': $div.data('url'),
+                        'team': $div.data('team'),
 			'show_subtitle_me': $div.data('hide-subtitle-me') ? false : true,
                         'show_logo': $div.data('hide-logo') ? false : true,
                         'show_order_subtitles': $div.data('hide-order') ? false : true,

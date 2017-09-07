@@ -34,7 +34,8 @@ Listing Videos
     List results are paginated.
 
     :queryparam url video_url: Filter by video URL
-    :queryparam slug team: Filter by team
+    :queryparam slug team: Filter by team.  Passing in `null` will return only
+        videos that are in the public area.
     :queryparam slug project: Filter by team project.  Passing in `null` will
         return only videos that don't belong to a project
     :queryparam string order_by: Change the list ordering.  Possible values:
@@ -615,6 +616,8 @@ class VideoViewSet(mixins.CreateModelMixin,
             Q(teamvideo__team__in=user_visible_teams))
 
     def get_videos_for_team(self, query_params):
+        if query_params['team'] == 'null':
+            return Video.objects.filter(teamvideo__team__isnull=True)
         try:
             team = Team.objects.get(slug=query_params['team'])
         except Team.DoesNotExist:
