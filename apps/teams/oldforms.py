@@ -1360,8 +1360,7 @@ class MoveTeamVideosForm(BulkTeamVideoForm):
                                 required=False)
 
     def setup_fields(self):
-        dest_teams = [self.team] + permissions.can_move_videos_to(
-            self.team, self.user)
+        dest_teams = permissions.can_move_videos_to(self.user)
         dest_teams.sort(key=lambda t: t.name)
         self.fields['new_team'].choices = [
             (dest.id, dest.name) for dest in dest_teams

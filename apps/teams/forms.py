@@ -1703,11 +1703,10 @@ class MoveVideosForm(VideoManagementForm):
 
     @staticmethod
     def permissions_check(team, user):
-        return len(permissions.can_move_videos_to(team, user)) > 0
+        return len(permissions.can_move_videos_to(user, [team])) > 0
 
     def setup_fields(self):
-        dest_teams = [self.team] + permissions.can_move_videos_to(
-            self.team, self.user)
+        dest_teams = permissions.can_move_videos_to(self.user)
         dest_teams.sort(key=lambda t: t.name)
         self.fields['new_team'].choices = [
             (dest.id, dest.name) for dest in dest_teams
