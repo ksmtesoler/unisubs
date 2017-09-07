@@ -177,6 +177,9 @@
             {% if has_private_version %}
             <p><em class="italic">{% trans "Private revisions are in italics." %}</em></p>
             {% endif %}
+            {% if enable_change_language %}
+            <p class="text-right"><a class="ajaxLink" data-href="{% query_string form=language %}">{%trans "Change subtitle language" %}</a></p>
+            {% endif %}
             {% if enable_delete_subtitles %}
             <p class="text-right"><a class="ajaxLink" data-href="{% query_string form=delete %}">{% trans "Delete subtitles" %}</a></p>
             {% endif %}
