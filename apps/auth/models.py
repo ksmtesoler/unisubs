@@ -29,7 +29,6 @@ from django.conf import settings
 from django.contrib.auth.models import UserManager, User as BaseUser
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.core.cache import cache
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -214,28 +213,35 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         """
         if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
            hasattr(settings, 'MESSAGES_SENT_LIMIT'):
-            if hasattr(self, '_cached_sent_messages') and \
-               self._cached_sent_messages is not None:
-                self._cached_sent_messages.append(dates.now())
+            cached_sent_messages = cache.get('_cached_sent_messages_' + self.username)
+            if cached_sent_messages is not None:
+                cached_sent_messages.append(dates.now())
+                cache.set('_cached_sent_messages_' + self.username, cached_sent_messages,
+                          settings.MESSAGES_SENT_WINDOW_MINUTES * 60)
             else:
-                self._cached_sent_messages = deque([dates.now()])
+                cached_sent_messages = deque([dates.now()])
+                cache.set('_cached_sent_messages_' + self.username, cached_sent_messages,
+                          settings.MESSAGES_SENT_WINDOW_MINUTES * 60)
             self._check_sent_messages()
 
     def _check_sent_messages(self):
-        if hasattr(self, '_cached_sent_messages') and \
-           self._cached_sent_messages is not None and \
+        cached_sent_messages = cache.get('_cached_sent_messages_' + self.username)
+        if cached_sent_messages is not None and \
            hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
            hasattr(settings, 'MESSAGES_SENT_LIMIT'):
             now = dates.now()
-            while self._cached_sent_messages[0] < \
+            while cached_sent_messages[0] < \
                   (now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)):
-                self._cached_sent_messages.popleft()
-            if len(self._cached_sent_messages) > settings.MESSAGES_SENT_LIMIT:
+                cached_sent_messages.popleft()
+            cache.set('_cached_sent_messages_' + self.username, cached_sent_messages,
+                      settings.MESSAGES_SENT_WINDOW_MINUTES * 60)
+            if len(cached_sent_messages) > settings.MESSAGES_SENT_LIMIT:
                 self.de_activate()
 
     def de_activate(self):
         if not self.is_superuser:
             self.is_active = False
+            self.save()
             import tasks
             tasks.notify_blocked_user.delay(self)
 
