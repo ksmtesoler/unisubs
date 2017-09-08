@@ -11,8 +11,6 @@ section {
 }
 header {
   position: relative;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
   &.borderless {
     border-bottom: none;
   }
@@ -131,9 +129,9 @@ hr {
   margin-bottom: 20px;
 }
 
-
-
-
+.container {
+  position: relative;
+}
 
 @media(max-width: 1199px) {
   .container {
@@ -147,12 +145,3 @@ hr {
   }
 }
 
-$z-index-behind: -1;
-// page layer
-$z-index-menu: 20;
-$z-index-action-bar: 30;
-// modal dialog layer
-$z-index-overlay: 100;
-$z-index-modal: 110;
-// top layer
-$z-index-tooltip: 200;

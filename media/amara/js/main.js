@@ -26,6 +26,7 @@ require([
         'videoSubtitles',
         'fileUpload',
         'clamp',
+        'staffControls',
         'styleGuide',
     ]);
 });
