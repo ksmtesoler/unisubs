@@ -459,7 +459,8 @@ class Team(models.Model):
     def add_existing_video(self, video, user, project=None):
         """Add an existing video to this team
 
-        Use this to add a video that was added in in the past to a team.
+        Use this to add a video that was added in in the past to the public
+        area.
 
         Args:
             video: Video to add.  This cannot already be in a team

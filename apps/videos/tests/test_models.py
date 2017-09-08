@@ -578,19 +578,20 @@ class AddVideoTest(TestCase):
                      mock.call(signal=signals.video_url_added,
                                sender=video_url, video=video, new_video=True, team=None, user=self.user))
 
+def check_duplicate_url_error(url, existing_video, team=None):
+    num_videos_before_call = Video.objects.count()
+    with assert_raises(Video.DuplicateUrlError) as cm:
+        v, vurl = Video.add(url, UserFactory(), team=team)
+    assert_equal(cm.exception.video, existing_video)
+    assert_equal(cm.exception.video_url, existing_video.get_primary_videourl_obj())
+    # test that we didn't create any extra videos as a result of the call
+    assert_equal(Video.objects.count(), num_videos_before_call)
+
+
 class AddVideoTestWithTransactions(TransactionTestCase):
     # These tests is split off from the others because it needs to be inside a
     # TransactionTestCase.  TransactionTestCase is not needed for the other
     # tests and it slows things down a lot.
-
-    def check_duplicate_url_error(self, url, existing_video, team=None):
-        num_videos_before_call = Video.objects.count()
-        with assert_raises(Video.DuplicateUrlError) as cm:
-            v, vurl = Video.add(url, UserFactory(), team=team)
-        assert_equal(cm.exception.video, existing_video)
-        assert_equal(cm.exception.video_url, existing_video.get_primary_videourl_obj())
-        # test that we didn't create any extra videos as a result of the call
-        assert_equal(Video.objects.count(), num_videos_before_call)
 
     def test_duplicate_video_url_public_video(self):
         # test calling Video.add() with a URL already in the system on a
@@ -599,7 +600,7 @@ class AddVideoTestWithTransactions(TransactionTestCase):
         # This should be an exception if the video is being added without a
         # team
         video = VideoFactory(video_url__url=url)
-        self.check_duplicate_url_error(url, video)
+        check_duplicate_url_error(url, video)
         # Adding with to a team should be okay though
         Video.add(url, UserFactory(), team=TeamFactory())
 
@@ -611,7 +612,7 @@ class AddVideoTestWithTransactions(TransactionTestCase):
         other_team = TeamFactory()
         video = VideoFactory(video_url__url=url, team=team)
         # Adding a video to the same team should be an exception
-        self.check_duplicate_url_error(url, video, team=team)
+        check_duplicate_url_error(url, video, team=team)
         # Adding to a different team should be okay though
         Video.add(url, UserFactory(), team=other_team)
         # Adding a public video should also be okay
@@ -629,6 +630,71 @@ class AddVideoTestWithTransactions(TransactionTestCase):
 
         assert_equal(Video.objects.count(), num_videos_before_call)
         assert_equal(VideoUrl.objects.count(), num_video_urls_before_call)
+
+class PreventDuplicatePublicVideoFlagTest(TestCase):
+    # Test adding videos when a team has prevent_duplicate_public_videos set
+    def setUp(self):
+        self.user = UserFactory()
+        self.team = TeamFactory(prevent_duplicate_public_videos=True,
+                                admin=self.user)
+        self.project = ProjectFactory(team=self.team, slug='test-project')
+        self.url = 'http://example.com/video.mp4'
+
+    def test_add_to_team_moves_public_video(self):
+        # Test adding a video URL to a team, when it's already on a video in
+        # the public area.  We should move the existing video rather than
+        # create a new one
+        video1, video_url1 = Video.add(self.url, self.user)
+        video2, video_url2 = self.team.add_video(self.url, self.user)
+        assert_equal(video1.id, video2.id)
+        assert_equal(video2.get_team_video().team, self.team)
+        assert_equal(VideoUrl.objects.filter(url=self.url).count(), 1)
+
+    def test_move_into_project(self):
+        # Test moving a video from the public area and also into a project
+        video1, video_url1 = Video.add(self.url, self.user)
+        video2, video_url2 = self.team.add_video(self.url, self.user,
+                                        project=self.project)
+        assert_equal(video2.get_team_video().project, self.project)
+
+    def test_add_to_public(self):
+        # Test adding a video URL to the public area when it's already on a
+        # video in the team.  We should throw a DuplicateUrlError.
+        video, video_url = self.team.add_video(self.url, self.user)
+        check_duplicate_url_error(self.url, video)
+
+    def test_remove_from_team(self):
+        # Test removing a video from a different team, when one of it's video
+        # URLs is on the team.  This should result in a DuplicateUrlError,
+        # since the video would go to the public area otherwise.
+        video1, video_url1 = self.team.add_video(self.url, self.user)
+        other_team = TeamFactory(admin=self.user)
+        video2, video_url2 = other_team.add_video(self.url, self.user)
+
+        with assert_raises(Video.DuplicateUrlError) as cm:
+            video2.get_team_video().remove(self.user)
+        assert_equal(cm.exception.video, video1)
+        assert_equal(cm.exception.video_url, video_url1)
+
+    def test_add_video_url_to_public(self):
+        # Test trying to add a video URL to a public video, when that video URL
+        # is already on a team video.  This should result in a
+        # DuplicateUrlError.
+        video1, video_url1 = self.team.add_video(self.url, self.user)
+        video2, video_url2 = Video.add('http://otherurl.com/video.mp4', self.user)
+        with assert_raises(Video.DuplicateUrlError) as cm:
+            video2.add_url(self.url, self.user)
+        assert_equal(cm.exception.video, video1)
+        assert_equal(cm.exception.video_url, video_url1)
+
+    def test_add_video_url_to_team_video(self):
+        # Test trying to add a video URL to a team video, when that video URL
+        # is already in the public area.  There's no clear way to handle this,
+        # for now just let it happen
+        video1, video_url1 = Video.add(self.url, self.user)
+        video2, video_url2 = self.team.add_video(
+            'http://otherurl.com/video.mp4', self.user)
+        video2.add_url(self.url, self.user)
 
 class AddVideoUrlTest(TestCase):
     def setUp(self):

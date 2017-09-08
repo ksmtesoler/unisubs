@@ -696,8 +696,8 @@ class Video(models.Model):
     def _calc_url_count(self):
         return self.videourl_set.count()
 
-    @staticmethod
-    def add(url, user, setup_callback=None, team=None):
+    @classmethod
+    def add(cls, url, user, setup_callback=None, team=None):
         """
         Add a new Video
 
@@ -728,24 +728,9 @@ class Video(models.Model):
             (video, video_url) tuple
         """
         with transaction.atomic():
-            # We need to be a little careful when creating the VideoUrl
-            # because it has a foreign key to Video.  We want to call
-            # get_or_create(), and we need to pass the Video to that.
-            # However, we don't want to fully set up the video since that's
-            # wasted work if the VideoUrl already exists.
-            #
-            # To work around this, we create an video without the setup code,
-            # pass that to get_or_create(), and only run the setup code if we
-            # end up creating a VideoUrl.
-            video = Video.objects.create()
-            vt, video_url = video._add_video_url(url, user, True, team)
-            # okay, we can now run the setup
-            video.set_values(vt, user, team)
-            video.user = user
+            video, video_url = cls._get_video_for_add(url, user, team)
             if setup_callback:
                 setup_callback(video, video_url)
-            if not video.title:
-                video.title = make_title_from_url(video_url.url)
             video.update_search_index()
             video.save()
             if user and user.notify_by_message:
@@ -758,6 +743,44 @@ class Video(models.Model):
                                      new_video=True, user=user, team=team)
 
         return (video, video_url)
+
+    @classmethod
+    def _get_video_for_add(cls, url, user, team):
+        """Get a video for Video.add()
+
+        Normally this means creating a new video, but if
+        team.prevent_duplicate_public_videos is set, then sometimes we'll use
+        an existing public video and move it to the team.
+        """
+        vt, url = cls._coerce_url_param(url)
+        # handle the prevent_duplicate_public_videos flag
+        if team and team.prevent_duplicate_public_videos:
+            try:
+                public_video_url = (
+                    VideoUrl.objects
+                    .filter(url=url, team_id=0)
+                    .select_related('video').get())
+                return public_video_url.video, public_video_url
+            except VideoUrl.DoesNotExist:
+                pass
+        elif not team:
+            cls._check_prevent_duplicate_public_videos(url)
+        # We need to be a little careful when creating the VideoUrl.
+        # We want to call VideoUrl.get_or_create() and we need to pass a Video
+        # objects to that.  However, we don't want to fully set up the video
+        # since that's wasted work if the VideoUrl already exists.
+        #
+        # To work around this, we create an video without the setup code,
+        # and use that for video._add_video_url().  If that works, then we can
+        # run the setup code.
+        video = Video.objects.create()
+        video_url = video._add_video_url(vt, user, True, team)
+        # okay, we can now run the setup
+        video.set_values(vt, user, team)
+        video.user = user
+        if not video.title:
+            video.title = make_title_from_url(video_url.url)
+        return video, video_url
 
     def set_values(self, video_type, user, team):
         video_type.set_values(self, user, team)
@@ -779,7 +802,9 @@ class Video(models.Model):
             Video.DuplicateUrlError: The URL was already added to a
                                      different video
         """
-        vt, video_url = self._add_video_url(url, user, False, self.get_team())
+        vt, url = self._coerce_url_param(url)
+        self._check_prevent_duplicate_public_videos(url)
+        video_url = self._add_video_url(vt, user, False, self.get_team())
 
         video_cache.invalidate_cache(self.video_id)
         self.cache.invalidate()
@@ -788,14 +813,8 @@ class Video(models.Model):
 
         return video_url
 
-    def _add_video_url(self, url, user, primary, team):
+    def _add_video_url(self, vt, user, primary, team):
         # Low-level video URL adding code for add() and add_url()
-        if isinstance(url, basestring):
-            vt = video_type_registrar.video_type_for_url(url)
-            if vt is None:
-                raise VideoTypeError(url)
-        else:
-            vt = url
         team_id = team.id if team else 0
         video_url, created = VideoUrl.objects.get_or_create(
             url=vt.convert_to_video_url(), team_id=team_id,
@@ -810,7 +829,43 @@ class Video(models.Model):
             })
         if not created:
             raise Video.DuplicateUrlError(video_url)
-        return vt, video_url
+        return video_url
+
+    @staticmethod
+    def _coerce_url_param(url):
+        """Get a VideoType object for an url param
+
+        Several of our methods input a url param that can be either a string,
+        or a VideoType object.  This method handles standardizing the
+        paramaters
+
+        returns: (VideoType, str) tuple with the VideoType and the URL as a
+        string
+        raises VideoTypeError: can't find a VideoType for a URL
+        """
+        if isinstance(url, basestring):
+            vt = video_type_registrar.video_type_for_url(url)
+            if vt is None:
+                raise VideoTypeError(url)
+        else:
+            vt = url
+        return vt, vt.url
+
+    @classmethod
+    def _check_prevent_duplicate_public_videos(cls, url):
+        """Check if there are any duplicate video URLs on teams with
+        prevent_duplicate_public_videos set
+        """
+        try:
+            video_url = (
+                VideoUrl.objects
+                .filter(url=url,
+                        video__teamvideo__team__prevent_duplicate_public_videos=True)
+                .get())
+        except VideoUrl.DoesNotExist:
+            pass
+        else:
+            raise Video.DuplicateUrlError(video_url)
 
     def update_team(self, team):
         """Update the team for this video
@@ -828,15 +883,20 @@ class Video(models.Model):
             DuplicateUrlError: One of the video URLs for this video was
                 already added to the team
         """
+        for vurl in self.get_video_urls():
+            if not team:
+                self._check_prevent_duplicate_public_videos(vurl.url)
         new_team_id = team.id if team else 0
         try:
             self.videourl_set.update(team_id=new_team_id)
         except IntegrityError:
             for vurl in self.get_video_urls():
-                qs = VideoUrl.objects.filter(url=vurl.url, type=vurl.type,
-                                             team_id=new_team_id)
-                if qs.exists():
+                try:
+                    dup_vurl = VideoUrl.objects.get(
+                        url=vurl.url, type=vurl.type, team_id=new_team_id)
                     raise Video.DuplicateUrlError(vurl)
+                except VideoUrl.DoesNotExist:
+                    pass
             raise
 
     @property
