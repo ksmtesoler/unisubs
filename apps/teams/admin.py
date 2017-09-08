@@ -29,7 +29,7 @@ from teams.models import (
     Team, TeamMember, TeamVideo, Workflow, Task, Setting, MembershipNarrowing,
     Project, TeamLanguagePreference, TeamNotificationSetting, BillingReport,
     Partner, Application, ApplicationInvalidException, Invite, BillingRecord,
-    LanguageManager
+    LanguageManager, BillToClient
 )
 from utils.text import fmt
 from videos.models import SubtitleLanguage
@@ -130,7 +130,10 @@ class TeamMemberChangeList(ChangeList):
         team_qs = Team.objects.filter(id__in=team_ids)
         team_map = dict((u.id, u) for u in team_qs)
         for member in results:
-            member.team = team_map.get(member.team_id)
+            team = team_map.get(member.team_id)
+            if team is not None:
+                # Could be None if team marked as deleted
+                member.team = team
 
 class TeamMemberAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'team__name', 'user__first_name', 'user__last_name')
@@ -334,6 +337,7 @@ admin.site.register(Setting, SettingAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(TeamNotificationSetting)
 admin.site.register(BillingReport, BillingReportAdmin)
+admin.site.register(BillToClient)
 admin.site.register(Partner)
 admin.site.register(Invite, InviteAdmin)
 admin.site.register(Application, ApplicationAdmin)

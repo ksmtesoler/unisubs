@@ -57,7 +57,7 @@ urlpatterns = patterns('',
     url('^robots.txt$', TemplateView.as_view(template_name='robots.txt')),
     url(r'^crossdomain.xml$',
         'crossdomain_views.root_crossdomain'),
-    url(r'^$', 'videos.views.index', name="home"),
+    url(r'^$', 'views.home', name="home"),
     url(r'^comments/',
         include('comments.urls', namespace='comments')),
     url(r'^messages/',
@@ -65,9 +65,9 @@ urlpatterns = patterns('',
     # TODO: Not sure what this is.  It's breaking the app under Django 1.4
     # url(r'^pcf-targetter/',
     #     include('targetter.urls', namespace='targetter')),
-    url(r'^logout/',
-        'django.contrib.auth.views.logout', name='logout'),
+    url(r'^logout/', 'auth.views.logout', name='logout'),
     url(r'^errortest', 'views.errortest', name='errortest'),
+    url(r'^one_time_url/(?P<token>.+)$', 'views.one_time_url', name='one_time_url'),
     url(r'^admin/billing/$', 'teams.views.billing', name='billing'),
     url(r'^admin/password_reset/$', 'auth.views.password_reset', name='password_reset'),
     url(r'^password_reset/done/$',
@@ -174,7 +174,10 @@ urlpatterns = patterns('',
     url(r'^api/', include('api.urls', namespace='api')),
     url(r'^api2/partners/', include('api.urls', namespace='api')),
     ## Video shortlinks
-    url(r'^v/(?P<encoded_pk>\w+)/$', 'videos.views.shortlink', name='shortlink')
+    url(r'^v/(?P<encoded_pk>\w+)/$', 'videos.views.shortlink',
+        name='shortlink'),
+    # ESI includes
+    url(r'^esi/user-menu/$', 'views.user_menu_esi'),
 )
 
 urlpatterns += optionalapps.get_urlpatterns()

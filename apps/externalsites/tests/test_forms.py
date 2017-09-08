@@ -104,192 +104,43 @@ class AccountFormTest(TestCase):
         assert_equal(account.user, user)
         assert_equal(account.team, None)
 
-class BrightcoveFormTest(TestCase):
+class BrightcoveCMSFormTest(TestCase):
     def setUp(self):
         self.team = TeamFactory()
         self.publisher_id = '123'
-        self.player_id = '456'
-        self.write_token = '789'
+        self.client_id = '456'
+        self.client_secret = '789'
 
     def test_no_feed(self):
-        form = forms.BrightcoveAccountForm(self.team, {
+        form = forms.BrightcoveCMSAccountForm(self.team, {
             'enabled': '1',
             'publisher_id': self.publisher_id,
-            'write_token': self.write_token,
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
         })
         assert_true(form.is_valid(), form.errors.as_text())
         account = form.save()
         self.assertEquals(account.publisher_id, self.publisher_id)
-        self.assertEquals(account.write_token, self.write_token)
+        self.assertEquals(account.client_id, self.client_id)
         self.assertEquals(account.team, self.team)
-        self.assertEquals(account.import_feed, None)
+        self.assertEquals(account.client_secret, self.client_secret)
 
     def test_disable_deletes_account(self):
         # test enabled being false when we have an account.  In this case
         # save() should delete the account
-        account = BrightcoveAccountFactory(team=self.team)
-        assert_equal(models.BrightcoveAccount.objects.count(), 1)
-        form = forms.BrightcoveAccountForm(self.team, { })
+        account = BrightcoveCMSAccountFactory(team=self.team)
+        assert_equal(models.BrightcoveCMSAccount.objects.count(), 1)
+        form = forms.BrightcoveCMSAccountForm(self.team, { })
         assert_true(form.is_valid(), form.errors.as_text())
         form.save()
-        assert_equal(models.BrightcoveAccount.objects.count(), 0)
+        assert_equal(models.BrightcoveCMSAccount.objects.count(), 0)
 
     def test_disable_no_account(self):
         # test enabled being false when there's no account to delete.  In this
         # case save() should be a no-op
-        form = forms.BrightcoveAccountForm(self.team, { })
+        form = forms.BrightcoveCMSAccountForm(self.team, { })
         assert_true(form.is_valid(), form.errors.as_text())
         form.save()
-
-    def feed_url(self, *tags):
-        if tags:
-            return ('http://link.brightcove.com'
-                    '/services/mrss/player%s/%s/tags/%s') % (
-                        self.player_id, self.publisher_id,
-                        '/'.join(quote_plus(t) for t in tags))
-        else:
-            return ('http://link.brightcove.com'
-                    '/services/mrss/player%s/%s/new') % (
-                        self.player_id, self.publisher_id,
-                    )
-
-    def test_feed_all_new(self):
-        form = forms.BrightcoveAccountForm(self.team, {
-            'enabled': '1',
-            'publisher_id': self.publisher_id,
-            'write_token': self.write_token,
-            'feed_enabled': '1',
-            'player_id': self.player_id,
-            'feed_type': forms.BrightcoveAccountForm.FEED_ALL_NEW,
-            'feed_tags': '',
-        })
-        self.assert_(form.is_valid(), form.errors.as_text())
-        account = form.save()
-        self.assertNotEquals(account.import_feed, None)
-        self.assertEquals(account.import_feed.url, self.feed_url())
-        test_utils.import_videos_from_feed.delay.assert_called_with(
-            account.import_feed.id)
-
-    def test_feed_with_tags(self):
-        # feed tags should be a comma separated list of tags.  If there are
-        # spaces inside the tag we should preserve them
-        form = forms.BrightcoveAccountForm(self.team, {
-            'enabled': '1',
-            'publisher_id': self.publisher_id,
-            'write_token': self.write_token,
-            'feed_enabled': '1',
-            'player_id': self.player_id,
-            'feed_type': forms.BrightcoveAccountForm.FEED_WITH_TAGS,
-            'feed_tags': 'cats, cute pets,dogs  ',
-        })
-        self.assert_(form.is_valid(), form.errors.as_text())
-        account = form.save()
-        self.assertNotEquals(account.import_feed, None)
-        self.assertEquals(account.import_feed.url,
-                          self.feed_url('cats', 'cute pets', 'dogs'))
-        test_utils.import_videos_from_feed.delay.assert_called_with(
-            account.import_feed.id)
-
-    def test_feed_exists(self):
-        # test that we set initial values for the feed inputs for accounts
-        # with feeds created.
-
-        # create an account with an import feed
-        account = models.BrightcoveAccount.objects.create(
-            team=self.team, publisher_id=self.publisher_id,
-            write_token=self.write_token)
-        account.make_feed(self.player_id)
-        form = forms.BrightcoveAccountForm(self.team)
-        self.assertEquals(form.fields['player_id'].initial, self.player_id)
-        self.assertEquals(form.fields['feed_type'].initial,
-                          forms.BrightcoveAccountForm.FEED_ALL_NEW)
-        self.assertEquals(form.fields['feed_tags'].initial, '')
-
-        # try again when using tags
-        account.make_feed(self.player_id, ['cats', 'dogs'])
-        form = forms.BrightcoveAccountForm(self.team)
-        self.assertEquals(form.fields['player_id'].initial, self.player_id)
-        self.assertEquals(form.fields['feed_type'].initial,
-                          forms.BrightcoveAccountForm.FEED_WITH_TAGS)
-        self.assertEquals(form.fields['feed_tags'].initial, 'cats, dogs')
-
-    def test_change_feed(self):
-        # test saving a form when we already have an import feed
-
-        # create an account with an import feed
-        account = models.BrightcoveAccount.objects.create(
-            team=self.team, publisher_id=self.publisher_id,
-            write_token=self.write_token)
-        account.make_feed(self.player_id, ['cats'])
-        first_feed = account.import_feed
-        # test saving a form with different feed tags.  We should update the
-        # feed URL, but not make a new feed object
-        data = {
-            'enabled': '1',
-            'publisher_id': self.publisher_id,
-            'write_token': self.write_token,
-            'feed_enabled': '1',
-            'player_id': self.player_id,
-            'feed_type': forms.BrightcoveAccountForm.FEED_WITH_TAGS,
-            'feed_tags': 'cats, dogs',
-        }
-        form = forms.BrightcoveAccountForm(self.team, data)
-        account = form.save()
-        self.assertEquals(account.import_feed.id, first_feed.id)
-        test_utils.import_videos_from_feed.delay.assert_called_with(
-            account.import_feed.id)
-        # test saving the form with the same tags.  We should import videos
-        # for this save
-        form = forms.BrightcoveAccountForm(self.team, data)
-        account = form.save()
-        self.assertEquals(account.import_feed.id, first_feed.id)
-        self.assertEquals(test_utils.import_videos_from_feed.delay.call_count,
-                          1)
-
-    def test_player_id_required_with_feed(self):
-        form = forms.BrightcoveAccountForm(self.team, {
-            'enabled': '1',
-            'publisher_id': self.publisher_id,
-            'write_token': self.write_token,
-            'feed_enabled': '1',
-            'player_id': '',
-            'feed_type': forms.BrightcoveAccountForm.FEED_ALL_NEW,
-            'feed_tags': '',
-        })
-        self.assertEquals(form.is_valid(), False)
-        self.assertEquals(form.errors.keys(), ['player_id'])
-
-    def test_tags_required_with_feed_with_tags(self):
-        form = forms.BrightcoveAccountForm(self.team, {
-            'enabled': '1',
-            'publisher_id': self.publisher_id,
-            'write_token': self.write_token,
-            'feed_enabled': '1',
-            'player_id': self.player_id,
-            'feed_type': forms.BrightcoveAccountForm.FEED_WITH_TAGS,
-            'feed_tags': '',
-        })
-        self.assertEquals(form.is_valid(), False)
-        self.assertEquals(form.errors.keys(), ['feed_tags'])
-
-    def test_remove_feed(self):
-        account = models.BrightcoveAccount.objects.create(
-            team=self.team, publisher_id=self.publisher_id,
-            write_token=self.write_token)
-        account.make_feed(self.player_id)
-        old_import_feed = account.import_feed
-
-        form = forms.BrightcoveAccountForm(self.team, {
-            'enabled': '1',
-            'publisher_id': self.publisher_id,
-            'write_token': self.write_token,
-            'player_id': self.player_id,
-            'feed_type': forms.BrightcoveAccountForm.FEED_ALL_NEW,
-            'feed_tags': '',
-        })
-        account = form.save()
-        self.assertEquals(account.import_feed, None)
-        self.assert_(not VideoFeed.objects.filter(id=old_import_feed.id))
 
 class AddYoutubeAccountFormTest(TestCase):
     def test_add_with_team(self):
@@ -398,13 +249,13 @@ class AccountFormsetTest(TestCase):
         account2 = YouTubeAccountFactory(team=team, id=2)
         formset = forms.AccountFormset(user, team)
         assert_equal(set(formset.keys()), set([
-            'brightcove',
+            'brightcovecms',
             'kaltura',
             'add_youtube',
             'youtube_1',
             'youtube_2',
         ]))
-        assert_equal(type(formset['brightcove']), forms.BrightcoveAccountForm)
+        assert_equal(type(formset['brightcovecms']), forms.BrightcoveCMSAccountForm)
         assert_equal(type(formset['kaltura']), forms.KalturaAccountForm)
         assert_equal(type(formset['add_youtube']), forms.AddYoutubeAccountForm)
         assert_equal(type(formset['youtube_1']),

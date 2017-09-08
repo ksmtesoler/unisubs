@@ -208,7 +208,7 @@ class ProjectField(AmaraChoiceField):
             if not self.required:
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
-            choices.extend((p.slug, p.name) for p in projects)
+            choices.extend((p.id, p.name) for p in projects)
             self.choices = choices
             if initial is None:
                 initial = choices[0][0]
@@ -217,14 +217,15 @@ class ProjectField(AmaraChoiceField):
             self.enabled = False
 
     def prepare_value(self, value):
-        return value.slug if isinstance(value, Project) else value
+        return value.id if isinstance(value, Project) else value
 
     def clean(self, value):
         if not self.enabled or value in EMPTY_VALUES:
             return None
         if value == 'none':
-            value = Project.DEFAULT_NAME
-        return Project.objects.get(team=self.team, slug=value)
+            return Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
+        else:
+            return Project.objects.get(id=value)
 
 
 

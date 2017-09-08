@@ -108,8 +108,6 @@ def update_metadata_choices():
     VIDEO_META_TYPE_IDS = dict([choice[::-1] for choice in VIDEO_META_CHOICES])
 update_metadata_choices()
 
-WRITELOCK_EXPIRATION = 30 # 30 seconds
-
 ALL_LANGUAGES = [(val, _(name))for val, name in settings.ALL_LANGUAGES]
 VALID_LANGUAGE_CODES = [unicode(x[0]) for x in ALL_LANGUAGES]
 
@@ -165,12 +163,12 @@ EXISTS(
         return self.extra({ '_has_public_version': sql })
 
     def search(self, query):
-        # Search in video_id if only one query term.
-        # Otherwise only use terms with 3 or more chars.  Terms with less chars are not indexed, so they will never match anything.
+        # If only one query term, search normally,
+        # otherwise only use terms with 3 or more chars.
+        # Terms with less chars are not indexed, so they will never match anything.
         terms = get_terms(query)
         if len(terms) == 1 and len(terms[0]) > 2:
-            term = terms[0]
-            return self.filter(Q(index__text__search=query)|Q(video_id=term))
+            return self.filter(index__text__search=query)
         else:
             terms = [t for t in get_terms(query) if len(t) > 2]
             query = u' '.join(u'+"{}"'.format(t) for t in terms)
@@ -1091,47 +1089,6 @@ class Video(models.Model):
                     in self.newsubtitlelanguage_set.filter(
                     subtitles_complete=True).filter(is_forked=False)])
 
-    @property
-    def writelock_owner_name(self):
-        """The user who currently has a subtitling writelock on this video."""
-        if self.writelock_owner == None:
-            return "anonymous"
-        else:
-            return self.writelock_owner.__unicode__()
-
-    @property
-    def is_writelocked(self):
-        """Is this video writelocked for subtitling?"""
-        if self.writelock_time == None:
-            return False
-        delta = datetime.now() - self.writelock_time
-        seconds = delta.days * 24 * 60 * 60 + delta.seconds
-        return seconds < WRITELOCK_EXPIRATION
-
-    def can_writelock(self, request):
-        """Can I place a writelock on this video for subtitling?"""
-        return self.writelock_session_key == \
-            request.browser_id or \
-            not self.is_writelocked
-
-    def writelock(self, request):
-        """Writelock this video for subtitling."""
-        self._make_writelock(request.user, request.browser_id)
-
-    def _make_writelock(self, user, key):
-        if user.is_authenticated():
-            self.writelock_owner = user
-        else:
-            self.writelock_owner = None
-        self.writelock_session_key = key
-        self.writelock_time = datetime.now()
-
-    def release_writelock(self):
-        """Writelock this video for subtitling."""
-        self.writelock_owner = None
-        self.writelock_session_key = ''
-        self.writelock_time = None
-
     def user_is_follower(self, user):
         followers = self.cache.get('followers')
         if followers is None:
@@ -1311,6 +1268,7 @@ class VideoIndex(models.Model):
         parts = [
             video.title_display(),
             video.description,
+            video.video_id,
             video.meta_1_content,
             video.meta_2_content,
             video.meta_3_content,
@@ -1443,39 +1401,7 @@ class SubtitleLanguage(models.Model):
             assert self.language in VALID_LANGUAGE_CODES, \
                 "Subtitle Language %s should be a valid code." % self.language
         super(SubtitleLanguage, self).save(*args, **kwargs)
-    @property
-    def writelock_owner_name(self):
-        if self.writelock_owner == None:
-            return "anonymous"
-        else:
-            return self.writelock_owner.__unicode__()
 
-    @property
-    def is_writelocked(self):
-        if self.writelock_time == None:
-            return False
-        delta = datetime.now() - self.writelock_time
-        seconds = delta.days * 24 * 60 * 60 + delta.seconds
-        return seconds < WRITELOCK_EXPIRATION
-
-    def can_writelock(self, request):
-        return self.writelock_session_key == \
-               request.browser_id or \
-        not self.is_writelocked
-
-
-    def writelock(self, request):
-        if request.user.is_authenticated():
-            self.writelock_owner = request.user
-        else:
-            self.writelock_owner = None
-            self.writelock_session_key = request.browser_id
-            self.writelock_time = datetime.now()
-
-    def release_writelock(self):
-        self.writelock_owner = None
-        self.writelock_session_key = ''
-        self.writelock_time = None
     class Meta:
         unique_together = (('video', 'language', 'standard_language'),)
 
@@ -2266,7 +2192,8 @@ class VideoUrl(models.Model):
         we need to use the username, we call fix_owner_username() and fix it
         then.
         """
-
+        # We should not do that as it calls the API each time
+        return
         types_to_fix = (
             VIDEO_TYPE_YOUTUBE,
         )

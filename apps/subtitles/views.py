@@ -69,10 +69,10 @@ def regain_lock(request, video_id, language_code):
     video = get_object_or_404(Video, video_id=video_id)
     language = video.subtitle_language(language_code)
 
-    if not language.can_writelock(request.browser_id):
+    if not language.can_writelock(request.user):
         return HttpResponse(json.dumps({'ok': False}))
 
-    language.writelock(request.user, request.browser_id, save=True)
+    language.writelock(request.user, save=True)
     return HttpResponse(json.dumps({'ok': True}))
 
 @require_POST
@@ -80,7 +80,7 @@ def release_lock(request, video_id, language_code):
     video = get_object_or_404(Video, video_id=video_id)
     language = video.subtitle_language(language_code)
 
-    if language.can_writelock(request.browser_id):
+    if language.can_writelock(request.user):
         language.release_writelock()
 
     return HttpResponse(json.dumps({'url': reverse('videos:video', args=(video_id,))}))
@@ -166,7 +166,7 @@ class SubtitleEditorBase(View):
                 video=self.video, language_code=self.language_code)
 
     def check_can_writelock(self):
-        if not self.editing_language.can_writelock(self.request.browser_id):
+        if not self.editing_language.can_writelock(self.request.user):
             msg = _("Sorry, you cannot edit these subtitles now because they are being edited by another user. Please check back later.")
             messages.error(self.request, msg)
             return False
@@ -380,7 +380,7 @@ class SubtitleEditorBase(View):
                 return redirect(self.video.get_absolute_url() + qs)
             return redirect(self.video)
 
-        self.editing_language.writelock(self.user, self.request.browser_id,
+        self.editing_language.writelock(self.user,
                                         save=True)
         self.editing_version = self.editing_language.get_tip(public=False)
         # we ignore forking because even if it *is* a fork, we still want to

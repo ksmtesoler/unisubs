@@ -23,7 +23,9 @@
 @import 'global/charts';
 
 // Elements
-@import 'elements/page_header';
+@import 'elements/_navigation';
+@import 'elements/_page_header';
+@import 'elements/_consolidate-header';
 @import 'elements/page_footer';
 
 @import 'elements/avatars';
@@ -53,6 +55,7 @@
 @import 'views/video_subtitles';
 @import 'views/messaging_center';
 @import 'views/member_directory';
+@import 'views/activity_page';
 
 
 
@@ -60,3 +63,5 @@
 // Responsive
 @import 'media_queries';
 
+
+@import 'marketing-integration'

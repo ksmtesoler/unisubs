@@ -56,7 +56,8 @@ from teams import workflows
 from teams.exceptions import ApplicationInvalidException
 from teams.notifications import BaseNotification
 from teams.signals import (member_leave, api_subtitles_approved,
-                           api_subtitles_rejected, video_removed_from_team)
+                           api_subtitles_rejected, video_removed_from_team,
+                           team_settings_changed)
 from utils import DEFAULT_PROTOCOL
 from utils import translation
 from utils.amazon import S3EnabledImageField, S3EnabledFileField
@@ -245,6 +246,7 @@ class Team(models.Model):
 
     auth_provider_code = models.CharField(_(u'authentication provider code'),
                                           max_length=24, blank=True, default="")
+    bill_to = models.ForeignKey('BillToClient', blank=True, null=True)
 
     # code value from one the TeamWorkflow subclasses
     # Since other apps can add workflow types, let's use this system to avoid
@@ -474,6 +476,52 @@ class Team(models.Model):
             video.save()
             return TeamVideo.objects.create(team=self, video=video,
                                             project=project, added_by=user)
+    # Settings
+    SETTINGS_ATTRIBUTES = set([
+        'description', 'is_visible', 'sync_metadata', 'membership_policy',
+        'video_policy',
+    ])
+    def get_settings(self):
+        """Get the current settings for this team
+
+        This isn't that useful by itself, but it's required in order to call
+        handle_settings_changes() later.
+        """
+        return {
+            name: getattr(self, name)
+            for name in self.SETTINGS_ATTRIBUTES
+        }
+
+    def handle_settings_changes(self, user, previous_settings):
+        """Handle team settings changes
+
+        A "setting" is a field on the Team model that we use to configure the
+        team and that can be changed by the team admins.
+
+        Call this after a team admin has potentially changed the team
+        settings.  This method takes care of a few things:
+
+            - Checks if any settings have changed from their previous value
+            - If there were changes, then emit the team_settings_changed
+            signal
+
+        Args:
+            user: user performing the action
+            previous_settings: return value from the get_settings() method
+        """
+        changed_settings = {}
+        old_settings = {}
+        for name, old_value in previous_settings.items():
+            current_value = getattr(self, name)
+            if old_value != current_value:
+                changed_settings[name] = current_value
+                old_settings[name] = old_value
+
+        if not changed_settings:
+            return
+        team_settings_changed.send(sender=self, user=user,
+                                   changed_settings=changed_settings,
+                                   old_settings=old_settings)
 
     # Thumbnails
     def logo_thumbnail(self):
@@ -969,6 +1017,8 @@ class Project(models.Model):
     workflow_enabled = models.BooleanField(default=False)
 
     objects = ProjectManager()
+
+    bill_to = models.ForeignKey('BillToClient', blank=True, null=True)
 
     def __unicode__(self):
         if self.is_default_project:
@@ -2732,6 +2782,24 @@ class Task(models.Model):
             if previous:
                 return previous[0].assignee
 
+    def get_subtitler(self):
+        """For Approve tasks, return the last user to Review these subtitles.
+
+        May be None if this task is not an Approve task, or if we can't figure
+        out the last reviewer for any reason.
+
+        """
+        subtitling_tasks = Task.objects.complete().filter(
+            team_video=self.team_video,
+            language=self.language,
+            team=self.team,
+            type__in=[Task.TYPE_IDS['Translate'],
+            Task.TYPE_IDS['Subtitle']]).order_by('-completed')[:1]
+        if subtitling_tasks:
+            return subtitling_tasks[0].assignee
+        else:
+            return None
+
     def set_expiration(self):
         """Set the expiration_date of this task.  Does not save().
 
@@ -3394,6 +3462,14 @@ class BillingReport(models.Model):
     def end_str(self):
         return self.end_date.strftime("%Y%m%d")
 
+class BillToClient(models.Model):
+    """Billable client for a billing record."""
+
+    client = models.CharField(max_length=255, unique=True)
+
+    def __unicode__(self):
+        return self.client
+
 class BillingReportGenerator(object):
     def __init__(self, all_records, add_header=True):
         if add_header:
@@ -3414,6 +3490,7 @@ class BillingReportGenerator(object):
 
     def header(self):
         return [
+            'Bill To',
             'Video Title',
             'Video ID',
             'Project',
@@ -3429,6 +3506,7 @@ class BillingReportGenerator(object):
 
     def make_row(self, video, record):
         return [
+            record.bill_to,
             (video and video.title_display()) or "----",
             (video and video.video_id) or "deleted",
             (record.project.name if record.project else 'none'),
@@ -3477,6 +3555,7 @@ NOT EXISTS (
 
     def make_row_for_lang_without_record(self, video, language):
         return [
+            'unknown',
             video.title_display(),
             video.video_id,
             'none',
@@ -3656,6 +3735,15 @@ class BillingRecord(models.Model):
         assert self.minutes is not None
 
         return super(BillingRecord, self).save(*args, **kwargs)
+
+    @property
+    def bill_to(self):
+        if self.project.bill_to:
+             return self.project.bill_to.client
+        elif self.team.bill_to:
+             return self.team.bill_to.client
+        else:
+             return ''
 
     def get_minutes(self):
         return get_minutes_for_version(self.new_subtitle_version, True)

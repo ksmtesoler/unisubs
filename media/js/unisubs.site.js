@@ -486,7 +486,7 @@ var Site = function(Site) {
 
                 select.change(function(evt) {
                     var newUrl = window.location.pathname.replace(new RegExp("^/[^/]*"), "/" + select.val());
-                    console.log(newUrl);
+                    Cookies.set('language', select.val(), {expires: 5 * 365});
                     window.location = newUrl;
                     return false;
                 });
@@ -890,9 +890,6 @@ var Site = function(Site) {
             });
         },
         team_dashboard: function() {
-            $('.dropdown').click(function(){
-                return false;
-            });
         },
         team_videos_list: function() {
             $form = $('form', 'div#remove-modal');

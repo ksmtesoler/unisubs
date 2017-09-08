@@ -48,7 +48,7 @@ Listing languages for a video
     :>json boolean subtitles_complete: Are the subtitles complete for this
         language?
     :>json integer subtitle_count: Number of subtitles for this language
-    :>json string reviewer: Username of the reviewer fro task-based teams
+    :>json string reviewer: Username of the reviewer for task-based teams
     :>json string approver: Username of the approver for task-based teams
     :>json boolean is_translation: Is this language translated from other
         languages? **(deprecated)**
@@ -87,7 +87,7 @@ Creating subtitle languages
 .. http:post:: /api/videos/(video-id)/languages/
 
     :<json string language_code: bcp-47 code for the language
-    :<json boolean is_primary_audio_language: Is this is the primary spoken
+    :<json boolean is_primary_audio_language: Is this the primary spoken
         language of the video? *(optional)*.
     :<json boolean subtitles_complete: Are the subtitles for this
        language complete? *(optional)*.
@@ -140,14 +140,14 @@ Fetching subtitles for a given language
     **Language data:**
 
     :>json bcp-47 code: Language of the subtitles
-    :>json string name: Human readable name for the language
+    :>json string name: Human-readable name for the language
     :>json string dir: Language direction ("ltr" or "rtl")
 
 Getting subtitle data only
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Sometimes you want just subtitles data without the rest of the data.  This
-is possible using a special Accept headers or the `format` query
+is possible using a special Accept header or the `format` query
 parameter.  This can be used to download a DFXP, SRT, or any other
 subtitle format that Amara supports.  If one of these is used, then the
 sub_format param will be ignored.
@@ -180,7 +180,7 @@ Creating new subtitles
 
     :<json object subtitles: The subtitles to submit, as a string. The
         format depends on the sub_format param.
-    :<json object subtitles_url: Alternativeley, subtitles can be given
+    :<json object subtitles_url: Alternatively, subtitles can be given
         as a text file URL.  The format depends on the sub_format param.
     :<json string sub_format: The format used to parse the subs. The same
         formats as for fetching subtitles are accepted. Optional - defaults to

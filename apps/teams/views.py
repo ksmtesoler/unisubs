@@ -253,7 +253,7 @@ def settings_basic(request, team):
 
         if form.is_valid():
             try:
-                form.save()
+                form.save(request.user)
             except:
                 logger.exception("Error on changing team settings")
                 raise
@@ -348,7 +348,7 @@ def old_team_settings_workflows(request, team):
         workflow_form = WorkflowForm(request.POST, instance=workflow)
 
         if form.is_valid() and workflow_form.is_valid():
-            form.save()
+            form.save(request.user)
 
             if form.cleaned_data['workflow_enabled']:
                 workflow_form.save()
@@ -789,8 +789,10 @@ def add_video(request, slug):
     team = get_team_for_view(slug, request.user)
 
     project_id = request.GET.get('project') or request.POST.get('project') or None
-    if project_id and project_id != 'none':
-        project = Project.objects.get(team=team, slug=project_id)
+    if project_id and project_id not in ['none', Project.DEFAULT_NAME]:
+        project = Project.objects.get(id=project_id)
+    elif project_id == Project.DEFAULT_NAME:
+        project = Project.objects.get(team=team, slug=Project.DEFAULT_NAME)
     else:
         project = team.default_project
 
@@ -1260,6 +1262,7 @@ def leave_team(request, slug):
         tm_user_pk = member.user.pk
         team_pk = member.team.pk
         member.leave_team()
+        member.delete()
         [application.on_member_leave(request.user, "web UI") for application in \
          member.team.applications.filter(status=Application.STATUS_APPROVED)]
 
@@ -2256,8 +2259,8 @@ def _writelock_languages_for_delete(request, subtitle_language):
     locked = []
 
     for sl in to_lock:
-        if sl.can_writelock(request.browser_id):
-            sl.writelock(request.user, request.browser_id)
+        if sl.can_writelock(request.user):
+            sl.writelock(request.user)
             locked.append(sl)
         else:
             messages.error(request, fmt(

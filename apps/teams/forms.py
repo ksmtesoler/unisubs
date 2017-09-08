@@ -224,6 +224,7 @@ class ProjectField(AmaraChoiceField):
     def setup(self, team, promote_main_project=False, initial=None, source_teams=None):
         self.team = team
         if source_teams:
+            self.source_teams = source_teams
             projects = []
             for team in source_teams:
                 projects += list(Project.objects.for_team(team))
@@ -236,15 +237,15 @@ class ProjectField(AmaraChoiceField):
                     projects.remove(main_project)
                     projects.insert(0, main_project)
                     if initial is None:
-                        initial = main_project.slug
+                        initial = main_project.id
             choices = []
             if not self.required:
                 choices.append(('', self.null_label))
             choices.append(('none', _('No project')))
-            # Only use the project name for now until we fix
-            # amara-enterprise#1495
-            #choices.extend((p.slug, team.name + ' - ' + p.name) for p in projects)
-            choices.extend((p.slug, p.name) for p in projects)
+            if source_teams and len(source_teams) > 1:
+                choices.extend((p.id, p.team.name + ' - ' + p.name) for p in projects)
+            else:
+                choices.extend((p.id, p.name) for p in projects)
             self.choices = choices
             if initial is None:
                 initial = choices[0][0]
@@ -261,14 +262,17 @@ class ProjectField(AmaraChoiceField):
             self._setup_widget_choices()
 
     def prepare_value(self, value):
-        return value.slug if isinstance(value, Project) else value
+        return value.id if isinstance(value, Project) else value
 
     def clean(self, value):
         if not self.enabled or value in EMPTY_VALUES or not self.team:
             return None
         if value == 'none':
-            # TODO: find a way to get collabs for all source team videos without a project
-            project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
+            if getattr(self, 'source_teams', None):
+                project = [p for p in Project.objects.filter(team__in=self.source_teams)
+                           if p.slug == Project.DEFAULT_NAME]
+            else:
+                project = Project.objects.get(team=self.team, slug=Project.DEFAULT_NAME)
         else:
             project = Project.objects.get(id=value)
         return project
@@ -843,6 +847,15 @@ class SettingsForm(forms.ModelForm):
         widget=forms.FileInput,
         required=False)
 
+    def __init__(self, *args, **kwargs):
+        super(SettingsForm, self).__init__(*args, **kwargs)
+        self.initial_settings = self.instance.get_settings()
+
+    def save(self, user):
+        with transaction.atomic():
+            super(SettingsForm, self).save()
+            self.instance.handle_settings_changes(user, self.initial_settings)
+
     class Meta:
         model = Team
         fields = ('description', 'logo', 'square_logo', 'is_visible', 'sync_metadata')
@@ -864,6 +877,15 @@ class PermissionsForm(forms.ModelForm):
                   'translate_policy', 'task_assign_policy', 'workflow_enabled',
                   'max_tasks_per_member', 'task_expiration',)
 
+    def __init__(self, *args, **kwargs):
+        super(PermissionsForm, self).__init__(*args, **kwargs)
+        self.initial_settings = self.instance.get_settings()
+
+    def save(self, user):
+        with transaction.atomic():
+            super(PermissionsForm, self).save()
+            self.instance.handle_settings_changes(user, self.initial_settings)
+
 class SimplePermissionsForm(forms.ModelForm):
     class Meta:
         model = Team
@@ -872,6 +894,15 @@ class SimplePermissionsForm(forms.ModelForm):
             'membership_policy': _('How can users join your team?'),
             'video_policy': _('Who can add/remove videos?'),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(SimplePermissionsForm, self).__init__(*args, **kwargs)
+        self.initial_settings = self.instance.get_settings()
+
+    def save(self, user):
+        with transaction.atomic():
+            super(SimplePermissionsForm, self).save()
+            self.instance.handle_settings_changes(user, self.initial_settings)
 
 class LanguagesForm(forms.Form):
     preferred = forms.MultipleChoiceField(required=False, choices=())
@@ -1376,7 +1407,7 @@ class ActivityFiltersForm(forms.Form):
         if subtitle_language:
             qs = qs.filter(language_code=subtitle_language)
         if video_language:
-            qs = qs.filter(video__primary_audio_language_code=video_language)
+            qs = qs.filter(video_language_code=video_language)
         return qs.order_by(sort)
 
 class MemberFiltersForm(forms.Form):
@@ -1599,7 +1630,7 @@ class EditVideosForm(VideoManagementForm):
     def setup_single_selection(self, video):
         team_video = video.teamvideo
         self.fields['project'].required = True
-        self.fields['project'].initial = team_video.project.slug
+        self.fields['project'].initial = team_video.project.id
         self.fields['project'].choices = self.fields['project'].choices[1:]
         self.fields['language'].set_placeholder(_('No language set'))
         self.fields['language'].initial = video.primary_audio_language_code

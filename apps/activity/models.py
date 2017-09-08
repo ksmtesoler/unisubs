@@ -22,7 +22,7 @@ from django.db import models
 from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import gettext, ungettext
+from django.utils.translation import ugettext, ungettext
 
 from auth.models import CustomUser as User
 from codefield import CodeField, Code
@@ -37,6 +37,7 @@ from utils import translation
 from utils.text import fmt
 from videos.models import Video
 
+import json
 import logging
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,55 @@ class VideoDeletion(models.Model):
 class URLEdit(models.Model):
     old_url = models.URLField(max_length=512, blank=True)
     new_url = models.URLField(max_length=512, blank=True)
+
+
+class TeamSettingsChangeInfo(models.Model):
+    # Settings changes as a JSON encoded dict
+    changes = models.TextField()
+
+    SETTINGS_CHANGE_LABELS = {
+        'is_visible': _('Videos Public'),
+    }
+
+    @classmethod
+    def create_from_dict(cls, changes):
+        return cls.objects.create(changes=json.dumps(changes))
+
+    def get_changes(self):
+        return json.loads(self.changes)
+
+    def format_changes(self):
+        """Get a list of changes to display to the user
+
+        Returns:
+            List of strings to displa to the user, for example:
+                - Videos public changed to true
+                - 13 miscellaneous settings changed
+
+        """
+        rv = []
+        misc_count = 0
+        for name, value in self.get_changes().items():
+            if name in self.SETTINGS_CHANGE_LABELS:
+                rv.append(fmt(ugettext(u'%(setting)s changed to %(value)s'),
+                              setting=self.SETTINGS_CHANGE_LABELS[name],
+                              value=self.format_value(value)))
+            else:
+                misc_count += 1
+        if misc_count:
+            rv.append(fmt(ungettext(
+                u'%(count)s miscellaneous setting changed',
+                u'%(count)s miscellaneous settings changed',
+                misc_count), count=misc_count))
+        return rv
+
+    def format_value(self, value):
+        if value == True:
+            return ugettext('true')
+        elif value == False:
+            return ugettext('false')
+        else:
+            return unicode(value)
 
 class ActivityType(Code):
     # Model that the related_obj_id field points to
@@ -116,7 +166,10 @@ class ActivityMessageDict(object):
         elif key == 'team':
             return self.record.team
         elif key == 'user':
-            return self.record.user.username
+            if self.record.user is None:
+                return _("Somebody (possibly automatically)")
+            else:
+                return self.record.user.username
         else:
             # Like the fmt() function, display something in the message rather
             # than raise an exception
@@ -547,12 +600,35 @@ class VideoMovedFromTeam(ActivityType):
     def get_action_name(self):
         return _('moved video from team')
 
+class TeamSettingsChanged(ActivityType):
+    slug = 'team-settings-changed'
+    label = _('Team settings changed')
+    related_model = TeamSettingsChangeInfo
+
+    def get_message(self, record, user):
+        change_info = record.get_related_obj()
+        msg = _('<strong>%(user)s</strong> changed team settings: '
+                '%(change_list)s')
+        return self.format_message(
+            record, msg,
+            change_list = ', '.join(change_info.format_changes()))
+
+    def get_old_message(self, record, user):
+        change_info = record.get_related_obj()
+        msg = _('changed team settings: %(change_list)s')
+        return self.format_message(
+            record, msg,
+            change_list = ', '.join(change_info.format_changes()))
+
+    def get_action_name(self):
+        return _('changed team setting')
+
 activity_choices = [
     VideoAdded, VideoTitleChanged, CommentAdded, VersionAdded, VideoURLAdded,
     TranslationAdded, SubtitleRequestCreated, VersionApproved, MemberJoined,
     VersionRejected, MemberLeft, VersionReviewed, VersionAccepted,
     VersionDeclined, VideoDeleted, VideoURLEdited, VideoURLDeleted,
-    VideoMovedToTeam, VideoMovedFromTeam,
+    VideoMovedToTeam, VideoMovedFromTeam, TeamSettingsChanged,
 ]
 
 class ActivityQueryset(query.QuerySet):
@@ -684,6 +760,12 @@ class ActivityManager(models.Manager):
     def create_for_member_deleted(self, member):
         return self.create('member-left', team=member.team,
                            user=member.user, created=dates.now())
+
+    def create_for_team_settings_changed(self, team, user, changes):
+        change_info = TeamSettingsChangeInfo.create_from_dict(changes)
+        return self.create('team-settings-changed', team=team,
+                           user=user, related_obj_id=change_info.id,
+                           created=dates.now())
 
     def create_for_video_deleted(self, video, user):
         with transaction.atomic():
@@ -830,7 +912,16 @@ class ActivityRecord(models.Model):
 
     def get_language_code_display(self):
         if self.language_code:
-            return translation.get_language_label(self.language_code)
+            try:
+                language_code_display = translation.get_language_label(self.language_code)
+            except KeyError:
+                logger.error("Error with language code {} in activity record {}".format(self.id, self.language_code))
+                try:
+                    language_code_display = translation.get_language_label(self.language_code.lower())
+                except KeyError:
+                    logger.error("Error with language code {} in activity record {} can not be fixed".format(self.id, self.language_code))
+                    language_code_display = 'Unknown language'
+            return language_code_display
         else:
             return ''
 
