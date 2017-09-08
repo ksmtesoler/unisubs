@@ -243,6 +243,7 @@ class Team(models.Model):
     notify_interval = models.CharField(max_length=1,
                                        choices=NOTIFY_INTERVAL_CHOICES,
                                        default=NOTIFY_DAILY)
+    prevent_duplicate_public_videos = models.BooleanField(default=False)
 
     auth_provider_code = models.CharField(_(u'authentication provider code'),
                                           max_length=24, blank=True, default="")
