@@ -67,6 +67,7 @@ from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
 from teams.models import Task
 from ui.ajax import AJAXResponseRenderer
+from utils.behaviors import behavior
 from utils.decorators import staff_member_required
 from videos import behaviors
 from videos import permissions
@@ -262,6 +263,7 @@ def redirect_to_video(request, video):
 def should_use_old_view(request):
     return 'team' not in request.GET
 
+@behavior
 def video(request, video_id, video_url=None, title=None):
     if should_use_old_view(request):
         return oldviews.video(request, video_id, video_url, title)
