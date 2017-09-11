@@ -36,7 +36,7 @@ class UstreamVideoType(VideoType):
     def matches_video_url(cls, url):
         return bool(ustream.USTREAM_REGEX.match(url))
 
-    def set_values(self, video_obj, user, team):
+    def set_values(self, video_obj, user, team, video_url):
         video_obj.title = ustream.get_title(self.url)
         video_obj.description = ustream.get_description(self.url)
         video_obj.thumbnail = ustream.get_thumbnail_url(self.url)

@@ -55,7 +55,7 @@ class WistiaVideoType(VideoType):
     def matches_video_url(cls, url):
         return bool(wistia.WISTIA_REGEX.match(url))
 
-    def set_values(self, video_obj, user, team):
+    def set_values(self, video_obj, user, team, video_url):
         try:
             video_obj.thumbnail = wistia.get_thumbnail_url(self.url, self.shortmem) or ''
             video_obj.small_thumbnail = wistia.get_small_thumbnail_url(self.url, self.shortmem) or ''

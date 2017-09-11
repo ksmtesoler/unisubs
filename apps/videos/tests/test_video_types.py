@@ -103,10 +103,6 @@ class YoutubeVideoTypeTest(TestCase):
         self.assertEqual(video.description, '')
         self.assertEqual(video.duration, None)
         self.assertEqual(video.thumbnail, '')
-        # since get_video_info failed, we don't know the channel id of our
-        # video URL.  We should use a dummy value to make it easier to fix the
-        # issue in the future
-        self.assertEqual(vt.owner_username(), None)
 
     def test_matches_video_url(self):
         for item in self.data:

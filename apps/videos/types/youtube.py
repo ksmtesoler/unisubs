@@ -21,7 +21,8 @@ from urlparse import urlparse
 from base import VideoType
 from externalsites import google
 import externalsites
-
+import logging
+logger = logging.getLogger(__name__)
 class YoutubeVideoType(VideoType):
 
     _url_patterns = [re.compile(x) for x in [
@@ -74,7 +75,7 @@ class YoutubeVideoType(VideoType):
             self._video_info = google.get_video_info(self.video_id, accounts)
         return self._video_info
 
-    def set_values(self, video, user, team):
+    def set_values(self, video, user, team, video_url):
         try:
             video_info = self.get_video_info(user, team)
         except google.APIError:
@@ -83,12 +84,10 @@ class YoutubeVideoType(VideoType):
         video.description = video_info.description
         video.duration = video_info.duration
         video.thumbnail = video_info.thumbnail_url
-
-    def owner_username(self):
-        try:
-            return self.get_video_info(None, None).channel_id
-        except google.APIError:
-            return None
+        if video_url.owner_username is None and \
+           video_info.channel_id is not None:
+            video_url.owner_username = video_info.channel_id
+            video_url.save()
 
     @classmethod
     def url_from_id(cls, video_id):
