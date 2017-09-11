@@ -78,9 +78,10 @@ class YoutubeVideoType(VideoType):
                 accounts = []
             try:
                 self._video_info = google.get_video_info(self.video_id, accounts[:YoutubeVideoType.MAX_ACCOUNTS_TO_TRY])
-            except:
+            except google.APIError:
                 if len(accounts) > YoutubeVideoType.MAX_ACCOUNTS_TO_TRY:
-                    get_set_values_background.apply_async(args=[self.video_id, accounts[YoutubeVideoType.MAX_ACCOUNTS_TO_TRY:],
+                    accounts_pks = map(lambda x: x.pk, accounts[YoutubeVideoType.MAX_ACCOUNTS_TO_TRY:])
+                    get_set_values_background.apply_async(args=[self.video_id, accounts_pks,
                                                                 video.pk, video_url.pk], countdown=2)
                     incomplete = True
                     self._video_info = None
@@ -125,12 +126,14 @@ class YoutubeVideoType(VideoType):
         raise ValueError("Unknown video id")
 
 @task()
-def get_set_values_background(video_id, accounts, video_pk, video_url_pk):
+def get_set_values_background(video_id, accounts_pks, video_pk, video_url_pk):
     from django.db import models
     from videos.models import Video, VideoUrl
+    from externalsites.models import YouTubeAccount
     try:
         video = Video.objects.get(id=video_pk)
         video_url = VideoUrl.objects.get(id=video_url_pk)
+        accounts = list(YouTubeAccount.objects.filter(id__in=accounts_pks))
         video_info = google.get_video_info(video_id, accounts)
         YoutubeVideoType.complete_set_values(video,
                                              video_url,
