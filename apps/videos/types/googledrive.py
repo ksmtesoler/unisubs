@@ -66,7 +66,7 @@ class GoogleDriveVideoType(VideoType):
                 self.file_id))
             raise
 
-    def set_values(self, video, user, team):
+    def set_values(self, video, user, team, video_url):
         try:
             video_info = self.get_drive_file_info()
         except google.APIError:

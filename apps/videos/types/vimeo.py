@@ -54,7 +54,7 @@ class VimeoVideoType(VideoType):
     def matches_video_url(cls, url):
         return bool(vimeo.VIMEO_REGEX.match(url))
 
-    def set_values(self, video_obj, user, team):
+    def set_values(self, video_obj, user, team, video_url):
         if vimeo.VIMEO_API_KEY and vimeo.VIMEO_API_SECRET:
             try:
                 video_obj.thumbnail = vimeo.get_thumbnail_url(self.url, self.shortmem) or ''

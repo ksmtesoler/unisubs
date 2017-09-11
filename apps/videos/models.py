@@ -732,11 +732,11 @@ class Video(models.Model):
             video = Video.objects.create()
             vt, video_url = video._add_video_url(url, user, True)
             # okay, we can now run the setup
-            video.set_values(vt, user, team)
+            incomplete = video.set_values(vt, video_url, user, team)
             video.user = user
             if setup_callback:
                 setup_callback(video, video_url)
-            if not video.title:
+            if not (incomplete or video.title):
                 video.title = make_title_from_url(video_url.url)
             video.update_search_index()
             video.save()
@@ -748,13 +748,14 @@ class Video(models.Model):
         signals.video_added.send(sender=video, video_url=video_url)
         signals.video_url_added.send(sender=video_url, video=video,
                                      new_video=True, user=user, team=team)
-
         return (video, video_url)
 
-    def set_values(self, video_type, user, team):
-        video_type.set_values(self, user, team)
-        self.title = self.re_unicode.sub(u'\uFFFD', self.title)
-        self.description = self.re_unicode.sub(u'\uFFFD', self.description)
+    def set_values(self, video_type, video_url, user, team):
+        incomplete = video_type.set_values(self, user, team, video_url)
+        if not incomplete:
+            self.title = self.re_unicode.sub(u'\uFFFD', self.title)
+            self.description = self.re_unicode.sub(u'\uFFFD', self.description)
+        return incomplete
 
     def add_url(self, url, user):
         """
@@ -794,7 +795,6 @@ class Video(models.Model):
                 'primary': primary,
                 'original': primary,
                 'videoid': vt.video_id if vt.video_id else '',
-                'owner_username': vt.owner_username(),
             })
         if not created:
             raise Video.UrlAlreadyAdded(video_url)
@@ -2149,25 +2149,6 @@ class VideoUrl(models.Model):
 
         signals.video_url_deleted.send(sender=self, user=user)
         self.delete()
-
-    def fix_owner_username(self):
-        """Workaround for us changing how owner_usernames work.
-
-        At some point we changed how owner_usernames works for youtube videos.
-        Rather than trying to change the owner_usernames attribute for all
-        videos at once in a huge migration, we set them to None.  Then before
-        we need to use the username, we call fix_owner_username() and fix it
-        then.
-        """
-        # We should not do that as it calls the API each time
-        return
-        types_to_fix = (
-            VIDEO_TYPE_YOUTUBE,
-        )
-
-        if self.type in types_to_fix and self.owner_username is None:
-            self.owner_username = self.get_video_type().owner_username()
-            self.save()
 
     def get_video_type_class(self):
         try:
