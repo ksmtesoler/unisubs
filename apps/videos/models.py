@@ -732,11 +732,11 @@ class Video(models.Model):
             video = Video.objects.create()
             vt, video_url = video._add_video_url(url, user, True)
             # okay, we can now run the setup
-            video.set_values(vt, video_url, user, team)
+            incomplete = video.set_values(vt, video_url, user, team)
             video.user = user
             if setup_callback:
                 setup_callback(video, video_url)
-            if not video.title:
+            if not (incomplete or video.title):
                 video.title = make_title_from_url(video_url.url)
             video.update_search_index()
             video.save()
@@ -748,13 +748,14 @@ class Video(models.Model):
         signals.video_added.send(sender=video, video_url=video_url)
         signals.video_url_added.send(sender=video_url, video=video,
                                      new_video=True, user=user, team=team)
-
         return (video, video_url)
 
     def set_values(self, video_type, video_url, user, team):
-        video_type.set_values(self, user, team, video_url)
-        self.title = self.re_unicode.sub(u'\uFFFD', self.title)
-        self.description = self.re_unicode.sub(u'\uFFFD', self.description)
+        incomplete = video_type.set_values(self, user, team, video_url)
+        if not incomplete:
+            self.title = self.re_unicode.sub(u'\uFFFD', self.title)
+            self.description = self.re_unicode.sub(u'\uFFFD', self.description)
+        return incomplete
 
     def add_url(self, url, user):
         """
