@@ -16,6 +16,7 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
+from collections import deque
 from datetime import datetime, timedelta
 import hashlib
 import hmac
@@ -27,7 +28,6 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.models import UserManager, User as BaseUser
 from django.contrib.sites.models import Site
-from django.core.cache import cache
 from django.core.cache import cache
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.urlresolvers import reverse
@@ -45,6 +45,7 @@ from tastypie.models import ApiKey
 from auth import signals
 from caching import CacheGroup, ModelCacheManager
 from utils.amazon import S3EnabledImageField
+from utils import dates
 from utils import secureid
 from utils import translation
 from utils.memoize import memoize
@@ -206,6 +207,29 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
             return self.full_name
         else:
             return self.username
+
+    def sent_message(self):
+        """
+        Should be called each time a user sends a message.
+        This is used to control if a user is spamming.
+        """
+        if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
+           hasattr(settings, 'MESSAGES_SENT_LIMIT'):
+            SentMessageDate.objects.sent_message(self)
+            self._check_sent_messages()
+
+    def _check_sent_messages(self):
+        if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
+           hasattr(settings, 'MESSAGES_SENT_LIMIT'):
+            if SentMessageDate.objects.check_messages(self):
+                self.de_activate()
+
+    def de_activate(self):
+        if not self.is_superuser:
+            self.is_active = False
+            self.save()
+            import tasks
+            tasks.notify_blocked_user.delay(self)
 
     def has_fullname_set(self):
         return any([self.first_name, self.last_name, self.full_name])
@@ -815,3 +839,18 @@ class LoginToken(models.Model):
 
     def __unicode__(self):
         return u"LoginToken for %s" %(self.user)
+
+class SentMessageDateManager(models.Manager):
+    def sent_message(self, user):
+        self.create(user=user, created=dates.now())
+
+    def check_messages(self, user):
+        now = dates.now()
+        self.get_query_set().filter(created__lt=now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)).delete()
+        return self.get_query_set().filter(user=user,
+                                    created__gt=now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)).count() > settings.MESSAGES_SENT_LIMIT
+
+class SentMessageDate(models.Model):
+    user = models.ForeignKey(CustomUser)
+    created = models.DateTimeField()
+    objects = SentMessageDateManager()
