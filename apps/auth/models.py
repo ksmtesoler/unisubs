@@ -34,6 +34,7 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db import models
 from django.db import transaction
+from django.db.models import Max
 from django.db.models.loading import get_model
 from django.db.models.signals import post_save
 from django.utils.http import urlquote
@@ -46,6 +47,7 @@ from caching import CacheGroup, ModelCacheManager
 from utils.amazon import S3EnabledImageField
 from utils import secureid
 from utils import translation
+from utils.memoize import memoize
 from utils.tasks import send_templated_email_async
 
 import logging
@@ -257,21 +259,21 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         if '$' in self.username:
             raise ValidationError("usernames can't contain the '$' character")
 
-    def unread_messages(self, hidden_meassage_id=None):
+    def unread_messages(self, after_message_id=None):
         from messages.models import Message
-
         qs = Message.objects.for_user(self).filter(read=False)
-
-        try:
-            if hidden_meassage_id:
-                qs = qs.filter(pk__gt=hidden_meassage_id)
-        except (ValueError, TypeError):
-            pass
-
+        if after_message_id is not None:
+            qs = qs.filter(id__gt=after_message_id)
         return qs
 
-    def unread_messages_count(self, hidden_meassage_id=None):
-        return self.unread_messages(hidden_meassage_id).count()
+    @memoize
+    def unread_messages_count(self, after_message_id=None):
+        return self.unread_messages(after_message_id).count()
+
+    @memoize
+    def last_unread_message_id(self, after_message_id=None):
+        qs = self.unread_messages(after_message_id).aggregate(max_id=Max('id'))
+        return qs['max_id']
 
     def tutorial_was_shown(self):
         CustomUser.objects.filter(pk=self.id).update(show_tutorial=False)
