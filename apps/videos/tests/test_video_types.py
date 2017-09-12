@@ -83,7 +83,7 @@ class YoutubeVideoTypeTest(TestCase):
         mock_get_video_info.return_value = video_info
         vt = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0')
         video = Video()
-        vt.set_values(video, None, None)
+        vt.set_values(video, None, None, None)
         self.assertEqual(video.title, video_info.title)
         self.assertEqual(video.description, video_info.description)
         self.assertEqual(video.duration, video_info.duration)
@@ -97,7 +97,7 @@ class YoutubeVideoTypeTest(TestCase):
         mock_get_video_info.side_effect = google.APIError()
         vt = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0')
         video = Video()
-        vt.set_values(video, None, None)
+        vt.set_values(video, None, None, None)
 
         self.assertEqual(vt.video_id, '_ShmidkrcY0')
         self.assertEqual(video.description, '')

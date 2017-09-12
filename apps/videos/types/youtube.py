@@ -98,7 +98,8 @@ class YoutubeVideoType(VideoType):
         video.duration = video_info.duration
         if not video.thumbnail:
             video.thumbnail = video_info.thumbnail_url
-        if video_url.owner_username is None and \
+        if video_url is not None and \
+           video_url.owner_username is None and \
            video_info.channel_id is not None:
             video_url.owner_username = video_info.channel_id
             video_url.save()
