@@ -213,29 +213,13 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         """
         if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
            hasattr(settings, 'MESSAGES_SENT_LIMIT'):
-            cached_sent_messages = cache.get('_cached_sent_messages_' + self.username)
-            if cached_sent_messages is not None:
-                cached_sent_messages.append(dates.now())
-                cache.set('_cached_sent_messages_' + self.username, cached_sent_messages,
-                          settings.MESSAGES_SENT_WINDOW_MINUTES * 60)
-            else:
-                cached_sent_messages = deque([dates.now()])
-                cache.set('_cached_sent_messages_' + self.username, cached_sent_messages,
-                          settings.MESSAGES_SENT_WINDOW_MINUTES * 60)
+            SentMessageDate.objects.sent_message(self)
             self._check_sent_messages()
 
     def _check_sent_messages(self):
-        cached_sent_messages = cache.get('_cached_sent_messages_' + self.username)
-        if cached_sent_messages is not None and \
-           hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
+        if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
            hasattr(settings, 'MESSAGES_SENT_LIMIT'):
-            now = dates.now()
-            while cached_sent_messages[0] < \
-                  (now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)):
-                cached_sent_messages.popleft()
-            cache.set('_cached_sent_messages_' + self.username, cached_sent_messages,
-                      settings.MESSAGES_SENT_WINDOW_MINUTES * 60)
-            if len(cached_sent_messages) > settings.MESSAGES_SENT_LIMIT:
+            if SentMessageDate.objects.check_messages(self):
                 self.de_activate()
 
     def de_activate(self):
@@ -852,3 +836,18 @@ class LoginToken(models.Model):
 
     def __unicode__(self):
         return u"LoginToken for %s" %(self.user)
+
+class SentMessageDateManager(models.Manager):
+    def sent_message(self, user):
+        self.create(user=user, created=dates.now())
+
+    def check_messages(self, user):
+        now = dates.now()
+        self.get_query_set().filter(created__lt=now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)).delete()
+        return self.get_query_set().filter(user=user,
+                                    created__gt=now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)).count() > settings.MESSAGES_SENT_LIMIT
+
+class SentMessageDate(models.Model):
+    user = models.ForeignKey(CustomUser)
+    created = models.DateTimeField()
+    objects = SentMessageDateManager()
