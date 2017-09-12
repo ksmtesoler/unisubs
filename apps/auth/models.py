@@ -221,7 +221,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def _check_sent_messages(self):
         if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
            hasattr(settings, 'MESSAGES_SENT_LIMIT'):
-            if SentMessageDate.objects.check_messages(self):
+            if SentMessageDate.objects.check_too_many_messages(self):
                 self.de_activate()
 
     def de_activate(self):
@@ -844,7 +844,7 @@ class SentMessageDateManager(models.Manager):
     def sent_message(self, user):
         self.create(user=user, created=dates.now())
 
-    def check_messages(self, user):
+    def check_too_many_messages(self, user):
         now = dates.now()
         self.get_query_set().filter(created__lt=now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)).delete()
         return self.get_query_set().filter(user=user,
