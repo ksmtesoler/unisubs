@@ -463,7 +463,8 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         url = '{}?user={}'.format(reverse('messages:new'),
                                   urlquote(self.username))
         if absolute_url:
-            url = "http://" + Site.objects.get_current().domain + url
+            url = "{}://{}{}".format(settings.DEFAULT_PROTOCOL,
+                                     Site.objects.get_current().domain, url)
         return url
 
     @property
