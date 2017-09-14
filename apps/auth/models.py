@@ -747,7 +747,7 @@ class EmailConfirmationManager(models.Manager):
         except Site.DoesNotExist:
             return
         path = reverse("auth:confirm_email", args=[confirmation_key])
-        activate_url = u"http://%s%s" % (unicode(current_site.domain), path)
+        activate_url = u"{}://{}{}".format(settings.DEFAULT_PROTOCOL, unicode(current_site.domain), path)
         context = {
             "user": user,
             "activate_url": activate_url,
