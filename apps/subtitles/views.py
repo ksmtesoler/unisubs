@@ -178,7 +178,7 @@ class SubtitleEditorBase(View):
                                                  self.language_code):
             return True
         learn_more_link = u'<a href="{}">{}</a>'.format(
-            u'http://support.amara.org/solution/articles/212109-why-do-i-see-a-message-saying-that-i-am-not-permitted-to-edit-subtitles',
+            u'https://support.amara.org/solution/articles/212109-why-do-i-see-a-message-saying-that-i-am-not-permitted-to-edit-subtitles',
             _(u'Learn more'))
 
         messages.error(self.request,

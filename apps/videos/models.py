@@ -587,20 +587,6 @@ class Video(models.Model):
     def can_user_see(self, user):
         return self.get_workflow().user_can_view_video(user)
 
-    def thumbnail_link(self):
-        """Return a URL to this video's thumbnail, or '' if there isn't one.
-
-        Unlike get_thumbnail, this URL will always be absolute.
-
-        """
-        if not self.thumbnail:
-            return ''
-
-        if self.thumbnail.startswith('http://'):
-            return self.thumbnail
-
-        return settings.STATIC_URL+self.thumbnail
-
     def is_html5(self):
         """Return whether if the original URL for this video is an HTML5 one."""
         try:
