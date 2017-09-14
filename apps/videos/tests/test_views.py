@@ -100,14 +100,6 @@ class TestViews(WebUseTest):
         response = self.client.post(url, data)
         self.assertEqual(video.videourl_set.count(), 2)
 
-    def test_feedback(self):
-        data = {
-            'email': 'test@test.com',
-            'message': 'Test',
-        }
-        response = self.client.post(reverse('videos:feedback'), data)
-        self.assertEqual(response.status_code, 200)
-
     def test_create(self):
         self._login()
         url = reverse('videos:create')

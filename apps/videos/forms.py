@@ -316,58 +316,6 @@ class AddFromFeedForm(forms.Form, AjaxForm):
     def make_feed(self, url):
         return VideoFeed.objects.create(user=self.user, url=url)
 
-class FeedbackForm(forms.Form):
-    email = forms.EmailField(required=False)
-    message = forms.CharField(widget=forms.Textarea())
-    error = forms.CharField(required=False, widget=forms.HiddenInput)
-    captcha = ReCaptchaField(label=_(u'captcha'))
-
-    def __init__(self, *args, **kwargs):
-        hide_captcha = kwargs.pop('hide_captcha', False)
-        super(FeedbackForm, self).__init__(*args, **kwargs)
-        if hide_captcha:
-            del self.fields['captcha']
-
-    def send(self, request):
-        email = self.cleaned_data['email']
-        message = self.cleaned_data['message']
-        error = self.cleaned_data['error']
-        user_agent_data = u'User agent: %s' % request.META.get('HTTP_USER_AGENT')
-        timestamp = u'Time: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        version = u'Version: %s' % settings.PROJECT_VERSION
-        commit = u'Commit: %s' % settings.LAST_COMMIT_GUID
-        url = u'URL: %s' % request.META.get('HTTP_REFERER', '')
-        user = u'Logged in: %s' % (request.user.is_authenticated() and request.user or u'not logged in')
-        message = u'%s\n\n%s\n%s\n%s\n%s\n%s\n%s' % (message, user_agent_data, timestamp, version, commit, url, user)
-        if error in ['404', '500']:
-            message += u'\nPage type: %s' % error
-            feedback_emails = [settings.FEEDBACK_ERROR_EMAIL]
-        else:
-            feedback_emails = settings.FEEDBACK_EMAILS
-        headers = {'Reply-To': email} if email else None
-        bcc = getattr(settings, 'EMAIL_BCC_LIST', [])
-        if email:
-            subject = '%s (from %s)' % (settings.FEEDBACK_SUBJECT, email)
-        else:
-            subject = settings.FEEDBACK_SUBJECT
-        EmailMessage(subject, message, email, \
-                         feedback_emails, headers=headers, bcc=bcc).send()
-
-        if email:
-            headers = {'Reply-To': settings.FEEDBACK_RESPONSE_EMAIL}
-            body = render_to_string(settings.FEEDBACK_RESPONSE_TEMPLATE, {})
-            email = EmailMessage(settings.FEEDBACK_RESPONSE_SUBJECT, body, \
-                         settings.FEEDBACK_RESPONSE_EMAIL, [email], headers=headers, bcc=bcc)
-            email.content_subtype = 'html'
-            email.send()
-
-    def get_errors(self):
-        from django.utils.encoding import force_unicode
-        output = {}
-        for key, value in self.errors.items():
-            output[key] = '/n'.join([force_unicode(i) for i in value])
-        return output
-
 class EmailFriendForm(forms.Form):
     from_email = forms.EmailField(label='From')
     to_emails = EmailListField(label='To')

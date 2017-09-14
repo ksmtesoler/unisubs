@@ -68,7 +68,7 @@ from videos import permissions
 from videos.decorators import (get_video_revision, get_video_from_code,
                                get_cached_video_from_code)
 from videos.forms import (
-    VideoForm, FeedbackForm, EmailFriendForm, UserTestResultForm,
+    VideoForm, EmailFriendForm, UserTestResultForm,
     CreateVideoUrlForm, AddFromFeedForm,
     ChangeVideoOriginalLanguageForm, CreateSubtitlesForm,
 )
@@ -417,17 +417,6 @@ def upload_subtitles(request):
         output['errors'] = {'__all__': [force_unicode(e)]}
 
     return HttpResponse(json.dumps(output))
-
-def feedback(request, hide_captcha=False):
-    output = dict(success=False)
-    form = FeedbackForm(request.POST, initial={'captcha': request.META['REMOTE_ADDR']},
-                        hide_captcha=hide_captcha)
-    if form.is_valid():
-        form.send(request)
-        output['success'] = True
-    else:
-        output['errors'] = form.get_errors()
-    return HttpResponse(json.dumps(output), "text/javascript")
 
 @get_video_from_code
 def legacy_history(request, video, lang=None):
