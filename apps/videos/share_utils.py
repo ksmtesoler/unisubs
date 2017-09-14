@@ -51,7 +51,7 @@ def share_panel_context_for_video(video):
 
 def add_share_panel_context_for_history(context, video, language=None):
     page_url = language.get_absolute_url() if language else video.get_absolute_url()
-    abs_page_url = "http://{0}{1}".format(domain(), page_url)
+    abs_page_url = "{}://{}{}".format(settings.DEFAULT_PROTOCOL, domain(), page_url)
     
     msg = _(u"%(language)s subtitles for %(video)s:") % {
         'language': language,
