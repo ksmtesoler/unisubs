@@ -25,10 +25,9 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from vidscraper import errors
-from vidscraper.sites import (
-    vimeo, youtube, fora)
+from vidscraper.sites import (vimeo, youtube)
 
-AUTOSCRAPE_SUITES = [vimeo.SUITE, youtube.SUITE, fora.SUITE]
+AUTOSCRAPE_SUITES = [vimeo.SUITE, youtube.SUITE]
 
 
 def scrape_suite(url, suite, fields=None):
