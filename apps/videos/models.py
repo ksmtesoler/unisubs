@@ -2022,15 +2022,6 @@ class Action(models.Model):
             instance.action = obj
             instance.save()
 
-# UserTestResult
-class UserTestResult(models.Model):
-    email = models.EmailField()
-    browser = models.CharField(max_length=1024)
-    task1 = models.TextField()
-    task2 = models.TextField(blank=True)
-    task3 = models.TextField(blank=True)
-    get_updates = models.BooleanField(default=False)
-
 class VideoUrlManager(models.Manager):
     def get_query_set(self):
         return VideoUrlQueryset(self.model, using=self._db)

@@ -41,7 +41,7 @@ from videos.tests.videotestutils import (
 from videos import views
 from videos.models import (
     Video, VideoUrl, Action, VIDEO_TYPE_YOUTUBE, SubtitleVersion,
-    SubtitleLanguage, Subtitle, UserTestResult
+    SubtitleLanguage, Subtitle
 )
 from videos.tests.data import (
     get_video, make_subtitle_language, make_subtitle_version

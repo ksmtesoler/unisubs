@@ -34,7 +34,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
 from videos.feed_parser import FeedParser
-from videos.models import Video, VideoFeed, UserTestResult, VideoUrl
+from videos.models import Video, VideoFeed, VideoUrl
 from videos.permissions import can_user_edit_video_urls
 from teams.permissions import can_create_and_edit_subtitles
 from videos.tasks import import_videos_from_feed
@@ -231,18 +231,6 @@ class NewCreateVideoUrlForm(forms.Form):
     def save(self):
         return self.video_url
 
-class UserTestResultForm(forms.ModelForm):
-
-    class Meta:
-        model = UserTestResult
-        exclude = ('browser',)
-
-    def save(self, request):
-        obj = super(UserTestResultForm, self).save(False)
-        obj.browser = request.META.get('HTTP_USER_AGENT', 'empty HTTP_USER_AGENT')
-        obj.save()
-        return obj
-
 class VideoForm(forms.Form):
     video_url = VideoURLField()
 
@@ -315,19 +303,6 @@ class AddFromFeedForm(forms.Form, AjaxForm):
 
     def make_feed(self, url):
         return VideoFeed.objects.create(user=self.user, url=url)
-
-class EmailFriendForm(forms.Form):
-    from_email = forms.EmailField(label='From')
-    to_emails = EmailListField(label='To')
-    subject = forms.CharField()
-    message = forms.CharField(widget=forms.Textarea())
-
-    def send(self):
-        subject = self.cleaned_data['subject']
-        message = self.cleaned_data['message']
-        from_email = self.cleaned_data['from_email']
-        to_emails = self.cleaned_data['to_emails']
-        send_mail(subject, message, from_email, to_emails)
 
 class ChangeVideoOriginalLanguageForm(forms.Form):
     language_code = forms.ChoiceField()

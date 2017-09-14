@@ -66,7 +66,7 @@ from videos import permissions
 from videos.decorators import (get_video_revision, get_video_from_code,
                                get_cached_video_from_code)
 from videos.forms import (
-    VideoForm, EmailFriendForm, UserTestResultForm,
+    VideoForm,
     CreateVideoUrlForm, AddFromFeedForm,
     ChangeVideoOriginalLanguageForm, CreateSubtitlesForm,
 )
