@@ -202,7 +202,6 @@
             project: null,
             resource_uri: null,
             team: null,
-            team_type: null,
             thumbnail: null,
             title: null,
 
@@ -432,9 +431,8 @@
                                 that.buildLanguageSelector();
                                 // update the view on amara button
                                 that.$viewOnAmaraButton.attr('href', apiDomain(that.model.get('embed_on_amara')) + '/en/videos/' + that.model.get('id'));
-                                // change video url based on team type
-                                if (that.model.get('team_type') == 'EC') {
-                                    _$('#amara-video-link').attr('href', apiDomain(that.model.get('embed_on_amara')) + '/subtitles/editor/' + that.model.get('id') + '/en/?team=' + that.model.get('team'));
+                                if(that.model.get('team')) {
+                                    _$('#amara-video-link').parent().hide();
                                 } else {
                                     _$('#amara-video-link').attr('href', apiDomain(that.model.get('embed_on_amara')) + '/subtitles/editor/' + that.model.get('id') + '/');
                                 }
@@ -710,8 +708,6 @@
 			this.$amaraCurrentLang.text(languageName);
 			_$('#amara-download-subtitles').attr('href', apiDomain(this.model.get('embed_on_amara')) + '/en/videos/' + this.model.get('id') + '/' + languageCode);
                         var amara_video_link = apiDomain(this.model.get('embed_on_amara')) + '/subtitles/editor/' + this.model.get('id') + '/' + languageCode;
-                        if (this.model.get('team') && (this.model.get('team_type') == 'EC'))
-                            amara_video_link += '?team=' + this.model.get('team');
 			_$('#amara-video-link').attr('href', amara_video_link);
 			_$('ul.amara-languages-list li').removeClass('currently-selected-item');
 			_$('.currently-selected').parent().addClass('currently-selected-item');
