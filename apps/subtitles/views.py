@@ -104,7 +104,7 @@ def old_editor(request, video_id, language_code):
     url_path = shims.get_widget_url(language,
                                     request.GET.get('mode'),
                                     request.GET.get('task_id'))
-    return redirect("http://%s%s" % (request.get_host(), url_path))
+    return redirect("{}://{}{}".format(settings.DEFAULT_PROTOCOL, request.get_host(), url_path))
 
 class SubtitleEditorBase(View):
     def dispatch(self, request, *args, **kwargs):
@@ -178,7 +178,7 @@ class SubtitleEditorBase(View):
                                                  self.language_code):
             return True
         learn_more_link = u'<a href="{}">{}</a>'.format(
-            u'http://support.amara.org/solution/articles/212109-why-do-i-see-a-message-saying-that-i-am-not-permitted-to-edit-subtitles',
+            u'https://support.amara.org/solution/articles/212109-why-do-i-see-a-message-saying-that-i-am-not-permitted-to-edit-subtitles',
             _(u'Learn more'))
 
         messages.error(self.request,

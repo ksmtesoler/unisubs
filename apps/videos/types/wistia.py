@@ -49,7 +49,7 @@ class WistiaVideoType(VideoType):
         return self.videoid
     
     def convert_to_video_url(self):
-        return "http://fast.wistia.net/embed/iframe/%s" % self.videoid
+        return "https://fast.wistia.net/embed/iframe/%s" % self.videoid
 
     @classmethod
     def matches_video_url(cls, url):

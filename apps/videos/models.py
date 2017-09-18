@@ -71,7 +71,6 @@ VIDEO_TYPE_YOUTUBE = 'Y'
 VIDEO_TYPE_BLIPTV = 'B'
 VIDEO_TYPE_GOOGLE = 'G'
 VIDEO_TYPE_FORA = 'F'
-VIDEO_TYPE_USTREAM = 'U'
 VIDEO_TYPE_VIMEO = 'V'
 VIDEO_TYPE_WISTIA = 'W'
 VIDEO_TYPE_DAILYMOTION = 'D'
@@ -587,20 +586,6 @@ class Video(models.Model):
 
     def can_user_see(self, user):
         return self.get_workflow().user_can_view_video(user)
-
-    def thumbnail_link(self):
-        """Return a URL to this video's thumbnail, or '' if there isn't one.
-
-        Unlike get_thumbnail, this URL will always be absolute.
-
-        """
-        if not self.thumbnail:
-            return ''
-
-        if self.thumbnail.startswith('http://'):
-            return self.thumbnail
-
-        return settings.STATIC_URL+self.thumbnail
 
     def is_html5(self):
         """Return whether if the original URL for this video is an HTML5 one."""
@@ -2036,15 +2021,6 @@ class Action(models.Model):
 
             instance.action = obj
             instance.save()
-
-# UserTestResult
-class UserTestResult(models.Model):
-    email = models.EmailField()
-    browser = models.CharField(max_length=1024)
-    task1 = models.TextField()
-    task2 = models.TextField(blank=True)
-    task3 = models.TextField(blank=True)
-    get_updates = models.BooleanField(default=False)
 
 class VideoUrlManager(models.Manager):
     def get_query_set(self):

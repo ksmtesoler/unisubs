@@ -47,8 +47,8 @@ def add_config_based_js_files(context, files, compiled_file_name):
     if settings.COMPRESS_MEDIA:
         js_files.append(full_path(compiled_file_name))
     else:
-        js_files.append('http://{0}/widget/config.js'.format(
-                Site.objects.get_current().domain))
+        js_files.append('{}://{}/widget/config.js'.format(settings.DEFAULT_PROTOCOL,
+                                                          Site.objects.get_current().domain))
         js_files.extend(
             [full_path(js_file) for js_file
              in files])
