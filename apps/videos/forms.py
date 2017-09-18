@@ -39,7 +39,7 @@ from videos.permissions import can_user_edit_video_urls
 from teams.permissions import can_create_and_edit_subtitles
 from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
-from utils.forms import AjaxForm, EmailListField, UsernameListField, StripRegexField, FeedURLField, ReCaptchaField
+from utils.forms import AjaxForm, EmailListField, UsernameListField, StripRegexField, FeedURLField
 from utils import http
 from utils.text import fmt
 from utils.translation import get_language_choices, get_user_languages_from_request
