@@ -1480,6 +1480,132 @@ class MemberFiltersForm(forms.Form):
             qs = qs.order_by('-created')
         return qs
 
+class ApplicationFiltersForm(forms.Form):
+    LANGUAGE_CHOICES = [
+        ('any', _('Any language')),
+    ] + get_language_choices()
+
+    language = forms.ChoiceField(choices=LANGUAGE_CHOICES,
+                                 label=_('Language spoken'),
+                                 initial='any', required=False)
+
+    def __init__(self, get_data=None):
+        super(ApplicationFiltersForm, self).__init__(self.calc_data(get_data))
+
+    def calc_data(self, get_data):
+        if get_data is None:
+            return None
+        data = {k:v for k, v in get_data.items() if k != 'page'}
+        return data if data else None
+
+    def update_qs(self, qs):
+        if not (self.is_bound and self.is_valid()):
+            return qs
+        language = self.cleaned_data.get('language', 'any')
+        if language and language != 'any':
+            qs = qs.filter(user__userlanguage__language=language)
+
+        return qs
+
+class ApproveApplicationForm(ManagementForm):
+
+    name = "approve_application"
+    label = _("Approve Application")
+
+    def __init__(self, user, queryset, selection, all_selected,
+                 data=None, files=None):
+        self.user = user
+        super(ApproveApplicationForm, self).__init__(
+            queryset, selection, all_selected, data=data, files=files)
+
+    def perform_submit(self, applications):
+        self.approved_count = 0
+        self.invalid_count = 0
+        self.error_count = 0
+        for application in applications:
+            try:
+                application.approve(self.user, "web UI")
+            except ApplicationInvalidException:
+                self.invalid_count += 1
+                _(u'Application already processed.')
+            except Exception as e:
+                logger.warn(e, exc_info=True)
+                self.error_count += 1
+
+    def message(self):
+        if self.approved_count:
+            return fmt(self.ungettext('%(count)s application has been approved',
+                                      '%(count)s applications have been approved',
+                                      self.approved_count), count=self.approved_count)
+        else:
+            return None
+
+    def error_messages(self):
+        errors = []
+        if self.invalid_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be approved because it was already processed",
+                "%(count)s application could not be approved because it was already processed",
+                "%(count)s applications could not be approved because they were already processed",
+                self.invalid_count), count=self.invalid_count))
+        if self.error_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be processed",
+                "%(count)s application could not be processed",
+                "%(count)s applications could not be processed",
+                self.error_count), count=self.error_count))
+        return errors
+
+
+class DenyApplicationForm(ManagementForm):
+
+    name = "deny_application"
+    label = _("Deny Application")
+
+    def __init__(self, user, queryset, selection, all_selected,
+                 data=None, files=None):
+        self.user = user
+        super(DenyApplicationForm, self).__init__(
+            queryset, selection, all_selected, data=data, files=files)
+
+    def perform_submit(self, applications):
+        self.denied_count = 0
+        self.invalid_count = 0
+        self.error_count = 0
+        for application in applications:
+            try:
+                application.deny(self.user, "web UI")
+            except ApplicationInvalidException:
+                self.invalid_count += 1
+                _(u'Application already processed.')
+            except Exception as e:
+                logger.warn(e, exc_info=True)
+                self.error_count += 1
+
+    def message(self):
+        if self.denied_count:
+            return fmt(self.ungettext('%(count)s application has been denied',
+                                      '%(count)s applications have been denied',
+                                      self.denied_count), count=self.denied_count)
+        else:
+            return None
+
+    def error_messages(self):
+        errors = []
+        if self.invalid_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be denied because it was already processed",
+                "%(count)s application could not be denied because it was already processed",
+                "%(count)s applications could not be denied because they were already processed",
+                self.invalid_count), count=self.invalid_count))
+        if self.error_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be processed",
+                "%(count)s application could not be processed",
+                "%(count)s applications could not be processed",
+                self.error_count), count=self.error_count))
+        return errors
+
 class EditMembershipForm(forms.Form):
     member = forms.ChoiceField()
     remove = forms.BooleanField(required=False)

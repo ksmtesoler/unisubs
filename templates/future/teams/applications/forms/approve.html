@@ -1,0 +1,20 @@
+{% load i18n forms %}
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="dialogHeader text-center">
+        <h4 class="dialogTitle">
+          {% blocktrans count count=selection_count %}
+          Are you sure that you want to approve the selected application for {{team}}?
+          {% plural %}
+          Are you sure that you want to approve {{ count }} applications for {{ team }}?
+          {% endblocktrans %}
+        </h4>
+      </div>
+      <form class="ajaxForm text-center" method="POST" action="{{ request.get_full_path }}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include "future/forms/non-field-errors.html" %}
+        <button class="button cta-reverse" data-dismiss="modal">Cancel</button>
+        <button class="button cta">Approve</button>
+      </form>
+    </div>
+  </div>

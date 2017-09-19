@@ -222,6 +222,83 @@ def members(request, team):
         ],
     })
 
+@with_old_view(old_views.applications)
+@team_view
+def applications(request, team):
+    if not team.user_is_admin(request.user):
+        raise PermissionDenied()
+
+    filters_form = forms.ApplicationFiltersForm(request.GET)
+    form_name = request.GET.get('form', None)
+    applications = filters_form.update_qs(team.applications.filter(
+                                          status=Application.STATUS_PENDING))
+    paginator = AmaraPaginatorFuture(applications, MEMBERS_PER_PAGE)
+    page = paginator.get_page(request)
+    next_page, prev_page = paginator.make_next_previous_page_links(page, request)
+
+    context = {
+        'request': request,
+        'filters_form': filters_form,
+        'paginator': paginator,
+        'page': page,
+        'next': next_page,
+        'previous': prev_page,
+        'team': team,
+    }
+
+    if form_name:
+        return manage_application_form(request, team, form_name, applications)
+
+    if not form_name and request.is_ajax():
+        response_renderer = AJAXResponseRenderer(request)
+        response_renderer.replace(
+            '#application-list-all',
+            'future/teams/applications/application-list.html',
+            context
+        )
+        return response_renderer.render()
+
+    return render(request, 'future/teams/applications/applications.html', context)
+
+def manage_application_form(request, team, form_name, applications):
+
+    try:
+        selection = request.GET['selection'].split('-')
+    except StandardError:
+        return HttpResponseBadRequest()
+
+    if form_name == 'approve':
+        FormClass = forms.ApproveApplicationForm
+    elif form_name == 'deny':
+        FormClass = forms.DenyApplicationForm
+    else:
+        raise Http404()
+
+    all_selected = len(selection) >= MEMBERS_PER_PAGE
+    response_renderer = AJAXResponseRenderer(request)
+
+    if request.method == 'POST':
+        try:
+            form = FormClass(request.user, applications, selection, all_selected,
+                             data=request.POST, files=request.FILES)
+        except Exception as e:
+            logger.error(e, exc_info=True)
+        if form.is_valid():
+            return render_management_form_submit(request, form)
+    else:
+        try:
+            form = FormClass(request.user, applications, selection, all_selected)
+        except Exception as e:
+            logger.error(e, exc_info=True)
+
+    template_name = 'future/teams/applications/forms/{}.html'.format(form_name)
+    response_renderer.show_modal(template_name, {
+        'team': team,
+        'selection_count': len(selection),
+        'single_selection': len(selection) == 1,
+    })
+    return response_renderer.render()
+
 @team_view
 def project(request, team, project_slug):
     project = get_object_or_404(team.project_set, slug=project_slug)

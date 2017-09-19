@@ -1,0 +1,26 @@
+{% load i18n_tags %}
+<li class="selectList-item">
+  <div class="checkbox">
+    <input value="{{ application.id }}" id="application-{{ application.id }}" type="checkbox" class="selectList-checkbox">
+    <label for="application-{{ application.id }}"><span></span></label>
+  </div>
+  <div>
+    {{ application.user.avatar_tag_large }}
+  </div>
+  <div>
+    <nav class="actions">
+      <form class="ajaxForm copyQuery" method="GET" action="{{ request.path }}">
+        <input class="selectList-selection" type="hidden" name="selection" value="{{application.id}}">
+        <button class="inline" type="submit" name="form" value="approve">
+          <i class="icon icon-check"></i>
+        </button>
+        <button class="inline" type="submit" name="form" value="deny">
+          <i class="icon icon-close"></i>
+        </button>
+      </form>
+    </nav>
+    <h3><a href="{{ application.user.profile_url }}">{{ application.user.display_name }}</a></h3>
+    <p>{{ application.user.get_languages|to_localized_display_list }}</p>
+    <p class="constrain">{{ application.note }}</p>
+  </div>
+</li>
