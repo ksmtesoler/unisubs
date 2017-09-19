@@ -89,6 +89,15 @@ VIDEO_META_TYPE_IDS = {}
 def url_hash(url):
     return hashlib.md5(url.encode("utf-8")).hexdigest()
 
+def remove_scheme(url):
+    """Remove the scheme from an URL.
+
+    Use this for thumbnail links and other URLs that we display in a browser.
+    Having no scheme means the browser will use HTTP/HTTPS depending on how
+    the page was loaded.  This avoids mixed content issues with HTTPS.
+    """
+    return urlparse.urlparse(url)._replace(scheme='').geturl()
+
 def update_metadata_choices():
     """Refresh the VIDEO_META_TYPE_* set of constants.
 
@@ -490,7 +499,7 @@ class Video(models.Model):
             return self.s3_thumbnail.url
 
         if self.thumbnail:
-            return self.thumbnail
+            return remove_scheme(self.thumbnail)
         if fallback:
             return "%simages/video-no-thumbnail-medium.png" % settings.STATIC_URL
 
@@ -505,7 +514,7 @@ class Video(models.Model):
             return self.s3_thumbnail.thumb_url(720, 405)
 
         if self.thumbnail:
-            return self.thumbnail
+            return remove_scheme(self.thumbnail)
         return "%simages/video-no-thumbnail-wide.png" % settings.STATIC_URL
 
     def get_wide_thumbnail(self):
@@ -519,7 +528,7 @@ class Video(models.Model):
             return self.s3_thumbnail.thumb_url(480, 270)
 
         if self.thumbnail:
-            return self.thumbnail
+            return remove_scheme(self.thumbnail)
         return "%simages/video-no-thumbnail-wide.png" % settings.STATIC_URL
 
     def get_small_thumbnail(self):
@@ -533,7 +542,7 @@ class Video(models.Model):
             return self.s3_thumbnail.thumb_url(120, 90)
 
         if self.small_thumbnail:
-            return self.small_thumbnail
+            return remove_scheme(self.small_thumbnail)
         return "%simages/video-no-thumbnail-small.png" % settings.STATIC_URL
 
     def get_medium_thumbnail(self):
@@ -547,7 +556,7 @@ class Video(models.Model):
             return self.s3_thumbnail.thumb_url(288, 162)
 
         if self.thumbnail:
-            return self.thumbnail
+            return remove_scheme(self.thumbnail)
 
         return "%simages/video-no-thumbnail-medium.png" % settings.STATIC_URL
 
