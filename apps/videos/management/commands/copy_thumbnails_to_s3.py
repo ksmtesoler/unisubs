@@ -28,5 +28,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         qs = Video.objects.filter(s3_thumbnail='').exclude(thumbnail='')
         for video in chunkedqs(qs):
-            print video
+            print video.video_id
             tasks.save_thumbnail_in_s3.delay(video.id)
