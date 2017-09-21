@@ -18,6 +18,7 @@
   <body{% block body-extra %}{% endblock %}>
     {% block header %}{% include "future/header.html" %}{% endblock %}
     <main id="page-content">
+      {% new_announcement %}
       {% if messages %}
       <div id="messages" class="container">
         <div class="content">
