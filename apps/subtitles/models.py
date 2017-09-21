@@ -593,11 +593,7 @@ class SubtitleLanguage(models.Model):
                 raise e
 
         # change collab language codes
-        from collab.models import Collaboration
-        collabs = Collaboration.objects.filter(video=self.video, language_code=old_language_code)
-        for collab in collabs:
-            collab.language_code = self.language_code
-            collab.save()
+        self.send_signal(signals.subtitle_language_changed, old_language=old_language_code)
 
         cache.invalidate_language_cache(self)
         self.clear_tip_cache()
