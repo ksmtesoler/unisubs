@@ -23,6 +23,7 @@ import re
 
 from django import forms
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
@@ -32,6 +33,7 @@ from django.db import transaction
 from django.forms.formsets import formset_factory
 from django.forms.util import ErrorDict
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
@@ -40,6 +42,8 @@ from django.utils.translation import ungettext
 from auth.forms import UserField
 from auth.models import CustomUser as User
 from activity.models import ActivityRecord
+from messages.models import Message, SYSTEM_NOTIFICATION
+from messages.tasks import send_new_messages_notifications
 from subtitles.forms import SubtitlesUploadForm
 from teams.models import (
     Team, TeamMember, TeamVideo, Task, Project, Workflow, Invite,
@@ -58,6 +62,7 @@ from teams.workflows import TeamWorkflow
 from ui.forms import (FiltersForm, ManagementForm, AmaraChoiceField,
                       AmaraRadioSelect, SearchField)
 from ui.forms import LanguageField as NewLanguageField
+from utils import send_templated_email
 from utils.forms import (ErrorableModelForm, get_label_for_value,
                          UserAutocompleteField, LanguageField,
                          LanguageDropdown, Dropdown )
@@ -1557,6 +1562,31 @@ class ApplicationForm(forms.Form):
             field = self.fields['language{}'.format(i+1)]
             field.initial = language
 
+    def notify(self):
+        send_to = [tm.user for tm in self.application.team.members.admins()]
+        url_base = '{}://{}'.format(settings.DEFAULT_PROTOCOL, Site.objects.get_current().domain)
+        context = {
+            'application': self.application,
+            'applicant': self.application.user,
+            'team': self.application.team,
+            'note': self.application.note,
+            'url_base': url_base
+        }
+        subject = _(u"A user has requested to join your team")
+        ids = []
+
+        for user in send_to:
+            context['user'] = user
+            body = render_to_string("messages/application-sent.txt", context)
+            msg = Message(user=user, subject=subject, content=body,
+                          message_type=SYSTEM_NOTIFICATION)
+            msg.save()
+            ids.append(msg.pk)
+            if user.notify_by_email:
+                send_templated_email(user, subject,
+                        "messages/email/application-sent-email.html", context)
+        send_new_messages_notifications.delay(ids)
+
     def clean(self):
         try:
             self.application.check_can_submit()
@@ -1573,6 +1603,7 @@ class ApplicationForm(forms.Form):
             if value:
                 languages.append({"language": value, "priority": i})
         self.application.user.set_languages(languages)
+        self.notify()
 
 class TeamVideoURLForm(forms.Form):
     video_url = VideoURLField()
