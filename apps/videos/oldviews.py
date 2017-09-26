@@ -360,7 +360,7 @@ def activity(request, video_id):
                        extra_context=extra_context)
 
 def check_upload_subtitles_permissions(request):
-    return request.user.is_authenticated():
+    return request.user.is_authenticated()
 
 def upload_subtitles(request):
     if not check_upload_subtitles_permissions(request):
