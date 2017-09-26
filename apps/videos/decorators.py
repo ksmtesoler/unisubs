@@ -35,7 +35,7 @@ def get_video_from_code(func):
     for the user on that request.
     """
     def wrapper(request, video_id, *args, **kwargs):
-        qs = Video.objects.select_related('teamvideo')
+        qs = Video.available_objects.select_related('teamvideo')
         video = get_object_or_403(request, qs, video_id=video_id)
         if not video.can_user_see(request.user):
             raise PermissionDenied()

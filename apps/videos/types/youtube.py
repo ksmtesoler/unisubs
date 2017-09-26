@@ -132,7 +132,7 @@ def get_set_values_background(video_id, accounts_pks, video_pk, video_url_pk):
     from videos.models import Video, VideoUrl
     from externalsites.models import YouTubeAccount
     try:
-        video = Video.objects.get(id=video_pk)
+        video = Video.available_objects.get(id=video_pk)
         video_url = VideoUrl.objects.get(id=video_url_pk)
         accounts = list(YouTubeAccount.objects.filter(id__in=accounts_pks))
         video_info = google.get_video_info(video_id, accounts)

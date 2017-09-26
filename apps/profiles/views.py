@@ -168,7 +168,7 @@ def videos(request, user_id=None):
             except (User.DoesNotExist, ValueError):
                 raise Http404
 
-    qs = Video.objects.filter(user=user).order_by('-edited')
+    qs = Video.available_objects.filter(user=user).order_by('-edited')
     q = request.REQUEST.get('q')
 
     if q:

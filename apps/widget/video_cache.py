@@ -61,7 +61,7 @@ def associate_extra_url(video_url, video_id):
         video_url, created = VideoUrl.objects.get_or_create(
             url=vt.convert_to_video_url(),
             defaults={
-                'video': Video.objects.get(video_id=video_id),
+                'video': Video.available_objects.get(video_id=video_id),
                 'type': vt.abbreviation,
                 'videoid': video_id })
         cache.set(cache_key, video_url.videoid, TIMEOUT)
@@ -73,7 +73,7 @@ def invalidate_cache(video_id):
 
     try:
         from videos.models import Video
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         for l in video.newsubtitlelanguage_set.all():
             cache.delete(_subtitles_dict_key(video_id, l.pk))
     except Video.DoesNotExist:
@@ -93,7 +93,7 @@ def invalidate_cache(video_id):
 
     from videos.models import Video
     try:
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         for url in video.videourl_set.all():
             cache.delete(_video_id_key(url.url))
 
@@ -163,7 +163,7 @@ def pk_for_default_language(video_id, language_code):
 
     if value is None:
         from videos.models import Video
-        sl = Video.objects.get(video_id=video_id).subtitle_language(
+        sl = Video.available_objects.get(video_id=video_id).subtitle_language(
             language_code)
         value = None if sl is None else sl.pk
         cache.set(cache_key, value, TIMEOUT)
@@ -177,7 +177,7 @@ def get_video_urls(video_id):
     if video_urls is None:
         from videos.models import Video
         video_urls = [vu.url for vu
-                 in Video.objects.get(video_id=video_id).videourl_set.all()]
+                 in Video.available_objects.get(video_id=video_id).videourl_set.all()]
         cache.set(cache_key, video_urls, TIMEOUT)
 
     return video_urls
@@ -191,7 +191,7 @@ def get_subtitles_dict(video_id, language_pk, version_number,
     if cached_value is None:
         from videos.models import Video
         from subtitles.models import SubtitleLanguage
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
 
         if language_pk is None:
             language = video.subtitle_language()
@@ -221,7 +221,7 @@ def get_video_languages(video_id):
 
     if value is None:
         from videos.models import Video
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         languages = video.newsubtitlelanguage_set.having_nonempty_versions()
 
         team_video = video.get_team_video()
@@ -255,7 +255,7 @@ def get_video_languages_verbose(video_id, max_items=6):
 
     if data is None:
         from videos.models import Video
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         languages_with_version_total = video.subtitlelanguage_set.filter(has_version=True).order_by('-percent_done')
         total_number = languages_with_version_total.count()
         languages_with_version = languages_with_version_total[:max_items]
@@ -289,7 +289,7 @@ def get_is_moderated(video_id):
 
     if value is None:
         from videos.models import Video
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         value = video.is_moderated
         cache.set(cache_key, value, TIMEOUT)
 
@@ -301,7 +301,7 @@ def get_download_filename(video_id):
 
     if value is None:
         from videos.models import Video
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         value = video.get_download_filename()
         cache.set(cache_key, value, TIMEOUT)
 
@@ -315,7 +315,7 @@ def get_visibility_policies(video_id):
         from videos.models import Video
 
         try:
-            video = Video.objects.get(video_id=video_id)
+            video = Video.available_objects.get(video_id=video_id)
         except Video.DoesNotExist:
             return {}
 
@@ -351,7 +351,7 @@ def writelocked_langs(video_id):
 
     if value is None:
         treshold = datetime.datetime.now() - datetime.timedelta(seconds=WRITELOCK_EXPIRATION)
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         langs = list(video.subtitlelanguage_set.filter(writelock_time__gte=treshold))
         value = _writelocked_store_langs(video_id, [x.language for x in langs])
 

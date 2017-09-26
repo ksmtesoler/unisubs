@@ -485,7 +485,7 @@ class SubtitleLanguageViewSet(mixins.CreateModelMixin,
     @property
     def video(self):
         if not hasattr(self, '_video'):
-            qs = Video.objects.select_related("teamvideo")
+            qs = Video.available_objects.select_related("teamvideo")
             self._video = get_object_or_404(qs,
                                             video_id=self.kwargs['video_id'])
         return self._video
@@ -770,7 +770,7 @@ class SubtitlesView(generics.CreateAPIView):
     def get_video(self):
         if not hasattr(self, '_video'):
             try:
-                self._video = Video.objects.get(
+                self._video = Video.available_objects.get(
                     video_id=self.kwargs['video_id'])
             except Video.DoesNotExist:
                 raise Http404
@@ -876,11 +876,11 @@ class SubtitlesView(generics.CreateAPIView):
 
 class LanguageFollowerView(views.APIView):
     def get(self, request, video_id, language_code, *args, **kwargs):
-        subtitle_language = Video.objects.get(video_id=video_id).subtitle_language(language_code)
+        subtitle_language = Video.available_objects.get(video_id=video_id).subtitle_language(language_code)
         return Response({'follow': subtitle_language.user_is_follower(request.user)}, status=status.HTTP_200_OK)
 
     def post(self, request, video_id, language_code, *args, **kwargs):
-        subtitle_language = Video.objects.get(video_id=video_id).subtitle_language(language_code)
+        subtitle_language = Video.available_objects.get(video_id=video_id).subtitle_language(language_code)
         follow = True if request.data.get('follow', "off") == "on" else False
         if follow == subtitle_language.user_is_follower(request.user):
             return Response("Not modified", status=status.HTTP_304_NOT_MODIFIED)

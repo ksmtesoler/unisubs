@@ -34,7 +34,7 @@ def sorted_language_choices():
     return _sorted_language_choices
 
 def _calc_sorted_language_choices():
-    qs = (Video.objects.order_by()
+    qs = (Video.available_objects.order_by()
           .values_list('primary_audio_language_code')
           .annotate(count=Count('primary_audio_language_code')))
     language_counts = dict(qs)
@@ -68,7 +68,7 @@ class SearchForm(forms.Form):
         video_lang = self.data.get('video_lang')
         langs = self.data.get('langs')
 
-        qs = Video.objects.public()
+        qs = Video.available_objects.public()
         if q:
             qs = qs.search(q)
         if video_lang:

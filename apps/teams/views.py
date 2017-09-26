@@ -468,7 +468,7 @@ def _get_videos_for_detail_page(team, user, query, project, language_code,
     if not team.is_member(user) and not team.is_visible:
         return Video.objects.none()
 
-    qs = Video.objects.filter(teamvideo__team=team)
+    qs = Video.available_objects.filter(teamvideo__team=team)
     # add a couple of completed values that we use in the template code
     qs = qs.add_num_completed_languages()
     num_tasks_sql = ("""
@@ -917,7 +917,7 @@ def remove_video(request, team_video_pk):
     video = team_video.video
 
     if wants_delete:
-        video.delete(request.user)
+        video.mark_deleted(request.user)
         msg = _(u'Video has been deleted from Amara.')
     else:
         team_video.remove(request.user)
@@ -1854,7 +1854,7 @@ def assign_task_ajax(request, slug):
 @login_required
 def upload_draft(request, slug, video_id):
     if request.POST:
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         form = TaskUploadForm(request.POST, request.FILES,
                               user=request.user, video=video,
                               initial={'primary_audio_language_code':video.primary_audio_language_code}

@@ -389,7 +389,7 @@ def _add_subtitles(video, sl, subtitles, title, duration, description, author,
     # Use select_for_update() to lock the row for our video.  We know
     # that we're going to do some work, then potentially update the video,
     # locking at the start prevents deadlocks.
-    Video.objects.select_for_update(id=video.id)
+    Video.available_objects.select_for_update(id=video.id)
 
     data = {'title': title, 'duration': duration, 'description': description, 'author': author,
             'visibility': visibility, 'visibility_override': visibility_override,

@@ -41,7 +41,7 @@ class BulkAddVideosTest(TestCase):
 
     def check_video(self, video_url, primary_audio_language_code='', title='',
                     description='', project=None, duration=None):
-        video = Video.objects.get(videourl__url=video_url)
+        video = Video.available_objects.get(videourl__url=video_url)
 
         assert_equal(video.primary_audio_language_code,
                      primary_audio_language_code)

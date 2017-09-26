@@ -188,8 +188,8 @@ class LanguageList(object):
 @cache_page(minutes=60)
 def watch_page(request):
     return render(request, 'videos/watch-home.html', {
-        'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
-        'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
+        'featured_videos': Video.available_objects.featured()[:VIDEO_IN_ROW],
+        'latest_videos': Video.available_objects.latest()[:VIDEO_IN_ROW*3],
     })
 
 @cache_page(minutes=60)
@@ -208,18 +208,18 @@ def video_listing_page(request, subheader, video_qs, query=None,
 
 def featured_videos(request):
     return video_listing_page(request, _('Featured Videos'),
-                              Video.objects.featured(), force_pages=1)
+                              Video.available_objects.featured(), force_pages=1)
 
 def latest_videos(request):
     return video_listing_page(request, _('Latest Videos'),
-                              Video.objects.latest(), force_pages=100)
+                              Video.available_objects.latest(), force_pages=100)
 
 def search(request):
     query = request.GET.get('q')
     if query:
         subheader = fmt(ugettext('Searching for "%(query)s"'),
                         query=query)
-        queryset = Video.objects.public().search(query)
+        queryset = Video.available_objects.public().search(query)
     else:
         subheader = ugettext('Search for videos')
         queryset = Video.objects.none()
@@ -489,7 +489,7 @@ def upload_subtitles(request):
         return redirect_to_login(path)
 
     output = {'success': False}
-    video = Video.objects.get(id=request.POST['video'])
+    video = Video.available_objects.get(id=request.POST['video'])
     form = SubtitlesUploadForm(request.user, video, True, request.POST,
                                request.FILES,
                                initial={'primary_audio_language_code':video.primary_audio_language_code},

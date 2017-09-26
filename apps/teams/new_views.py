@@ -720,7 +720,7 @@ def manage_videos_form(request, team, form_name, videos):
         form = FormClass(team, request.user, videos, selection, all_selected)
 
     response_renderer = AJAXResponseRenderer(request)
-    first_video = Video.objects.get(id=selection[0])
+    first_video = Video.available_objects.get(id=selection[0])
     template_name = 'future/teams/management/video-forms/{}.html'.format(
         form_name)
     response_renderer.show_modal(template_name, {
@@ -1092,7 +1092,7 @@ def ajax_member_search(request, team):
 @team_view
 def ajax_video_search(request, team):
     query = request.GET.get('q', '')
-    qs = Video.objects.search(query).filter(teamvideo__team=team)[:8]
+    qs = Video.available_objects.search(query).filter(teamvideo__team=team)[:8]
     title_set = set(v.title_display() for v in qs)
     has_duplicate_title = len(title_set) != len(qs)
     def get_title(video):

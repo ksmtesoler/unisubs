@@ -153,7 +153,7 @@ def send_change_title_email(video_id, user_id, old_title, new_title):
     domain = Site.objects.get_current().domain
 
     try:
-        video = Video.objects.get(id=video_id)
+        video = Video.available_objects.get(id=video_id)
         user = user_id and User.objects.get(id=user_id)
     except ObjectDoesNotExist:
         return

@@ -68,7 +68,7 @@ class BaseNotification(object):
         Subclasses mapping to other system's id e.g ted should be able
         to gather the video from this public id
         """
-        return Video.objects.get(video_id=api_pk).video_id
+        return Video.available_objects.get(video_id=api_pk).video_id
 
     def from_internal_video_id(self, video_id, video=None):
         """
@@ -91,7 +91,7 @@ class BaseNotification(object):
         self.partner = partner
         video_id  = kwargs.pop('video_id', None)
         if video_id:
-            self.video = Video.objects.get(video_id=video_id)
+            self.video = Video.available_objects.get(video_id=video_id)
         else:
             self.video = None
         self.language_pk = kwargs.pop('language_pk', None)

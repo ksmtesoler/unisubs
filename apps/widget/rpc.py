@@ -241,7 +241,7 @@ class Rpc(BaseRpc):
     def fetch_start_dialog_contents(self, request, video_id):
         my_languages = get_user_languages_from_request(request)
         my_languages.extend([l[:l.find('-')] for l in my_languages if l.find('-') > -1])
-        video = models.Video.objects.get(video_id=video_id)
+        video = models.Video.available_objects.get(video_id=video_id)
         team_video = video.get_team_video()
         languages = (new_models.SubtitleLanguage.objects.having_public_versions()
                                                         .filter(video=video))
@@ -263,7 +263,6 @@ class Rpc(BaseRpc):
             'is_moderated': video.is_moderated,
             'blocked_languages': blocked_langs
         }
-
 
     # Fetch Video ID and Settings
     def fetch_video_id_and_settings(self, request, video_id):
@@ -304,7 +303,7 @@ class Rpc(BaseRpc):
         prevented from editing them, or None if the user can safely edit.
 
         """
-        video = models.Video.objects.get(video_id=video_id)
+        video = models.Video.available_objects.get(video_id=video_id)
         check_result = can_add_version(user, video, language_code)
         if check_result:
             return None
@@ -498,7 +497,7 @@ class Rpc(BaseRpc):
         The response will contain can_subtitle and can_translate attributes.
 
         """
-        video = models.Video.objects.get(video_id=video_id)
+        video = models.Video.available_objects.get(video_id=video_id)
         team_video = video.get_team_video()
 
         if not team_video:
@@ -963,8 +962,8 @@ class Rpc(BaseRpc):
 
     def get_widget_info(self, request):
         return {
-            'all_videos': models.Video.objects.count(),
-            'videos_with_captions': models.Video.objects.exclude(subtitlelanguage=None).count(),
+            'all_videos': models.Video.available_objects.count(),
+            'videos_with_captions': models.Video.available_objects.exclude(subtitlelanguage=None).count(),
             'translations_count': models.SubtitleLanguage.objects.filter(is_original=False).count()
         }
 
@@ -1087,7 +1086,7 @@ class Rpc(BaseRpc):
                                   subtitle_language_pk=None, base_language_code=None):
         """Return the subtitle language to edit or a lock response."""
 
-        video = models.Video.objects.get(video_id=video_id)
+        video = models.Video.available_objects.get(video_id=video_id)
 
         editable = False
         created  = False
@@ -1127,7 +1126,7 @@ class Rpc(BaseRpc):
                            "locked_by": unicode(language.writelock_owner) }
 
     def _save_original_language(self, video_id, language_code):
-        video = models.Video.objects.get(video_id=video_id)
+        video = models.Video.available_objects.get(video_id=video_id)
 
         if not video.primary_audio_language_code:
             video.primary_audio_language_code = language_code

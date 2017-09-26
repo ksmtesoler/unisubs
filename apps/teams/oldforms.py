@@ -1097,7 +1097,7 @@ class VideoFiltersForm(forms.Form):
         q = self.cleaned_data['q']
         sort = self.cleaned_data['sort']
 
-        qs = Video.objects.filter(teamvideo__team=self.team)
+        qs = Video.available_objects.filter(teamvideo__team=self.team)
 
         if q:
             qs = qs.search(q)

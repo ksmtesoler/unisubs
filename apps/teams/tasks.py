@@ -44,7 +44,7 @@ def update_video_moderation(team):
     from videos.models import Video
 
     moderated_by = team if team.moderates_videos() else None
-    Video.objects.filter(teamvideo__team=team).update(moderated_by=moderated_by)
+    Video.available_objects.filter(teamvideo__team=team).update(moderated_by=moderated_by)
 
 @task()
 def invalidate_video_visibility_caches(team):

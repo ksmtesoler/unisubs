@@ -146,6 +146,10 @@ class VideoManager(models.Manager):
     def search(self, text):
         return self.all().search(text)
 
+class NonDeletedVideoManager(VideoManager):
+    def get_query_set(self):
+        return VideoQueryset(self.model, using=self._db).filter(is_deleted=False)
+
 class VideoQueryset(query.QuerySet):
     def select_has_public_version(self):
         """Add a subquery to check if there is a public version for this video
@@ -357,6 +361,7 @@ class Video(models.Model):
     writelock_owner = models.ForeignKey(User, null=True, editable=False,
                                         related_name="writelock_owners")
     is_subtitled = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
     was_subtitled = models.BooleanField(default=False, db_index=True)
     thumbnail = models.CharField(max_length=500, blank=True)
     small_thumbnail = models.CharField(max_length=500, blank=True)
@@ -405,6 +410,7 @@ class Video(models.Model):
     cache = VideoCacheManager()
 
     objects = VideoManager()
+    available_objects = NonDeletedVideoManager()
 
     class UrlAlreadyAdded(Exception):
         """
@@ -443,6 +449,11 @@ class Video(models.Model):
         signals.video_deleted.send(sender=self, user=user)
         super(Video, self).delete()
 
+    def mark_deleted(self, user=None):
+        signals.video_marked_deleted.send(sender=self, user=user)
+        self.is_deleted = True
+        self.save()
+
     def update_search_index(self):
         """Update this video's search index text."""
 
@@ -455,13 +466,17 @@ class Video(models.Model):
         :param use_language_title: should we fetch the title from our primary
         audio language?
         """
+        if self.is_deleted:
+            deleted = u'(deleted) '
+        else:
+            deleted = ''
         if self.title:
-            return self.title
+            return deleted + self.title
         video_url = self.get_primary_videourl_obj()
         if video_url:
-            return make_title_from_url(video_url.url)
+            return deleted + make_title_from_url(video_url.url)
         else:
-            return 'No title'
+            return deleted + 'No title'
 
     def get_subtitle(self):
         return behaviors.get_video_subtitle(self, self.get_metadata())

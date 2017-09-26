@@ -560,7 +560,7 @@ class VideoViewSet(mixins.CreateModelMixin,
                    mixins.ListModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = VideoSerializer
-    queryset = Video.objects.all()
+    queryset = Video.available_objects.all()
     paginate_by = 20
 
     lookup_field = 'video_id'
@@ -578,7 +578,7 @@ class VideoViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         query_params = self.request.query_params
         if 'team' not in query_params and 'video_url' not in query_params:
-            return Video.objects.public().order_by('-id')[:20]
+            return Video.available_objects.public().order_by('-id')[:20]
         if 'team' not in query_params:
             qs = self.get_videos_for_user()
         else:
@@ -597,7 +597,7 @@ class VideoViewSet(mixins.CreateModelMixin,
             members = self.request.user.team_members.all()
             visibility = visibility | Q(id__in=members.values_list('team_id'))
         user_visible_teams = Team.objects.filter(visibility)
-        return Video.objects.filter(
+        return Video.available_objects.filter(
             Q(teamvideo__isnull=True) |
             Q(teamvideo__team__in=user_visible_teams))
 
@@ -605,9 +605,9 @@ class VideoViewSet(mixins.CreateModelMixin,
         try:
             team = Team.objects.get(slug=query_params['team'])
         except Team.DoesNotExist:
-            return Video.objects.none()
+            return Video.available_objects.none()
         if not team.user_can_view_videos(self.request.user):
-            return Video.objects.none()
+            return Video.available_objects.none()
 
         if 'project' in query_params:
             if query_params['project'] != 'null':
@@ -618,13 +618,13 @@ class VideoViewSet(mixins.CreateModelMixin,
                 project = team.project_set.get(slug=project_slug)
             except Project.DoesNotExist:
                 return Video.objects.none()
-            return Video.objects.filter(teamvideo__project=project)
+            return Video.available_objects.filter(teamvideo__project=project)
         else:
-            return Video.objects.filter(teamvideo__team=team)
+            return Video.available_objects.filter(teamvideo__team=team)
 
     def get_object(self):
         try:
-            video = (Video.objects
+            video = (Video.available_objects
                      .select_related('teamvideo')
                      .get(video_id=self.kwargs['video_id']))
         except Video.DoesNotExist:
@@ -645,7 +645,7 @@ class VideoViewSet(mixins.CreateModelMixin,
         if team_video is not None and \
            team_perms.can_delete_video(team_video,
                                         self.request.user):
-            video.delete(user=self.request.user)
+            video.mark_deleted(user=self.request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
         raise PermissionDenied()
 
@@ -727,14 +727,14 @@ class VideoURLUpdateSerializer(VideoURLSerializer):
 
 class VideoDurationView(views.APIView):
     def get(self, request, video_id, *args, **kwargs):
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         workflow = video.get_workflow()
         if not workflow.user_can_view_video(request.user):
             return Response("Not authorized", status=status.HTTP_401_UNAUTHORIZED)
         return Response({'duration': video.duration}, status=status.HTTP_200_OK)
 
     def put(self, request, video_id, *args, **kwargs):
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         workflow = video.get_workflow()
         if not workflow.user_can_view_video(request.user):
             return Response("Not authorized", status=status.HTTP_401_UNAUTHORIZED)
@@ -751,11 +751,11 @@ class VideoDurationView(views.APIView):
 
 class VideoFollowerView(views.APIView):
     def get(self, request, video_id, *args, **kwargs):
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         return Response({'follow': video.user_is_follower(request.user)}, status=status.HTTP_200_OK)
 
     def post(self, request, video_id, *args, **kwargs):
-        video = Video.objects.get(video_id=video_id)
+        video = Video.available_objects.get(video_id=video_id)
         follow = True if request.data.get('follow', "off") == "on" else False
         if follow == video.user_is_follower(request.user):
             return Response("Not modified", status=status.HTTP_304_NOT_MODIFIED)
@@ -779,7 +779,7 @@ class VideoURLViewSet(viewsets.ModelViewSet):
     @property
     def video(self):
         if not hasattr(self, '_video'):
-            self._video = Video.objects.get(video_id=self.kwargs['video_id'])
+            self._video = Video.available_objects.get(video_id=self.kwargs['video_id'])
         return self._video
 
     def get_queryset(self):

@@ -136,7 +136,7 @@ class VideoURLField(forms.URLField):
 
 class CreateVideoUrlForm(forms.Form):
     url = VideoURLField()
-    video = forms.ModelChoiceField(queryset=Video.objects.all(),
+    video = forms.ModelChoiceField(queryset=Video.available_objects.all(),
                                    widget=forms.HiddenInput)
 
     def __init__(self, user, *args, **kwargs):
@@ -348,7 +348,7 @@ class CreateSubtitlesFormBase(forms.Form):
     def set_primary_audio_language(self):
         # Sometimes we are passed in a cached video, which can't be saved.
         # Make sure we have one from the DB.
-        video = Video.objects.get(pk=self.get_video().pk)
+        video = Video.available_objects.get(pk=self.get_video().pk)
         lang = self.cleaned_data['primary_audio_language_code']
         video.primary_audio_language_code = lang
         video.save()
@@ -430,7 +430,7 @@ class MultiVideoCreateSubtitlesForm(CreateSubtitlesFormBase):
 
     See the team dashboard page for an example.
     """
-    video = forms.ModelChoiceField(queryset=Video.objects.none(),
+    video = forms.ModelChoiceField(queryset=Video.available_objects.none(),
                                    widget=forms.HiddenInput)
 
     def __init__(self, request, video_queryset, data=None):

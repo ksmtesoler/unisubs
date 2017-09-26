@@ -179,8 +179,8 @@ def index(request):
 
 def watch_page(request):
     context = {
-        'featured_videos': Video.objects.featured()[:VIDEO_IN_ROW],
-        'latest_videos': Video.objects.latest()[:VIDEO_IN_ROW*3],
+        'featured_videos': Video.available_objects.featured()[:VIDEO_IN_ROW],
+        'latest_videos': Video.available_objects.latest()[:VIDEO_IN_ROW*3],
     }
     return render_to_response('videos/watch.html', context,
                               context_instance=RequestContext(request))
@@ -388,7 +388,7 @@ def upload_subtitles(request):
         return redirect_to_login(path)
 
     output = {'success': False}
-    video = Video.objects.get(id=request.POST['video'])
+    video = Video.available_objects.get(id=request.POST['video'])
     form = SubtitlesUploadForm(request.user, video, True, request.POST,
                                request.FILES,
                                initial={'primary_audio_language_code':video.primary_audio_language_code},

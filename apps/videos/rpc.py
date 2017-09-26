@@ -48,7 +48,7 @@ class VideosApiClass(object):
             raise RpcExceptionEvent(_(u'You have not permission'))
 
         try:
-            c = Video.objects.filter(pk=video_id).update(featured=None)
+            c = Video.available_objects.filter(pk=video_id).update(featured=None)
         except (ValueError, TypeError):
             raise RpcExceptionEvent(_(u'Incorrect video ID'))
 
@@ -62,7 +62,7 @@ class VideosApiClass(object):
             raise RpcExceptionEvent(_(u'You have not permission'))
 
         try:
-            c = Video.objects.filter(pk=video_id).update(featured=datetime.datetime.today())
+            c = Video.available_objects.filter(pk=video_id).update(featured=datetime.datetime.today())
         except (ValueError, TypeError, Video.DoesNotExist):
             raise RpcExceptionEvent(_(u'Incorrect video ID'))
 
@@ -83,7 +83,7 @@ class VideosApiClass(object):
         LANGS_COUNT = 7
 
         try:
-            video = Video.objects.get(pk=video_id)
+            video = Video.available_objects.get(pk=video_id)
         except Video.DoesNotExist:
             video = None
 
@@ -145,7 +145,7 @@ class VideosApiClass(object):
             return Error(_(u'Title can\'t be empty'))
 
         try:
-            video = Video.objects.get(pk=video_pk)
+            video = Video.available_objects.get(pk=video_pk)
             if title and not video.title or video.is_html5() or user.is_superuser:
                 if title != video.title:
                     old_title = video.title_display()
@@ -165,7 +165,7 @@ class VideosApiClass(object):
             return Error(self.authentication_error_msg)
 
         try:
-            video = Video.objects.get(pk=video_id)
+            video = Video.available_objects.get(pk=video_id)
         except Video.DoesNotExist:
             return Error(_(u'Video does not exist.'))
 
@@ -181,7 +181,7 @@ class VideosApiClass(object):
             return Error(self.authentication_error_msg)
 
         try:
-            video = Video.objects.get(pk=video_id)
+            video = Video.available_objects.get(pk=video_id)
         except Video.DoesNotExist:
             return Error(_(u'Video does not exist.'))
 

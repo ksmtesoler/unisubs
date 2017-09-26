@@ -352,7 +352,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         elif reverse and action == 'post_remove':
             #instance is User
             for sl_pk in pk_set:
-                if not Video.objects.filter(followers=instance, subtitlelanguage__pk=sl_pk).exists():
+                if not Video.available_objects.filter(followers=instance, subtitlelanguage__pk=sl_pk).exists():
                     sl = SubtitleLanguage.objects.get(pk=sl_pk)
                     instance.videos.remove(sl.video)
         elif not reverse and action == 'post_add':
@@ -362,7 +362,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         elif not reverse and action == 'post_remove':
             #instance is SubtitleLanguage
             for user_pk in pk_set:
-                if not Video.objects.filter(followers__pk=user_pk, subtitlelanguage=instance).exists():
+                if not Video.available_objects.filter(followers__pk=user_pk, subtitlelanguage=instance).exists():
                     instance.video.customuser_set.remove(user_pk)
         elif reverse and action == 'post_clear':
             #instance is User

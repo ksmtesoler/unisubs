@@ -116,10 +116,10 @@ class VideoSitemapValuesQuery(object):
     and has brought down our site.
     """
     def __init__(self, *values):
-        self._qs = Video.objects.values(*values)
+        self._qs = Video.available_objects.values(*values)
 
     def count(self):
-        return Video.objects.count()
+        return Video.available_objects.count()
 
     def __getitem__(self, index_or_slice):
         return self._qs.__getitem__(index_or_slice)

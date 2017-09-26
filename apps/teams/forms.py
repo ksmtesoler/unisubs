@@ -148,7 +148,7 @@ class TeamVideoField(AmaraChoiceField):
         if isinstance(value, Video):
             return value
         try:
-            return Video.objects.get(video_id=value)
+            return Video.available_objects.get(video_id=value)
         except Video.DoesNotExist:
             raise forms.ValidationError(self.error_messages['invalid'])
 
@@ -166,7 +166,7 @@ class TeamVideoField(AmaraChoiceField):
         elif isinstance(value, basestring):
             try:
                 value = self.choice_for_video(
-                    Video.objects.get(video_id=value,
+                    Video.available_objects.get(video_id=value,
                                       teamvideo__team=self.team))
             except Video.DoesNotExist:
                 return None
@@ -1289,7 +1289,7 @@ class VideoFiltersForm(FiltersForm):
         q = data.get('q')
         sort = data.get('sort')
 
-        qs = Video.objects.filter(teamvideo__team=self.team)
+        qs = Video.available_objects.filter(teamvideo__team=self.team)
 
         if q:
             qs = qs.search(q)
@@ -1650,7 +1650,7 @@ class VideoManagementForm(ManagementForm):
     def restore_from_pickle_state(cls, state):
         team = Team.objects.get(id=state[0])
         user = User.objects.get(id=state[1])
-        queryset = Video.objects.all()
+        queryset = Video.available_objects.all()
         queryset.query = state[2]
         return cls(team, user, queryset, *state[3:])
 
@@ -1741,7 +1741,7 @@ class DeleteVideosForm(VideoManagementForm):
             team_video = video.teamvideo
             team_video.remove(self.user)
             if delete:
-                video.delete(self.user)
+                video.mark_deleted(self.user)
 
     def message(self):
         if self.cleaned_data.get('delete'):
