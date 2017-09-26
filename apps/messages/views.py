@@ -173,6 +173,7 @@ def new(request):
                         content=form.cleaned_data['content'],
                         subject=form.cleaned_data['subject'])
                 m.save()
+                request.user.sent_message()
                 send_new_message_notification.delay(m.pk)
             elif form.cleaned_data['team']:
                 # TODO: Move this into a task for performance?

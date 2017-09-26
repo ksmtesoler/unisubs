@@ -1,5 +1,6 @@
 {% extends "future/base.html" %}
 {% load cache %}
+{% load webdesign %}
 {% block body_attrs %}id="index"{% endblock %}
 
 {% block user-menu %}
@@ -12,5 +13,6 @@
   
   You should only be seeing this page if If you're running in a dev environment.
   </p>
+  {% lorem 20 p %}
 </div>
 {% endblock %}

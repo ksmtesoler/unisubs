@@ -1976,12 +1976,13 @@ class SubtitleVersion(models.Model):
                  self.pk])
 
     def get_absolute_download_url(self, format="vtt", filename="subtitles"):
-        return ''.join(['http://', Site.objects.get_current().domain,
-                        reverse("subtitles:download", kwargs={"video_id": self.video.video_id,
-                                                              "language_code": self.language_code,
-                                                              "version_number": self.version_number,
-                                                              "filename": filename,
-                                                              "format": format})])
+        return "{}://{}{}".format(settings.DEFAULT_PROTOCOL,
+                                  Site.objects.get_current().domain,
+                                  reverse("subtitles:download", kwargs={"video_id": self.video.video_id,
+                                                                        "language_code": self.language_code,
+                                                                        "version_number": self.version_number,
+                                                                        "filename": filename,
+                                                                        "format": format}))
 
 class SubtitleVersionMetadata(models.Model):
     """This model is used to add extra metadata to SubtitleVersions.

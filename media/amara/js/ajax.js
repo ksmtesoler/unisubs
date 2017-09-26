@@ -93,9 +93,9 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
                     return false;
                 }
                 submitting = true;
+                lastSerialize = form.formSerialize();
                 if(form.hasClass('updateLocation')) {
-                    history.pushState(null, "", window.location.protocol + "//" + window.location.host +
-                            window.location.pathname + '?' + form.formSerialize());
+                    updateLocation(false);
                 }
                 if(form.hasClass('copyQuery')) {
                     _.each(querystring.parse(), function(value, name) {
@@ -147,13 +147,30 @@ define(['jquery', 'querystring', 'dialogs'], function($, querystring, dialogs) {
         }
 
         var lastSerialize = form.formSerialize();
+        function formHasChanged() {
+            return form.formSerialize() != lastSerialize;
+        }
         function submitIfChanged() {
-            var newSerialize = form.formSerialize();
-            if(newSerialize != lastSerialize) {
-                lastSerialize = newSerialize;
+            if(formHasChanged()) {
+                updateLocation(true);
                 form.submit();
             }
         }
+        function updateLocation(resetPage) {
+            if(!formHasChanged()) {
+                return;
+            }
+            var url = window.location.protocol + "//" + window.location.host +
+                window.location.pathname + '?' + form.formSerialize()
+            var params = querystring.parse();
+            if(!resetPage && params.page) {
+                url += '&page=' + params.page;
+            }
+            if (url != history.state) {
+                history.pushState(url, "", url);
+            }
+        }
+
     }
 
     function ajaxLink(link) {

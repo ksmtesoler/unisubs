@@ -41,7 +41,7 @@ from videos.tests.videotestutils import (
 from videos import views
 from videos.models import (
     Video, VideoUrl, Action, VIDEO_TYPE_YOUTUBE, SubtitleVersion,
-    SubtitleLanguage, Subtitle, UserTestResult
+    SubtitleLanguage, Subtitle
 )
 from videos.tests.data import (
     get_video, make_subtitle_language, make_subtitle_version
@@ -99,17 +99,6 @@ class TestViews(WebUseTest):
         self._login(member)
         response = self.client.post(url, data)
         self.assertEqual(video.videourl_set.count(), 2)
-
-    def test_index(self):
-        self._simple_test('videos.views.index')
-
-    def test_feedback(self):
-        data = {
-            'email': 'test@test.com',
-            'message': 'Test',
-        }
-        response = self.client.post(reverse('videos:feedback'), data)
-        self.assertEqual(response.status_code, 200)
 
     def test_create(self):
         self._login()

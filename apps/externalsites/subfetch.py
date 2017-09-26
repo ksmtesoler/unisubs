@@ -78,7 +78,7 @@ def fetch_subs_youtube(video_url, user, team):
         access_token = google.get_new_access_token(account.oauth_refresh_token)
         try:
             captions_list = google.captions_list(access_token, video_id)
-        except APIError:
+        except google.APIError:
             continue
         versions = []
         for caption_id, language_code, caption_name in captions_list:

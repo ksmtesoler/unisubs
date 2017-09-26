@@ -271,6 +271,16 @@ class ManagementFormList(object):
         for form in forms:
             self.append(form)
 
+    def exclude(self, form):
+        """Returns a copy of the current ManagementFormList without the given
+        form."""
+        form_list = ManagementFormList(self.forms.values())
+        try:
+            del form_list.forms[form]
+        except KeyError:
+            pass
+        return form_list
+
     def all(self, *permissions_check_args):
         return [
             f for f in self.forms.values()

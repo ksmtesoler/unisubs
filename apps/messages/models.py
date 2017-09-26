@@ -47,13 +47,13 @@ class MessageManager(models.Manager):
     use_for_related_fields = True
 
     def for_user(self, user, thread_tip_only=False):
-        qs = self.get_query_set().filter(user=user).exclude(deleted_for_user=True)
+        qs = self.get_query_set().filter(user=user, deleted_for_user=False)
         if thread_tip_only:
             qs = qs.filter(has_reply_for_user=False)
         return qs
 
     def for_author(self, user, thread_tip_only=False):
-        qs = self.get_query_set().filter(author=user).exclude(deleted_for_author=True)
+        qs = self.get_query_set().filter(author=user, deleted_for_author=False)
         if thread_tip_only:
             qs = qs.filter(has_reply_for_author=False)
         return qs
@@ -123,7 +123,16 @@ class Message(models.Model):
                                     choices=MESSAGE_TYPE_CHOICES,
                                     validators=[validate_message_type])
     class Meta:
-        ordering = ['-created']
+        ordering = ['-id']
+        # If we had a newer version of django, we would have an index_together
+        # section, but for now we need to handle this with south/setup_indexes
+        #
+        # index_together = [
+        #     ('user_id', 'deleted_for_user', 'has_reply_for_user'),
+        #     ('user_id', 'deleted_for_author', 'has_reply_for_author'),
+        #     ('user_id', 'deleted_for_user', 'read', 'id'),
+        # ]
+
 
     def __unicode__(self):
         if self.subject and not u' ' in self.subject:

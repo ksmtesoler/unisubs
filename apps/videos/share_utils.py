@@ -6,19 +6,18 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from utils.text import fmt
-import widget
 
 def domain():
     return Site.objects.get_current().domain
     
 def make_facebook_url(page_url, msg):
     title = u'%s: %s' % (msg, page_url)
-    url = "http://www.facebook.com/sharer.php?%s"
+    url = "https://www.facebook.com/sharer.php?%s"
     url_param = urlencode({'u': page_url, 't': title})
     return url % url_param
 
 def make_twitter_url(page_url, message):
-    url = "http://twitter.com/share/?%s"
+    url = "https://twitter.com/share/?%s"
     url_param = urlencode({'text': message, 'url': page_url})
     return url % url_param
 
@@ -31,7 +30,7 @@ def share_panel_context(facebook_url, twitter_url, embed_params, permalink):
 
 def share_panel_context_for_video(video):
     page_url = reverse('videos:video', kwargs={'video_id':video.video_id})
-    abs_page_url = "http://{0}{1}".format(domain(), page_url)
+    abs_page_url = "{}://{}{}".format(settings.DEFAULT_PROTOCOL, domain(), page_url)
     
     if video.latest_version() is not None:
         msg = _(u"Just found a version of this video with subtitles")
@@ -52,7 +51,7 @@ def share_panel_context_for_video(video):
 
 def add_share_panel_context_for_history(context, video, language=None):
     page_url = language.get_absolute_url() if language else video.get_absolute_url()
-    abs_page_url = "http://{0}{1}".format(domain(), page_url)
+    abs_page_url = "{}://{}{}".format(settings.DEFAULT_PROTOCOL, domain(), page_url)
     
     msg = _(u"%(language)s subtitles for %(video)s:") % {
         'language': language,

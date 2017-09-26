@@ -62,6 +62,9 @@ NOSE_ARGS = ['--logging-clear-handlers',
              '--xunit-file=nosetests.xml',
             ]
 
+MESSAGES_SENT_WINDOW_MINUTES = 1
+MESSAGES_SENT_LIMIT = 50
+
 try:
     from dev_settings_test_local import *
 except ImportError:

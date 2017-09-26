@@ -12,9 +12,6 @@
     {{ block.super }}
     {% media_bundle "teams.js" %}
     <script src="{% url "teams:rpc_api" %}" type="text/javascript"></script>
-    <script type="text/javascript">
-        window.WIDGET_SETTINGS = {{ widget_settings|to_json|safe }};
-    </script>
 {% endblock %}
 
 {% block main_content %}
@@ -23,13 +20,13 @@
     <div class="view grid_8 push_2 alpha">
         <h2>Hey {{ user }}!</h2>
 
-        {% if user.unread_messages.count > 0 %}
+        {% if user.unread_messages_count > 0 %}
             <div class="section messages">
                 <p>
                     {% trans "You have " %}
                     <a href="{% url "messages:inbox" %}" title="{% trans 'Go to your inbox' %}" class="messages">
-                        {{ user.unread_messages.count }}
-                        {% trans "unread message" %}{{ user.unread_messages.count|pluralize }}
+                        {{ user.unread_messages_count }}
+                        {% trans "unread message" %}{{ user.unread_messages_count|pluralize }}
                     </a>
                 </p>
             </div>

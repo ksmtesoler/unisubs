@@ -21,9 +21,24 @@ import logging
 from django.http import Http404, HttpResponse
 from django.shortcuts import render
 
+from caching.decorators import cache_page
 from utils.decorators import staff_member_required
 from utils.one_time_data import get_one_time_data
 logger = logging.getLogger(__name__)
+
+@cache_page(minutes=60)
+def home(request):
+    # At some point we should switch to using home.html, but for now we use
+    # oldhome.html.  The main reason is that if the new infrastructure change
+    # we're making on 9/1/2017 doesn't work, we want to be able to switch back
+    # to our old infrastructure.  This means we'll be using this view as our
+    # actual homepage for amara.org, so it can't be a placeholder.
+
+    # return render(request, 'home.html', {
+    #     'user_menu_esi': 'esi' in request.GET,
+    # })
+    
+    return render(request, 'oldhome.html')
 
 @staff_member_required
 def errortest(request):
@@ -41,12 +56,8 @@ def one_time_url(request, token):
     This is a view to host one-time, time limited URLs, used
     to deliver non-public data to a third party website.
     """
-    logger.error("one_time_url")
-    logger.error(token)
     data = get_one_time_data(token)
     if data is not None:
-        logger.error("Data")
-        logger.error(data)
         response = HttpResponse(data, mimetype="text/plain")
         response['Content-Disposition'] = 'attachment'
         return response
