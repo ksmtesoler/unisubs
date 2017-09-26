@@ -28,3 +28,4 @@ video_url_added = dispatch.Signal(providing_args=['video', 'new_video', 'user', 
 video_url_made_primary = dispatch.Signal(providing_args=['old_url', 'user'])
 video_url_deleted = dispatch.Signal(providing_args=['user'])
 video_deleted = dispatch.Signal(providing_args=['user'])
+video_marked_deleted = dispatch.Signal(providing_args=['user'])

@@ -472,6 +472,32 @@ class VideoDeleted(ActivityType):
     def get_action_name(self):
         return _('deleted')
 
+class VideoMarkedDeleted(ActivityType):
+    slug = 'video-marked-deleted'
+    label = _('Video deleted')
+    related_model = Video
+
+    def get_message(self, record, user):
+        video = record.get_related_obj()
+        if video is not None:
+            title = video.title
+        else:
+            title = _('Unknown video')
+        return self.format_message(record, _('<strong>%(user)s</strong> deleted a video: %(title)s'),
+                                   title=title)
+
+    def get_old_message(self, record, user):
+        video = record.get_related_obj()
+        if video is not None:
+            title = video.title
+        else:
+            title = _('Unknown video')
+        return self.format_message(record, _('deleted a video: %(title)s'),
+                                   title=title)
+
+    def get_action_name(self):
+        return _('deleted')
+
 class VideoURLEdited(ActivityType):
     slug = 'video-url-edited'
     label = _('Video URL edited')
@@ -778,6 +804,15 @@ class ActivityManager(models.Manager):
             return self.create('video-deleted', user=user,
                                created=dates.now(), team_id=team_id,
                                related_obj_id=video_deletion.id)
+
+    def create_for_video_marked_deleted(self, video, user):
+        with transaction.atomic():
+            team_video = video.get_team_video()
+            team_id = team_video.team_id if team_video else None
+            url = video.get_video_url()
+            return self.create('video-marked-deleted', user=user,
+                               created=dates.now(), team_id=team_id,
+                               related_obj_id=video.id)
 
     def create_for_video_url_made_primary(self, video_url, old_url, user):
         with transaction.atomic():

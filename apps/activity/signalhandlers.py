@@ -45,6 +45,10 @@ def on_video_url_added(sender, new_video, **kwargs):
 def on_video_deleted(sender, user, **kwargs):
     ActivityRecord.objects.create_for_video_deleted(sender, user)
 
+@receiver(videos.signals.video_marked_deleted)
+def on_video_marked_deleted(sender, user, **kwargs):
+    ActivityRecord.objects.create_for_video_marked_deleted(sender, user)
+
 @receiver(videos.signals.video_url_made_primary)
 def on_video_url_made_primary(sender, old_url, user, **kwargs):
     ActivityRecord.objects.create_for_video_url_made_primary(sender, old_url,
