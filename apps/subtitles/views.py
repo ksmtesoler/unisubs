@@ -417,32 +417,9 @@ class SubtitleEditor(SubtitleEditorBase):
         return super(SubtitleEditor, self).dispatch(
             request, *args, **kwargs)
 
-def _user_for_download_permissions(request):
-    # check authorization...  This is pretty hacky.  We should implement
-    # pculture/amara-enterprise#89
-    if request.user.is_authenticated():
-        return request.user
-    username = request.META.get('HTTP_X_API_USERNAME', None)
-    api_key = request.META.get('HTTP_X_API_KEY',
-                               request.META.get('HTTP_X_APIKEY', None))
-    if not username or not api_key:
-        return request.user
-    try:
-        import apiv2
-        from tastypie.models import ApiKey
-    except ImportError:
-        return request.user
-    try:
-        api_user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return request.user
-    if not ApiKey.objects.filter(user=api_user, key=api_key).exists():
-        return request.user
-    return api_user
-
 def download(request, video_id, language_code, filename, format,
              version_number=None):
-    user = _user_for_download_permissions(request)
+    user = request.user
     if not user_can_access_subtitles_format(user, format):
         raise HttpResponseForbidden(_(u'You are not allowed to download this subtitle format.'))
     video = get_object_or_404(Video, video_id=video_id)
