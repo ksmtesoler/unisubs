@@ -198,7 +198,6 @@ INSTALLED_APPS = (
     'djcelery',
     'south',
     'rest_framework',
-    'tastypie',
     # third party apps forked on our repo
     'localeurl',
     'openid_consumer',
