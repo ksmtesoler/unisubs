@@ -72,7 +72,7 @@ class UserAPITest(TestCase):
             assert_not_in('api_key', response.data)
         else:
             assert_equal(response.data['email'], user.email)
-            assert_equal(response.data['api_key'], user.api_key.key)
+            assert_equal(response.data['api_key'], user.amara_api_key.key)
 
     def test_get_details(self):
         user = UserFactory(

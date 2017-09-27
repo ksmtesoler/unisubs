@@ -222,7 +222,7 @@ class UserCreateSerializer(UserSerializer):
     username = serializers.CharField(max_length=30)
     password = PasswordField(required=False, write_only=True)
     allow_3rd_party_login = serializers.BooleanField(write_only=True, required=False)
-    api_key = serializers.CharField(source='api_key.key', read_only=True)
+    api_key = serializers.CharField(source='amara_api_key.key', read_only=True)
     create_login_token = serializers.BooleanField(write_only=True,
                                                   required=False)
     find_unique_username = serializers.BooleanField(write_only=True,
