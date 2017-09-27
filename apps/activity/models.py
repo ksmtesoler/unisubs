@@ -653,8 +653,8 @@ activity_choices = [
     VideoAdded, VideoTitleChanged, CommentAdded, VersionAdded, VideoURLAdded,
     TranslationAdded, SubtitleRequestCreated, VersionApproved, MemberJoined,
     VersionRejected, MemberLeft, VersionReviewed, VersionAccepted,
-    VersionDeclined, VideoDeleted, VideoURLEdited, VideoURLDeleted,
-    VideoMovedToTeam, VideoMovedFromTeam, TeamSettingsChanged,
+    VersionDeclined, VideoDeleted, VideoMarkedDeleted, VideoURLEdited,
+    VideoURLDeleted, VideoMovedToTeam, VideoMovedFromTeam, TeamSettingsChanged,
 ]
 
 class ActivityQueryset(query.QuerySet):
