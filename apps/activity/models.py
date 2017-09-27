@@ -937,6 +937,8 @@ class ActivityRecord(models.Model):
     def get_language_url(self):
         if self.video and self.language_code:
             url = self.video.get_language_url_with_id(self.language_code)
+            if not url:
+                return ''
             if self.team and self.team and self.team.workflow_type != 'O':
                 url += "?team={}".format(self.team.slug)
             return url
