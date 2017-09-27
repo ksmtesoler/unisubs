@@ -33,27 +33,27 @@ Video notifications always include the following data:
 
 Supported events for videos:
 
-    on_video_added
+    video-added
         Sent when a video is added to your team, or moved to your team from another team.
 
         Additional data: ``old_team`` (if video is moved from another team)
-    on_video_removed
+    video-removed
         Sent when a video is removed from your team, or moved to another team.
 
         Additional data: ``new_team`` (if video is moved to another team)
-    on_video_url_made_primary
+    video-made-primary
         Sent when one of the multiple URLs for a video on your team is set as the primary URL.
 
         Additional data: ``url``
-    on_video_moved_project
+    video-moved-project
         Sent when a video on your team is moved to a different project.
 
         Additional data: ``old_project``
-    on_subtitles_published
+    subtitles-published
         Sent when a new subtitle version for a video on your team is published.
 
         Additional data: ``language_code``, ``amara_version``
-    on_subtitles_deleted
+    subtitle-unpublished
         Sent when subtitles are deleted for a video on your team.
 
         Additional data: ``language_code``
@@ -70,11 +70,11 @@ Team member notifications always include the following data:
 
 Supported events for team members:
 
-    on_user_added
+    member-added
         Sent when a user is added to your team.
-    on_user_removed
+    member-removed
         Sent when a user is removed from your team.
-    on_user_info_updated
+    member-profile-changed
         Sent when the information in a team member's profile is changed.
 
 For each event we can customize the data that is sent with the notification.
