@@ -108,6 +108,10 @@ associated with them
 |                      |                           | the deleted video's     |
 |                      |                           | title                   |
 +----------------------+---------------------------+-------------------------+
+| video-marked-deleted | Video marked as deleted   | ``title`` will contain  |
+|                      | from amara                | the deleted video's     |
+|                      |                           | title                   |
++----------------------+---------------------------+-------------------------+
 | **Team Related Activity**                                                  |
 +----------------------+---------------------------+-------------------------+
 | member-joined        | User joined team          |                         |

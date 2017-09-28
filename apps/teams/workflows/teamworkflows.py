@@ -217,6 +217,7 @@ class TeamWorkflow(object):
             'member-joined',
             'member-left',
             'video-deleted',
+            'video-marked-deleted',
             'video-url-edited',
             'video-url-deleted',
             'video-moved-from-team',

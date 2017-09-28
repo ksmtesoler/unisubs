@@ -809,7 +809,6 @@ class ActivityManager(models.Manager):
         with transaction.atomic():
             team_video = video.get_team_video()
             team_id = team_video.team_id if team_video else None
-            url = video.get_video_url()
             return self.create('video-marked-deleted', user=user,
                                created=dates.now(), team_id=team_id,
                                related_obj_id=video.id)
