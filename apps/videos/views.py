@@ -57,10 +57,11 @@ from comments.models import Comment
 from comments.forms import CommentForm
 from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
-                                   user_can_edit_subtitles)
+                                   user_can_edit_subtitles,
+                                   user_can_change_subtitle_language)
 from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
                              RollbackSubtitlesForm, SubtitlesNotesForm,
-                             ResyncSubtitlesForm)
+                             ResyncSubtitlesForm, ChangeSubtitleLanguageForm)
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
@@ -611,6 +612,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'subtitle_version': version,
         'enable_delete_subtitles': workflow.user_can_delete_subtitles(
                 request.user, subtitle_language.language_code),
+        'enable_change_language': user_can_change_subtitle_language(request.user, video),
         'show_rollback': version and not version.is_tip(public=False),
         'all_subtitle_versions': all_subtitle_versions,
         'enabled_compare': len(all_subtitle_versions) >= 2,
@@ -717,6 +719,7 @@ def downloadable_formats(user):
 
 subtitles_form_map = {
     'delete': DeleteSubtitlesForm,
+    'language': ChangeSubtitleLanguageForm,
     'rollback': RollbackSubtitlesForm,
     'notes': SubtitlesNotesForm,
     'resync': ResyncSubtitlesForm,
@@ -735,7 +738,11 @@ def subtitles_ajax_form(request, video, subtitle_language, version):
     if not form.check_permissions():
         raise PermissionDenied()
 
-    if request.is_ajax():
+    if form.is_bound and form.is_valid() and form_name == 'language':
+        form.submit(request)
+        redirect_url = subtitle_language.get_absolute_url() + '?team=' + request.GET['team']
+        return redirect(redirect_url)
+    elif request.is_ajax():
         if form.is_bound and form.is_valid():
             form.submit(request)
             return handle_subtitles_ajax_form_success(
