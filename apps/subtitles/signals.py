@@ -31,3 +31,4 @@ subtitles_imported = dispatch.Signal(providing_args=['versions'])
 subtitles_completed = dispatch.Signal()
 # Called when we have a new public/complete version
 subtitles_published = dispatch.Signal(providing_args=['version'])
+subtitle_language_changed = dispatch.Signal(providing_args=['old_language'])
