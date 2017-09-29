@@ -512,7 +512,6 @@ class AddVideoTest(TestCase):
         assert_equal(video.title, 'vurl title')
         assert_equal(video.duration, 100)
         assert_equal(video_url.videoid, mock_video_type.video_id)
-        assert_equal(video_url.owner_username, 'test-user')
 
     def test_null_videoid(self):
         # Test VideoType.video_id being None

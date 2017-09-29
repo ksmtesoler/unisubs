@@ -12,13 +12,10 @@ from .autocomplete import AutocompleteTextInput
 from .dates import MonthChoiceField
 from .formrouter import FormRouter
 from .languages import LanguageDropdown, LanguageField, MultipleLanguageField
-from .recapcha import ReCaptchaField
 from .teamautocomplete import TeamAutocompleteField, autocomplete_team_view
 from .userautocomplete import UserAutocompleteField, autocomplete_user_view
 from .widgets import Dropdown
 from utils.translation import get_language_choices
-
-assert ReCaptchaField # Shut up, Pyflakes.
 
 class AjaxForm(object):
     def get_errors(self):

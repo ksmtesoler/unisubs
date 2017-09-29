@@ -338,7 +338,7 @@ class CreateTeamForm(forms.ModelForm):
         self.fields['workflow_type'].choices = TeamWorkflow.get_choices()
         self.fields['is_visible'].widget.attrs['class'] = 'checkbox'
         self.fields['sync_metadata'].widget.attrs['class'] = 'checkbox'
-        self.fields['slug'].label = _(u'Team URL: http://universalsubtitles.org/teams/')
+        self.fields['slug'].label = _(u'Team URL: https://amara.org/teams/')
 
     def clean_slug(self):
         slug = self.cleaned_data['slug']

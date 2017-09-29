@@ -83,7 +83,7 @@ class HtmlFiveVideoType(VideoType):
     def get_direct_url(self, prefer_audio=False):
         return self.url
 
-    def set_values(self, video, user, team):
+    def set_values(self, video, user, team, video_url):
         cmd = """avprobe -v error -show_format -show_streams "{}" 2>&1 """.format(self.url)
         try:
             with Popen(cmd, shell=True, stdout=PIPE, preexec_fn=os.setsid) as process:

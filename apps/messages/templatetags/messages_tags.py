@@ -38,10 +38,8 @@ def messages(context):
     if isinstance(cached, tuple) and cached[0] == hidden_message_id:
         return cached[1]
 
-    qs = user.unread_messages(hidden_message_id)
-    try:
-        last_unread = qs[:1].get().pk
-    except Message.DoesNotExist:
+    last_unread = user.last_unread_message_id(hidden_message_id)
+    if last_unread < hidden_message_id:
         last_unread = ''
     count = user.unread_messages_count(hidden_message_id)
     
