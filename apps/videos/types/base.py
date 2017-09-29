@@ -138,11 +138,8 @@ class VideoType(object):
             'allow_community_edits': True
         }
 
-    def set_values(self, video, user, team):
+    def set_values(self, video, user, team, video_url):
         pass
-
-    def owner_username(self):
-        return None
     
     @classmethod
     def format_url(cls, url):

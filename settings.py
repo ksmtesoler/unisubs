@@ -465,7 +465,6 @@ MEDIA_BUNDLES = {
             "css/background.css",
             "css/activity_stream.css",
             "css/settings.css",
-            "css/feedback.css",
             "css/messages.css",
             "css/global.css",
             "css/top_user_panel.css",

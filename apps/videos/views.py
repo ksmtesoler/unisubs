@@ -48,7 +48,6 @@ from django.utils.http import urlquote_plus
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.views.decorators.http import require_POST
 from gdata.service import RequestError
-from vidscraper.errors import Error as VidscraperError
 
 import widget
 from widget import rpc as widget_rpc
@@ -68,13 +67,14 @@ from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
 from teams.models import Task, Team
 from ui.ajax import AJAXResponseRenderer
+from utils.behaviors import behavior
 from utils.decorators import staff_member_required
 from videos import behaviors
 from videos import permissions
 from videos.decorators import (get_video_revision, get_video_from_code,
                                get_cached_video_from_code)
 from videos.forms import (
-    VideoForm, FeedbackForm, EmailFriendForm, UserTestResultForm,
+    VideoForm,
     CreateVideoUrlForm, NewCreateVideoUrlForm, AddFromFeedForm,
     ChangeVideoOriginalLanguageForm, CreateSubtitlesForm,
 )
@@ -265,6 +265,7 @@ def redirect_to_video(request, video):
 def should_use_old_view(request):
     return 'team' not in request.GET
 
+@behavior
 def video(request, video_id, video_url=None, title=None):
     if should_use_old_view(request):
         return oldviews.video(request, video_id, video_url, title)
@@ -530,17 +531,6 @@ def upload_subtitles(request):
         output['errors'] = {'__all__': [force_unicode(e)]}
 
     return HttpResponse(json.dumps(output))
-
-def feedback(request, hide_captcha=False):
-    output = dict(success=False)
-    form = FeedbackForm(request.POST, initial={'captcha': request.META['REMOTE_ADDR']},
-                        hide_captcha=hide_captcha)
-    if form.is_valid():
-        form.send(request)
-        output['success'] = True
-    else:
-        output['errors'] = form.get_errors()
-    return HttpResponse(json.dumps(output), "text/javascript")
 
 @get_video_from_code
 def legacy_history(request, video, lang):

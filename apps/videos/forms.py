@@ -34,12 +34,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
 from videos.feed_parser import FeedParser
-from videos.models import Video, VideoFeed, UserTestResult, VideoUrl
+from videos.models import Video, VideoFeed, VideoUrl
 from videos.permissions import can_user_edit_video_urls
 from teams.permissions import can_create_and_edit_subtitles
 from videos.tasks import import_videos_from_feed
 from videos.types import video_type_registrar, VideoTypeError
-from utils.forms import AjaxForm, EmailListField, UsernameListField, StripRegexField, FeedURLField, ReCaptchaField
+from utils.forms import AjaxForm, EmailListField, UsernameListField, StripRegexField, FeedURLField
 from utils import http
 from utils.text import fmt
 from utils.translation import get_language_choices, get_user_languages_from_request
@@ -225,18 +225,6 @@ class NewCreateVideoUrlForm(forms.Form):
     def save(self):
         return self.video_url
 
-class UserTestResultForm(forms.ModelForm):
-
-    class Meta:
-        model = UserTestResult
-        exclude = ('browser',)
-
-    def save(self, request):
-        obj = super(UserTestResultForm, self).save(False)
-        obj.browser = request.META.get('HTTP_USER_AGENT', 'empty HTTP_USER_AGENT')
-        obj.save()
-        return obj
-
 class VideoForm(forms.Form):
     video_url = VideoURLField()
 
@@ -309,71 +297,6 @@ class AddFromFeedForm(forms.Form, AjaxForm):
 
     def make_feed(self, url):
         return VideoFeed.objects.create(user=self.user, url=url)
-
-class FeedbackForm(forms.Form):
-    email = forms.EmailField(required=False)
-    message = forms.CharField(widget=forms.Textarea())
-    error = forms.CharField(required=False, widget=forms.HiddenInput)
-    captcha = ReCaptchaField(label=_(u'captcha'))
-
-    def __init__(self, *args, **kwargs):
-        hide_captcha = kwargs.pop('hide_captcha', False)
-        super(FeedbackForm, self).__init__(*args, **kwargs)
-        if hide_captcha:
-            del self.fields['captcha']
-
-    def send(self, request):
-        email = self.cleaned_data['email']
-        message = self.cleaned_data['message']
-        error = self.cleaned_data['error']
-        user_agent_data = u'User agent: %s' % request.META.get('HTTP_USER_AGENT')
-        timestamp = u'Time: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        version = u'Version: %s' % settings.PROJECT_VERSION
-        commit = u'Commit: %s' % settings.LAST_COMMIT_GUID
-        url = u'URL: %s' % request.META.get('HTTP_REFERER', '')
-        user = u'Logged in: %s' % (request.user.is_authenticated() and request.user or u'not logged in')
-        message = u'%s\n\n%s\n%s\n%s\n%s\n%s\n%s' % (message, user_agent_data, timestamp, version, commit, url, user)
-        if error in ['404', '500']:
-            message += u'\nPage type: %s' % error
-            feedback_emails = [settings.FEEDBACK_ERROR_EMAIL]
-        else:
-            feedback_emails = settings.FEEDBACK_EMAILS
-        headers = {'Reply-To': email} if email else None
-        bcc = getattr(settings, 'EMAIL_BCC_LIST', [])
-        if email:
-            subject = '%s (from %s)' % (settings.FEEDBACK_SUBJECT, email)
-        else:
-            subject = settings.FEEDBACK_SUBJECT
-        EmailMessage(subject, message, email, \
-                         feedback_emails, headers=headers, bcc=bcc).send()
-
-        if email:
-            headers = {'Reply-To': settings.FEEDBACK_RESPONSE_EMAIL}
-            body = render_to_string(settings.FEEDBACK_RESPONSE_TEMPLATE, {})
-            email = EmailMessage(settings.FEEDBACK_RESPONSE_SUBJECT, body, \
-                         settings.FEEDBACK_RESPONSE_EMAIL, [email], headers=headers, bcc=bcc)
-            email.content_subtype = 'html'
-            email.send()
-
-    def get_errors(self):
-        from django.utils.encoding import force_unicode
-        output = {}
-        for key, value in self.errors.items():
-            output[key] = '/n'.join([force_unicode(i) for i in value])
-        return output
-
-class EmailFriendForm(forms.Form):
-    from_email = forms.EmailField(label='From')
-    to_emails = EmailListField(label='To')
-    subject = forms.CharField()
-    message = forms.CharField(widget=forms.Textarea())
-
-    def send(self):
-        subject = self.cleaned_data['subject']
-        message = self.cleaned_data['message']
-        from_email = self.cleaned_data['from_email']
-        to_emails = self.cleaned_data['to_emails']
-        send_mail(subject, message, from_email, to_emails)
 
 class ChangeVideoOriginalLanguageForm(forms.Form):
     language_code = forms.ChoiceField()

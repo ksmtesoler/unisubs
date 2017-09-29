@@ -115,7 +115,6 @@ def update_all_subtitles(account_type, account_id):
 
     for video in videos.all():
         for video_url in video.get_video_urls():
-            video_url.fix_owner_username()
             if not account.should_sync_video_url(video, video_url):
                 continue
             language_qs = (video.newsubtitlelanguage_set

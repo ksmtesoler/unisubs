@@ -65,6 +65,8 @@ class Command(BaseCommand):
                        'ADD INDEX for_user (user_id, deleted_for_user, has_reply_for_user)')
         cursor.execute('ALTER TABLE messages_message '
                        'ADD INDEX for_author (user_id, deleted_for_author, has_reply_for_author)')
+        cursor.execute('ALTER TABLE messages_message '
+                       'ADD INDEX unread_messages (`user_id`, `deleted_for_user`, `read`, `id`)')
 
     def setup_user_collation(self, cursor):
         cursor.execute('ALTER TABLE auth_user MODIFY first_name varchar(30) '

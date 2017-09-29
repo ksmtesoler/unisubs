@@ -77,11 +77,6 @@ def embed(request, version_no=''):
         context_instance=RequestContext(request),
         mimetype='text/javascript')
 
-def widget_public_demo(request):
-    context = widget.add_onsite_js_files({})
-    return render_to_response('widget/widget_public_demo.html', context,
-                              context_instance=RequestContext(request))
-
 @csrf_exempt
 def convert_subtitles(request):
     # FIXME: front end needs to send the DFXP for the subs
@@ -212,58 +207,6 @@ def onsite_widget_resume(request):
     add_general_settings(request, general_settings)
     context['general_settings'] = json.dumps(general_settings)
     return render_to_response('widget/onsite_widget_resume.html',
-                              context,
-                              context_instance=RequestContext(request))
-
-def widget_demo(request):
-    context = {}
-    context['js_use_compiled'] = settings.COMPRESS_MEDIA
-    context['site_url'] = '{0}://{1}'.format( DEFAULT_PROTOCOL,
-        request.get_host())
-    if 'video_url' not in request.GET:
-        context['help_mode'] = True
-    else:
-        context['help_mode'] = False
-        params = base_widget_params(request)
-        context['embed_js_url'] = \
-            "http://{0}/embed{1}.js".format(
-            Site.objects.get_current().domain,
-            settings.EMBED_JS_VERSION)
-        context['widget_params'] = params
-    return render_to_response('widget/widget_demo.html',
-                              context,
-                              context_instance=RequestContext(request))
-
-def video_demo(request, template):
-    context = widget.add_config_based_js_files(
-        {}, settings.JS_WIDGETIZER, 'unisubs-widgetizer.js')
-    context['embed_js_url'] = \
-        "http://{0}/embed{1}.js".format(
-        Site.objects.get_current().domain,
-        settings.EMBED_JS_VERSION)
-    return render_to_response(
-        'widget/{0}_demo.html'.format(template),
-        context,
-        context_instance=RequestContext(request))
-
-
-def widgetize_demo(request, page_name):
-    context = widget.add_config_based_js_files(
-        {}, settings.JS_WIDGETIZER, 'unisubs-widgetizer.js')
-    return render_to_response('widget/widgetize_demo/{0}.html'.format(page_name),
-                              context,
-                              context_instance=RequestContext(request))
-
-def statwidget_demo(request):
-    js_files = ['http://{0}/widget/statwidgetconfig.js'.format(
-            Site.objects.get_current().domain)]
-    js_files.append('{0}js/statwidget/statwidget.js'.format(
-            settings.STATIC_URL))
-    context = widget.add_js_files({}, settings.COMPRESS_MEDIA,
-                               settings.JS_OFFSITE,
-                               'unisubs-statwidget.js',
-                               full_path_js_files=js_files)
-    return render_to_response('widget/statwidget_demo.html',
                               context,
                               context_instance=RequestContext(request))
 

@@ -40,7 +40,7 @@ class MockVideoType(mock.Mock):
             owner_username=mock.Mock(return_value=None),
             convert_to_video_url=mock.Mock(return_value=url),
             set_values=mock.Mock(
-                side_effect=lambda v, u, t: v.__dict__.update(self.values_to_set)
+                side_effect=lambda v, u, t, r: v.__dict__.update(self.values_to_set)
             ),
         )
         self.url = url

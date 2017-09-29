@@ -56,12 +56,8 @@ def one_time_url(request, token):
     This is a view to host one-time, time limited URLs, used
     to deliver non-public data to a third party website.
     """
-    logger.error("one_time_url")
-    logger.error(token)
     data = get_one_time_data(token)
     if data is not None:
-        logger.error("Data")
-        logger.error(data)
         response = HttpResponse(data, mimetype="text/plain")
         response['Content-Disposition'] = 'attachment'
         return response

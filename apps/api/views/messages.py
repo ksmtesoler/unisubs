@@ -92,6 +92,8 @@ class MessagesSerializer(serializers.Serializer):
             if user != self.context['user']
         ]
         Message.objects.bulk_create(messages)
+        if len(messages) == 1:
+            self.context['user'].sent_message()
 
 class Messages(views.APIView):
     def get_serializer(self):
