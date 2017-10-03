@@ -652,9 +652,8 @@ class TeamSettingsChanged(ActivityType):
 activity_choices = [
     VideoAdded, VideoTitleChanged, CommentAdded, VersionAdded, VideoURLAdded,
     TranslationAdded, SubtitleRequestCreated, VersionApproved, MemberJoined,
-    VersionRejected, MemberLeft, VersionReviewed, VersionAccepted,
-    VersionDeclined, VideoDeleted, VideoMarkedDeleted, VideoURLEdited,
-    VideoURLDeleted, VideoMovedToTeam, VideoMovedFromTeam, TeamSettingsChanged,
+    VersionRejected, MemberLeft, VersionReviewed, VersionAccepted, VersionDeclined, VideoDeleted, VideoURLEdited, VideoURLDeleted, VideoMovedToTeam,
+    VideoMovedFromTeam, TeamSettingsChanged, VideoMarkedDeleted,
 ]
 
 class ActivityQueryset(query.QuerySet):

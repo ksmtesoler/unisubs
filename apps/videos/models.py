@@ -275,6 +275,8 @@ class VideoCacheManager(ModelCacheManager):
 
     def get_instance(self, pk, cache_pattern=None):
         video = super(VideoCacheManager, self).get_instance(pk, cache_pattern)
+        if video.is_deleted:
+            raise Video.DoesNotExist()
         # use a cached team_video as well
         video._cached_teamvideo = self._get_team_video_from_cache(video)
         return video

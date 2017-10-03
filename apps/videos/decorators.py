@@ -54,6 +54,8 @@ def get_cached_video_from_code(cache_pattern):
                                                              cache_pattern)
             except Video.DoesNotExist:
                 raise Http404
+            if video.is_deleted:
+                raise Http404
             request.use_cached_user()
             if not video.can_user_see(request.user):
                 raise PermissionDenied()

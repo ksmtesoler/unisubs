@@ -217,12 +217,12 @@ class TeamWorkflow(object):
             'member-joined',
             'member-left',
             'video-deleted',
-            'video-marked-deleted',
             'video-url-edited',
             'video-url-deleted',
             'video-moved-from-team',
             'video-moved-to-team',
             'team-settings-changed',
+            'video-marked-deleted',
         ]
 
     # these can be used to customize the content in the project/language
