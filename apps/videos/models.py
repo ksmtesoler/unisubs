@@ -834,7 +834,7 @@ class Video(models.Model):
                 raise VideoTypeError(url)
         else:
             vt = url
-        return vt, vt.url
+        return vt, vt.convert_to_video_url()
 
     @classmethod
     def _check_prevent_duplicate_public_videos(cls, url):
