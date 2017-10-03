@@ -5,6 +5,7 @@
 {% block content %}
 <section>
   <div class="container">
+    <a class="pull-right" href="{% url "videos:url-search" %}">{% trans "New Search" %}</a>
     <h1>{% trans "Search results" %}</h1>
     {% if videos %}
     <form method="POST">
@@ -25,7 +26,12 @@
             {% for video in videos %}
             {% with team=video.get_team %}
             <tr>
-              <td><input type="checkbox" name="videos" value="{{ video.video_id }}"></td>
+              <td>
+                <div class="checkbox">
+                  <input type="checkbox" name="videos" id="video-cb-{{ video.video_id }}" value="{{ video.video_id }}">
+                  <label for="video-cb-{{ video.video_id}}"><span></span></label>
+                </div>
+              </td>
               <td><a href="{{ video.get_absolute_url }}">{{ video.title_display }}</a></td>
               <td>{{ video.video_id }}</td>
               <td>{% if team %}{{ team }}{% else %}{% trans "No team" %}{% endif %}</td>
@@ -35,8 +41,6 @@
             {% endfor %}
           </tbody>
         </table>
-      </section>
-      <section>
         <div class="form-group">
           <select name="team" class="select" data-placeholder="{% trans "Move to team" %}">
             <option></option>
@@ -50,8 +54,16 @@
         </div>
       </section>
     </form>
-    {% else %}
-    <div class="zero-state">{% trans "No videos found" %}</div>
+    {% endif %}
+    {% if not_found  %}
+    <section>
+      <h1>{% trans "Not found:" %}</h1>
+      <ul>
+        {% for url in not_found %}
+        <li>{{ url }}</li>
+        {% endfor %}
+      </ul>
+    </section>
     {% endif %}
   </div>
 </section>

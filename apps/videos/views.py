@@ -1076,13 +1076,21 @@ def url_search_results(request):
         vt = video_type_registrar.video_type_for_url(url)
         if vt:
             urls.append(vt.convert_to_video_url())
-    videos = (
-        Video.objects
-        .filter(videourl__url__in=urls)
-        .order_by('videourl__url')
+    video_urls = list(
+        VideoUrl.objects
+        .filter(url__in=urls)
+        .select_related('video', 'video__teamvideo')
     )
+    found_urls = set(vurl.url for vurl in video_urls)
+    not_found = [
+        url for url in urls
+        if url not in found_urls
+    ]
+    video_urls.sort(key=lambda vurl: urls.index(vurl.url))
+    videos = [vurl.video for vurl in video_urls]
     return render(request, "future/videos/url-search-results.html", {
         'videos': videos,
+        'not_found': not_found,
         'move_to_options': teams.permissions.can_move_videos_to(request.user),
     })
 
