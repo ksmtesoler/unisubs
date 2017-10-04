@@ -41,7 +41,6 @@ vendor/pyfacebook-1.0a2.tar.gz
 vendor/Unidecode-0.04.9.tar.gz
 M2Crypto==0.21.1
 vendor/django-templatetag-sugar.tar.gz
-vendor/django-tastypie-0.9.11.tar.gz
 # this should be commented until we are sure we want to deploy this to prod
 #vendor/oboe-0.4.1.0.tar.gz
 requests[security]==2.9.0

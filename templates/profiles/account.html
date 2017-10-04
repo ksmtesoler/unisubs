@@ -114,13 +114,13 @@
             <div class="grid_4 omega">
                 <fieldset id="api">
                     <h3>{% trans "API Access" %}</h3>
-                    <div{% if not editnotificationsform.instance.api_key.key %} style="display:none"{% endif %}>
+                    <div{% if not editnotificationsform.instance.amara_api_key.key %} style="display:none"{% endif %}>
                         <label>{% trans "Your API key" %}</label>
-                        <textarea class="api-key-holder" readonly="readonly">{{editnotificationsform.instance.api_key.key}}</textarea>
+                        <textarea class="api-key-holder" readonly="readonly">{{editnotificationsform.instance.amara_api_key.key}}</textarea>
                         <p class="api-key-status"></p>
                     </div>
                     <a href="{% url "profiles:generate-api-key" %}" class="get-new-api-bt button reduced">
-                        {% if editnotificationsform.instance.api_key.key %}
+                        {% if editnotificationsform.instance.amara_api_key.key %}
                             {% trans "Reset your API key" %}
                         {% else %}
                             {% trans "Get an API key" %}
