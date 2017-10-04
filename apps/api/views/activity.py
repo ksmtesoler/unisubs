@@ -210,7 +210,6 @@ from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework.reverse import reverse
 import dateutil.parser
-import pytz
 
 from activity.models import ActivityRecord
 from api import userlookup
