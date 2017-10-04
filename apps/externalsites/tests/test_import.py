@@ -42,7 +42,7 @@ class YoutubeImportTest(TestCase):
         self.mock_get_uploaded_video_ids.return_value = [
             'video-1', 'video-2', 'video-3',
         ]
-        def make_video(url, user, setup_callback=None):
+        def make_video(url, user, setup_callback=None, team=None):
             video = VideoFactory(video_url__url=url)
             video_url = video.get_primary_videourl_obj()
             if setup_callback:
@@ -75,9 +75,12 @@ class YoutubeImportTest(TestCase):
         # we should import all videos and add them to our team
         self.team_account.import_videos()
         assert_equals(self.mock_video_add.call_args_list, [
-            mock.call('http://youtube.com/watch?v=video-1', None, mock.ANY),
-            mock.call('http://youtube.com/watch?v=video-2', None, mock.ANY),
-            mock.call('http://youtube.com/watch?v=video-3', None, mock.ANY),
+            mock.call('http://youtube.com/watch?v=video-1', None, mock.ANY,
+                      self.import_team),
+            mock.call('http://youtube.com/watch?v=video-2', None, mock.ANY,
+                      self.import_team),
+            mock.call('http://youtube.com/watch?v=video-3', None, mock.ANY,
+                      self.import_team),
         ])
         for i in range(1, 4):
             url = 'http://youtube.com/watch?v=video-{}'.format(i)

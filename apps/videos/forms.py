@@ -163,7 +163,7 @@ class CreateVideoUrlForm(forms.Form):
             self.video_url = self.cleaned_data['video'].add_url(
                 self.cleaned_data['url'],
                 self.user)
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             raise forms.ValidationError(self.already_added_message(e.video))
 
     def already_added_message(self, video):
@@ -210,7 +210,7 @@ class NewCreateVideoUrlForm(forms.Form):
         try:
             self.video_url = self.video.add_url( self.cleaned_data['url'],
                 self.user)
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             self._errors['url'] = self.error_class([
                 self.already_added_message(e.video)
             ])
@@ -251,7 +251,7 @@ class VideoForm(forms.Form):
             self.video, video_url = Video.add(
                 self.cleaned_data['video_url'], self.user)
             self.created = True
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             self.video = e.video
             self.created = False
         return self.cleaned_data

@@ -267,8 +267,8 @@ class AddTeamVideoForm(forms.ModelForm):
         # See if any error happen when we create our video
         try:
             Video.add(self.cleaned_data['video_url'], self.user,
-                      self.setup_video)
-        except Video.UrlAlreadyAdded, e:
+                      self.setup_video, self.team)
+        except Video.DuplicateUrlError, e:
             self.setup_existing_video(e.video, e.video_url)
         return self.cleaned_data
 
@@ -1663,47 +1663,6 @@ class ApplicationForm(forms.Form):
             if value:
                 languages.append({"language": value, "priority": i})
         self.application.user.set_languages(languages)
-
-class TeamVideoURLForm(forms.Form):
-    video_url = VideoURLField()
-
-    def save(self, team, user, project=None, thumbnail=None, language=None):
-        errors = ""
-        if not self.cleaned_data.get('video_url'):
-            return (False, "")
-
-        video_type = self.cleaned_data['video_url']
-        def setup_video(video, video_url):
-            video.is_public = team.is_visible
-            if language is not None:
-                video.primary_audio_language_code = language
-            if thumbnail:
-                video.s3_thumbnail.save(thumbnail.name, thumbnail)
-            team_video = TeamVideo.objects.create(video=video, team=team,
-                                                  project_id=project,
-                                                  added_by=user)
-
-        try:
-            Video.add(video_type, user, setup_video)
-        except Video.UrlAlreadyAdded, e:
-            if e.video.get_team_video() is not None:
-                return (False,
-                        self.video_in_team_msg(e.video, e.video_url, user))
-            else:
-                setup_video(e.video, e.video_url)
-                e.video.save()
-        return (True, "")
-
-    def video_in_team_msg(self, video, video_url, user):
-        team = video.get_team_video().team
-        if team.user_can_view_videos(user):
-            return fmt(_(u"Video %(url)s already in the %(team)s Team"),
-                       url=video_url.url, team=team)
-        else:
-            return fmt(_(u"Video %(url)s already in another team"),
-                       url=video_url.url)
-
-TeamVideoURLFormSet = formset_factory(TeamVideoURLForm)
 
 class TeamVideoCSVForm(forms.Form):
     csv_file = forms.FileField(label=_(u"CSV file"), required=True, allow_empty_file=False)
