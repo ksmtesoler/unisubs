@@ -37,7 +37,7 @@ class Mp3VideoType(VideoType):
     def matches_video_url(cls, url):
         return cls.url_extension(url) == 'mp3'
 
-    def set_values(self, video, user, team):
+    def set_values(self, video, user, team, video_url):
         cmd = """avprobe -v error -show_format -show_streams "{}" | grep duration= | sed 's/^.*=//' | head -n1""".format(self.url)
         try:
             duration = int(float(subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)))

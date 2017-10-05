@@ -30,8 +30,6 @@ urlpatterns = patterns(
     url(r'^router/$', rpc_router, name='rpc_router'),
     url(r'^router/api/$', rpc_router.api, name='rpc_api'),
     url(r'^subscribe_to_updates/$', 'subscribe_to_updates', name='subscribe_to_updates'),
-    url(r'^feedback/$', 'feedback', name='feedback'),
-    url(r'^feedback/error/$', 'feedback', {'hide_captcha': True}, 'feedback_error'),
     url(r'^upload_subtitles/$', 'upload_subtitles', name='upload_subtitles'),
     url(r'^create/$', 'create', name='create'),
     url(r'^activities/(?P<video_id>(\w|-)+)/$', 'activity', name='activity'),

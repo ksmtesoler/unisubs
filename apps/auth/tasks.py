@@ -16,10 +16,24 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-from celery.task import task
-
 from auth.models import LoginToken
+from celery.task import task
+from django.conf import settings
+from utils import send_templated_email
+import logging
+logger = logging.getLogger(__name__)
+
+BLOCKED_USER_NOTIFICATION_TEMPLATE = "auth/blocked_user_notification.html"
 
 @task
 def expire_login_tokens():
     LoginToken.objects.get_expired().delete()
+
+@task
+def notify_blocked_user(user):
+    if hasattr(settings, 'BLOCKED_USER_NOTIFICATION_ADDRESS'):
+        subject = "Attacking user detected and de-activated"
+        logger.error("A user was deactivated because he was sending too many messages: {}".format(user.username))
+        return send_templated_email(settings.BLOCKED_USER_NOTIFICATION_ADDRESS, subject, \
+                                    BLOCKED_USER_NOTIFICATION_TEMPLATE, {'username': user.username}, \
+                                    from_email=None, ct="html", fail_silently=not settings.DEBUG)

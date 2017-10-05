@@ -19,8 +19,11 @@ import re
 from urlparse import urlparse
 
 from base import VideoType
+from celery.task import task
 from externalsites import google
 import externalsites
+import logging
+logger = logging.getLogger(__name__)
 
 class YoutubeVideoType(VideoType):
 
@@ -41,6 +44,7 @@ class YoutubeVideoType(VideoType):
     CAN_IMPORT_SUBTITLES = True
 
     VIDEOID_MAX_LENGTH = 11
+    MAX_ACCOUNTS_TO_TRY = 5
 
     def __init__(self, url):
         self.url = url
@@ -65,30 +69,49 @@ class YoutubeVideoType(VideoType):
         else:
             return google.get_direct_url_to_video(self.video_id)
 
-    def get_video_info(self, user, team):
+    def get_video_info(self, video, user, team, video_url):
+        incomplete = False
         if not hasattr(self, '_video_info'):
             if team is not None and user is not None:
                 accounts = externalsites.models.YouTubeAccount.objects.get_accounts_for_user_and_team(user, team)
             else:
                 accounts = []
-            self._video_info = google.get_video_info(self.video_id, accounts)
-        return self._video_info
+            try:
+                self._video_info = google.get_video_info(self.video_id, accounts[:YoutubeVideoType.MAX_ACCOUNTS_TO_TRY])
+            except google.APIError:
+                if len(accounts) > YoutubeVideoType.MAX_ACCOUNTS_TO_TRY:
+                    accounts_pks = map(lambda x: x.pk, accounts[YoutubeVideoType.MAX_ACCOUNTS_TO_TRY:])
+                    get_set_values_background.apply_async(args=[self.video_id, accounts_pks,
+                                                                video.pk, video_url.pk], countdown=2)
+                    incomplete = True
+                    self._video_info = None
+                else:
+                    raise
+        return self._video_info, incomplete
 
-    def set_values(self, video, user, team):
+    @classmethod
+    def complete_set_values(cls, video, video_url, video_info):
+        if not video.title:
+            video.title = video_info.title
+        if not video.description:
+            video.description = video_info.description
+        video.duration = video_info.duration
+        if not video.thumbnail:
+            video.thumbnail = video_info.thumbnail_url
+        if video_url is not None and \
+           video_url.owner_username is None and \
+           video_info.channel_id is not None:
+            video_url.owner_username = video_info.channel_id
+            video_url.save()
+
+    def set_values(self, video, user, team, video_url):
         try:
-            video_info = self.get_video_info(user, team)
+            video_info, incomplete = self.get_video_info(video, user, team, video_url)
         except google.APIError:
             return
-        video.title = video_info.title
-        video.description = video_info.description
-        video.duration = video_info.duration
-        video.thumbnail = video_info.thumbnail_url
-
-    def owner_username(self):
-        try:
-            return self.get_video_info(None, None).channel_id
-        except google.APIError:
-            return None
+        if not incomplete:
+            self.complete_set_values(video, video_url, video_info)
+        return incomplete
 
     @classmethod
     def url_from_id(cls, video_id):
@@ -102,3 +125,23 @@ class YoutubeVideoType(VideoType):
             if bool(video_id):
                 return video_id[:YoutubeVideoType.VIDEOID_MAX_LENGTH]
         raise ValueError("Unknown video id")
+
+@task()
+def get_set_values_background(video_id, accounts_pks, video_pk, video_url_pk):
+    from django.db import models
+    from videos.models import Video, VideoUrl
+    from externalsites.models import YouTubeAccount
+    try:
+        video = Video.objects.get(id=video_pk)
+        video_url = VideoUrl.objects.get(id=video_url_pk)
+        accounts = list(YouTubeAccount.objects.filter(id__in=accounts_pks))
+        video_info = google.get_video_info(video_id, accounts)
+        YoutubeVideoType.complete_set_values(video,
+                                             video_url,
+                                             video_info)
+    except models.ObjectDoesNotExist, e:
+        return
+    except Exception, e:
+        logger.error("No values available for video " + video_id)
+    video.update_search_index()
+    video.save()

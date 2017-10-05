@@ -83,7 +83,7 @@ class YoutubeVideoTypeTest(TestCase):
         mock_get_video_info.return_value = video_info
         vt = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0')
         video = Video()
-        vt.set_values(video, None, None)
+        vt.set_values(video, None, None, None)
         self.assertEqual(video.title, video_info.title)
         self.assertEqual(video.description, video_info.description)
         self.assertEqual(video.duration, video_info.duration)
@@ -97,16 +97,12 @@ class YoutubeVideoTypeTest(TestCase):
         mock_get_video_info.side_effect = google.APIError()
         vt = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0')
         video = Video()
-        vt.set_values(video, None, None)
+        vt.set_values(video, None, None, None)
 
         self.assertEqual(vt.video_id, '_ShmidkrcY0')
         self.assertEqual(video.description, '')
         self.assertEqual(video.duration, None)
         self.assertEqual(video.thumbnail, '')
-        # since get_video_info failed, we don't know the channel id of our
-        # video URL.  We should use a dummy value to make it easier to fix the
-        # issue in the future
-        self.assertEqual(vt.owner_username(), None)
 
     def test_matches_video_url(self):
         for item in self.data:
@@ -132,9 +128,9 @@ class YoutubeVideoTypeTest(TestCase):
         vt_3 = YoutubeVideoType('http://www.youtube.com/watch?v=_ShmidkrcY0ewgwe')
         user = UserFactory()
         video, video_url = Video.add(vt, user)
-        with assert_raises(Video.UrlAlreadyAdded):
+        with assert_raises(Video.DuplicateUrlError):
             video_2, video_url_2 = Video.add(vt_2, user)
-        with assert_raises(Video.UrlAlreadyAdded):
+        with assert_raises(Video.DuplicateUrlError):
             video_3, video_url_3 = Video.add(vt_3, user)
 
 class HtmlFiveVideoTypeTest(TestCase):

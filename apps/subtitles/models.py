@@ -28,7 +28,7 @@ from datetime import datetime, date, timedelta
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, IntegrityError
 from django.db.models import query, Q, Count
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext
@@ -39,6 +39,7 @@ from subtitles import shims
 from auth.models import CustomUser as User
 from videos import metadata
 from videos.models import Video
+import videos.tasks
 from babelsubs.storage import SubtitleSet
 from babelsubs.storage import calc_changes
 from babelsubs.generators.html import HTMLGenerator
@@ -565,6 +566,38 @@ class SubtitleLanguage(models.Model):
             self.created = dates.now()
 
         super(SubtitleLanguage, self).save(*args, **kwargs)
+
+    def change_language_code(self, language_code):
+        # change current language_code
+        old_language_code = self.language_code
+        try:
+            self.language_code = language_code
+            self.save()
+        except ValidationError as e:
+            # raised if an invalid language code is provided
+            self.language_code = old_language_code
+            logger.error(e, exc_info=True)
+            raise e
+        except IntegrityError as e:
+            self.language_code = old_language_code
+            logger.error("Subtitle already exists for this language")
+            raise e
+
+        # get all subtitle versions and change their language_codes
+        for version in self.get_versions(full=True):
+            try:
+                version.language_code = language_code
+                version.save()
+            except AssertionError as e:
+                logger.error(e)
+                raise e
+
+        # change collab language codes
+        self.send_signal(signals.subtitle_language_changed, old_language=old_language_code)
+
+        cache.invalidate_language_cache(self)
+        self.clear_tip_cache()
+        videos.tasks.video_changed_tasks(self.video.id)
 
     def title_display(self):
         tip = self.get_tip()
@@ -1976,12 +2009,13 @@ class SubtitleVersion(models.Model):
                  self.pk])
 
     def get_absolute_download_url(self, format="vtt", filename="subtitles"):
-        return ''.join(['http://', Site.objects.get_current().domain,
-                        reverse("subtitles:download", kwargs={"video_id": self.video.video_id,
-                                                              "language_code": self.language_code,
-                                                              "version_number": self.version_number,
-                                                              "filename": filename,
-                                                              "format": format})])
+        return "{}://{}{}".format(settings.DEFAULT_PROTOCOL,
+                                  Site.objects.get_current().domain,
+                                  reverse("subtitles:download", kwargs={"video_id": self.video.video_id,
+                                                                        "language_code": self.language_code,
+                                                                        "version_number": self.version_number,
+                                                                        "filename": filename,
+                                                                        "format": format}))
 
 class SubtitleVersionMetadata(models.Model):
     """This model is used to add extra metadata to SubtitleVersions.

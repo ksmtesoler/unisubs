@@ -1,0 +1,17 @@
+{% load forms i18n query_string %}
+<div class="modal-dialog modal-md">
+  <div class="modal-content">
+    <header class="dialogHeader">
+      <h4 class="dialogTitle">{% trans "Changing subtitle language" %}</h4>
+      <h5 class="dialogSubTitle">{{ video.title_display }} - {{ subtitle_language.get_language_code_display }}</h5>
+    </header>
+    <form action="{% query_string form=language %}" method="POST">
+      {% csrf_token %}
+      {{  form.new_language|render_field  }}
+      <div class="text-right">
+        <button class="button borderless" data-dismiss="modal">{% trans "Cancel" %}</a>
+        <button class="button cta" type="submit">{% trans "Change subtitle language" %}</button>
+      </div>
+    </form>
+  </div>
+</div>

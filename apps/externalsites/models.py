@@ -569,7 +569,7 @@ class YouTubeAccount(ExternalAccount):
             if self.type == ExternalAccount.TYPE_USER:
                 try:
                     Video.add(video_url, self.user)
-                except Video.UrlAlreadyAdded:
+                except Video.DuplicateUrlError:
                     continue
             elif self.import_team:
                 def add_to_team(video, video_url):
@@ -577,8 +577,8 @@ class YouTubeAccount(ExternalAccount):
                                              team=self.import_team,
                                              added_by=self.user)
                 try:
-                    Video.add(video_url, None, add_to_team)
-                except Video.UrlAlreadyAdded:
+                    Video.add(video_url, None, add_to_team, self.import_team)
+                except Video.DuplicateUrlError:
                     continue
 
         self.last_import_video_id = video_ids[0]
@@ -633,7 +633,6 @@ def get_sync_accounts(video):
     return rv
 
 def get_sync_account(video, video_url):
-    video_url.fix_owner_username()
     AccountModel = _video_type_to_account_model.get(video_url.type)
     if AccountModel is None:
         return None

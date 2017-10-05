@@ -106,11 +106,6 @@ urlpatterns += patterns('teams.new_views',
         name='video-durations'),
 )
 
-urlpatterns += patterns('',
-    (r'^t1$',
-     TemplateView.as_view(template_name='jsdemo/teams_profile.html')),
-)
-
 # settings views that are handled by other apps
 urlpatterns += patterns('',
     url(r'^(?P<slug>[-\w]+)/settings/accounts/$', 'externalsites.views.team_settings_tab', name='settings_externalsites'),

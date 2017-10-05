@@ -50,10 +50,7 @@ from django.utils.http import urlquote_plus
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.views.decorators.http import require_POST
 from gdata.service import RequestError
-from vidscraper.errors import Error as VidscraperError
 
-import widget
-from widget import rpc as widget_rpc
 from activity.models import ActivityRecord
 from auth.models import CustomUser as User
 from subtitles.models import SubtitleLanguage, SubtitleVersion
@@ -69,7 +66,7 @@ from videos import permissions
 from videos.decorators import (get_video_revision, get_video_from_code,
                                get_cached_video_from_code)
 from videos.forms import (
-    VideoForm, FeedbackForm, EmailFriendForm, UserTestResultForm,
+    VideoForm,
     CreateVideoUrlForm, AddFromFeedForm,
     ChangeVideoOriginalLanguageForm, CreateSubtitlesForm,
 )
@@ -79,7 +76,6 @@ from videos.models import (
 from videos.rpc import VideosApiClass
 from videos import share_utils
 from videos.tasks import video_changed_tasks
-from widget.views import base_widget_params
 from externalsites.models import can_sync_videourl, get_sync_account
 from utils import send_templated_email
 from utils.basexconverter import base62
@@ -246,8 +242,6 @@ class VideoPageContext(dict):
         self.setup_tab(request, video, video_url, tab)
 
     def setup(self, request, video, video_url):
-        self['widget_settings'] = json.dumps(
-            widget_rpc.get_general_settings(request))
         self['add_language_mode'] = self.workflow.get_add_language_mode(
             request.user)
 
@@ -418,17 +412,6 @@ def upload_subtitles(request):
         output['errors'] = {'__all__': [force_unicode(e)]}
 
     return HttpResponse(json.dumps(output))
-
-def feedback(request, hide_captcha=False):
-    output = dict(success=False)
-    form = FeedbackForm(request.POST, initial={'captcha': request.META['REMOTE_ADDR']},
-                        hide_captcha=hide_captcha)
-    if form.is_valid():
-        form.send(request)
-        output['success'] = True
-    else:
-        output['errors'] = form.get_errors()
-    return HttpResponse(json.dumps(output), "text/javascript")
 
 @get_video_from_code
 def legacy_history(request, video, lang=None):
@@ -641,25 +624,6 @@ def language_subtitles(request, video, lang, lang_id, version_id=None):
     if context['create_subtitles_form'].is_valid():
         return context['create_subtitles_form'].handle_post()
     return render(request, template_name, context)
-
-def _widget_params(request, video, version_no=None, language=None, video_url=None, size=None):
-    primary_url = video_url or video.get_video_url()
-    alternate_urls = [vu.effective_url for vu in video.videourl_set.all()
-                      if vu.effective_url != primary_url]
-    params = {'video_url': primary_url,
-              'alternate_video_urls': alternate_urls,
-              'base_state': {}}
-
-    if version_no:
-        params['base_state']['revision'] = version_no
-
-    if language:
-        params['base_state']['language_code'] = language.language_code
-        params['base_state']['language_pk'] = language.pk
-    if size:
-        params['video_config'] = {"width":size[0], "height":size[1]}
-
-    return base_widget_params(request, params)
 
 @login_required
 @get_video_revision
