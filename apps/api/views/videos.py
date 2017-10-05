@@ -490,17 +490,22 @@ class VideoSerializer(serializers.Serializer):
             if validated_data.get('metadata'):
                 video.update_metadata(validated_data['metadata'],
                                       commit=False)
-            self._update_team(video, validated_data)
         try:
-            if 'team' in validated_data:
-                team = validated_data['team']
+            team = validated_data.get('team')
+            if team:
+                video, video_url =  team.add_video(
+                    validated_data['video_url'],
+                    self.context['user'],
+                    self.calc_project(validated_data),
+                    setup_video)
             else:
-                team = None
-            return Video.add(validated_data['video_url'],
-                             self.context['user'], setup_video, team)[0]
+                video, video_url = Video.add(validated_data['video_url'],
+                                             self.context['user'],
+                                             setup_video)
+            return video
         except VideoTypeError:
             self.fail('invalid-url', url=validated_data['video_url'])
-        except Video.UrlAlreadyAdded:
+        except Video.DuplicateUrlError:
             self.fail('video-exists', url=validated_data['video_url'])
 
     def update(self, video, validated_data):
@@ -523,11 +528,19 @@ class VideoSerializer(serializers.Serializer):
             videos.tasks.save_thumbnail_in_s3.delay(video.id)
         return video
 
+    def calc_project(self, validated_data):
+        team = validated_data.get('team')
+        project = validated_data.get('project')
+        if team:
+            return project if project is not None else team.default_project
+        else:
+            return None
+
     def _update_team(self, video, validated_data):
         if 'team' not in validated_data:
             return
         team = validated_data['team']
-        project = validated_data.get('project')
+        project = self.calc_project(validated_data)
         team_video = video.get_team_video()
         if team is None:
             if team_video:
@@ -539,10 +552,7 @@ class VideoSerializer(serializers.Serializer):
             if team_video:
                 team_video.move_to(team, project, self.context['user'])
             else:
-                TeamVideo.objects.create(video=video, team=team,
-                                         project=project,
-                                         added_by=self.context['user'])
-                video.is_public = team.is_visible
+                team.add_existing_video(video, self.context['user'], project)
 
         video.clear_team_video_cache()
 

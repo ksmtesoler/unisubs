@@ -231,6 +231,7 @@ INSTALLED_APPS = (
     'widget',
     'subtitles',
     'captcha',
+    'raven.contrib.django.raven_compat',
 )
 
 STARTUP_MODULES = [
