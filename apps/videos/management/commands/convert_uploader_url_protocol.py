@@ -29,7 +29,7 @@ class Command(BaseCommand):
             video_url.url = video_url.url.replace("http", "https", 1)
             video_url.save()
             count += 1
-            if count % 1 == 0:
+            if count % 100 == 0:
                 print "processed {} video URLs".format(count)
         print "processed {} video URLs ({} left)".format(
             count, VideoUrl.objects.filter(url__startswith='http://amara-video.s3.amazonaws.com').count())
