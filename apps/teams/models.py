@@ -460,7 +460,8 @@ class Team(models.Model):
     def add_existing_video(self, video, user, project=None):
         """Add an existing video to this team
 
-        Use this to add a video that was added in in the past to a team.
+        Use this to add a video that was added in in the past to the public
+        area.
 
         Args:
             video: Video to add.  This cannot already be in a team
@@ -1301,7 +1302,7 @@ class TeamVideo(models.Model):
             if project is not None:
                 self.project = project
             with transaction.atomic():
-                self.video.update_team(None)
+                self.video.update_team(new_team)
                 self.save(user=user)
             video_changed_tasks.delay(self.video_id)
 

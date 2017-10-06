@@ -155,6 +155,15 @@ class VideoFactory(DjangoModelFactory):
         ])
         subtitles.models.SubtitleVersion.objects.bulk_create(all_versions)
 
+    @classmethod
+    def _after_postgeneration(cls, video, create, results=None):
+        # Need to call update_team(), but we can't do it in our
+        # post-generation method, since that might run before the video URLs
+        # are created
+        team = video.get_team()
+        if team:
+            video.update_team(team)
+
 class KalturaVideoFactory(VideoFactory):
     FACTORY_HIDDEN_ARGS = ('name',)
 

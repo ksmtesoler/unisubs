@@ -180,21 +180,6 @@ class BulkAddVideosTest(TestCase):
         assert_equal([i.text for i in subtitles.subtitle_items()],
                      ['first sub', 'second sub'])
 
-    def test_transcript_with_existing_video(self):
-        mocker = RequestsMocker()
-        video = VideoFactory(video_url__url=self.url)
-        mocker.expect_request('get', 'http://example.com/transcript.txt',
-                              body='first sub\n\nsecond sub')
-        with mocker:
-            self.run_add_team_videos([{
-                'url': self.url,
-                'language': 'en',
-                'transcript': 'http://example.com/transcript.txt'
-            }])
-        subtitles = video.subtitle_language('en').get_tip().get_subtitles()
-        assert_equal([i.text for i in subtitles.subtitle_items()],
-                     ['first sub', 'second sub'])
-
     def test_transcript_no_language(self):
         # we should ignore the transcript URL if no language is set
         mocker = RequestsMocker()
@@ -205,31 +190,6 @@ class BulkAddVideosTest(TestCase):
             }])
         video = self.check_video(self.url)
         assert_equal(video.newsubtitleversion_set.count(), 0)
-
-    def test_public_video(self):
-        # test importing a video that's already in amara
-        VideoFactory(video_url__url=self.url, duration=None,
-                     title='old title', description='old description')
-        self.run_add_team_videos([{
-            'url': self.url,
-            'title': 'new title',
-        }])
-        self.check_video(self.url, title='new title',
-                         description='old description')
-        self.check_email('Number of videos added to team: 1')
-
-    def test_other_team_video(self):
-        # test importing a video that's already in amara and part of another
-        # team
-        video = VideoFactory(video_url__url=self.url, title='existing video',
-                             duration=None)
-        TeamVideoFactory(video=video)
-        self.run_add_team_videos([{
-            'url': self.url,
-        }])
-        self.check_email(
-            "Video is already part of a team: {url}",
-            'Number of videos added to team: 0')
 
     def test_complex_case(self):
         # test a complex case with multiple videos and various values set

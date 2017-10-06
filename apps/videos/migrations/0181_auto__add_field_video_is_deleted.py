@@ -382,7 +382,7 @@ class Migration(SchemaMigration):
             'url_pattern': ('django.db.models.fields.URLField', [], {'unique': 'True', 'max_length': '255'})
         },
         'videos.videourl': {
-            'Meta': {'ordering': "('video', '-primary')", 'unique_together': "(('url_hash', 'type'),)", 'object_name': 'VideoUrl'},
+            'Meta': {'ordering': "('video', '-primary')", 'unique_together': "(('url_hash', 'team_id', 'type'),)", 'object_name': 'VideoUrl'},
             'added_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.CustomUser']", 'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
