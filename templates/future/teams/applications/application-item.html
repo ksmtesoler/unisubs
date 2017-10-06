@@ -5,7 +5,7 @@
     <label for="application-{{ application.id }}"><span></span></label>
   </div>
   <div>
-    {{ application.user.avatar_tag_large }}
+    <a href="{{ application.user.profile_url }}">{{ application.user.avatar_tag_large }}</a>
   </div>
   <div>
     <nav class="actions">
@@ -21,6 +21,6 @@
     </nav>
     <h3><a href="{{ application.user.profile_url }}">{{ application.user.display_name }}</a></h3>
     <p>{{ application.user.get_languages|to_localized_display_list }}</p>
-    <p class="constrain">{{ application.note }}</p>
+    <p class="clamp">{{ application.note }}</p>
   </div>
 </li>
