@@ -1646,7 +1646,8 @@ class DeleteVideosForm(VideoManagementForm):
 
     def perform_submit(self, qs):
         delete = self.cleaned_data.get('delete', False)
-        self.duplicate_url_errors = 0
+        self.public_duplicate_url_errors = 0
+        self.other_team_duplicate_url_errors = 0
         self.success_count = 0
 
         for video in qs:
@@ -1657,8 +1658,11 @@ class DeleteVideosForm(VideoManagementForm):
             else:
                 try:
                     team_video.remove(self.user)
-                except Video.DuplicateUrlError:
-                    self.duplicate_url_errors += 1
+                except Video.DuplicateUrlError, e:
+                    if e.video.get_team_video():
+                        self.other_team_duplicate_url_errors += 1
+                    else:
+                        self.public_duplicate_url_errors += 1
                     continue
             self.success_count += 1
 
@@ -1681,7 +1685,7 @@ class DeleteVideosForm(VideoManagementForm):
 
     def error_messages(self):
         messages = []
-        if self.duplicate_url_errors:
+        if self.public_duplicate_url_errors:
             messages.append(fmt(self.ungettext(
                 'Video not removed because it already exists in the '
                 'public area',
@@ -1689,8 +1693,18 @@ class DeleteVideosForm(VideoManagementForm):
                 'public area',
                 '%(count)s videos not removed because they already exists in '
                 'the public area',
-                self.duplicate_url_errors),
-                                count=self.duplicate_url_errors))
+                self.public_duplicate_url_errors),
+                                count=self.public_duplicate_url_errors))
+        if self.other_team_duplicate_url_errors:
+            messages.append(fmt(self.ungettext(
+                "Video not removed to avoid a conflict with another "
+                "team's video policy",
+                "%(count) video not removed to avoid a conflict with another "
+                "team's video policy",
+                "%(count) videso not removed to avoid a conflict with another "
+                "team's video policy",
+                self.other_team_duplicate_url_errors),
+                                count=self.other_team_duplicate_url_errors))
         return messages
 
 class MoveVideosForm(VideoManagementForm):

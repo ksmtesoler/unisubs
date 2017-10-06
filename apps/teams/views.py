@@ -947,10 +947,14 @@ def remove_video(request, team_video_pk):
     else:
         try:
             team_video.remove(request.user)
-        except Video.DuplicateUrlError:
-            messages.error(request,
-                             _(u'Video not removed because it already '
-                               u'exists in the public area'))
+        except Video.DuplicateUrlError, e:
+            if e.video.get_team_video():
+                msg = _(u"Video not removed to avoid a conflict with "
+                        u"another team's video policy.")
+            else:
+                msg = _(u'Video not removed because it already '
+                        u'exists in the public area')
+            messages.error(request, msg)
         else:
             messages.success(request,
                              _(u'Video has been removed from the team.'))
