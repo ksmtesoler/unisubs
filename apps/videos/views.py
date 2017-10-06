@@ -1099,6 +1099,7 @@ def url_search_move(request):
     if not teams.permissions.can_move_videos_to_team(request.user, team):
         raise PermissionDenied()
     videos = Video.objects.filter(video_id__in=request.POST.getlist('videos'))
+    moved_a_video = False
     with transaction.atomic():
         for video in videos:
             try:
@@ -1111,6 +1112,9 @@ def url_search_move(request):
                 msg = fmt(ugettext(u"%(video)s already added to %(team)s"),
                           team=team, video=video.title_display())
                 messages.error(request, msg)
-    messages.success(request, fmt(ugettext(u'Videos moved to %(team)s'),
-                                  team=team))
+            else:
+                moved_a_video = True
+    if moved_a_video:
+        messages.success(request, fmt(ugettext(u'Videos moved to %(team)s'),
+                                      team=team))
     return redirect(request.get_full_path())
