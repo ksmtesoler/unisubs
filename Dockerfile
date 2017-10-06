@@ -26,7 +26,8 @@ ADD .docker/bin/* /usr/local/bin/
 RUN rm /usr/local/man
 RUN mkdir -p /var/run/amara
 RUN useradd --home /var/run/amara --shell /bin/bash amara
-RUN chown amara:amara /var/run/amara
+RUN mkdir /var/run/amara/test-output/
+RUN chown -R amara:amara /var/run/amara
 USER amara
 WORKDIR /var/run/amara
 EXPOSE 8000
