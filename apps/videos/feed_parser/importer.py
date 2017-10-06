@@ -76,8 +76,9 @@ class VideoImporter(object):
             for vt, info, entry in items
             if vt is not None
         ]
+        team_id = self.team.id if self.team else 0
         existing_urls = set(VideoUrl.objects
-                            .filter(url__in=urls)
+                            .filter(url__in=urls, team_id=team_id)
                             .values_list('url', flat=True))
 
         for vt, info, entry in items:
