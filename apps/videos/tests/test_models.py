@@ -647,7 +647,8 @@ class PreventDuplicatePublicVideoFlagTest(TestCase):
         video2, video_url2 = self.team.add_video(self.url, self.user)
         assert_equal(video1.id, video2.id)
         assert_equal(video2.get_team_video().team, self.team)
-        assert_equal(VideoUrl.objects.filter(url=self.url).count(), 1)
+        video_url = VideoUrl.objects.get(url=self.url)
+        assert_equal(video_url.team_id, self.team.id)
 
     def test_move_into_project(self):
         # Test moving a video from the public area and also into a project

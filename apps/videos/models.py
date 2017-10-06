@@ -744,6 +744,8 @@ class Video(models.Model):
                     VideoUrl.objects
                     .filter(url=url, team_id=0)
                     .select_related('video').get())
+                public_video_url.team_id = team.id
+                public_video_url.save()
                 return public_video_url.video, public_video_url
             except VideoUrl.DoesNotExist:
                 pass
