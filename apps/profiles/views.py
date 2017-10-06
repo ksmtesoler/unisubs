@@ -273,9 +273,8 @@ def send_message(request):
 @login_required
 def generate_api_key(request):
     key, created = AmaraApiKey.objects.get_or_create(user=request.user)
-    if not created:
-        key.key = key.generate_key()
-        key.save()
+    key.key = key.generate_key()
+    key.save()
     return HttpResponse(json.dumps({"key":key.key}))
 
 
