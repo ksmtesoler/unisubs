@@ -1,4 +1,5 @@
 {% load i18n_tags %}
+{% load url from future %}
 <li class="selectList-item">
   <div class="checkbox">
     <input value="{{ application.id }}" id="application-{{ application.id }}" type="checkbox" class="selectList-checkbox">
@@ -17,6 +18,9 @@
         <button class="inline" type="submit" name="form" value="deny">
           <i class="icon icon-close"></i>
         </button>
+        <a class="inline" type="action" href="{% url "messages:new" %}?user={{ application.user.username }}">
+          <i class="icon icon-mail"></i>
+        </a>
       </form>
     </nav>
     <h3><a href="{{ application.user.profile_url }}">{{ application.user.display_name }}</a></h3>
