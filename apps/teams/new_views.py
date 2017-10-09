@@ -292,11 +292,14 @@ def manage_application_form(request, team, form_name, applications):
             logger.error(e, exc_info=True)
 
     template_name = 'future/teams/applications/forms/{}.html'.format(form_name)
-    response_renderer.show_modal(template_name, {
+    modal_context = {
         'team': team,
         'selection_count': len(selection),
         'single_selection': len(selection) == 1,
-    })
+    }
+    if modal_context['single_selection']:
+        modal_context['user'] = applications[0].user
+    response_renderer.show_modal(template_name, modal_context)
     return response_renderer.render()
 
 @team_view
