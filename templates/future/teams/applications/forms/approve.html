@@ -10,6 +10,7 @@
           {% endblocktrans %}
         </h4>
       </div>
+      <span style="padding: 20px;"></span>
       <form class="ajaxForm text-center" method="POST" action="{{ request.get_full_path }}" enctype="multipart/form-data">
         {% csrf_token %}
         {% include "future/forms/non-field-errors.html" %}
