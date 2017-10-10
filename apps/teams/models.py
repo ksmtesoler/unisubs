@@ -454,6 +454,8 @@ class Team(models.Model):
                                      project=project,
                                      added_by=user)
             video.is_public = self.is_visible
+            if setup_video:
+                setup_video(video, video_url)
 
         return Video.add(url, user, setup_team_video, team=self)
 
