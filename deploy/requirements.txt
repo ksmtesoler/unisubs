@@ -77,5 +77,6 @@ isodate==0.5.4
 django-simple-captcha==0.5.1
 django-ipware==1.1.2
 uwsgi==2.0.14
+raven==6.1.0
 newrelic
 subprocess32
