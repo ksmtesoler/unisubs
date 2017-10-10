@@ -18,9 +18,9 @@ Amara uses [Docker](http://docker.io).  For ease of development, we use the dock
 
 2. Get submodules.  There are two cases here:
 
-   - For non-pcf employees, use the ./get-submodules public
+   - For non-pcf employees, use the ./checkout-submodules public
    - For PCF employees and others with access to our private repositories, use
-     the ./get-submodules all
+     the ./checkout-submodules all
 
 3. Install docker-compose (http://docs.docker.com/compose/install/)
 
