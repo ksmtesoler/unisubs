@@ -142,6 +142,17 @@ def team_settings_view(view_func):
         return view_func(request, team, *args, **kwargs)
     return login_required(wrapper)
 
+def application_review_view(view_func):
+    """Decorator for the application review page."""
+    @functools.wraps(view_func)
+    def wrapper(request, team, *args, **kwargs):
+        if not team.user_is_admin(request.user):
+            messages.error(request,
+                           _(u'You do not have permission to review applications to this team.'))
+            return HttpResponseRedirect(team.get_absolute_url())
+        return view_func(request, team, *args, **kwargs)
+    return login_required(wrapper)
+
 @with_old_view(old_views.detail)
 @team_view
 def videos(request, team):
@@ -224,6 +235,7 @@ def members(request, team):
 
 @with_old_view(old_views.applications)
 @team_view
+@application_review_view
 def applications(request, team):
     if not team.user_is_admin(request.user):
         raise PermissionDenied()
