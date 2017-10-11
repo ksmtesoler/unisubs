@@ -27,7 +27,7 @@
     <p>{{ application.user.get_languages|to_localized_display_list }}</p>
     <div class="clamp">
       <div class="clamp-lines clamp-sm-3 clamp-xs-2">
-        <p>{{ application.note }}</p>
+        {{ application.note|linebreaks }}
       </div>
       <a class="clamp-expand">More <i class="icon icon-down"></i></a>
       <a class="clamp-collapse">Less <i class="icon icon-up"></i></a>
