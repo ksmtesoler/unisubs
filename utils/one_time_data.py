@@ -17,6 +17,7 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 import uuid
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -28,8 +29,9 @@ def set_one_time_data(data):
     token = str(uuid.uuid4())
     key = _mk_key(token)
     cache.set(key, data, 60)
-    return ''.join(['https://', Site.objects.get_current().domain,
-                    reverse("one_time_url", kwargs={"token": token})])
+    return '{}://{}{}'.format(settings.DEFAULT_PROTOCOL,
+                                 Site.objects.get_current().domain,
+                                 reverse("one_time_url", kwargs={"token": token}))
 
 def get_one_time_data(token):
     key = _mk_key(token)

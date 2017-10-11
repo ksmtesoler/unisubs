@@ -47,7 +47,6 @@ from django.utils.http import urlquote_plus
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.views.decorators.http import require_POST
 from gdata.service import RequestError
-from vidscraper.errors import Error as VidscraperError
 
 import widget
 from widget import rpc as widget_rpc
@@ -58,10 +57,11 @@ from comments.models import Comment
 from comments.forms import CommentForm
 from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
-                                   user_can_edit_subtitles)
+                                   user_can_edit_subtitles,
+                                   user_can_change_subtitle_language)
 from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
                              RollbackSubtitlesForm, SubtitlesNotesForm,
-                             ResyncSubtitlesForm)
+                             ResyncSubtitlesForm, ChangeSubtitleLanguageForm)
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
@@ -74,7 +74,7 @@ from videos import permissions
 from videos.decorators import (get_video_revision, get_video_from_code,
                                get_cached_video_from_code)
 from videos.forms import (
-    VideoForm, FeedbackForm, EmailFriendForm, UserTestResultForm,
+    VideoForm,
     CreateVideoUrlForm, NewCreateVideoUrlForm, AddFromFeedForm,
     ChangeVideoOriginalLanguageForm, CreateSubtitlesForm,
 )
@@ -313,6 +313,9 @@ def video(request, video_id, video_url=None, title=None):
 
     activity = all_activities[:ACTIVITY_PER_PAGE]
     show_all = False if len(activity) >= len(all_activities) else True
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
@@ -429,6 +432,17 @@ def urls_tab_replacement_data(request, video):
             'create_url_form': NewCreateVideoUrlForm(video, request.user),
         })
 
+def sanity_check_video_urls(request, video):
+    team = video.get_team()
+    team_id = team.id if team else 0
+    for video_url in video.get_video_urls():
+        if video_url.team_id != team_id:
+            video_url.team_id = team_id
+            video_url.save()
+            if request.user.is_staff:
+                messages.warning(request, "Updated team for {} to {}".format(
+                                     video_url.url, team))
+
 def _get_related_task(request):
     """
     Checks if request has t=[task-id], and if so checks if the current
@@ -515,17 +529,6 @@ def upload_subtitles(request):
 
     return HttpResponse(json.dumps(output))
 
-def feedback(request, hide_captcha=False):
-    output = dict(success=False)
-    form = FeedbackForm(request.POST, initial={'captcha': request.META['REMOTE_ADDR']},
-                        hide_captcha=hide_captcha)
-    if form.is_valid():
-        form.send(request)
-        output['success'] = True
-    else:
-        output['errors'] = form.get_errors()
-    return HttpResponse(json.dumps(output), "text/javascript")
-
 @get_video_from_code
 def legacy_history(request, video, lang):
     """
@@ -609,6 +612,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'subtitle_version': version,
         'enable_delete_subtitles': workflow.user_can_delete_subtitles(
                 request.user, subtitle_language.language_code),
+        'enable_change_language': user_can_change_subtitle_language(request.user, video),
         'show_rollback': version and not version.is_tip(public=False),
         'all_subtitle_versions': all_subtitle_versions,
         'enabled_compare': len(all_subtitle_versions) >= 2,
@@ -647,6 +651,9 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     else:
         context['show_sync_history'] = False
         context['can_resync'] = False
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/subtitles.html', context)
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
@@ -712,6 +719,7 @@ def downloadable_formats(user):
 
 subtitles_form_map = {
     'delete': DeleteSubtitlesForm,
+    'language': ChangeSubtitleLanguageForm,
     'rollback': RollbackSubtitlesForm,
     'notes': SubtitlesNotesForm,
     'resync': ResyncSubtitlesForm,
@@ -730,7 +738,11 @@ def subtitles_ajax_form(request, video, subtitle_language, version):
     if not form.check_permissions():
         raise PermissionDenied()
 
-    if request.is_ajax():
+    if form.is_bound and form.is_valid() and form_name == 'language':
+        form.submit(request)
+        redirect_url = subtitle_language.get_absolute_url() + '?team=' + request.GET['team']
+        return redirect(redirect_url)
+    elif request.is_ajax():
         if form.is_bound and form.is_valid():
             form.submit(request)
             return handle_subtitles_ajax_form_success(

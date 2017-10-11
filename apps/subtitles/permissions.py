@@ -39,3 +39,13 @@ def user_can_edit_subtitles(user, video, language_code):
         return True
     workflow = workflows.get_workflow(video)
     return workflow.user_can_edit_subtitles(user, language_code)
+
+def user_can_change_subtitle_language(user, video):
+    if user.is_staff:
+        return True
+    tv = video.get_team_video()
+    if tv is None:
+        return False
+    else:
+        team = tv.team
+        return team.user_is_admin(user)

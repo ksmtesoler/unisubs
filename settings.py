@@ -231,6 +231,7 @@ INSTALLED_APPS = (
     'widget',
     'subtitles',
     'captcha',
+    'raven.contrib.django.raven_compat',
 )
 
 STARTUP_MODULES = [
@@ -465,7 +466,6 @@ MEDIA_BUNDLES = {
             "css/background.css",
             "css/activity_stream.css",
             "css/settings.css",
-            "css/feedback.css",
             "css/messages.css",
             "css/global.css",
             "css/top_user_panel.css",

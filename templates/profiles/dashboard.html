@@ -12,9 +12,6 @@
     {{ block.super }}
     {% media_bundle "teams.js" %}
     <script src="{% url "teams:rpc_api" %}" type="text/javascript"></script>
-    <script type="text/javascript">
-        window.WIDGET_SETTINGS = {{ widget_settings|to_json|safe }};
-    </script>
 {% endblock %}
 
 {% block main_content %}

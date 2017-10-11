@@ -71,7 +71,6 @@ VIDEO_TYPE_YOUTUBE = 'Y'
 VIDEO_TYPE_BLIPTV = 'B'
 VIDEO_TYPE_GOOGLE = 'G'
 VIDEO_TYPE_FORA = 'F'
-VIDEO_TYPE_USTREAM = 'U'
 VIDEO_TYPE_VIMEO = 'V'
 VIDEO_TYPE_WISTIA = 'W'
 VIDEO_TYPE_DAILYMOTION = 'D'
@@ -407,9 +406,10 @@ class Video(models.Model):
 
     objects = VideoManager()
 
-    class UrlAlreadyAdded(Exception):
+    class DuplicateUrlError(Exception):
         """
-        Video.add() was called with a URL that already exists in amara
+        Raised where a video URL would be added twice to videos on the same
+        team or two non-team videos.
 
         Attributes:
           video: Video for the URL
@@ -420,7 +420,7 @@ class Video(models.Model):
             self.video = video_url.video
 
         def __unicode__(self):
-            return 'Video.UrlAlreadyAdded: {}'.format(self.url)
+            return 'Video.DuplicateUrlError: {}'.format(self.url)
 
     def __init__(self, *args, **kwargs):
         super(Video, self).__init__(*args, **kwargs)
@@ -570,6 +570,11 @@ class Video(models.Model):
         self._cached_teamvideo = rv
         return rv
 
+    def get_team(self):
+        """Return the Team for this video or None."""
+        team_video = self.get_team_video()
+        return team_video.team if team_video else None
+
     def clear_team_video_cache(self):
         if hasattr(self, '_cached_teamvideo'):
             del self._cached_teamvideo
@@ -587,20 +592,6 @@ class Video(models.Model):
 
     def can_user_see(self, user):
         return self.get_workflow().user_can_view_video(user)
-
-    def thumbnail_link(self):
-        """Return a URL to this video's thumbnail, or '' if there isn't one.
-
-        Unlike get_thumbnail, this URL will always be absolute.
-
-        """
-        if not self.thumbnail:
-            return ''
-
-        if self.thumbnail.startswith('http://'):
-            return self.thumbnail
-
-        return settings.STATIC_URL+self.thumbnail
 
     def is_html5(self):
         """Return whether if the original URL for this video is an HTML5 one."""
@@ -714,7 +705,7 @@ class Video(models.Model):
 
         Raises:
             VideoTypeError: The video URL is invalid
-            Video.UrlAlreadyAdded: The video URL has already been added
+            Video.DuplicateUrlError: The video URL has already been added
 
         Returns:
             (video, video_url) tuple
@@ -730,7 +721,7 @@ class Video(models.Model):
             # pass that to get_or_create(), and only run the setup code if we
             # end up creating a VideoUrl.
             video = Video.objects.create()
-            vt, video_url = video._add_video_url(url, user, True)
+            vt, video_url = video._add_video_url(url, user, True, team)
             # okay, we can now run the setup
             incomplete = video.set_values(vt, video_url, user, team)
             video.user = user
@@ -769,9 +760,10 @@ class Video(models.Model):
             VideoUrl object that was added
 
         Raises:
-            Video.UrlAlreadyAdded: The URL was already added to a different video
+            Video.DuplicateUrlError: The URL was already added to a
+                                     different video
         """
-        vt, video_url = self._add_video_url(url, user, False)
+        vt, video_url = self._add_video_url(url, user, False, self.get_team())
 
         video_cache.invalidate_cache(self.video_id)
         self.cache.invalidate()
@@ -780,7 +772,7 @@ class Video(models.Model):
 
         return video_url
 
-    def _add_video_url(self, url, user, primary):
+    def _add_video_url(self, url, user, primary, team):
         # Low-level video URL adding code for add() and add_url()
         if isinstance(url, basestring):
             vt = video_type_registrar.video_type_for_url(url)
@@ -788,17 +780,35 @@ class Video(models.Model):
                 raise VideoTypeError(url)
         else:
             vt = url
+        team_id = team.id if team else 0
         video_url, created = VideoUrl.objects.get_or_create(
-            url=vt.convert_to_video_url(), type=vt.abbreviation, defaults={
+            url=vt.convert_to_video_url(), type=vt.abbreviation,
+            defaults={
                 'video': self,
+                'team_id': team_id,
                 'added_by': user,
                 'primary': primary,
                 'original': primary,
                 'videoid': vt.video_id if vt.video_id else '',
             })
         if not created:
-            raise Video.UrlAlreadyAdded(video_url)
+            raise Video.DuplicateUrlError(video_url)
         return vt, video_url
+
+    def update_team(self, team):
+        """Update the team for this video
+
+        This method must be called whenever the video changes teams.  For
+        example:
+
+            - Being added to a team from the public area (new TeamVideo object
+              created)
+            - Being moved from team to team (TeamVideo object changed)
+            - Being moved from a team back to the public area (TeamVideo
+              object deleted)
+        """
+        new_team_id = team.id if team else 0
+        self.videourl_set.update(team_id=new_team_id)
 
     @property
     def language(self):
@@ -2037,15 +2047,6 @@ class Action(models.Model):
             instance.action = obj
             instance.save()
 
-# UserTestResult
-class UserTestResult(models.Model):
-    email = models.EmailField()
-    browser = models.CharField(max_length=1024)
-    task1 = models.TextField()
-    task2 = models.TextField(blank=True)
-    task3 = models.TextField(blank=True)
-    get_updates = models.BooleanField(default=False)
-
 class VideoUrlManager(models.Manager):
     def get_query_set(self):
         return VideoUrlQueryset(self.model, using=self._db)
@@ -2080,6 +2081,14 @@ class VideoUrl(models.Model):
     # this is the owner if the video is from a third party website
     # shuch as Youtube or Vimeo username
     owner_username = models.CharField(max_length=255, blank=True, null=True)
+    # Team.id value copied from TeamVideo.team.  It's only here because we
+    # need to use it in our unique constraint.
+    #
+    # We use an IntegerField instead of a ForeignKey because this makes the
+    # unique constraint work properly with non-team videos.  If it was a NULL
+    # valued ForeignKey, then mysql would not enforce the constraint.  So
+    # instead, we use an IntegerField set equal to 0.
+    team_id = models.IntegerField(blank=True, default=0)
 
     objects = VideoUrlManager()
 

@@ -48,7 +48,8 @@ BATCH_SIZE = 1000
 logger = logging.getLogger(__name__)
 
 def get_url_base():
-    return "http://" + Site.objects.get_current().domain
+    return "{}://{}".format(settings.DEFAULT_PROTOCOL,
+                            Site.objects.get_current().domain)
 
 def team_sends_notification(team, notification_setting_name):
     from teams.models import Setting

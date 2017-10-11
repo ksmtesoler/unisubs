@@ -438,7 +438,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         return Task.objects.incomplete().filter(assignee=self)
 
     def _get_gravatar(self, size, default='mm'):
-        url = "http://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
+        url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
         url += urllib.urlencode({'d': default, 's':str(size)})
         return url
 
@@ -455,7 +455,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def small_avatar(self):
         return self._get_avatar_by_size(50)
 
-    # future UI avatag
+    # future UI avatar
     def _get_avatar(self, size):
         if self.picture:
             return self.picture.thumb_url(size, size)
@@ -747,7 +747,7 @@ class EmailConfirmationManager(models.Manager):
         except Site.DoesNotExist:
             return
         path = reverse("auth:confirm_email", args=[confirmation_key])
-        activate_url = u"http://%s%s" % (unicode(current_site.domain), path)
+        activate_url = u"{}://{}{}".format(settings.DEFAULT_PROTOCOL, unicode(current_site.domain), path)
         context = {
             "user": user,
             "activate_url": activate_url,

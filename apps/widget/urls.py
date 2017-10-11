@@ -33,9 +33,6 @@ urlpatterns = patterns(
         name='widgetizerbootloader'),
     url(r'^convert_subtitles/$', 'convert_subtitles',
         name='convert_subtitles'),
-    url(r'^widgetize_demo/(\w+)$', 'widgetize_demo'),
-    url(r'^statwidget_demo.html$', 'statwidget_demo'),
-    url(r'^video_demo/(\w+)$', 'video_demo'),
     url(r'^save_emailed_translations/$',
         'save_emailed_translations'),
 )
