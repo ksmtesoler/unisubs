@@ -4,7 +4,6 @@
 #
 # Required settings:
 #    USE_AMAZON_S3 - Boolean, self explanatory
-#    DEFAULT_BUCKET - String, represents the default bucket name to use if one isn't provided
 #    AWS_ACCESS_KEY_ID - String
 #    AWS_SECRET_ACCESS_KEY - String
 #
