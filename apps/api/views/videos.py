@@ -399,6 +399,8 @@ class VideoSerializer(serializers.Serializer):
         'project-without-team': "Can't specify project without team",
         'unknown-project': 'Unknown project: {project}',
         'video-exists': 'Video already added for {url}',
+        'video-policy-error': ('Video for {url} not moved because it would '
+                               'conflic with the video policy for {team}'),
         'invalid-url': 'Invalid URL: {url}',
     }
 
@@ -526,7 +528,11 @@ class VideoSerializer(serializers.Serializer):
         try:
             self._update_team(video, validated_data)
         except Video.DuplicateUrlError, e:
-            self.fail('video-exists', url=e.video_url.url)
+            if e.from_prevent_duplicate_public_videos:
+                self.fail('video-policy-error', url=e.video_url.url,
+                          team=validated_data['team'])
+            else:
+                self.fail('video-exists', url=e.video_url.url)
         video.save()
         if validated_data.get('thumbnail'):
             videos.tasks.save_thumbnail_in_s3.delay(video.id)

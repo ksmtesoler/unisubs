@@ -1108,9 +1108,15 @@ def url_search_move(request):
                     team_video.move_to(team, user=request.user)
                 else:
                     team.add_existing_video(video, request.user)
-            except Video.DuplicateUrlError:
-                msg = fmt(ugettext(u"%(video)s already added to %(team)s"),
-                          team=team, video=video.title_display())
+            except Video.DuplicateUrlError, e:
+                if e.from_prevent_duplicate_public_videos:
+                    msg = ugettext(
+                        u"%(video)s not moved to %(team)s because it "
+                        "would conflict with the team policy")
+                else:
+                    msg = ugettext(u"%(video)s already added to %(team)s"),
+
+                msg = fmt(msg, team=team, video=video.title_display())
                 messages.error(request, msg)
             else:
                 moved_a_video = True

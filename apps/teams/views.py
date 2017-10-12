@@ -630,6 +630,7 @@ def move_videos(request, slug, project_slug=None, languages=None):
 
     if request.method == 'POST':
         duplicate_url_errors = []
+        video_policy_errors = []
         form = OldMoveVideosForm(request.user, request.POST)
         if 'move' in request.POST and form.is_valid():
             target_team = form.cleaned_data['team']
@@ -659,7 +660,10 @@ def move_videos(request, slug, project_slug=None, languages=None):
                 except MultipleObjectsReturned:
                     return  HttpResponseServerError("Internal Error")
                 except Video.DuplicateUrlError, e:
-                    duplicate_url_errors.append(e.video_url.url)
+                    if e.from_prevent_duplicate_public_videos:
+                        video_policy_errors.append(e.video_url.url)
+                    else:
+                        duplicate_url_errors.append(e.video_url.url)
             if duplicate_url_errors:
                 messages.warning(request, fmt(
                     ungettext(
@@ -670,6 +674,18 @@ def move_videos(request, slug, project_slug=None, languages=None):
                         len(duplicate_url_errors)),
                     urls=','.join(duplicate_url_errors),
                     team=target_team))
+            if video_policy_errors:
+                messages.warning(request, fmt(
+                    ungettext(
+                        "%(urls)s couldn't be moved because it would "
+                        "conflict with the video policy for %(team)s",
+                        "Some videos couldn't be moved because it would "
+                        "conflict with the video polcy for %(team)s: "
+                        "%(urls)s",
+                        len(duplicate_url_errors)),
+                    urls=','.join(duplicate_url_errors),
+                    team=target_team))
+
     else:
         form = OldMoveVideosForm(request.user)
      
@@ -948,7 +964,7 @@ def remove_video(request, team_video_pk):
         try:
             team_video.remove(request.user)
         except Video.DuplicateUrlError, e:
-            if e.video.get_team_video():
+            if e.from_prevent_duplicate_public_videos:
                 msg = _(u"Video not removed to avoid a conflict with "
                         u"another team's video policy.")
             else:

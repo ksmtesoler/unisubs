@@ -577,12 +577,15 @@ class AddVideoTest(TestCase):
                      mock.call(signal=signals.video_url_added,
                                sender=video_url, video=video, new_video=True, team=None, user=self.user))
 
-def check_duplicate_url_error(url, existing_video, team=None):
+def check_duplicate_url_error(url, existing_video, team=None,
+                              from_prevent_duplicate_public_videos=False):
     num_videos_before_call = Video.objects.count()
     with assert_raises(Video.DuplicateUrlError) as cm:
         v, vurl = Video.add(url, UserFactory(), team=team)
     assert_equal(cm.exception.video, existing_video)
     assert_equal(cm.exception.video_url, existing_video.get_primary_videourl_obj())
+    assert_equal(cm.exception.from_prevent_duplicate_public_videos,
+                 from_prevent_duplicate_public_videos)
     # test that we didn't create any extra videos as a result of the call
     assert_equal(Video.objects.count(), num_videos_before_call)
 
@@ -661,7 +664,8 @@ class PreventDuplicatePublicVideoFlagTest(TestCase):
         # Test adding a video URL to the public area when it's already on a
         # video in the team.  We should throw a DuplicateUrlError.
         video, video_url = self.team.add_video(self.url, self.user)
-        check_duplicate_url_error(self.url, video)
+        check_duplicate_url_error(self.url, video,
+                                  from_prevent_duplicate_public_videos=True)
 
     def test_remove_from_team(self):
         # Test removing a video from a different team, when one of it's video
@@ -675,6 +679,21 @@ class PreventDuplicatePublicVideoFlagTest(TestCase):
             video2.get_team_video().remove(self.user)
         assert_equal(cm.exception.video, video1)
         assert_equal(cm.exception.video_url, video_url1)
+        assert_equal(cm.exception.from_prevent_duplicate_public_videos, True)
+
+    def test_move_to_team(self):
+        # Test moving a video from a team without
+        # prevent_duplicate_public_videos to a team with it set.  It should
+        # result in a DuplicateUrlError if there is a public video with the
+        # same URL
+        public_video, public_video_url = Video.add(self.url, self.user)
+        other_team = TeamFactory(admin=self.user)
+        video, video_url = other_team.add_video(self.url, self.user)
+        with assert_raises(Video.DuplicateUrlError) as cm:
+            video.get_team_video().move_to(self.team)
+        assert_equal(cm.exception.video, public_video)
+        assert_equal(cm.exception.video_url, public_video_url)
+        assert_equal(cm.exception.from_prevent_duplicate_public_videos, True)
 
     def test_add_video_url_to_public(self):
         # Test trying to add a video URL to a public video, when that video URL
@@ -686,6 +705,7 @@ class PreventDuplicatePublicVideoFlagTest(TestCase):
             video2.add_url(self.url, self.user)
         assert_equal(cm.exception.video, video1)
         assert_equal(cm.exception.video_url, video_url1)
+        assert_equal(cm.exception.from_prevent_duplicate_public_videos, True)
 
     def test_add_video_url_to_team_video(self):
         # Test trying to add a video URL to a team video, when that video URL
