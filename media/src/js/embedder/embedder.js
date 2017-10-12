@@ -225,26 +225,22 @@
                         if (resp.objects.length) {
                             // The video exists on Amara.
                             video.set('is_on_amara', true);
-                            // There should only be one object.
-                            if (resp.objects.length === 1) {
-                                // Set all of the API attrs as attrs on the video model.
-                                video.set(resp.objects[0]);
-				sizeUpdated(video);
-				var visibleLanguages = _$.map(_$.grep(video.get('languages'), function(language) {return language.published;}),
-							  function(language) {return language.code;});
-				video.get('languages').forEach(function(lang) {
-				    video.languages_dir[lang.code] = lang.dir;
-				});
-                                // Set the initial language to either the one provided by the initial
-                                // options, or the original language from the API.
-                                video.set('initial_language',
-					  (video.get('initial_language') && (visibleLanguages.indexOf(video.get('initial_language')) > -1) && video.get('initial_language')) ||
-					  (video.get('original_language') && (visibleLanguages.indexOf(video.get('original_language')) > -1) && video.get('original_language')) ||
-					  ((visibleLanguages.indexOf('en') > -1) && 'en') ||
-					  ((visibleLanguages.length > 0) && visibleLanguages[0])
-                                );
-                            }
-
+                            // Set all of the API attrs as attrs on the video model.
+                            video.setFromResponseData(resp);
+                            sizeUpdated(video);
+                            var visibleLanguages = _$.map(_$.grep(video.get('languages'), function(language) {return language.published;}),
+                                                      function(language) {return language.code;});
+                            video.get('languages').forEach(function(lang) {
+                                video.languages_dir[lang.code] = lang.dir;
+                            });
+                            // Set the initial language to either the one provided by the initial
+                            // options, or the original language from the API.
+                            video.set('initial_language',
+                                      (video.get('initial_language') && (visibleLanguages.indexOf(video.get('initial_language')) > -1) && video.get('initial_language')) ||
+                                      (video.get('original_language') && (visibleLanguages.indexOf(video.get('original_language')) > -1) && video.get('original_language')) ||
+                                      ((visibleLanguages.indexOf('en') > -1) && 'en') ||
+                                      ((visibleLanguages.length > 0) && visibleLanguages[0])
+                            );
                         } else {
                             // The video does not exist on Amara.
                             video.set('is_on_amara', false);
@@ -257,6 +253,21 @@
                         video.view.initThumbnail();
                     }
                 });
+            },
+            setFromResponseData(resp) {
+                // Try to find a non-team video
+                var videoData;
+                for(var i=0; i < resp.objects.length; i++) {
+                    if(!resp.objects[i].team) {
+                        videoData = resp.objects[i];
+                        break;
+                    }
+                }
+                // Fall back to the first video
+                if(!videoData) {
+                    videoData = resp.objects[0];
+                }
+                this.set(videoData);
             }
         });
 
