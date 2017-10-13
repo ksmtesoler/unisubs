@@ -7,27 +7,10 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        from tastypie.models import ApiKey
-        for key in ApiKey.objects.all():
-            try:
-                user = orm.CustomUser.objects.get(id=key.user.id)
-                orm.AmaraApiKey.objects.create(user=user,
-                                               key=key.key)
-            except orm.CustomUser.DoesNotExist:
-                pass
-        ApiKey.objects.all().delete()
+        db.execute("INSERT INTO auth_amaraapikey (auth_amaraapikey.user_id, auth_amaraapikey.created, auth_amaraapikey.key) SELECT tastypie_apikey.user_id, NOW(), tastypie_apikey.key FROM tastypie_apikey ;")
 
     def backwards(self, orm):
-        from tastypie.models import ApiKey
-        from django.contrib.auth.models import User
-        for key in orm.AmaraApiKey.objects.all():
-            try:
-                user = User.objects.get(id=key.user.id)
-                ApiKey.objects.create(user=user,
-                                      key=key.key)
-            except User.DoesNotExist:
-                pass
-        orm.AmaraApiKey.objects.all().delete()
+        pass
 
     models = {
         'auth.amaraapikey': {
