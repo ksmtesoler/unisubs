@@ -418,6 +418,19 @@ class SubtitleEditor(SubtitleEditorBase):
             request, *args, **kwargs)
 
 def _user_for_download_permissions(request):
+    if request.user.is_authenticated():
+        return request.user
+    username = request.META.get('HTTP_X_API_USERNAME', None)
+    api_key = request.META.get('HTTP_X_API_KEY',
+                               request.META.get('HTTP_X_APIKEY', None))
+    if not username or not api_key:
+        return request.user
+    try:
+        api_user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return request.user
+    if api_user.check_api_key(api_key):
+        return api_user
     return request.user
 
 def download(request, video_id, language_code, filename, format,
@@ -438,7 +451,6 @@ def download(request, video_id, language_code, filename, format,
                                                            language_code)
     version = language.version(public_only=not public_only,
                                version_number=version_number)
-
     if not version:
         raise Http404()
     if not format in babelsubs.get_available_formats():

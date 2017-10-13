@@ -568,6 +568,12 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         except:
             pass
 
+    def check_api_key(self, key):
+        try:
+            return self.amara_api_key.key == key
+        except AmaraApiKey.DoesNotExist:
+            return False
+
     def get_api_key(self):
         return AmaraApiKey.objects.get_or_create(user=self)[0].key
 
