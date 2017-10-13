@@ -30,10 +30,9 @@ from django.http import Http404, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode
-from tastypie.models import ApiKey
 
 from activity.models import ActivityRecord
-from auth.models import CustomUser as User
+from auth.models import CustomUser as User, AmaraApiKey
 from profiles.forms import (EditUserForm, EditAccountForm, SendMessageForm,
                             EditAvatarForm, AdminProfileForm, EditNotificationsForm)
 from profiles.rpc import ProfileApiClass
@@ -241,7 +240,6 @@ def account(request):
     else:
         editnotificationsform = EditNotificationsForm(instance=request.user, label_suffix="", prefix='notifications')
         editaccountform = EditAccountForm(instance=request.user, label_suffix="", prefix='account')
-
     twitters = request.user.twitteraccount_set.all()
     facebooks = request.user.facebookaccount_set.all()
 
@@ -274,10 +272,9 @@ def send_message(request):
 
 @login_required
 def generate_api_key(request):
-    key, created = ApiKey.objects.get_or_create(user=request.user)
-    if not created:
-        key.key = key.generate_key()
-        key.save()
+    key, created = AmaraApiKey.objects.get_or_create(user=request.user)
+    key.key = key.generate_key()
+    key.save()
     return HttpResponse(json.dumps({"key":key.key}))
 
 

@@ -305,7 +305,6 @@ def render_login(request, user_creation_form, login_form, redirect_to, email_for
         context['creation_form'] = user_creation_form
         context['login_form'] = login_form
         context['ted_auth'] = get_authentication_provider('ted')
-        context['stanford_auth'] = get_authentication_provider('stanford')
         context['facebook_login_confirm'] = reverse('thirdpartyaccounts:facebook_login_confirm');
         template = 'auth/login.html'
     else:
@@ -314,8 +313,6 @@ def render_login(request, user_creation_form, login_form, redirect_to, email_for
         template = 'auth/login_create.html'
         if confirm_type == 'ted':
             context['ted_auth'] = get_authentication_provider('ted')
-        if confirm_type == 'stanford':
-            context['stanford_auth'] = get_authentication_provider('stanford')
         if confirm_type == 'facebook':
             context['submit_facebook'] = "submit-proceed-to-create-facebook"
     return render_to_response(

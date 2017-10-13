@@ -31,7 +31,7 @@ from django.test import TestCase
 
 from auth import signals
 from auth.models import CustomUser as User, UserLanguage
-from auth.models import LoginToken
+from auth.models import LoginToken, AmaraApiKey
 from caching.tests.utils import assert_invalidates_model_cache
 from utils.factories import *
 from utils import test_utils
@@ -261,3 +261,19 @@ class LoginTokenViewsTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
 
+
+class ApiKeysTest(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_get_api_key(self):
+        self.assertEqual(self.user.check_api_key(""), False)
+        self.assertEqual(self.user.get_api_key(), "")
+        self.assertEqual(self.user.check_api_key(""), True)
+        key= self.user.api_key.generate_key()
+        self.user.api_key.key = key
+        self.user.api_key.save()
+        self.assertEqual(len(self.user.get_api_key()), 40)
+        self.assertEqual(self.user.get_api_key(), key)
+        self.assertEqual(self.user.check_api_key(""), False)
+        self.assertEqual(self.user.check_api_key(key), True)
