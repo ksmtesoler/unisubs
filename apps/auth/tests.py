@@ -270,9 +270,9 @@ class ApiKeysTest(TestCase):
         self.assertEqual(self.user.check_api_key(""), False)
         self.assertEqual(self.user.get_api_key(), "")
         self.assertEqual(self.user.check_api_key(""), True)
-        key= self.user.amara_api_key.generate_key()
-        self.user.amara_api_key.key = key
-        self.user.amara_api_key.save()
+        key= self.user.api_key.generate_key()
+        self.user.api_key.key = key
+        self.user.api_key.save()
         self.assertEqual(len(self.user.get_api_key()), 40)
         self.assertEqual(self.user.get_api_key(), key)
         self.assertEqual(self.user.check_api_key(""), False)

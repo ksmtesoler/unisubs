@@ -570,7 +570,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
 
     def check_api_key(self, key):
         try:
-            return self.amara_api_key.key == key
+            return self.api_key.key == key
         except AmaraApiKey.DoesNotExist:
             return False
 
@@ -848,7 +848,7 @@ class LoginToken(models.Model):
         return u"LoginToken for %s" %(self.user)
 
 class AmaraApiKey(models.Model):
-    user = models.OneToOneField(CustomUser, related_name="amara_api_key")
+    user = models.OneToOneField(CustomUser, related_name="api_key")
     created = models.DateTimeField(auto_now_add=True)
     key = models.CharField(max_length=256, blank=True, default='')
 
