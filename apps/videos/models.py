@@ -422,10 +422,15 @@ class Video(models.Model):
         Attributes:
           video: Video for the URL
           video_url: VideoUrl for the URL
+          from_prevent_duplicate_public_videos: Was this caused be a team
+              with the prevent_duplicate_public_videos flag set?
         """
-        def __init__(self, video_url):
+        def __init__(self, video_url,
+                     from_prevent_duplicate_public_videos=False):
             self.video_url = video_url
             self.video = video_url.video
+            self.from_prevent_duplicate_public_videos = \
+                from_prevent_duplicate_public_videos
 
         def __unicode__(self):
             return 'Video.DuplicateUrlError: {}'.format(self.video_url.url)
@@ -761,6 +766,8 @@ class Video(models.Model):
                     VideoUrl.objects
                     .filter(url=url, team_id=0)
                     .select_related('video').get())
+                public_video_url.team_id = team.id
+                public_video_url.save()
                 return public_video_url.video, public_video_url
             except VideoUrl.DoesNotExist:
                 pass
@@ -854,20 +861,33 @@ class Video(models.Model):
         return vt, vt.convert_to_video_url()
 
     @classmethod
-    def _check_prevent_duplicate_public_videos(cls, url):
+    def _check_prevent_duplicate_public_videos(cls, url, team=None):
         """Check if there are any duplicate video URLs on teams with
         prevent_duplicate_public_videos set
+
+        Call this whenever a URL is being added to amara, or moved to a team
+
+        Args:
+            url(str): url being added
+            team(Team): team the URL is being added to, or None if it's being
+                added to the public area
         """
+        if team and not team.prevent_duplicate_public_videos:
+            return
         try:
-            video_url = (
-                VideoUrl.objects
-                .filter(url=url,
-                        video__teamvideo__team__prevent_duplicate_public_videos=True)
-                .get())
+            qs = VideoUrl.objects.filter(url=url)
+            if team:
+                qs = qs.filter(video__teamvideo__isnull=True)
+            else:
+                qs = qs.filter(
+                    video__teamvideo__team__prevent_duplicate_public_videos=True
+                )
+            video_url = qs.get()
         except VideoUrl.DoesNotExist:
             pass
         else:
-            raise Video.DuplicateUrlError(video_url)
+            raise Video.DuplicateUrlError(
+                video_url, from_prevent_duplicate_public_videos=True)
 
     def update_team(self, team):
         """Update the team for this video
@@ -886,8 +906,7 @@ class Video(models.Model):
                 already added to the team
         """
         for vurl in self.get_video_urls():
-            if not team:
-                self._check_prevent_duplicate_public_videos(vurl.url)
+            self._check_prevent_duplicate_public_videos(vurl.url, team)
         new_team_id = team.id if team else 0
         try:
             self.videourl_set.update(team_id=new_team_id)

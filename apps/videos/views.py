@@ -1079,6 +1079,7 @@ def url_search_move(request):
     if not teams.permissions.can_move_videos_to_team(request.user, team):
         raise PermissionDenied()
     videos = Video.objects.filter(video_id__in=request.POST.getlist('videos'))
+    moved_a_video = False
     with transaction.atomic():
         for video in videos:
             try:
@@ -1087,10 +1088,19 @@ def url_search_move(request):
                     team_video.move_to(team, user=request.user)
                 else:
                     team.add_existing_video(video, request.user)
-            except Video.DuplicateUrlError:
-                msg = fmt(ugettext(u"%(video)s already added to %(team)s"),
-                          team=team, video=video.title_display())
+            except Video.DuplicateUrlError, e:
+                if e.from_prevent_duplicate_public_videos:
+                    msg = ugettext(
+                        u"%(video)s not moved to %(team)s because it "
+                        "would conflict with the team policy")
+                else:
+                    msg = ugettext(u"%(video)s already added to %(team)s"),
+
+                msg = fmt(msg, team=team, video=video.title_display())
                 messages.error(request, msg)
-    messages.success(request, fmt(ugettext(u'Videos moved to %(team)s'),
-                                  team=team))
+            else:
+                moved_a_video = True
+    if moved_a_video:
+        messages.success(request, fmt(ugettext(u'Videos moved to %(team)s'),
+                                      team=team))
     return redirect(request.get_full_path())

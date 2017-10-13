@@ -437,7 +437,7 @@ class Team(models.Model):
     def add_video(self, url, user, project=None, setup_video=None):
         """Create a video and add it to a team
 
-        Use this to add a video that was added in in the past to a team.
+        Use this to add a video that was not added to amara yet
 
         Args:
             url: Video url
@@ -454,6 +454,8 @@ class Team(models.Model):
                                      project=project,
                                      added_by=user)
             video.is_public = self.is_visible
+            if setup_video:
+                setup_video(video, video_url)
 
         return Video.add(url, user, setup_team_video, team=self)
 

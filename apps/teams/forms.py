@@ -1646,7 +1646,8 @@ class DeleteVideosForm(VideoManagementForm):
 
     def perform_submit(self, qs):
         delete = self.cleaned_data.get('delete', False)
-        self.duplicate_url_errors = 0
+        self.public_duplicate_url_errors = 0
+        self.other_team_duplicate_url_errors = 0
         self.success_count = 0
 
         for video in qs:
@@ -1657,8 +1658,11 @@ class DeleteVideosForm(VideoManagementForm):
             else:
                 try:
                     team_video.remove(self.user)
-                except Video.DuplicateUrlError:
-                    self.duplicate_url_errors += 1
+                except Video.DuplicateUrlError, e:
+                    if e.from_prevent_duplicate_public_videos:
+                        self.other_team_duplicate_url_errors += 1
+                    else:
+                        self.public_duplicate_url_errors += 1
                     continue
             self.success_count += 1
 
@@ -1681,7 +1685,7 @@ class DeleteVideosForm(VideoManagementForm):
 
     def error_messages(self):
         messages = []
-        if self.duplicate_url_errors:
+        if self.public_duplicate_url_errors:
             messages.append(fmt(self.ungettext(
                 'Video not removed because it already exists in the '
                 'public area',
@@ -1689,8 +1693,18 @@ class DeleteVideosForm(VideoManagementForm):
                 'public area',
                 '%(count)s videos not removed because they already exists in '
                 'the public area',
-                self.duplicate_url_errors),
-                                count=self.duplicate_url_errors))
+                self.public_duplicate_url_errors),
+                                count=self.public_duplicate_url_errors))
+        if self.other_team_duplicate_url_errors:
+            messages.append(fmt(self.ungettext(
+                "Video not removed to avoid a conflict with another "
+                "team's video policy",
+                "%(count) video not removed to avoid a conflict with another "
+                "team's video policy",
+                "%(count) videso not removed to avoid a conflict with another "
+                "team's video policy",
+                self.other_team_duplicate_url_errors),
+                                count=self.other_team_duplicate_url_errors))
         return messages
 
 class MoveVideosForm(VideoManagementForm):
@@ -1761,6 +1775,7 @@ class MoveVideosForm(VideoManagementForm):
 
     def perform_submit(self, qs):
         self.duplicate_url_errors = 0
+        self.video_policy_errors = 0
         self.success_count = 0
         for video in qs:
             team_video = video.teamvideo
@@ -1768,8 +1783,11 @@ class MoveVideosForm(VideoManagementForm):
                 team_video.move_to(self.cleaned_data['new_team'],
                                    self.cleaned_data['project'],
                                    self.user)
-            except Video.DuplicateUrlError:
-                self.duplicate_url_errors += 1
+            except Video.DuplicateUrlError, e:
+                if e.from_prevent_duplicate_public_videos:
+                    self.video_policy_errors += 1
+                else:
+                    self.duplicate_url_errors += 1
             else:
                 self.success_count += 1
 
@@ -1819,5 +1837,17 @@ class MoveVideosForm(VideoManagementForm):
                     "%(count)s videos already added to %(team)s",
                     self.duplicate_url_errors),
                 count=self.duplicate_url_errors,
+                team=self.cleaned_data['new_team']))
+        if self.video_policy_errors:
+            messages.append(fmt(
+                self.ungettext(
+                    "Video not moved because it would conflict with the "
+                    "video policy for %(team)s",
+                    "1 video not moved because it would conflict with the "
+                    "video policy for %(team)s",
+                    "%(count)s videos not moved because they would conflict "
+                    "with the video policy for %(team)s",
+                    self.video_policy_errors),
+                count=self.video_policy_errors,
                 team=self.cleaned_data['new_team']))
         return messages

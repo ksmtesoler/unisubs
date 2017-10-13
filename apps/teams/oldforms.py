@@ -281,14 +281,12 @@ class AddTeamVideoForm(forms.ModelForm):
             added_by=self.user)
         self._success_message = ugettext('Video successfully added to team.')
 
-
     def success_message(self):
         return self._success_message
 
     def save(self):
         # TeamVideo was already created in clean()
         return self.saved_team_video
-
 
 class AddTeamVideosFromFeedForm(AddFromFeedForm):
     def __init__(self, team, user, *args, **kwargs):
