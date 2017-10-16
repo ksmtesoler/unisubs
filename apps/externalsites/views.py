@@ -204,13 +204,13 @@ def handle_login_callback(request, auth_info, confirmed=True):
     user = auth.authenticate(openid_connect_info=openid_connect_info, email=email)
     if not user:
         messages.error(request, _("OpenID Connect error"))
-        return redirect('videos.videos.index')
+        return redirect('home')
     auth.login(request, user)
     next_url = auth_info.state.get('next')
     if next_url and is_safe_url(next_url):
         return HttpResponseRedirect(next_url)
     else:
-        return redirect('videos.videos.index')
+        return redirect('home')
 
 def youtube_add_account(request):
     if 'team_slug' in request.GET:
@@ -234,7 +234,7 @@ def handle_add_account_callback(request, auth_info):
         # there's no good place to redirect the user to since we don't know
         # what team/user they were trying to add the account for.  I guess the
         # homepage is as good as any.
-        return redirect('videos.views.index')
+        return redirect('home')
     account_data = {
         'username': user_info.username,
         'channel_id': user_info.channel_id,
@@ -254,7 +254,7 @@ def handle_add_account_callback(request, auth_info):
         logger.error("google_callback: invalid state data: %s" %
                      auth_info.state)
         messages.error(request, _("Error in auth callback"))
-        return redirect('videos.views.index')
+        return redirect('home')
 
     try:
         account = YouTubeAccount.objects.create_or_update(**account_data)
@@ -273,7 +273,7 @@ def google_callback(request):
         # there's no good place to redirect the user to since we don't know
         # what team/user they were trying to add the account for.  I guess the
         # homepage is as good as any.
-        return redirect('videos.views.index')
+        return redirect('home')
 
     callback_type = auth_info.state.get('type')
     if callback_type == 'login-confirmed':
@@ -285,7 +285,7 @@ def google_callback(request):
     else:
         messages.warning(request,
                          _("Google Login Complete, but no next step"))
-        return redirect('videos.views.index')
+        return redirect('home')
 
 def already_linked_message(user, other_account):
     if other_account.user is not None:
