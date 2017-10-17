@@ -89,6 +89,24 @@ class SearchBar(widgets.TextInput):
                          '{}'
                          '</div>'.format(input))
 
+class AmaraClearableFileInput(widgets.ClearableFileInput):
+    def render(self, name, value, attrs=None):
+        return mark_safe(u'<div class="input-group fileUpload">'
+                         '<input type="text" class="form-control" readonly>'
+                         '<label class="input-group-btn">'
+                         '<span class="button buttonFile">'
+                         'Browse&hellip; <input type="file" style="display: none;" multiple>'
+                         '</span></label></div>')
+
+class AmaraFileInput(widgets.FileInput):
+    def render(self, name, value, attrs=None):
+        return mark_safe(u'<div class="input-group fileUpload">'
+                         '<input type="text" class="form-control" readonly>'
+                         '<label class="input-group-btn">'
+                         '<span class="button buttonFile">'
+                         'Browse&hellip; <input type="file" style="display: none;" multiple>'
+                         '</span></label></div>')
+
 __all__ = [
-    'AmaraRadioSelect', 'SearchBar',
+    'AmaraRadioSelect', 'SearchBar', 'AmaraFileInput', 'AmaraClearableFileInput',
 ]

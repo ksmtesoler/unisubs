@@ -56,7 +56,7 @@ from teams.permissions import (
 from teams.permissions_const import ROLE_NAMES
 from teams.workflows import TeamWorkflow
 from ui.forms import (FiltersForm, ManagementForm, AmaraChoiceField,
-                      AmaraRadioSelect, SearchField)
+                      AmaraRadioSelect, SearchField, AmaraClearableFileInput, AmaraFileInput)
 from ui.forms import LanguageField as NewLanguageField
 from utils.forms import (ErrorableModelForm, get_label_for_value,
                          UserAutocompleteField, LanguageField,
@@ -590,7 +590,8 @@ class AddTeamVideosFromFeedForm(AddFromFeedForm):
                                         url=url)
 
 class CreateTeamForm(forms.ModelForm):
-    logo = forms.ImageField(validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)], required=False)
+    logo = forms.ImageField(widget=AmaraClearableFileInput,
+                validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)], required=False)
     workflow_type = forms.ChoiceField(choices=(), initial="O")
 
     class Meta:
@@ -839,12 +840,12 @@ class SettingsForm(forms.ModelForm):
     logo = forms.ImageField(
         validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)],
         help_text=_('Max 940 x 235'),
-        widget=forms.FileInput,
+        widget=AmaraFileInput,
         required=False)
     square_logo = forms.ImageField(
         validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)],
         help_text=_('Recommended size: 100 x 100'),
-        widget=forms.FileInput,
+        widget=AmaraFileInput,
         required=False)
 
     def __init__(self, *args, **kwargs):
@@ -1574,7 +1575,8 @@ class ApplicationForm(forms.Form):
         self.application.user.set_languages(languages)
 
 class TeamVideoCSVForm(forms.Form):
-    csv_file = forms.FileField(label="", required=True, allow_empty_file=False)
+    csv_file = forms.FileField(widget=AmaraFileInput,
+            label="", required=True, allow_empty_file=False)
 
 class VideoManagementForm(ManagementForm):
     """Base class for forms on the video management page."""
@@ -1622,7 +1624,8 @@ class EditVideosForm(VideoManagementForm):
                                 placeholder=_('No change'))
     project = ProjectField(label=_('Project'), required=False,
                            null_label=_('No change'))
-    thumbnail = forms.ImageField(label=_('Change thumbnail'), required=False)
+    thumbnail = forms.ImageField(widget=AmaraClearableFileInput,
+                                 label=_('Change thumbnail'), required=False)
 
     def setup_fields(self):
         self.fields['project'].setup(self.team)
