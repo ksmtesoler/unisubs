@@ -313,6 +313,9 @@ def video(request, video_id, video_url=None, title=None):
 
     activity = all_activities[:ACTIVITY_PER_PAGE]
     show_all = False if len(activity) >= len(all_activities) else True
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
@@ -429,6 +432,17 @@ def urls_tab_replacement_data(request, video):
             'create_url_form': NewCreateVideoUrlForm(video, request.user),
         })
 
+def sanity_check_video_urls(request, video):
+    team = video.get_team()
+    team_id = team.id if team else 0
+    for video_url in video.get_video_urls():
+        if video_url.team_id != team_id:
+            video_url.team_id = team_id
+            video_url.save()
+            if request.user.is_staff:
+                messages.warning(request, "Updated team for {} to {}".format(
+                                     video_url.url, team))
+
 def _get_related_task(request):
     """
     Checks if request has t=[task-id], and if so checks if the current
@@ -462,27 +476,7 @@ def activity(request, video_id):
                        extra_context=extra_context)
 
 def check_upload_subtitles_permissions(request):
-    # check authorization...  This is pretty hacky.  We should implement
-    # #1830.
-    if request.user.is_authenticated():
-        return True
-    username = request.META.get('HTTP_X_API_USERNAME', None)
-    api_key = request.META.get( 'HTTP_X_APIKEY', None)
-    if not username or not api_key:
-        return False
-    try:
-        import apiv2
-        from tastypie.models import ApiKey
-    except ImportError:
-        return False
-    try:
-        api_user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return False
-    if not ApiKey.objects.filter(user=api_user, key=api_key).exists():
-        return False
-    request.user = api_user
-    return True
+    return request.user.is_authenticated()
 
 def upload_subtitles(request):
     if not check_upload_subtitles_permissions(request):
@@ -637,6 +631,9 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     else:
         context['show_sync_history'] = False
         context['can_resync'] = False
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/subtitles.html', context)
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
