@@ -17,15 +17,6 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 from videos.types.base import VideoType
-from vidscraper.sites import blip
-from django.utils.html import strip_tags
-# FIXME: we should just call the module "json" but that conflicts with our
-# variable names
-import json as simplejson
-
-import urllib2
-
-import re
 
 class BlipTvVideoType(VideoType):
 

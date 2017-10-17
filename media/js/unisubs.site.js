@@ -573,8 +573,8 @@ var Site = function(Site) {
             }
             if ($('#language_modal').length || $('#apply-modal').length || $('#language_profile').length) {
                 var cookies_are_enabled = function() {
-                    document.cookie = 'testcookie';
-                    return (document.cookie.indexOf('testcookie') != -1) ? true : false;
+                    document.cookie = 'testcookie=1';
+                    return (document.cookie.indexOf('testcookie=1') != -1) ? true : false;
                 };
                 ProfileApi.get_user_languages(function(r) {
                     if (!r) {
