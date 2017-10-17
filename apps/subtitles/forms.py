@@ -21,8 +21,9 @@ from itertools import izip
 
 import babelsubs
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib import messages
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
@@ -31,12 +32,14 @@ from externalsites.models import SyncHistory
 from subtitles import pipeline
 from subtitles.shims import is_dependent
 from subtitles.models import ORIGIN_UPLOAD, SubtitleLanguage
+from subtitles.permissions import user_can_change_subtitle_language
 from teams.models import Task
 from teams.permissions import (
     can_perform_task, can_create_and_edit_subtitles,
     can_create_and_edit_translations
 )
 from videos.tasks import video_changed_tasks
+from ui.forms import LanguageField
 from utils.text import fmt
 from utils.subtitles import load_subtitles
 from utils.translation import (ALL_LANGUAGE_CHOICES,
@@ -459,6 +462,28 @@ class DeleteSubtitlesForm(SubtitlesForm):
     def do_submit(self, request):
         self.subtitle_language.nuke_language()
         messages.success(request, _(u'Subtitles deleted'))
+
+class ChangeSubtitleLanguageForm(SubtitlesForm):
+    new_language = LanguageField(label=_(u'Subtitle Language'))
+
+    def check_permissions(self):
+        return user_can_change_subtitle_language(self.user, self.video)
+
+    def clean(self):
+        if not self.check_permissions():
+            raise forms.ValidationError(
+                ugettext(u'You do not have permission to change the subtitle language')
+            )
+        return self.cleaned_data
+
+    def do_submit(self, request):
+        try:
+            self.subtitle_language.change_language_code(self.cleaned_data['new_language'])
+            self.subtitle_language.video.clear_language_cache()
+        except ValidationError:
+            messages.error(request, ugettext(u'Invalid language code.'))
+        except IntegrityError:
+            messages.error(request, ugettext(u'Subtitles already exist for this language.'))
 
 class RollbackSubtitlesForm(SubtitlesForm):
     def check_permissions(self):
