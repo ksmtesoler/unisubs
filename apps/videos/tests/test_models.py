@@ -714,7 +714,11 @@ class PreventDuplicatePublicVideoFlagTest(TestCase):
         video1, video_url1 = Video.add(self.url, self.user)
         video2, video_url2 = self.team.add_video(
             'http://otherurl.com/video.mp4', self.user)
-        video2.add_url(self.url, self.user)
+        with assert_raises(Video.DuplicateUrlError) as cm:
+            video2.add_url(self.url, self.user)
+        assert_equal(cm.exception.video, video1)
+        assert_equal(cm.exception.video_url, video_url1)
+        assert_equal(cm.exception.from_prevent_duplicate_public_videos, True)
 
 class AddVideoUrlTest(TestCase):
     def setUp(self):

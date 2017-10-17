@@ -795,9 +795,10 @@ class Video(models.Model):
             Video.DuplicateUrlError: The URL was already added to a
                                      different video
         """
+        team = self.get_team()
         vt, url = self._coerce_url_param(url)
-        self._check_prevent_duplicate_public_videos(url)
-        video_url = self._add_video_url(vt, user, False, self.get_team())
+        self._check_prevent_duplicate_public_videos(url, team)
+        video_url = self._add_video_url(vt, user, False, team)
 
         video_cache.invalidate_cache(self.video_id)
         self.cache.invalidate()

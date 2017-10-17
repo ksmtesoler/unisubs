@@ -400,7 +400,7 @@ class VideoSerializer(serializers.Serializer):
         'unknown-project': 'Unknown project: {project}',
         'video-exists': 'Video already added for {url}',
         'video-policy-error': ('Video for {url} not moved because it would '
-                               'conflic with the video policy for {team}'),
+                               'conflict with the video policy for {team}'),
         'invalid-url': 'Invalid URL: {url}',
     }
 

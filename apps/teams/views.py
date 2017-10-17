@@ -866,10 +866,17 @@ def move_video(request):
         try:
             team_video.move_to(team, project, request.user)
         except Video.DuplicateUrlError, e:
-            messages.error(request, fmt(
-                _( "%(url)s couldn't be moved because it was "
-                  "already added to %(team)s"),
-                url=e.video_url.url, team=team))
+            if e.from_prevent_duplicate_public_videos:
+                messages.error(request, fmt(
+                    _( "%(url)s couldn't be moved because it would "
+                      "conflict with the video policy for %(team)s"),
+                    url=e.video_url.url, team=team))
+            else:
+                messages.error(request, fmt(
+                    _( "%(url)s couldn't be moved because it was "
+                      "already added to %(team)s"),
+                    url=e.video_url.url, team=team))
+
         else:
             messages.success(request, _(u'The video has been moved to the new team.'))
     else:

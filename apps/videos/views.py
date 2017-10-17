@@ -1114,7 +1114,7 @@ def url_search_move(request):
                         u"%(video)s not moved to %(team)s because it "
                         "would conflict with the team policy")
                 else:
-                    msg = ugettext(u"%(video)s already added to %(team)s"),
+                    msg = ugettext(u"%(video)s already added to %(team)s")
 
                 msg = fmt(msg, team=team, video=video.title_display())
                 messages.error(request, msg)
