@@ -63,6 +63,7 @@ define([
     options = _.defaults(options, {
       extraOptions: [],
       theme: "amara",
+      createTag: function(params) { return undefined; },
       minimumResultsForSearch: 8,
       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
       templateResult: templateResult,
