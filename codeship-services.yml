@@ -1,0 +1,15 @@
+amara:
+  build:
+    image: 241878618260.dkr.ecr.us-west-2.amazonaws.com/amara
+    dockerfile: Dockerfile
+  cached: true
+deploy:
+  image: 241878618260.dkr.ecr.us-west-2.amazonaws.com/deploy
+  encrypted_env_file: aws_creds.encrypted
+  dockercfg_service: aws_generator
+aws_generator: 
+  image: codeship/aws-ecr-dockercfg-generator
+  encrypted_env_file: aws_creds.encrypted
+  add_docker: true
+  environment:
+    AWS_REGION: us-west-2
