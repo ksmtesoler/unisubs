@@ -37,5 +37,4 @@ COPY .docker/known_hosts /root/.ssh/known_hosts
 COPY .docker/bin/* /usr/local/bin/
 COPY . /opt/apps/amara
 RUN ln -sf $CLOSURE_PATH $APP_DIR/media/js/closure-library
-RUN ls /opt/apps/amara
 USER amara
