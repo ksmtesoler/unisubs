@@ -1,0 +1,14 @@
+sudo: required
+
+language: python
+
+services:
+    - docker
+
+before_install:
+    - bin/dev build
+    - bin/dev dbreset
+    - bin/dev up
+
+script:
+    -  docker ps
