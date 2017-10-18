@@ -1,3 +1,6 @@
+- name: Generate commit.py
+  service: generate_commit_file
+  command: -c 'cd /repository && (echo "LAST_COMMIT_ID=$(git rev-parse --short=8 HEAD)" > commit.py)'
 - name: Test
   service: amara
   command: test

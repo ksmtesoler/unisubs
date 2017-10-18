@@ -1,3 +1,9 @@
+generate_commit_file:
+  # This is a weird service we use to create the commit.py file.  See codeship-steps for the other half
+  image: alpine/git
+  entrypoint: sh
+  volumes:
+    - .:/repository
 amara:
   build:
     image: 241878618260.dkr.ecr.us-west-2.amazonaws.com/amara
