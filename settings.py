@@ -198,7 +198,6 @@ INSTALLED_APPS = (
     'djcelery',
     'south',
     'rest_framework',
-    'tastypie',
     # third party apps forked on our repo
     'localeurl',
     'openid_consumer',
@@ -360,6 +359,8 @@ PROJECT_VERSION = '0.5'
 EDIT_END_THRESHOLD = 120
 
 ANONYMOUS_USER_ID = 10000
+ANONYMOUS_DEFAULT_USERNAME = u"amara-bot"
+ANONYMOUS_FULL_NAME = u"Amara Bot"
 
 #Use on production
 GOOGLE_ANALYTICS_NUMBER = 'UA-163840-22'

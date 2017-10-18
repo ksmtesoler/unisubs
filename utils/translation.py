@@ -12,11 +12,8 @@ from django.utils.translation import (
 )
 from django.utils.translation.trans_real import parse_accept_lang_header
 import babel
-import pyuca
 
 from unilangs import get_language_name_mapping, LanguageCode
-
-collator = pyuca.Collator()
 
 # A set of all language codes we support.
 _supported_languages_map = get_language_name_mapping('unisubs')
@@ -136,9 +133,6 @@ def choice_label(code):
     english_name = _supported_languages_map[code]
     translated_name = _(english_name)
     return u'{} [{}]'.format(translated_name, code)
-
-def choice_sort_key(item):
-    return collator.sort_key(item[1])
 
 babel_locale_blacklist = set(['tw'])
 def lookup_babel_locale(language_code):

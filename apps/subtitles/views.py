@@ -418,8 +418,6 @@ class SubtitleEditor(SubtitleEditorBase):
             request, *args, **kwargs)
 
 def _user_for_download_permissions(request):
-    # check authorization...  This is pretty hacky.  We should implement
-    # pculture/amara-enterprise#89
     if request.user.is_authenticated():
         return request.user
     username = request.META.get('HTTP_X_API_USERNAME', None)
@@ -428,17 +426,12 @@ def _user_for_download_permissions(request):
     if not username or not api_key:
         return request.user
     try:
-        import apiv2
-        from tastypie.models import ApiKey
-    except ImportError:
-        return request.user
-    try:
         api_user = User.objects.get(username=username)
     except User.DoesNotExist:
         return request.user
-    if not ApiKey.objects.filter(user=api_user, key=api_key).exists():
-        return request.user
-    return api_user
+    if api_user.check_api_key(api_key):
+        return api_user
+    return request.user
 
 def download(request, video_id, language_code, filename, format,
              version_number=None):
@@ -458,7 +451,6 @@ def download(request, video_id, language_code, filename, format,
                                                            language_code)
     version = language.version(public_only=not public_only,
                                version_number=version_number)
-
     if not version:
         raise Http404()
     if not format in babelsubs.get_available_formats():
