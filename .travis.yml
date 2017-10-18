@@ -8,7 +8,5 @@ services:
 before_install:
     - bin/dev build
     - bin/dev dbreset
-    - bin/dev up
-
 script:
-    -  docker ps
+    -  bin/dev test
