@@ -1,7 +1,7 @@
-generate_commit_file:
-  # This is a weird service we use to create the commit.py file.  See codeship-steps for the other half
-  image: alpine/git
-  entrypoint: sh
+create_commit_file:
+  build:
+    context: codeship/create-commit-file
+    dockerfile: Dockerfile
   volumes:
     - .:/repository
 amara:
