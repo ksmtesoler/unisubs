@@ -18,7 +18,9 @@
 
 
 from optparse import make_option
+import os
 
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -60,6 +62,10 @@ class Command(BaseCommand):
         call_command('syncdb', migrate_all=True, interactive=False)
         call_command('migrate', fake=True)
         call_command('setup_indexes')
+        # For now, we need to load the site data to make things work, but it
+        # would be nice to get rid of this
+        call_command('loaddata',
+                     os.path.join(settings.PROJECT_ROOT, 'sitedata.json'))
 
     def create_admin(self, user_and_pass):
         username, password = user_and_pass.split(':', 1)
