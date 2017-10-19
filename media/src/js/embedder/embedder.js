@@ -232,7 +232,7 @@
 				});
                                 // Set the initial language to either the one provided by the initial
                                 // options, or the original language from the API.
-                                var from_amara = document.referrer.split('/')[2].match('localhost:8080$')!= null;
+                                var from_amara = document.referrer.split('/')[2].match('amara.org$')!= null;
                                 var page_language = null;
                                 if (from_amara) page_language = document.referrer.split('/')[6];
                                 video.set('initial_language',
