@@ -17,18 +17,30 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 
+from optparse import make_option
+
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import connection
 
+from auth.models import CustomUser as User
+
 class Command(BaseCommand):
     help = u'Ensure the database is up-to-date'
+    option_list = BaseCommand.option_list + (
+        make_option(
+            '--create-admin-on-init',
+            help="username:password of an admin user to "
+            "create if the DB gets initialized"),
+    )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, **options):
         if self.is_db_created():
             self.migrate_existing_db()
         else:
             self.initialize_new_db()
+            if options['create_admin_on_init']:
+                self.create_admin(options['create_admin_on_init'])
 
     def is_db_created(self):
         cursor = connection.cursor()
@@ -48,3 +60,9 @@ class Command(BaseCommand):
         call_command('syncdb', migrate_all=True, interactive=False)
         call_command('migrate', fake=True)
         call_command('setup_indexes')
+
+    def create_admin(self, user_and_pass):
+        username, password = user_and_pass.split(':', 1)
+        User.objects.create_superuser(
+            username=username, email='{}@example.com'.format(username),
+            password=password)
