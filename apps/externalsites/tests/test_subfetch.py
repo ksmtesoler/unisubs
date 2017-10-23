@@ -188,7 +188,7 @@ class SubFetchTestCase(TestCase):
         subs.append_subtitle(100, 200, 'text')
         self.mock_captions_download.return_value = subs.to_xml()
 
-        fetch_subs(self.video_url)
+        fetch_subs(self.video_url, user=self.user)
         assert_equal(
             self.mock_captions_download.call_args,
             mock.call('test-access-token', 'caption-1'))
