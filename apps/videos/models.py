@@ -632,6 +632,8 @@ class Video(models.Model):
     get_absolute_url = _get_absolute_url
 
     def get_language_url(self, language_code):
+        if language_code in (None, ''):
+            return ''
         return reverse('videos:translation_history_legacy', kwargs={
             'video_id': self.video_id,
             'lang': language_code,

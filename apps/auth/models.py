@@ -199,10 +199,11 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         self.start_tracking_profile_fields()
 
     def __unicode__(self):
-        if not self.is_active:
+        if self.is_amara_anonymous:
+            return settings.ANONYMOUS_FULL_NAME
+        elif not self.is_active:
             return ugettext('Retired user')
-
-        if self.first_name or self.last_name:
+        elif self.first_name or self.last_name:
             return self.get_full_name()
         elif self.full_name:
             return self.full_name
@@ -476,6 +477,10 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         avatar = self._get_avatar(50)
         return mark_safe('<span class="avatar avatar-md"><img src="{}"></span>'.format(avatar))
 
+    def avatar_tag_large(self):
+        avatar = self._get_avatar(100)
+        return mark_safe('<span class="avatar avatar-lg"><img src="{}"></span>'.format(avatar))
+
     def avatar_tag_extra_large(self):
         avatar = self._get_avatar(110)
         return mark_safe('<span class="avatar avatar-xl"><img src="{}"></span>'.format(avatar))
@@ -526,7 +531,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def get_amara_anonymous(cls):
         user, created = cls.objects.get_or_create(
             pk=settings.ANONYMOUS_USER_ID,
-            defaults={'username': 'anonymous'})
+            defaults={'username': settings.ANONYMOUS_DEFAULT_USERNAME})
         return user
 
     @property

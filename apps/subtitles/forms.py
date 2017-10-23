@@ -28,6 +28,7 @@ from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
+from activity.models import ActivityRecord
 from externalsites.models import SyncHistory
 from subtitles import pipeline
 from subtitles.shims import is_dependent
@@ -477,6 +478,7 @@ class ChangeSubtitleLanguageForm(SubtitlesForm):
         return self.cleaned_data
 
     def do_submit(self, request):
+        old_language_code = self.subtitle_language.language_code
         try:
             self.subtitle_language.change_language_code(self.cleaned_data['new_language'])
             self.subtitle_language.video.clear_language_cache()
@@ -484,6 +486,8 @@ class ChangeSubtitleLanguageForm(SubtitlesForm):
             messages.error(request, ugettext(u'Invalid language code.'))
         except IntegrityError:
             messages.error(request, ugettext(u'Subtitles already exist for this language.'))
+        ActivityRecord.objects.create_for_subtitle_language_changed(
+                self.user, self.subtitle_language, old_language_code)
 
 class RollbackSubtitlesForm(SubtitlesForm):
     def check_permissions(self):
