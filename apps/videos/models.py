@@ -45,11 +45,12 @@ from django.forms.forms import NON_FIELD_ERRORS
 
 from auth.models import CustomUser as User, Awards
 from caching import ModelCacheManager
+from externalsites import google
 from videos import behaviors
 from videos import metadata
 from videos import signals
 from videos.types import (video_type_registrar, video_type_choices,
-                          VideoTypeError)
+                          VideoTypeError, YoutubeVideoType)
 from videos.feed_parser import VideoImporter
 from comments.models import Comment
 from widget import video_cache
@@ -631,6 +632,8 @@ class Video(models.Model):
     get_absolute_url = _get_absolute_url
 
     def get_language_url(self, language_code):
+        if language_code in (None, ''):
+            return ''
         return reverse('videos:translation_history_legacy', kwargs={
             'video_id': self.video_id,
             'lang': language_code,
@@ -763,7 +766,15 @@ class Video(models.Model):
             Video.DuplicateUrlError: The URL was already added to a
                                      different video
         """
-        vt, video_url = self._add_video_url(url, user, False, self.get_team())
+        team = self.get_team()
+        vt, video_url = self._add_video_url(url, user, False, team)
+
+        if type(vt) is YoutubeVideoType:
+            try:
+                video_info, incomplete = vt.get_video_info(self, user, team, video_url)
+                YoutubeVideoType.set_owner_username(self, video_url, video_info)
+            except google.APIError:
+                pass
 
         video_cache.invalidate_cache(self.video_id)
         self.cache.invalidate()

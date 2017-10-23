@@ -222,6 +222,7 @@ class TeamWorkflow(object):
             'video-moved-from-team',
             'video-moved-to-team',
             'team-settings-changed',
+            'language-changed',
         ]
 
     # these can be used to customize the content in the project/language
