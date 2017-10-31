@@ -40,7 +40,7 @@
                     </p>
                 {% else %}
                     {% if team|can_apply:user %}
-                        {% include "teams/_application_form.html" %}
+                      <a href="{% url "teams:join" slug=team.slug %}">{% trans "Apply to Join" %}</a>
                     {% else %}
                         <p class="action-replacement">{% trans "Your application is pending" %}</p>
                     {% endif %}
