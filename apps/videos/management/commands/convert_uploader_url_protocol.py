@@ -16,21 +16,20 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-from optparse import make_option
-
 from django.core.management.base import BaseCommand
 
-from utils import tasks
-
+from videos.models import VideoUrl
 
 class Command(BaseCommand):
-    help = u'Run a test task'
-    option_list = BaseCommand.option_list + (
-        make_option('-n', '--number', default=1,
-                    type=int, help='Number of tasks to run'),
-        make_option('-q', '--queue', dest='queue', default='default',
-                    help='Choose queue to run it in'),
-    )
+    help = "Convert URLs from the uploader into https"
+
     def handle(self, **options):
-        for i in range(options['number']):
-            tasks.test.apply_async(queue=options['queue'])
+        count = 0
+        for video_url in VideoUrl.objects.filter(url__startswith='http://amara-video.s3.amazonaws.com'):
+            video_url.url = video_url.url.replace("http", "https", 1)
+            video_url.save()
+            count += 1
+            if count % 100 == 0:
+                print "processed {} video URLs".format(count)
+        print "processed {} video URLs ({} left)".format(
+            count, VideoUrl.objects.filter(url__startswith='http://amara-video.s3.amazonaws.com').count())
