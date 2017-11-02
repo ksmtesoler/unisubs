@@ -4884,8 +4884,9 @@
 
     var playerStatus = "uninit";
 
-    self.setPlayerAPI = function(api) {
+    self.setPlayerAPI = function(api, callback) {
         playerAPI = api;
+        playerAPI.ready().then(callback);
     };
     self.getCurrentTime = function(callback) {
         playerAPI.getCurrentTime().then(callback);
@@ -4893,12 +4894,12 @@
     self.getDuration = function(callback) {
         playerAPI.getDuration().then(callback);
     };
-    self.setVolume = function(volume) {
-        playerAPI.setVolume(volume);
+    self.setVolume = function(volume, callback) {
+        playerAPI.setVolume(volume).then(callback);
     };
-    self.seekTo = function(time) {
+    self.seekTo = function(time, callback) {
         if (playerStatus == "available")
-          playerAPI.setCurrentTime(time);
+          playerAPI.setCurrentTime(time).then(callback);
     };
     self.setCallback = function(callbackName, callback) {
         playerAPI.on(callbackName, callback);
@@ -5012,8 +5013,8 @@
       player.setCallback('pause', pauseCallback);
       player.setCallback('finish', finishCallback);
       player.setCallback('seek', seekCallback);
+      player.pause(function() {player.getDuration(updateDuration);});
 
-      player.getDuration(updateDuration);
       impl.networkState = self.NETWORK_LOADING;
       self.dispatchEvent( "loadstart" );
       self.dispatchEvent( "progress" );
@@ -5052,15 +5053,16 @@
         }
       }
     }
-
-    function getDuration() {
+/*
+      function getDuration() {
+	  
       if( !playerReady ) {
         // Queue a getDuration() call so we have correct duration info for loadedmetadata
         addPlayerReadyCallback( function() { getDuration(); } );
       }
       player.getDuration();
     }
-
+*/
     function destroyPlayer() {
       if( !( playerReady && player ) ) {
         return;
@@ -5075,7 +5077,7 @@
     self.play = function() {
       impl.paused = false;
       if( !playerReady ) {
-        addPlayerReadyCallback( function() { self.play(); } );
+        addPlayerReadyCallback( function() {self.play(); } );
         return;
       }
       player.play();
@@ -5083,12 +5085,11 @@
     };
 
     function changeCurrentTime( aTime ) {
-      if( !playerReady ) {
-        addPlayerReadyCallback( function() { changeCurrentTime( aTime ); } );
-        return;
-      }
-      onSeeking();
-      player.seekTo( aTime );
+        if( !playerReady ) {
+          return;
+        }
+        onSeeking();
+	player.seekTo(aTime, function(){});
     }
 
     function onSeeking() {
@@ -5107,10 +5108,8 @@
     self.pause = function() {
       impl.paused = true;
       if( !playerReady ) {
-        addPlayerReadyCallback( function() { self.pause(); } );
         return;
       }
-
       player.pause();
     };
 
@@ -5202,8 +5201,7 @@
       }
       if (data.event == "ready") {
         player = new VimeoPlayer( elem );
-        player.setPlayerAPI(vimeoAPI);
-        player.play(firstPlayCallback);
+        player.setPlayerAPI(vimeoAPI, function() {player.play(firstPlayCallback);});
       }
     }
 
@@ -5293,12 +5291,9 @@
       impl.volume = aValue;
 
       if( !playerReady ) {
-        addPlayerReadyCallback( function() {
-          setVolume( aValue );
-        });
         return;
       }
-      player.setVolume( aValue );
+      player.setVolume(aValue, function(){});
       self.dispatchEvent( "volumechange" );
     }
 
