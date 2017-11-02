@@ -289,6 +289,7 @@ REST_FRAMEWORK = {
 import re
 LOCALE_INDEPENDENT_PATHS = [
     re.compile('^/media/'),
+    re.compile('^/assets/'),
     re.compile('^/widget/'),
     re.compile('^/api/'),
     re.compile('^/api2/'),
@@ -425,15 +426,16 @@ API_DOCS_MODULES = [
 
 MEDIA_BUNDLES = {
     "amara.css": {
+        "uses_amara_assets": True,
         "files": [
-            "bower/chartist/dist/chartist.css",
-            "bower/select2/dist/css/select2.css",
-            "amara/bootstrap/bootstrap-theme.min.css",
-            "amara/bootstrap/bootstrap.min.css",
-            "amara/css/main.scss",
+            "node_modules/chartist/dist/chartist.css",
+            "node_modules/select2/dist/css/select2.css",
+            "bootstrap/bootstrap-theme.min.css",
+            "bootstrap/bootstrap.min.css",
+            "scss/application.scss",
         ],
         "include_paths": [
-            "amara/css/",
+            "scss/",
         ],
     },
     "amara.js": {
@@ -444,6 +446,15 @@ MEDIA_BUNDLES = {
         },
         # extension_modules gets filled in by our optional repositories
         "extension_modules": [],
+    },
+    "marketing.css": {
+        "uses_amara_assets": True,
+        "files": [
+            "scss/marketing.scss",
+        ],
+        "include_paths": [
+            "scss/",
+        ],
     },
     "base.css": {
         "files": (

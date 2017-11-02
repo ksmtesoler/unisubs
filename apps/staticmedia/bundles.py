@@ -43,14 +43,6 @@ from django.template.loader import render_to_string
 from staticmedia import utils
 import optionalapps
 
-def media_directories():
-    dirs = [ settings.STATIC_ROOT ]
-    for repo_dir in optionalapps.get_repository_paths():
-        repo_media_dir = os.path.join(repo_dir, 'media')
-        if os.path.exists(repo_media_dir):
-            dirs.append(repo_media_dir)
-    return dirs
-
 class Bundle(object):
     """Represents a single media bundle."""
 
@@ -61,8 +53,24 @@ class Bundle(object):
         self.name = name
         self.config = config
 
+    def static_root(self):
+        if self.config.get('uses_amara_assets'):
+            # New stlye: The static files are in the amara-assets repo
+            return os.path.join(settings.PROJECT_ROOT, 'amara-assets')
+        else:
+            # Old style: The static files are in the media directory
+            return settings.STATIC_ROOT
+
+    def media_directories(self):
+        dirs = [ self.static_root() ]
+        for repo_dir in optionalapps.get_repository_paths():
+            repo_media_dir = os.path.join(repo_dir, 'media')
+            if os.path.exists(repo_media_dir):
+                dirs.append(repo_media_dir)
+        return dirs
+
     def path(self, filename):
-        for media_dir in media_directories():
+        for media_dir in self.media_directories():
             path_try = os.path.join(media_dir, filename)
             if os.path.exists(path_try):
                 return path_try
@@ -241,7 +249,7 @@ class RequireJSBundle(Bundle):
         file.
         """
         def setup_links(media_dir, dest_dir):
-            for media_root in media_directories():
+            for media_root in self.media_directories():
                 source_dir = os.path.join(media_root, media_dir)
                 if not os.path.exists(source_dir):
                     continue
@@ -269,14 +277,14 @@ class RequireJSBundle(Bundle):
             'mainConfigFile': os.path.join(build_dir,
                                            self.config_module() + '.js'),
             'findNestedDependencies': True,
-            'name': os.path.join(settings.STATIC_ROOT,
+            'name': os.path.join(self.static_root(),
                                  "bower/almond/almond.js"),
             'include': [self.main_module()] + self.extension_modules(),
             'insertRequire': self.extension_modules(),
             'optimize': optimize,
             'logLevel': 4,
         }
-        r_path = os.path.join(settings.STATIC_ROOT, 'bower/rjs/dist/r.js')
+        r_path = os.path.join(self.static_root(), 'bower/rjs/dist/r.js')
         with tempfile.NamedTemporaryFile(suffix='.js', prefix='build-') as f:
             json.dump(build_config, f)
             f.flush()
@@ -346,7 +354,8 @@ class CSSBundle(Bundle):
                     rv.append(path)
                     seen.add(path)
 
-        add_paths(os.path.join(path, 'css') for path in media_directories())
+        add_paths(os.path.join(path, 'css')
+                  for path in self.media_directories())
         add_paths(os.path.dirname(path) for path in self.paths())
         if 'include_paths' in self.config:
             add_paths(self.path(p) for p in self.config['include_paths'])

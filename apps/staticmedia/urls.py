@@ -51,6 +51,9 @@ else:
         '/flowplayer/', document_root=os.path.join(settings.STATIC_ROOT, 'flowplayer')
     ) + static(
         '/fonts/', document_root=os.path.join(settings.STATIC_ROOT, 'fonts')
+    ) + static(
+        '/assets/', document_root=os.path.join(
+            settings.PROJECT_ROOT, 'amara-assets/')
     )
 
     urlpatterns += patterns(
