@@ -159,6 +159,7 @@ MIDDLEWARE_CLASSES = (
     'api.middleware.CORSMiddleware',
 )
 
+HOMEPAGE_VIEW = 'views.home'
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
