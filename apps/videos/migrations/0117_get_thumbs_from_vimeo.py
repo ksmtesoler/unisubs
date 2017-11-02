@@ -3,35 +3,14 @@ import datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
-from vidscraper.sites import vimeo
-
-VIDEO_TYPE_VIMEO = 'V'
 
 class Migration(DataMigration):
     
     def forwards(self, orm):
-        qs = orm.VideoUrl.objects.filter(type=VIDEO_TYPE_VIMEO).select_related('video')
-        count = qs.count()
-        
-        i = 0
-        for vu in qs:
-            i += 1
-            if i % 100 == 0:
-                print '%s of %s updated...' % (i, count)
-                
-            video = vu.video
-
-            if video.small_thumbnail:
-                continue
-            
-            try:
-                video.small_thumbnail = vimeo.get_small_thumbnail_url(vu.url)
-                video.save()
-            except Exception, e:
-                pass
+        raise Exception("This migration should not run")
     
     def backwards(self, orm):
-        "Write your backwards methods here."
+        raise Exception("This migration should not run")
     
     models = {
         'auth.customuser': {

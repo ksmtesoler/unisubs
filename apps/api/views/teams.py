@@ -322,6 +322,7 @@ List notifications
     :>json boolean in_progress: Is the request still in progress?
     :>json integer response_status: HTTP response status code (or null)
     :>json string error_message: String describing any errors that occured
+    :>json uri resource_uri: Link to the details endpoint for the notification
 
     List results are paginated
 
@@ -1127,11 +1128,12 @@ class TeamNotificationSerializer(serializers.ModelSerializer):
     in_progress = serializers.BooleanField(source='is_in_progress')
     timestamp = TimezoneAwareDateTimeField(read_only=True)
     data = serializers.SerializerMethodField()
+    resource_uri = serializers.SerializerMethodField()
 
     class Meta:
         model = TeamNotification
         fields = ('number', 'url', 'data', 'timestamp', 'in_progress',
-                  'response_status', 'error_message')
+                  'response_status', 'error_message', 'resource_uri')
 
     def get_data(self, notification):
         try:
@@ -1139,6 +1141,12 @@ class TeamNotificationSerializer(serializers.ModelSerializer):
         except StandardError:
             # Error parsing the JSON.   Just return data as a string
             return notification.data
+
+    def get_resource_uri(self, notification):
+        return reverse('api:team-notifications-detail', kwargs={
+            'team_slug': self.context['team'].slug,
+            'number': notification.number,
+        }, request=self.context['request'])
 
 class TeamNotificationViewSet(TeamSubviewMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = TeamNotificationSerializer

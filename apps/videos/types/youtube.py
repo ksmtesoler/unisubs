@@ -98,11 +98,8 @@ class YoutubeVideoType(VideoType):
         video.duration = video_info.duration
         if not video.thumbnail:
             video.thumbnail = video_info.thumbnail_url
-        if video_url is not None and \
-           video_url.owner_username is None and \
-           video_info.channel_id is not None:
-            video_url.owner_username = video_info.channel_id
-            video_url.save()
+        if video_url is not None:
+            cls.set_owner_username(video, video_url, video_info)
 
     def set_values(self, video, user, team, video_url):
         try:
@@ -112,6 +109,12 @@ class YoutubeVideoType(VideoType):
         if not incomplete:
             self.complete_set_values(video, video_url, video_info)
         return incomplete
+
+    @classmethod
+    def set_owner_username(cls, video, video_url, video_info):
+        if video_url.owner_username is None and video_info.channel_id is not None:
+            video_url.owner_username = video_info.channel_id
+            video_url.save()
 
     @classmethod
     def url_from_id(cls, video_id):

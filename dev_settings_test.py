@@ -33,8 +33,15 @@ DATABASES = {
     }
 }
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
 CACHE_PREFIX = "testcache"
 CACHE_TIMEOUT = 60
+
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = ['utils.test_utils.plugin.UnisubsTestPlugin']
 CELERY_ALWAYS_EAGER = True

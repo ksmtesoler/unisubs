@@ -54,6 +54,8 @@ class URLEdit(models.Model):
     old_url = models.URLField(max_length=512, blank=True)
     new_url = models.URLField(max_length=512, blank=True)
 
+class SubtitleLanguageChange(models.Model):
+    old_language = models.CharField(max_length=512, blank=True)
 
 class TeamSettingsChangeInfo(models.Model):
     # Settings changes as a JSON encoded dict
@@ -446,6 +448,38 @@ class VersionDeclined(ActivityType):
     def get_action_name(self):
         return _('declined')
 
+class SubtitleLanguageChanged(ActivityType):
+    slug='language-changed'
+    label = _('Language Changed')
+    related_model = SubtitleLanguageChange
+
+    def get_message(self, record, user):
+        change = record.get_related_obj()
+        if change:
+            return self.format_message(record,
+                _('<strong>%(user)s</strong> changed a subtitle language for <a href="%(video_url)s">'
+                  '%(video)s</a> from %(old_language)s to <a href="%(language_url)s">%(language)s</a>'),
+                  old_language=change.old_language)
+        else:
+            return self.format_message(record,
+                _('<strong>%(user)s</strong> changed a subtitle language for <a href="%(video_url)s">'
+                  '%(video)s</a> to <a href="%(language_url)s">%(language)s</a>'))
+
+    def get_old_message(self, record, user):
+        change = record.get_related_obj()
+        if change:
+            return self.format_message(record,
+                _('changed a subtitle language for <a href="%(video_url)s">%(video)s</a> from '
+                  '%(old_language)s to <a href="%(language_url)s">%(language)s</a>'),
+                  old_language=change.old_language)
+        else:
+            return self.format_message(record,
+                _('changed a subtitle language for <a href="%(video_url)s">%(video)s</a> to'
+                  '<a href="%(language_url)s">%(language)s</a>'))
+
+    def get_action_name(self):
+        return _('changed subtitle language')
+
 class VideoDeleted(ActivityType):
     slug = 'video-deleted'
     label = _('Video deleted')
@@ -628,7 +662,7 @@ activity_choices = [
     TranslationAdded, SubtitleRequestCreated, VersionApproved, MemberJoined,
     VersionRejected, MemberLeft, VersionReviewed, VersionAccepted,
     VersionDeclined, VideoDeleted, VideoURLEdited, VideoURLDeleted,
-    VideoMovedToTeam, VideoMovedFromTeam, TeamSettingsChanged,
+    VideoMovedToTeam, VideoMovedFromTeam, TeamSettingsChanged, SubtitleLanguageChanged,
 ]
 
 class ActivityQueryset(query.QuerySet):
@@ -718,6 +752,15 @@ class ActivityManager(models.Manager):
             'version-added', version.video,
             language_code=version.language_code, user=version.author,
             created=version.created)
+
+    def create_for_subtitle_language_changed(self, user, subtitle_language, old_language_code):
+        with transaction.atomic():
+            change = SubtitleLanguageChange.objects.create(
+                        old_language=translation.get_language_label(old_language_code))
+            return self.create_for_video('language-changed', subtitle_language.video,
+                                         user=user, created=dates.now(),
+                                         language_code=subtitle_language.language_code,
+                                         related_obj_id=change.id)
 
     def create_for_video_url_added(self, video_url):
         with transaction.atomic():
@@ -937,6 +980,8 @@ class ActivityRecord(models.Model):
     def get_language_url(self):
         if self.video and self.language_code:
             url = self.video.get_language_url_with_id(self.language_code)
+            if not url:
+                return ''
             if self.team and self.team and self.team.workflow_type != 'O':
                 url += "?team={}".format(self.team.slug)
             return url
