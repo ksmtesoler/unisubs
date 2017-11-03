@@ -53,13 +53,3 @@ def one_time_url(request, token):
         return response
     else:
         raise Http404()
-
-def user_menu_esi(request):
-    """
-    Render the user menu HTML snippet only
-
-    We use this so that we can use it as as edge-side include with Varnish.
-    """
-    return render(request, "future/user-menu.html", {
-        'next': request.GET.get('next')
-    })

@@ -170,7 +170,6 @@ urlpatterns = patterns('',
     url(r'^v/(?P<encoded_pk>\w+)/$', 'videos.views.shortlink',
         name='shortlink'),
     # ESI includes
-    url(r'^esi/user-menu/$', 'views.user_menu_esi'),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^$', settings.HOMEPAGE_VIEW, name="home"),
 )

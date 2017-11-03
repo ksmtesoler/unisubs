@@ -8,16 +8,16 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="{% url "home" %}">
-        <img src="{{ STATIC_URL }}assets/img/amara_wordmark_plum.svg" height="50" class="img-responsive logo" alt="{% trans "Amara" %}">
-      </a>
+      <a class="navbar-brand" href="{% url "home" %}">{% include brand|default:"future/amara-brand.html" %}</a>
     </div>
     <div id="collapsible-menu" class="collapse">
+      {% if request.user.is_anonymous %}
       <div class="top-buttons">
         <a href="{% url "videos:create" %}" class="button button-lime">{% trans "Start Subtitling<span>For Free</span>" %}</a>
       </div>
+      {% endif %}
 
-      {% include "future/navigation/primarynav.html" %}
+      {% include primarynav|default:"future/navigation/primarynav.html" %}
       <nav class="appnav">
         <ul class="nav">
           <li>
@@ -27,5 +27,6 @@
       </nav>
 
       {% include "future/navigation/accessnav.html" %}
+      {% include "future/navigation/appnav.html" %}
     </div>
 </nav>
