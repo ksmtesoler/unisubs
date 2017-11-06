@@ -125,6 +125,7 @@ class Bash(Command):
     ]
 
     def run_inner(self, args, options):
+        ensure_node_modules()
         cmdline = ["docker-compose", "run", "--rm", '-u', 'root']
         if options.expose_port:
             cmdline.extend(['-p', '8000:8000'])
@@ -144,6 +145,7 @@ class Manage(Command):
     raw_args = True
 
     def run_inner(self, args, options):
+        ensure_node_modules()
         run_manage(args)
 
 class Test(Command):
@@ -152,6 +154,7 @@ class Test(Command):
     raw_args = True
 
     def run_inner(self, args, options):
+        ensure_node_modules()
         run_manage(['test', '--settings=dev_settings_test',
                     '--where=/opt/apps/amara'] + args)
 
@@ -232,96 +235,14 @@ class Up(Command):
     ]
 
     def run_inner(self, args, options):
+        ensure_node_modules()
         env = os.environ.copy()
         if options.jsonlog:
             env['JSON_LOGGING'] = '1'
         if options.dblog:
             env['DB_LOGGING'] = '1'
-        subprocess.call(['docker-compose', 'up', 'app', 'worker'], env=env)
-
-class Design(Command):
-    """Dump the database to a flie."""
-
-    # match paths in unisubs to amara-design
-    PATHS = [
-        ('media/amara/css/', 'src/_sass/', []),
-        ('media/amara/js/', 'src/js/', ['lib']),
-        ('media/bower.json', 'bower.json', []),
-    ]
-
-    def iter_paths(self):
-        for unisubs_relpath, design_relpath, exclude_paths in self.PATHS:
-            yield (os.path.join(unisubs_root(), unisubs_relpath),
-                   os.path.join(self.design_path, design_relpath), exclude_paths)
-
-    def run_inner(self, args, options):
-        if not self.check_repo_path():
-            return
-        try:
-            command = args[0]
-        except IndexError:
-            print 'need to specify a command (diff, push, pull)'
-            return
-        if command == 'diff':
-            self.diff()
-        elif command == 'push':
-            self.push()
-        elif command == 'pull':
-            self.pull()
-        else:
-            print "Unknown command: {}".format(command)
-
-    def check_repo_path(self):
-        settings_file = os.path.join(unisubs_root(), 'dev_settings_local.py')
-        dev_settings_local = {}
-        try:
-            execfile(settings_file, dev_settings_local)
-            self.design_path = dev_settings_local['AMARA_DESIGN_PATH']
-        except (KeyError, IOError):
-            print ('AMARA_DESIGN_PATH not set.  Add that to '
-                   'dev_settings_local.py and set it to '
-                   'the amara-design repository path.')
-            return False
-        if not os.path.isdir(self.design_path):
-            print '{} not found'.format(self.design_path)
-            return False
-        return True
-
-    def diff(self):
-        for unisubs_path, design_path, exclude_paths in self.iter_paths():
-            subprocess.call(['diff', '-dur', unisubs_path, design_path])
-
-    def push(self):
-        for unisubs_path, design_path, exclude_paths in self.iter_paths():
-            self.sync(unisubs_path, design_path, exclude_paths)
-
-    def pull(self):
-        for unisubs_path, design_path, exclude_paths in self.iter_paths():
-            self.sync(design_path, unisubs_path, exclude_paths)
-        # pull in the fonts as well.  We can't include this in the PATHS
-        # variable because we have some extra fonts there.  This shouldn't be
-        # an issue in practice since occupop is the only one to change these
-        # files
-        self.sync_fonts()
-
-    def sync(self, src, dest, exclude_paths):
-        if os.path.isdir(src):
-            cmd = ['rsync', '-a', '--delete']
-            for exclude_path in exclude_paths:
-                cmd.append('--exclude')
-                cmd.append(exclude_path)
-            subprocess.check_call(cmd  + [src, dest])
-        else:
-            shutil.copyfile(src, dest)
-
-    def sync_fonts(self):
-        dest_dir = os.path.join(unisubs_root(), 'media/fonts')
-        src_dir = os.path.join(self.design_path, 'src/fonts')
-        for filename in os.listdir(src_dir):
-            src = os.path.join(src_dir, filename)
-            dest = os.path.join(dest_dir, filename)
-            if os.path.isfile(src):
-                shutil.copyfile(src, dest)
+        subprocess.call(['docker-compose', 'up', 'app', 'worker',
+                         'asset-builder'], env=env)
 
 class PrepDeploy(Command):
     """Start docker containers."""
@@ -398,6 +319,28 @@ class VarnishLogs(Command):
     def run_inner(self, args, options):
         subprocess.call(['docker-compose', 'exec', 'varnish', 'varnishlog'])
 
+class NPM(Command):
+    """Run npm for the amara-assets repo."""
+
+    # Use this command to manage the packages.json file in amara-assets.  For
+    # example:
+    #
+    #     - dev npm install [package] -- add a dependancy
+    #     - dev npm uninstall [package] -- remove a dependancy
+
+    raw_args = True
+
+    def run_inner(self, args, options):
+        run_node(['npm'] + args)
+
+class Gulp(Command):
+    """Run gulp for the amara-assets repo."""
+
+    raw_args = True
+
+    def run_inner(self, args, options):
+        run_node(['node', 'node_modules/gulp/bin/gulp.js'] + args)
+
 NEEDS_ROOT = [
     'build_docs',
     'update_api_docs',
@@ -413,6 +356,35 @@ def run_manage(args, **kwargs):
     else:
         cmdline = ['docker-compose', 'run', '--rm', 'app', 'manage']
     subprocess.call(cmdline + args, **kwargs)
+
+NODE_IMAGE = 'node:9.0.0'
+def run_node(command):
+    """
+    Run the docker node container with the amara-assets repo
+    """
+    cmdline = [
+        'docker', 'run', '-it', '--rm',
+        '-v', '{}:/mnt'.format(unisubs_root()),
+        '-w', '/mnt/amara-assets',
+        NODE_IMAGE,
+    ]
+    cmdline.extend(command)
+    returncode = subprocess.call(cmdline)
+    if returncode != 0:
+        sys.exit(returncode)
+
+def ensure_node_modules():
+    node_modules = os.path.join(unisubs_root(), 'amara-assets',
+                                'node_modules')
+    package_json = os.path.join(unisubs_root(), 'amara-assets',
+                                'package.json')
+    if (os.path.exists(node_modules) and
+            os.path.getmtime(node_modules) < os.path.getmtime(package_json)):
+        # node_modules up-to-date, no need to rebuild
+        return
+    print('Installing node modules...')
+    run_node(['npm', 'install', '-d'])
+
 
 def usage():
     print "Usage %s [command]" % progname()
