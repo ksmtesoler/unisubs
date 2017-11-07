@@ -232,6 +232,7 @@ def embedder_code(video):
                              with_private_tips=True)
     return render_to_string('videos/_embed_link.html', {
         'video_url': video.get_video_url(),
+        'team': video.get_team(),
         'height': video_size["large"]["height"],
         'width': video_size["large"]["width"],
     })
