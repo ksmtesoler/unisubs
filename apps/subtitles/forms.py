@@ -40,7 +40,7 @@ from teams.permissions import (
     can_create_and_edit_translations
 )
 from videos.tasks import video_changed_tasks
-from ui.forms import LanguageField
+from ui.forms import AmaraClearableFileInput, LanguageField
 from utils.text import fmt
 from utils.subtitles import load_subtitles
 from utils.translation import (ALL_LANGUAGE_CHOICES,
@@ -52,7 +52,7 @@ SUBTITLE_FILESIZE_LIMIT_KB = 512
 SUBTITLE_FILE_FORMATS = babelsubs.get_available_formats()
 
 class SubtitlesUploadForm(forms.Form):
-    draft = forms.FileField(required=True)
+    draft = forms.FileField(widget=AmaraClearableFileInput, required=True)
     complete = forms.BooleanField(initial=False, required=False)
 
     language_code = forms.ChoiceField(required=True,
