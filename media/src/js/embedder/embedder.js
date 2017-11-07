@@ -258,7 +258,7 @@
                     }
                 });
             },
-            setFromResponseData(resp) {
+            setFromResponseData: function(resp) {
                 // Try to find a non-team video
                 var videoData;
                 for(var i=0; i < resp.objects.length; i++) {
