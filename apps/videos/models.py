@@ -779,8 +779,14 @@ class Video(models.Model):
     def set_values(self, video_type, video_url, user, team):
         incomplete = video_type.set_values(self, user, team, video_url)
         if not incomplete:
-            self.title = self.re_unicode.sub(u'\uFFFD', self.title)
-            self.description = self.re_unicode.sub(u'\uFFFD', self.description)
+            if self.title is None:
+                self.title = ""
+            else:
+                self.title = self.re_unicode.sub(u'\uFFFD', self.title)
+            if self.description is None:
+                self.description = ""
+            else:
+                self.description = self.re_unicode.sub(u'\uFFFD', self.description)
         return incomplete
 
     def add_url(self, url, user):

@@ -1,6 +1,7 @@
 {% load i18n ui query_string %}
 {% load url from future %}
 <ul class="comments">
+  {% if notes %}
   {% for note in notes %}
   <li class="row">
     <div class="col-xs-4">
@@ -17,6 +18,9 @@
     </div>
   </li>
   {% endfor %}
+  {% elif not notes_form %}
+  <div class="zero-state">{% trans "No subtitle notes" %}</div>
+  {% endif %}
   {% if notes_form %}
   <li class="row addComment">
     <div class="col-xs">

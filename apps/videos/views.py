@@ -617,7 +617,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'header': customization.header,
         'extra_page_controls': customization.extra_page_controls,
     }
-    if workflow.user_can_view_notes(request.user, subtitle_language.language_code):
+    if workflow.user_can_view_notes(request.user):
         editor_notes = workflow.get_editor_notes(request.user, subtitle_language.language_code)
         if editor_notes:
             context['show_notes'] = True

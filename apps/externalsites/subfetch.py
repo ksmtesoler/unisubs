@@ -52,12 +52,24 @@ def fetch_subs(video_url, user=None, team=None):
     else:
         logger.warn("fetch_subs() bad video type: %s" % video_url.type)
 
+def lookup_youtube_accounts(video_url, user, team):
+    """
+    Find the YouTubeAccount objects we should use to try in
+    fetch_subs_youtube()
+    """
+    owner = team if team else user
+    accounts = []
+    if owner:
+        return list(YouTubeAccount.objects.for_owner(owner))
+    else:
+        return []
+
 def fetch_subs_youtube(video_url, user, team):
     video_id = video_url.videoid
     channel_id = video_url.owner_username
     possible_accounts = set()
     if team is not None and user is not None:
-        for account in YouTubeAccount.objects.get_accounts_for_user_and_team(user, team):
+        for account in lookup_youtube_accounts(video_url, user, team):
             if account.fetch_initial_subtitles:
                 possible_accounts.add(account)
     if channel_id:
@@ -68,7 +80,7 @@ def fetch_subs_youtube(video_url, user, team):
         except:
             pass
     account = find_youtube_account(video_id, possible_accounts)
-    if account is None:
+    if len(accounts) == 0:
         logger.warn("fetch_subs() no available credentials.")
         return
     existing_langs = set(
