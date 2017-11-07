@@ -80,7 +80,7 @@ def fetch_subs_youtube(video_url, user, team):
         except:
             pass
     account = find_youtube_account(video_id, possible_accounts)
-    if len(accounts) == 0:
+    if account is None:
         logger.warn("fetch_subs() no available credentials.")
         return
     existing_langs = set(
