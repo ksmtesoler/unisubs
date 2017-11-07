@@ -36,6 +36,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from videos.templatetags.paginator import paginate
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django.db import transaction
 from django.db.models import Sum
 from django.http import (HttpResponse, Http404, HttpResponseRedirect,
                          HttpResponseForbidden)
@@ -65,7 +66,7 @@ from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
-from teams.models import Task
+from teams.models import Task, Team
 from ui.ajax import AJAXResponseRenderer
 from utils.behaviors import behavior
 from utils.decorators import staff_member_required
@@ -85,6 +86,7 @@ from videos import oldviews
 from videos.rpc import VideosApiClass
 from videos import share_utils
 from videos.tasks import video_changed_tasks
+from videos.types import video_type_registrar
 from widget.views import base_widget_params
 from externalsites.models import can_sync_videourl, get_sync_account, SyncHistory
 from utils import send_templated_email
@@ -99,6 +101,7 @@ from utils.translation import (get_user_languages_from_request,
 
 from teams.permissions import can_edit_video, can_add_version, can_resync
 from . import video_size
+import teams.permissions
 
 VIDEO_IN_ROW = 6
 ACTIVITY_PER_PAGE = 8
@@ -319,6 +322,7 @@ def video(request, video_id, video_url=None, title=None):
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
+        'team': video.get_team(),
         'team_video': video.get_team_video(),
         'tab': request.GET.get('tab', 'info'),
         'allow_delete': allow_delete,
@@ -1035,3 +1039,68 @@ def set_original_language(request, video_id):
         'form': form
     }, context_instance=RequestContext(request)
     )
+
+@staff_member_required
+def url_search(request):
+    if request.POST:
+        return url_search_move(request)
+    if 'urls' in request.GET:
+        return url_search_results(request)
+    return render(request, "future/videos/url-search.html")
+
+def url_search_results(request):
+    urls = []
+    for url in request.GET['urls'].split():
+        if not url:
+            continue
+        vt = video_type_registrar.video_type_for_url(url)
+        if vt:
+            urls.append(vt.convert_to_video_url())
+    video_urls = list(
+        VideoUrl.objects
+        .filter(url__in=urls)
+        .select_related('video', 'video__teamvideo')
+    )
+    found_urls = set(vurl.url for vurl in video_urls)
+    not_found = [
+        url for url in urls
+        if url not in found_urls
+    ]
+    video_urls.sort(key=lambda vurl: urls.index(vurl.url))
+    videos = [vurl.video for vurl in video_urls]
+    return render(request, "future/videos/url-search-results.html", {
+        'videos': videos,
+        'not_found': not_found,
+        'move_to_options': teams.permissions.can_move_videos_to(request.user),
+    })
+
+def url_search_move(request):
+    team = Team.objects.get(slug=request.POST['team'])
+    if not teams.permissions.can_move_videos_to_team(request.user, team):
+        raise PermissionDenied()
+    videos = Video.objects.filter(video_id__in=request.POST.getlist('videos'))
+    moved_a_video = False
+    with transaction.atomic():
+        for video in videos:
+            try:
+                team_video = video.get_team_video()
+                if team_video:
+                    team_video.move_to(team, user=request.user)
+                else:
+                    team.add_existing_video(video, request.user)
+            except Video.DuplicateUrlError, e:
+                if e.from_prevent_duplicate_public_videos:
+                    msg = ugettext(
+                        u"%(video)s not moved to %(team)s because it "
+                        "would conflict with the team policy")
+                else:
+                    msg = ugettext(u"%(video)s already added to %(team)s")
+
+                msg = fmt(msg, team=team, video=video.title_display())
+                messages.error(request, msg)
+            else:
+                moved_a_video = True
+    if moved_a_video:
+        messages.success(request, fmt(ugettext(u'Videos moved to %(team)s'),
+                                      team=team))
+    return redirect(request.get_full_path())
