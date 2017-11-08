@@ -398,7 +398,7 @@ def ensure_node_modules():
     package_json = os.path.join(unisubs_root(), 'amara-assets',
                                 'package.json')
     if (os.path.exists(node_modules) and
-            os.path.getmtime(node_modules) < os.path.getmtime(package_json)):
+            os.path.getmtime(node_modules) > os.path.getmtime(package_json)):
         # node_modules up-to-date, no need to rebuild
         return
     print('Installing node modules...')

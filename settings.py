@@ -132,6 +132,10 @@ MEDIA_ROOT  = rel('user-data')+'/'
 CSS_ROOT = os.path.join(STATIC_ROOT, 'amara/css')
 LOGO_URL = "https://s3.amazonaws.com/amara/assets/LogoAndWordmark.svg"
 PCF_LOGO_URL = "https://s3.amazonaws.com/amara/assets/PCFLogo.png"
+# Prefix for assets from the amara-assets repo.  This is currently needed to
+# keep them separate from ones from the staticmedia app.  Once everything is
+# using futureui, we can get rid of this.
+ASSETS_S3_PREFIX = 'assets/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
