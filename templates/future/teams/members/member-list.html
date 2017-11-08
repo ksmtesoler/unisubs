@@ -1,0 +1,30 @@
+{% load i18n i18n_tags forms %}
+{% load url from future %}
+
+<ul id="memberDirectory-selectList" class="selectList-members selectList" data-target="#memberDirectory-actionBar">
+  {% for member in page %}
+  <li>
+    {% if is_team_admin %}
+    <div class="checkbox">
+        <input id="member-{{member.id}}" type="checkbox" value="{{member.id}}" class="selectList-checkbox">
+        <label for="member-{{member.id}}"><span></span></label>
+    </div>
+    {% endif %}
+    <div>
+      <a href="{% url 'teams:member-profile' slug=team.slug username=member.user.username %}">
+        {{ member.user.avatar_tag_large }}
+      </a>
+    </div>
+    <div class="selectList-memberDetails">
+      <h3>
+        <a href="{% url 'teams:member-profile' slug=team.slug username=member.user.username %}">{{member.user}}</a>
+      </h3>
+      <h4>{{ member.role }}</h4>
+      <p>{{ member.user.get_languages|to_localized_display_list }}<p>
+    </div>
+    <div class="selectList-itemActions">
+      <a href="{% url 'messages:new' %}?user={{ member.user.username }}"><i class="icon icon-mail"></i></a>
+    </div>
+  </li>
+  {% endfor %}
+</ul>

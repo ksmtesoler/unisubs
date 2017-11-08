@@ -1422,16 +1422,16 @@ class MemberFiltersForm(forms.Form):
 
     q = forms.CharField(label=_('Search'), required=False)
 
-    role = forms.ChoiceField(choices=[
+    role = AmaraChoiceField(choices=[
         ('any', _('All roles')),
         (TeamMember.ROLE_ADMIN, _('Admins')),
         (TeamMember.ROLE_MANAGER, _('Managers')),
         (TeamMember.ROLE_CONTRIBUTOR, _('Contributors')),
     ], initial='any', required=False)
-    language = forms.ChoiceField(choices=LANGUAGE_CHOICES,
+    language = AmaraChoiceField(choices=LANGUAGE_CHOICES,
                                  label=_('Language spoken'),
                                  initial='any', required=False)
-    sort = forms.ChoiceField(choices=[
+    sort = AmaraChoiceField(choices=[
         ('recent', _('Date joined, most recent')),
         ('oldest', _('Date joined, oldest')),
     ], initial='recent', required=False)
@@ -1448,12 +1448,8 @@ class MemberFiltersForm(forms.Form):
         return data if data else None
 
     def update_qs(self, qs):
-        if not self.is_bound:
-            data = {}
-        elif not self.is_valid():
-            # we should never get here
-            logger.warn("Invalid member filters: %s", self.data)
-            data = {}
+        if not (self.is_bound and self.is_valid()):
+            return qs
         else:
             data = self.cleaned_data
 
@@ -1470,13 +1466,13 @@ class MemberFiltersForm(forms.Form):
                                | Q(user__email__icontains=term)
                                | Q(user__username__icontains=term)
                                | Q(user__biography__icontains=term))
-        if role != 'any':
+        if role and role != 'any':
             if role != TeamMember.ROLE_ADMIN:
                 qs = qs.filter(role=role)
             else:
                 qs = qs.filter(Q(role=TeamMember.ROLE_ADMIN)|
                                Q(role=TeamMember.ROLE_OWNER))
-        if language != 'any':
+        if language and language != 'any':
             qs = qs.filter(user__userlanguage__language=language)
         if sort == 'oldest':
             qs = qs.order_by('created')
@@ -1560,7 +1556,6 @@ class ApproveApplicationForm(ManagementForm):
                 self.error_count), count=self.error_count))
         return errors
 
-
 class DenyApplicationForm(ManagementForm):
 
     name = "deny_application"
@@ -1607,6 +1602,91 @@ class DenyApplicationForm(ManagementForm):
                 "Application could not be processed",
                 "%(count)s application could not be processed",
                 "%(count)s applications could not be processed",
+                self.error_count), count=self.error_count))
+        return errors
+
+class ChangeMemberRoleForm(ManagementForm):
+    name = "change_role"
+    label = _("Change Role")
+
+    role = AmaraChoiceField(choices=[
+                ('', _("Don't change")),
+                (TeamMember.ROLE_CONTRIBUTOR, _('Contributor')),
+                (TeamMember.ROLE_MANAGER, _('Manager')),
+                (TeamMember.ROLE_ADMIN, _('Admin')),
+           ], initial='', label=_('Member Role'))
+
+    def __init__(self, user, queryset, selection, all_selected,
+                 data=None, files=None):
+        self.user = user
+        super(ChangeMemberRoleForm, self).__init__(
+            queryset, selection, all_selected, data=data, files=files)
+
+    def perform_submit(self, members):
+        self.error_count = 0
+        if self.cleaned_data['role'] != '':
+            for member in members:
+                try:
+                    member.role = self.cleaned_data['role']
+                    member.save()
+                except Exception as e:
+                    logger.error(e, exc_info=True)
+                    self.error_count += 1
+
+    def message(self):
+        if self.count:
+            return fmt(self.ungettext('Member role has been updated',
+                                      '%(count)s member role has been updated',
+                                      '%(count)s member roles have been updated',
+                                      self.count), count=self.count)
+        else:
+            return None
+
+    def error_messages(self):
+        errors = []
+        if self.error_count:
+            errors.append(fmt(self.ungettext(
+                "Member could not be edited",
+                "%(count)s member could not be edited",
+                "%(count)s members could not be edited",
+                self.error_count), count=self.error_count))
+        return errors
+
+class RemoveMemberForm(ManagementForm):
+    name = "remove_member"
+    label = _("Remove Member")
+
+    def __init__(self, user, queryset, selection, all_selected,
+                 data=None, files=None):
+        self.user = user
+        super(RemoveMemberForm, self).__init__(
+            queryset, selection, all_selected, data=data, files=files)
+
+    def perform_submit(self, members):
+        self.error_count = 0
+        for member in members:
+            try:
+                member.delete()
+            except Exception as e:
+                logger.warn(e, exc_info=True)
+                self.error_count += 1
+
+    def message(self):
+        if self.count:
+            return fmt(self.ungettext('User has been removed',
+                                      '%(count)s user has been removed',
+                                      '%(count)s users have been removed',
+                                      self.count), count=self.count)
+        else:
+            return None
+
+    def error_messages(self):
+        errors = []
+        if self.error_count:
+            errors.append(fmt(self.ungettext(
+                "Member could not be removed",
+                "%(count)s member could not be removed",
+                "%(count)s members could not be removed",
                 self.error_count), count=self.error_count))
         return errors
 

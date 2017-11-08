@@ -1,0 +1,50 @@
+{% extends "future/teams/base.html" %}
+
+{% load i18n forms %}
+{% load url from future %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="content">
+          <div class="row">
+            <div class="col-sm-3">
+              <form method="GET" action="" class="ajaxForm updateOnChange updateLocation">
+                {{ filters_form.q|render_filter_field }}
+                {{ filters_form.role|render_filter_field }}
+                {{ filters_form.language|render_filter_field }}
+              </form>
+            </div>
+            <div class="col-sm-9">
+            {% if is_team_admin %}
+            <nav class="nav-actions">
+              <span class="pull-right">
+                <a href="{% url 'teams:applications' slug=team.slug %}" title="Application Review">Application Review</a>
+              </span>
+              <div class="checkbox">
+                <input id="select_all" type="checkbox" class="selectAll" data-target="#memberDirectory-selectList">
+                <label for="select_all" class="text-gray"><span></span>Select All</label>
+              </div>
+            </nav>
+            {% endif %}
+            <div id="member-list-all">
+            {% include "future/teams/members/member-list.html" %}
+            </div>
+            {% include "future/paginator.html" %}
+            <div id="memberDirectory-actionBar" class="actionBar">
+              <form class="ajaxForm copyQuery" method="GET" action="{{ request.path }}">
+                <input class="selectList-selection" type="hidden" name="selection">
+                <button class="button cta" type="submit" name="form" value="role">Change Role</button>
+                <button class="button cta" type="submit" name="form" value="remove">Remove</button>
+                <button class="button borderless deselectAll" data-target="#memberDirectory-selectList">Deselect</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
