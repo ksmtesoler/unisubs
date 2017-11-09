@@ -56,10 +56,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'videos.tasks.create_missing_index_objects',
         'schedule': crontab(minute=2),
     },
-    'update_feeds': {
-        'task': 'videos.tasks.update_from_feed',
-        'schedule': crontab(minute=0),
-    },
     'import_from_accounts': {
         'task': 'externalsites.tasks.import_videos_from_accounts',
         'schedule': crontab(minute=0),

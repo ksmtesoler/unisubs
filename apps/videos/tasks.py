@@ -72,19 +72,11 @@ def save_thumbnail_in_s3(video_id):
         video.s3_thumbnail.save(video.thumbnail.split('/')[-1], content)
 
 @task
-def update_from_feed():
-    qs = VideoFeed.objects.exclude(last_update__gt=datetime.now()-
-                                   timedelta(hours=1))
-    for feed in qs:
-        update_video_feed_with_rate_limit.apply_async(
-            args=(feed.pk,), queue='feeds')
-
-@task
 def update_video_feed(video_feed_id):
     try:
         video_feed = VideoFeed.objects.get(pk=video_feed_id)
         video_feed.update()
-    except VideoFeed:
+    except VideoFeed.DoesNotExist:
         logging.warn(
             '**update_video_feed**. VideoFeed does not exist. ID: %s',
             video_feed_id)
