@@ -187,7 +187,7 @@ class TestMoveVideosForm(TeamVideoManagementFormBase):
     def test_team_and_project_choices(self, can_move_videos_to):
         invalid_team = TeamFactory()
         invalid_project = ProjectFactory(team=invalid_team)
-        can_move_videos_to.return_value = [ self.other_team ]
+        can_move_videos_to.return_value = [ self.team, self.other_team ]
         form = self.build_form(forms.MoveVideosForm, self.videos)
         assert_items_equal([c[0] for c in form.fields['new_team'].choices],
                            [self.team.id, self.other_team.id])
