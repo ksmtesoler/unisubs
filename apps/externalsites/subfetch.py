@@ -57,21 +57,18 @@ def lookup_youtube_accounts(video_url, user, team):
     Find the YouTubeAccount objects we should use to try in
     fetch_subs_youtube()
     """
-    owner = team if team else user
-    accounts = []
-    if owner:
-        return list(YouTubeAccount.objects.for_owner(owner))
+    if team:
+        return YouTubeAccount.objects.for_team_or_synced_with_team(team)
     else:
-        return []
+        return YouTubeAccount.objects.for_owner(user)
 
 def fetch_subs_youtube(video_url, user, team):
     video_id = video_url.videoid
     channel_id = video_url.owner_username
     possible_accounts = set()
-    if team is not None and user is not None:
-        for account in lookup_youtube_accounts(video_url, user, team):
-            if account.fetch_initial_subtitles:
-                possible_accounts.add(account)
+    for account in lookup_youtube_accounts(video_url, user, team):
+        if account.fetch_initial_subtitles:
+            possible_accounts.add(account)
     account = find_youtube_account(video_id, possible_accounts)
     if account is None:
         logger.warn("fetch_subs() no available credentials.")
