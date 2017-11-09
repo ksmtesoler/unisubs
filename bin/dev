@@ -419,6 +419,40 @@ class Push(Command):
             run(['git', 'push'], cwd=path)
             print()
 
+class Bump(Command):
+    """
+    Push a commit to update submodule references
+    """
+
+    def run(self):
+        submodules_changed = False
+        submodules_changed_re = self.make_submodule_changed_re()
+        for line in get_output(['git', 'status', '--porcelain']).split('\n'):
+            if line == '':
+                continue
+            if line.startswith('??'):
+                continue
+            m = submodules_changed_re.match(line)
+            if m:
+                submodules_changed = True
+            else:
+                print('uncommited changes in unisubs')
+                run(['git', 'status', '--untracked=no'], stdout=None)
+                return 1
+
+        if submodules_changed:
+            run(['git', 'commit', '-a', '-m', 'Updating submodules'])
+            print('commited changes')
+        else:
+            print('no submodule changes to commit')
+
+    def make_submodule_changed_re(self):
+        pattern = ' *M *({})$'.format(
+            '|'.join(os.path.relpath(path, unisubs_root())
+                     for name, path in get_submodule_paths())
+        )
+        return re.compile(pattern)
+
 NEEDS_ROOT = [
     'build_docs',
     'update_api_docs',
@@ -447,6 +481,7 @@ class Dev(RootCommand):
         PrepDeploy,
         Switch,
         Push,
+        Bump,
         SyncTranslations,
         Test,
         Up,
