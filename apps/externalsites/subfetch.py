@@ -59,8 +59,10 @@ def lookup_youtube_accounts(video_url, user, team):
     """
     if team:
         return YouTubeAccount.objects.for_team_or_synced_with_team(team)
-    else:
+    elif user:
         return YouTubeAccount.objects.for_owner(user)
+    else:
+        return YouTubeAccount.objects.none()
 
 def fetch_subs_youtube(video_url, user, team):
     video_id = video_url.videoid
