@@ -21,7 +21,7 @@ from itertools import chain
 from django.forms import widgets
 from django.forms.util import flatatt
 from django.template.loader import render_to_string
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_unicode, force_text
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 
