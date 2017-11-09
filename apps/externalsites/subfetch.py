@@ -72,13 +72,6 @@ def fetch_subs_youtube(video_url, user, team):
         for account in lookup_youtube_accounts(video_url, user, team):
             if account.fetch_initial_subtitles:
                 possible_accounts.add(account)
-    if channel_id:
-        try:
-            account = YouTubeAccount.objects.get(channel_id=channel_id)
-            if account.fetch_initial_subtitles:
-                possible_accounts.add(account)
-        except:
-            pass
     account = find_youtube_account(video_id, possible_accounts)
     if account is None:
         logger.warn("fetch_subs() no available credentials.")
