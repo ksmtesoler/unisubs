@@ -32,24 +32,59 @@ specific command.
 from datetime import date
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
 
 from command import Command, CompositeCommand, RootCommand
 
+def run(cmdline, check=True, stdout=subprocess.DEVNULL, **kwargs):
+    return subprocess.run(cmdline, stdout=stdout, check=check, **kwargs)
+
+def get_output(cmdline, **kwargs):
+    result = run(cmdline, stdout=subprocess.PIPE, **kwargs)
+    return result.stdout.decode('utf8')
+
+
+initial_cwd = os.getcwd()
 def script_path():
     path = __file__
     while os.path.islink(path):
         path = os.path.join(os.path.dirname(path),
                             os.readlink(path))
-    return os.path.abspath(path)
+    return os.path.join(initial_cwd, path)
 
 def unisubs_root():
     return os.path.dirname(os.path.dirname(script_path()))
 
 def progname():
     return os.path.basename(sys.argv[0])
+
+def get_submodule_paths():
+    """
+    Get a list of initialized submodules and their paths
+
+    Returns: list of (name, path) tuples
+    """
+    output = get_output(['git', 'submodule', 'foreach', 'pwd'],
+                        cwd=unisubs_root())
+    rv = []
+    name = None
+    for line in output.split('\n'):
+        if line == '':
+            continue
+        if name is None:
+            m = re.match(r"entering '(.*?)'", line, re.IGNORECASE)
+            if m is None:
+                print('error parsing entering line: {}'.format(line))
+                sys.exit(1)
+            name = m.group(1)
+        else:
+            path = line.strip()
+            rv.append((name, path))
+            name = None
+    return rv
 
 class Bash(Command):
     """Run a bash script inside the app container."""
@@ -243,6 +278,126 @@ class VarnishLogs(Command):
     def run(self):
         subprocess.call(['docker-compose', 'exec', 'varnish', 'varnishlog'])
 
+class Switch(Command):
+    """
+    Switch to a git branch
+
+    This command can be used to switch to git branches, including on our
+    submodules.
+
+    For unisubs, we check out the branch directly.
+      - If --pull is present, we also run git pull
+
+    For submodules, we do one of the following (in order of preference):
+        - Checkout branch, if it exists locally
+        - Checkout origin/branch, if it exists
+        - Checkout master
+
+    Finally, we run git submodule update, with the following:
+        - --no-fetch (--pull is not present)
+        - --merge (--pull without --rebase)
+        - --rebase (--pull and --rebase)
+
+    If there are any uncommited changes in any repo, this command will exit
+    with a failure code.
+    """
+
+    def add_arguments(self, parser):
+        parser.add_argument('branch')
+        parser.add_argument('-p', '--pull', action='store_true',
+                            help='pull changes from origin')
+        parser.add_argument('-r', '--rebase', action='store_true',
+                            help='use rebase instead of merge '
+                            'when pulling changes')
+
+    def run(self):
+        submodule_paths = get_submodule_paths()
+
+        self.check_repo_changes('unisubs', unisubs_root())
+        for name, path in submodule_paths:
+            self.check_repo_changes(name, path)
+
+        self.checkout_submodule('unisubs', unisubs_root(),
+                                fallback_to_master=False)
+        for name, path in submodule_paths:
+            self.checkout_submodule(name, path)
+
+        self.pull()
+        self.submodule_update()
+
+        self.print_branch_and_commit('unisubs', unisubs_root())
+        for name, path in submodule_paths:
+            self.print_branch_and_commit(name, path)
+
+    def check_repo_changes(self, name, path):
+        return
+        os.chdir(path)
+        result = run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
+                          check=False)
+        if result.returncode != 0:
+            print('Uncommited changes to {}:'.format(name))
+            print()
+            run(['git', 'status'], stdout=None)
+            sys.exit(1)
+
+    def checkout_submodule(self, name, path, fallback_to_master=True):
+        os.chdir(path)
+        if self.args.pull:
+            run(['git', 'fetch'])
+        if self.branch_exists(self.args.branch):
+            self.checkout(self.args.branch)
+        elif self.branch_exists('origin/' + self.args.branch):
+            self.checkout('origin/' + branch, track=True)
+        else:
+            if not fallback_to_master:
+                print('{} does not exist on {}'.format(
+                    self.args.branch, name))
+                sys.exit(1)
+            self.checkout('master')
+
+    def checkout(self, branch, track=False):
+        cmdline = ['git', 'checkout']
+        if track:
+            cmdline.append('--track')
+        cmdline.append(branch)
+        # git checkout is quite chatty on stderr, squelch the output
+        run(cmdline, stderr=subprocess.DEVNULL)
+
+    def pull(self):
+        if self.args.pull:
+            cmdline = ['git', 'pull']
+            if self.args.rebase:
+                cmdline.append('--rebase')
+            run(cmdline)
+
+    def submodule_update(self):
+        os.chdir(unisubs_root())
+        cmdline = ['git', 'submodule', 'update']
+        if self.pull:
+            if self.args.rebase:
+                cmdline.append('--rebase')
+            else:
+                cmdline.append('--merge')
+        else:
+            cmdline.append('--no-fetch')
+        run(cmdline)
+
+    def print_branch_and_commit(self, name, path):
+        os.chdir(path)
+        branch = get_output(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
+        commit = get_output(
+            ['git', 'rev-parse', 'HEAD']).strip()
+        print('{:20} {:30} {}'.format(name, branch, commit))
+
+    def branch_exists(self, branch):
+        result = run(
+            ['git', 'rev-parse', '--verify', '--quiet', branch],
+            check=False,
+        )
+        return result.returncode == 0
+
+
 NEEDS_ROOT = [
     'build_docs',
     'update_api_docs',
@@ -269,6 +424,7 @@ class Dev(RootCommand):
         JSTest,
         Manage,
         PrepDeploy,
+        Switch,
         SyncTranslations,
         Test,
         Up,
