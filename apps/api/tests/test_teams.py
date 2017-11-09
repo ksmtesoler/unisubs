@@ -199,6 +199,13 @@ class TeamAPITest(TeamAPITestBase):
         response = self.client.delete(self.detail_url(team))
         assert_equal(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    def test_delete_team_allowed(self):
+        self.can_delete_team.return_value = True
+        team = TeamFactory()
+        response = self.client.delete(self.detail_url(team))
+        assert_equal(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        assert_equal(self.can_delete_team.call_args, None)
+
     def test_create_team_permissions(self):
         self.can_create_team.return_value = False
         response = self.client.post(self.list_url, data={

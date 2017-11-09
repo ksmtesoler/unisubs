@@ -210,7 +210,7 @@ class VideoSerializerTest(TestCase):
             self.run_create({
                 'video_url': url,
             })
-        assert_in('Video already exists', str(cm.exception))
+        assert_in('Video already added', str(cm.exception))
 
     def test_cant_create_with_invalid_video_url(self):
         url = 'http://junk.com/junky/fake1.mov'
@@ -326,6 +326,14 @@ class VideoSerializerTest(TestCase):
         self.run_update({ 'team': 'test-team', })
         assert_equal(self.video.get_team_video().team, team)
 
+    @test_utils.patch_for_test('teams.models.Team.add_existing_video')
+    def test_add_to_team_duplicate_url_error(self, add_existing_video):
+        add_existing_video.side_effect = Video.DuplicateUrlError(
+            self.video.get_primary_videourl_obj())
+        team = TeamFactory(slug='test-team')
+        with assert_raises(ValidationError):
+            self.run_update({ 'team': 'test-team', })
+
     @test_utils.mock_handler(teams.signals.video_moved_from_team_to_team)
     def test_move_team(self, mock_handler):
         team1 = TeamFactory(slug='team1')
@@ -335,11 +343,30 @@ class VideoSerializerTest(TestCase):
         assert_equal(self.video.get_team_video().team, team2)
         assert_equal(mock_handler.call_count, 1)
 
+    @test_utils.patch_for_test('teams.models.TeamVideo.move_to')
+    def test_move_to_team_duplicate_url_error(self, move_to):
+        move_to.side_effect = Video.DuplicateUrlError(
+            self.video.get_primary_videourl_obj())
+        team1 = TeamFactory(slug='team1')
+        team2 = TeamFactory(slug='team2')
+        TeamVideoFactory(video=self.video, team=team1)
+        with assert_raises(ValidationError):
+            self.run_update({ 'team': 'team2' })
+
     def test_remove_team(self):
         team = TeamFactory(slug='team')
         TeamVideoFactory(video=self.video, team=team)
         self.run_update({ 'team': None })
         assert_equal(test_utils.reload_obj(self.video).get_team_video(), None)
+
+    @test_utils.patch_for_test('teams.models.TeamVideo.remove')
+    def test_remove_team_duplicate_url_error(self, remove):
+        remove.side_effect = Video.DuplicateUrlError(
+            self.video.get_primary_videourl_obj())
+        team = TeamFactory(slug='test-team')
+        TeamVideoFactory(video=self.video, team=team)
+        with assert_raises(ValidationError):
+            self.run_update({ 'team': None})
 
     def test_set_project(self):
         project = ProjectFactory()

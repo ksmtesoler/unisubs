@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Amara, universalsubtitles.org
 #
@@ -30,20 +30,30 @@ specific command.
 """
 
 from datetime import date
-from glob import glob
+import argparse
 import os
-import optparse
 import re
 import shutil
 import subprocess
 import sys
 
+from command import Command, CompositeCommand, RootCommand
+
+def run(cmdline, check=True, stdout=subprocess.DEVNULL, **kwargs):
+    return subprocess.run(cmdline, stdout=stdout, check=check, **kwargs)
+
+def get_output(cmdline, **kwargs):
+    result = run(cmdline, stdout=subprocess.PIPE, **kwargs)
+    return result.stdout.decode('utf8')
+
+
+initial_cwd = os.getcwd()
 def script_path():
     path = __file__
     while os.path.islink(path):
         path = os.path.join(os.path.dirname(path),
                             os.readlink(path))
-    return os.path.abspath(path)
+    return os.path.join(initial_cwd, path)
 
 def unisubs_root():
     return os.path.dirname(os.path.dirname(script_path()))
@@ -51,85 +61,40 @@ def unisubs_root():
 def progname():
     return os.path.basename(sys.argv[0])
 
-class Command(object):
-    options = []
-    raw_args = False
+def get_submodule_paths():
+    """
+    Get a list of initialized submodules and their paths
 
-    @classmethod
-    def name(cls):
-        return cls.__name__.lower()
-
-    @classmethod
-    def all_commands(cls):
-        return dict((sub_class.name(), sub_class)
-                    for sub_class in cls.__subclasses__())
-
-    @classmethod
-    def get_command(cls, name):
-        CommandClass = cls.all_commands()[name]
-        return CommandClass()
-
-    def usage(self):
-        return "%s\n\n%s" % (self.usage_header(), self.usage_detail())
-
-    def usage_header(self):
-        header = "usage: %s %s" % (progname(), self.name())
-        if self.raw_args:
-            return header + " [args]"
-        if self.options:
-            header += " [options]"
-        return header
-
-    def usage_detail(self):
-        return self.__doc__
-
-    def make_option_parser(self):
-        return optparse.OptionParser(self.usage(), option_list=self.options)
-
-    def print_help(self):
-        self.make_option_parser().print_help()
-
-    def run(self, command_args):
-        if self.raw_args:
-            options = {}
-            args = command_args
+    Returns: list of (name, path) tuples
+    """
+    output = get_output(['git', 'submodule', 'foreach', 'pwd'],
+                        cwd=unisubs_root())
+    rv = []
+    name = None
+    for line in output.split('\n'):
+        if line == '':
+            continue
+        if name is None:
+            m = re.match(r"entering '(.*?)'", line, re.IGNORECASE)
+            if m is None:
+                print('error parsing entering line: {}'.format(line))
+                sys.exit(1)
+            name = m.group(1)
         else:
-            parser = self.make_option_parser()
-            (options, args) = parser.parse_args(command_args)
-        return self.run_inner(args, options)
-
-    def run_inner(self, args, options):
-        raise NotImplementedError()
-
-class Help(Command):
-    """Get help on a command."""
-
-    def usage_header(self):
-        return "usage: %s help [command]" % (progname(),)
-
-    def run_inner(self, args, options):
-        try:
-            command_name = args[0]
-        except IndexError:
-            command_name = 'help'
-        try:
-            command = Command.get_command(command_name)
-        except KeyError:
-            print "Unknown command: %s" % command_name
-        else:
-            command.print_help()
+            path = line.strip()
+            rv.append((name, path))
+            name = None
+    return rv
 
 class Bash(Command):
     """Run a bash script inside the app container."""
-    options = [
-        optparse.make_option('-p', '--expose-port', action='store_true',
+    def add_arguments(self, parser):
+        parser.add_argument('-p', '--expose-port', action='store_true',
                              help='Expose port 8000')
-    ]
 
-    def run_inner(self, args, options):
-        ensure_node_modules()
+    def run(self):
         cmdline = ["docker-compose", "run", "--rm", '-u', 'root']
-        if options.expose_port:
+        if self.args.expose_port:
             cmdline.extend(['-p', '8000:8000'])
         cmdline.extend(["app", "shell"])
         subprocess.call(cmdline)
@@ -137,33 +102,33 @@ class Bash(Command):
 class Build(Command):
     """Build the app container."""
 
-    def run_inner(self, args, options):
+    def run(self):
         build_script = os.path.join(unisubs_root(), 'bin', 'build.py')
         subprocess.call(['python', build_script, 'amara-app'])
 
 class Manage(Command):
     """Run manage.py inside the app container."""
 
-    raw_args = True
+    def add_arguments(self, parser):
+        parser.add_argument('manage_args', nargs=argparse.REMAINDER)
 
-    def run_inner(self, args, options):
-        ensure_node_modules()
-        run_manage(args)
+    def run(self):
+        run_manage(self.args.manage_args)
 
 class Test(Command):
     """Run unittests."""
 
-    raw_args = True
+    def add_arguments(self, parser):
+        parser.add_argument('test_args', nargs=argparse.REMAINDER)
 
-    def run_inner(self, args, options):
-        ensure_node_modules()
+    def run(self):
         run_manage(['test', '--settings=dev_settings_test',
-                    '--where=/opt/apps/amara'] + args)
+                    '--where=/opt/apps/amara'] + self.args.test_args)
 
 class JSTest(Command):
     """Run Javascript unittests."""
 
-    def run_inner(self, args, options):
+    def run(self):
         subprocess.call([
             'docker', 'run', '--rm',
             '--volume={}:/opt/apps/amara'.format(unisubs_root()),
@@ -173,7 +138,7 @@ class JSTest(Command):
 class DBReset(Command):
     """Reset the database."""
 
-    def run_inner(self, args, options):
+    def run(self):
         run_manage(['drop_all_tables'])
         run_manage(['syncdb', '--all', '--noinput'])
         run_manage(['migrate', '--fake'])
@@ -182,45 +147,40 @@ class DBReset(Command):
 class DBDump(Command):
     """Dump the database to a flie."""
 
-    def run_inner(self, args, options):
-        try:
-            path = args[0]
-        except IndexError:
-            print 'need to specify a file'
-            return
+    def add_arguments(self, parser):
+        parser.add_argument('path', help='dump file')
+
+    def run(self):
         mysql_cmd = ("mysqldump -u amara --host=db "
                      "--password=amara amara")
-        with open(path, 'w') as f:
+        with open(self.args.path, 'w') as f:
             subprocess.call(['docker-compose', 'run', '--rm',
                              '--entrypoint=bash', 'app', '-c', mysql_cmd], stdout=f)
 
 class DBLoad(Command):
     """Load the database from a file."""
 
-    def run_inner(self, args, options):
-        try:
-            path = args[0]
-        except IndexError:
-            print 'need to specify a file'
-            return
-        with open(path, 'r') as f:
+    def add_arguments(self, parser):
+        parser.add_argument('path', help='dump file')
+
+    def run(self):
+        with open(self.args.path, 'r') as f:
             run_manage(['dbshell'], stdin=f)
 
 class SyncTranslations(Command):
     """Sync our translation filen with transifex."""
 
-    options = [
-        optparse.make_option('-f', '--force', action='store_true',
-                             help='Force download translations'),
-        optparse.make_option('-p', '--pull-only', action='store_true',
-                             help='Download only'),
-    ]
+    def add_arguments(self, parser):
+        parser.add_argument('-f', '--force', action='store_true',
+                            help='Force download translations'),
+        parser.add_argument('-p', '--pull-only', action='store_true',
+                            help='Download only'),
 
-    def run_inner(self, args, options):
-        if not options.pull_only:
+    def run(self):
+        if not self.args.pull_only:
             run_manage(['update_translations'])
             subprocess.check_call(['tx', 'push', '--source'])
-        if options.force:
+        if self.args.force:
             subprocess.check_call(['tx', 'pull', '--all', '--force'])
         else:
             subprocess.check_call(['tx', 'pull', '--all'])
@@ -229,27 +189,24 @@ class SyncTranslations(Command):
 class Up(Command):
     """Start docker containers."""
 
-    options = [
-        optparse.make_option('--jsonlog', action='store_true',
-                             help='Use JSON formatted logging'),
-        optparse.make_option('--dblog', action='store_true',
-                             help='Log DB queries'),
-    ]
+    def add_arguments(self, parser):
+        parser.add_argument('--jsonlog', action='store_true',
+                            help='Use JSON formatted logging'),
+        parser.add_argument('--dblog', action='store_true',
+                            help='Log DB queries'),
 
-    def run_inner(self, args, options):
-        ensure_node_modules()
+    def run(self):
         env = os.environ.copy()
-        if options.jsonlog:
+        if self.args.jsonlog:
             env['JSON_LOGGING'] = '1'
-        if options.dblog:
+        if self.args.dblog:
             env['DB_LOGGING'] = '1'
-        subprocess.call(['docker-compose', 'up', 'app', 'worker',
-                         'asset-builder'], env=env)
+        subprocess.call(['docker-compose', 'up', 'app', 'worker'], env=env)
 
 class PrepDeploy(Command):
     """Start docker containers."""
 
-    def run_inner(self, args, options):
+    def run(self):
         try:
             if args[0] == 'staging':
                 return self.prep_staging()
@@ -257,7 +214,7 @@ class PrepDeploy(Command):
                 return self.prep_production()
         except IndexError:
             pass
-        print "Must specify staging or production"
+        print("Must specify staging or production")
 
     def prep_staging(self):
         self.check_branch('staging')
@@ -279,7 +236,7 @@ class PrepDeploy(Command):
         if value != correct_value:
             raise AssertionError(
                 "{} is {} instead of {}".format(label, value, correct_value))
-        print "{} is {}".format(label, value)
+        print("{} is {}".format(label, value))
 
     def check_branch(self, correct_branch):
         self.run_git('fetch')
@@ -287,7 +244,7 @@ class PrepDeploy(Command):
         self.check_value("Current branch", branch, correct_branch)
 
     def merge_branch(self, from_branch):
-        print "Merging {}".format(from_branch)
+        print("Merging {}".format(from_branch))
         self.run_git('merge', '--ff-only', from_branch)
 
     def tag_deploy(self):
@@ -312,36 +269,146 @@ class PrepDeploy(Command):
             yield tag_name_base + '-{}'.format(i)
 
     def push(self, branch):
-        print "Pushing {}".format(branch)
+        print("Pushing {}".format(branch))
         self.run_git('push', 'origin', branch)
 
 class VarnishLogs(Command):
     """Follow logs for varnish."""
 
-    def run_inner(self, args, options):
+    def run(self):
         subprocess.call(['docker-compose', 'exec', 'varnish', 'varnishlog'])
 
-class NPM(Command):
-    """Run npm for the amara-assets repo."""
+class Switch(Command):
+    """
+    Switch to a git branch
 
-    # Use this command to manage the packages.json file in amara-assets.  For
-    # example:
-    #
-    #     - dev npm install [package] -- add a dependancy
-    #     - dev npm uninstall [package] -- remove a dependancy
+    This command can be used to switch to git branches, including on our
+    submodules.
 
-    raw_args = True
+    For unisubs, we check out the branch directly.
+      - If --pull is present, we also run git pull
 
-    def run_inner(self, args, options):
-        run_node(['npm'] + args)
+    For submodules, we do one of the following (in order of preference):
+        - Checkout branch, if it exists locally
+        - Checkout origin/branch, if it exists
+        - Checkout master
 
-class Gulp(Command):
-    """Run gulp for the amara-assets repo."""
+    Finally, we run git submodule update, with the following:
+        - --no-fetch (--pull is not present)
+        - --merge (--pull without --rebase)
+        - --rebase (--pull and --rebase)
 
-    raw_args = True
+    If there are any uncommited changes in any repo, this command will exit
+    with a failure code.
+    """
 
-    def run_inner(self, args, options):
-        run_node(['node', 'node_modules/gulp/bin/gulp.js'] + args)
+    def add_arguments(self, parser):
+        parser.add_argument('branch')
+        parser.add_argument('-p', '--pull', action='store_true',
+                            help='pull changes from origin')
+        parser.add_argument('-r', '--rebase', action='store_true',
+                            help='use rebase instead of merge '
+                            'when pulling changes')
+
+    def run(self):
+        submodule_paths = get_submodule_paths()
+
+        self.check_repo_changes('unisubs', unisubs_root())
+        for name, path in submodule_paths:
+            self.check_repo_changes(name, path)
+
+        self.checkout_submodule('unisubs', unisubs_root(),
+                                fallback_to_master=False)
+        for name, path in submodule_paths:
+            self.checkout_submodule(name, path)
+
+        self.pull()
+        self.submodule_update()
+
+        self.print_branch_and_commit('unisubs', unisubs_root())
+        for name, path in submodule_paths:
+            self.print_branch_and_commit(name, path)
+
+    def check_repo_changes(self, name, path):
+        os.chdir(path)
+        result = run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
+                          check=False)
+        if result.returncode != 0:
+            print('\033[40;41mUncommited changes on {}\033[0m'.format(name))
+            print()
+            run(['git', 'status'], stdout=None)
+            sys.exit(1)
+
+    def checkout_submodule(self, name, path, fallback_to_master=True):
+        os.chdir(path)
+        if self.args.pull:
+            run(['git', 'fetch'])
+        if self.branch_exists(self.args.branch):
+            self.checkout(name, self.args.branch)
+        elif self.branch_exists('origin/' + self.args.branch):
+            self.checkout(name, 'origin/' + branch, track=True)
+        else:
+            if not fallback_to_master:
+                print('{} does not exist on {}'.format(
+                    self.args.branch, name))
+                sys.exit(1)
+            self.checkout(name, 'master')
+
+    def checkout(self, name, branch, track=False):
+        cmdline = ['git', 'checkout']
+        if track:
+            cmdline.append('--track')
+        cmdline.append(branch)
+        # git checkout is quite chatty on stderr, squelch the output unless we
+        # need it
+        result = run(cmdline, stderr=subprocess.PIPE, check=False)
+        if result.returncode != 0:
+            print('git checkout error on {}:\n\n{}'.format(name,
+                                                           result.stderr))
+
+    def pull(self):
+        if self.args.pull:
+            cmdline = ['git', 'pull']
+            if self.args.rebase:
+                cmdline.append('--rebase')
+            run(cmdline)
+
+    def submodule_update(self):
+        os.chdir(unisubs_root())
+        cmdline = ['git', 'submodule', 'update']
+        if self.pull:
+            if self.args.rebase:
+                cmdline.append('--rebase')
+            else:
+                cmdline.append('--merge')
+        else:
+            cmdline.append('--no-fetch')
+        run(cmdline)
+
+    def print_branch_and_commit(self, name, path):
+        os.chdir(path)
+        branch = get_output(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
+        commit = get_output(
+            ['git', 'rev-parse', 'HEAD']).strip()
+        print('{:20} {:30} {}'.format(name, branch, commit))
+
+    def branch_exists(self, branch):
+        result = run(
+            ['git', 'rev-parse', '--verify', '--quiet', branch],
+            check=False,
+        )
+        return result.returncode == 0
+
+class Push(Command):
+    """
+    Push all git branches
+
+    This command pushes unisubs + all submodules
+    """
+
+    def run(self):
+        run(['git', 'push', '--recurse-submodules=on-demand'])
 
 NEEDS_ROOT = [
     'build_docs',
@@ -359,74 +426,24 @@ def run_manage(args, **kwargs):
         cmdline = ['docker-compose', 'run', '--rm', 'app', 'manage']
     subprocess.call(cmdline + args, **kwargs)
 
-NODE_IMAGE = 'node:9.0.0'
-def run_node(command):
-    """
-    Run the docker node container with the amara-assets repo
-    """
-    cmdline = [
-        'docker', 'run', '-it', '--rm',
-        '-v', '{}:/mnt'.format(unisubs_root()),
-        '-w', '/mnt/amara-assets',
+class Dev(RootCommand):
+    subcommands = [
+        Bash,
+        Build,
+        DBDump,
+        DBLoad,
+        DBReset,
+        JSTest,
+        Manage,
+        PrepDeploy,
+        Switch,
+        Push,
+        SyncTranslations,
+        Test,
+        Up,
+        VarnishLogs,
     ]
-    js_extensions = find_js_extensions()
-    if js_extensions:
-        cmdline.extend([
-            '-e', 'JS_EXTENSIONS={}'.format(','.join(js_extensions))
-        ])
-    cmdline.append(NODE_IMAGE)
-    cmdline.extend(command)
-    returncode = subprocess.call(cmdline)
-    if returncode != 0:
-        sys.exit(returncode)
-
-def find_js_extensions():
-    js_extensions = []
-    with open(os.path.join(unisubs_root(), '.gitmodules')) as f:
-        gitmodules = f.read()
-    paths = re.findall(r'path *= *(.*?) *\n', gitmodules)
-    for path in paths:
-        js_extensions.extend(glob(os.path.join(path, 'assets/js-extensions/*.js')))
-    # convert to paths inside the docker container
-    return [
-        os.path.join('/mnt/', path) for path in js_extensions
-    ]
-
-def ensure_node_modules():
-    node_modules = os.path.join(unisubs_root(), 'amara-assets',
-                                'node_modules')
-    package_json = os.path.join(unisubs_root(), 'amara-assets',
-                                'package.json')
-    if (os.path.exists(node_modules) and
-            os.path.getmtime(node_modules) > os.path.getmtime(package_json)):
-        # node_modules up-to-date, no need to rebuild
-        return
-    print('Installing node modules...')
-    run_node(['npm', 'install', '-d'])
-
-
-def usage():
-    print "Usage %s [command]" % progname()
-    print
-    print "Available commands:"
-    all_commands = Command.all_commands()
-    for name in sorted(all_commands):
-        print "%s -- %s" % (name, all_commands[name].__doc__)
-
-def main(args):
-    os.chdir(unisubs_root())
-    if not args:
-        usage()
-        return 1
-    try:
-        command = Command.get_command(args[0])
-    except KeyError:
-        usage()
-        return 1
-    else:
-        command.run(args[1:])
 
 if __name__ == '__main__':
-    rv = main(sys.argv[1:])
-    if rv is not None:
-        sys.exit(rv)
+    os.chdir(unisubs_root())
+    Dev().main()

@@ -72,10 +72,12 @@ class YoutubeVideoType(VideoType):
     def get_video_info(self, video, user, team, video_url):
         incomplete = False
         if not hasattr(self, '_video_info'):
-            if team is not None and user is not None:
-                accounts = externalsites.models.YouTubeAccount.objects.get_accounts_for_user_and_team(user, team)
+            if team:
+                accounts = externalsites.models.YouTubeAccount.objects.for_owner(team)
+            elif user:
+                accounts = externalsites.models.YouTubeAccount.objects.for_owner(user)
             else:
-                accounts = []
+                accounts = externalsites.models.YouTubeAccount.objects.none()
             try:
                 self._video_info = google.get_video_info(self.video_id, accounts[:YoutubeVideoType.MAX_ACCOUNTS_TO_TRY])
             except google.APIError:

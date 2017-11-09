@@ -295,6 +295,11 @@ class UserAPITest(TestCase):
             'email': 'new-email@example.com',
         })
 
+    def test_delete_user(self):
+        response = self.client.delete(self.detail_url(self.user))
+        assert_equal(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED,
+                     response.content)
+
     def test_update_with_create_login_token(self):
         response = self.check_put({
             'create_login_token': True,
