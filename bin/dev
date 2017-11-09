@@ -330,12 +330,11 @@ class Switch(Command):
             self.print_branch_and_commit(name, path)
 
     def check_repo_changes(self, name, path):
-        return
         os.chdir(path)
         result = run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
                           check=False)
         if result.returncode != 0:
-            print('Uncommited changes to {}:'.format(name))
+            print('\033[40;41mUncommited changes on {}\033[0m'.format(name))
             print()
             run(['git', 'status'], stdout=None)
             sys.exit(1)
@@ -345,23 +344,27 @@ class Switch(Command):
         if self.args.pull:
             run(['git', 'fetch'])
         if self.branch_exists(self.args.branch):
-            self.checkout(self.args.branch)
+            self.checkout(name, self.args.branch)
         elif self.branch_exists('origin/' + self.args.branch):
-            self.checkout('origin/' + branch, track=True)
+            self.checkout(name, 'origin/' + branch, track=True)
         else:
             if not fallback_to_master:
                 print('{} does not exist on {}'.format(
                     self.args.branch, name))
                 sys.exit(1)
-            self.checkout('master')
+            self.checkout(name, 'master')
 
-    def checkout(self, branch, track=False):
+    def checkout(self, name, branch, track=False):
         cmdline = ['git', 'checkout']
         if track:
             cmdline.append('--track')
         cmdline.append(branch)
-        # git checkout is quite chatty on stderr, squelch the output
-        run(cmdline, stderr=subprocess.DEVNULL)
+        # git checkout is quite chatty on stderr, squelch the output unless we
+        # need it
+        result = run(cmdline, stderr=subprocess.PIPE, check=False)
+        if result.returncode != 0:
+            print('git checkout error on {}:\n\n{}'.format(name,
+                                                           result.stderr))
 
     def pull(self):
         if self.args.pull:
@@ -397,6 +400,15 @@ class Switch(Command):
         )
         return result.returncode == 0
 
+class Push(Command):
+    """
+    Push all git branches
+
+    This command pushes unisubs + all submodules
+    """
+
+    def run(self):
+        run(['git', 'push', '--recurse-submodules=on-demand'])
 
 NEEDS_ROOT = [
     'build_docs',
@@ -425,6 +437,7 @@ class Dev(RootCommand):
         Manage,
         PrepDeploy,
         Switch,
+        Push,
         SyncTranslations,
         Test,
         Up,
