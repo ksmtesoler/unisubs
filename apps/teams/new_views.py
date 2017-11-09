@@ -219,7 +219,7 @@ def members(request, team):
         'show_add_link': permissions.can_add_members(team, request.user),
     }
 
-    if form_name:
+    if form_name and is_team_admin:
         return manage_members_form(request, team, form_name, members)
 
     if not form_name and request.is_ajax():
