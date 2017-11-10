@@ -172,6 +172,7 @@ urlpatterns += optionalapps.get_urlpatterns()
 
 urlpatterns += patterns('',
     url(r'^captcha/', include('captcha.urls')),
+    url(r'^api/', 'api.views.index.not_found', name='api-not-found'),
 )
 
 try:

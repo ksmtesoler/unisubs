@@ -80,5 +80,4 @@ urlpatterns = router.urls + patterns('',
         views.activity.UserActivityView.as_view(), name='user-activity'),
     url(r'teams/(?P<slug>[\w\d-]+)/activity/$',
         views.activity.TeamActivityView.as_view(), name='team-activity'),
-    url(r'', views.index.not_found, name='not-found'),
 )
