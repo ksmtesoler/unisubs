@@ -29,6 +29,7 @@ Run "dev" for a list of commands and "dev help <command>" for help on a
 specific command.
 """
 
+from glob import glob
 from datetime import date
 import argparse
 import os
@@ -96,6 +97,7 @@ class Bash(Command):
                              help='Expose port 8000')
 
     def run(self):
+        ensure_node_modules()
         cmdline = ["docker-compose", "run", "--rm", '-u', 'root']
         if self.args.expose_port:
             cmdline.extend(['-p', '8000:8000'])
@@ -116,6 +118,7 @@ class Manage(Command):
         parser.add_argument('manage_args', nargs=argparse.REMAINDER)
 
     def run(self):
+        ensure_node_modules()
         run_manage(self.args.manage_args)
 
 class Test(Command):
@@ -125,6 +128,7 @@ class Test(Command):
         parser.add_argument('test_args', nargs=argparse.REMAINDER)
 
     def run(self):
+        ensure_node_modules()
         run_manage(['test', '--settings=dev_settings_test',
                     '--where=/opt/apps/amara'] + self.args.test_args)
 
@@ -199,6 +203,7 @@ class Up(Command):
                             help='Log DB queries'),
 
     def run(self):
+        ensure_node_modules()
         env = os.environ.copy()
         if self.args.jsonlog:
             env['JSON_LOGGING'] = '1'
@@ -280,6 +285,31 @@ class VarnishLogs(Command):
 
     def run(self):
         subprocess.call(['docker-compose', 'exec', 'varnish', 'varnishlog'])
+
+class NPM(Command):
+    """Run npm for the amara-assets repo."""
+
+    # Use this command to manage the packages.json file in amara-assets.  For
+    # example:
+    #
+    #     - dev npm install [package] -- add a dependancy
+    #     - dev npm uninstall [package] -- remove a dependancy
+
+    def add_arguments(self, parser):
+        parser.add_argument('npm_args', nargs=argparse.REMAINDER)
+
+    def run(self):
+        run_node(['npm'] + list(self.args.npm_args))
+
+class Gulp(Command):
+    """Run gulp for the amara-assets repo."""
+
+    def add_arguments(self, parser):
+        parser.add_argument('gulp_args', nargs=argparse.REMAINDER)
+
+    def run(self):
+        run_node(['node', 'node_modules/gulp/bin/gulp.js'] +
+                 list(self.args.gulp_args))
 
 class Switch(Command):
     """
@@ -469,6 +499,51 @@ def run_manage(args, **kwargs):
         cmdline = ['docker-compose', 'run', '--rm', 'app', 'manage']
     subprocess.call(cmdline + args, **kwargs)
 
+NODE_IMAGE = 'node:9.0.0'
+def run_node(command):
+    """
+    Run the docker node container with the amara-assets repo
+    """
+    cmdline = [
+        'docker', 'run', '-it', '--rm',
+        '-v', '{}:/mnt'.format(unisubs_root()),
+        '-w', '/mnt/amara-assets',
+    ]
+    js_extensions = find_js_extensions()
+    if js_extensions:
+        cmdline.extend([
+            '-e', 'JS_EXTENSIONS={}'.format(','.join(js_extensions))
+        ])
+    cmdline.append(NODE_IMAGE)
+    cmdline.extend(command)
+    returncode = subprocess.call(cmdline)
+    if returncode != 0:
+        sys.exit(returncode)
+
+def find_js_extensions():
+    js_extensions = []
+    with open(os.path.join(unisubs_root(), '.gitmodules')) as f:
+        gitmodules = f.read()
+    paths = re.findall(r'path *= *(.*?) *\n', gitmodules)
+    for path in paths:
+        js_extensions.extend(glob(os.path.join(path, 'assets/js-extensions/*.js')))
+    # convert to paths inside the docker container
+    return [
+        os.path.join('/mnt/', path) for path in js_extensions
+    ]
+
+def ensure_node_modules():
+    node_modules = os.path.join(unisubs_root(), 'amara-assets',
+                                'node_modules')
+    package_json = os.path.join(unisubs_root(), 'amara-assets',
+                                'package.json')
+    if (os.path.exists(node_modules) and
+            os.path.getmtime(node_modules) > os.path.getmtime(package_json)):
+        # node_modules up-to-date, no need to rebuild
+        return
+    print('Installing node modules...')
+    run_node(['npm', 'install', '-d'])
+
 class Dev(RootCommand):
     subcommands = [
         Bash,
@@ -486,6 +561,8 @@ class Dev(RootCommand):
         Test,
         Up,
         VarnishLogs,
+        NPM,
+        Gulp,
     ]
 
 if __name__ == '__main__':
