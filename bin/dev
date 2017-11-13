@@ -411,13 +411,12 @@ class Push(Command):
     """
 
     def run(self):
-        print_highlighted('unisubs')
-        run(['git', 'push'])
-        print()
         for name, path in get_submodule_paths():
             print_highlighted(name)
             run(['git', 'push'], cwd=path)
             print()
+        print_highlighted('unisubs')
+        run(['git', 'push'])
 
 class Bump(Command):
     """
