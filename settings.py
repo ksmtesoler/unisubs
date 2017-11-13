@@ -429,37 +429,6 @@ API_DOCS_MODULES = [
 ]
 
 MEDIA_BUNDLES = {
-    "amara.css": {
-        "uses_amara_assets": True,
-        "files": [
-            "node_modules/chartist/dist/chartist.css",
-            "node_modules/select2/dist/css/select2.css",
-            "bootstrap/bootstrap-theme.min.css",
-            "bootstrap/bootstrap.min.css",
-            "scss/application.scss",
-        ],
-        "include_paths": [
-            "scss/",
-        ],
-    },
-    "amara.js": {
-        "use_requirejs": True,
-        "root_dir": "amara/js",
-        "sub_dirs": {
-            'lib': 'bower',
-        },
-        # extension_modules gets filled in by our optional repositories
-        "extension_modules": [],
-    },
-    "marketing.css": {
-        "uses_amara_assets": True,
-        "files": [
-            "scss/marketing.scss",
-        ],
-        "include_paths": [
-            "scss/",
-        ],
-    },
     "base.css": {
         "files": (
             "css/jquery.jgrowl.css",
