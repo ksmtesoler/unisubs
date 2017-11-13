@@ -210,36 +210,41 @@
             initialize: function() {
 
                 var video = this;
-                var apiURL = '/api/videos/?extra=player_urls&video_url=';
+                var apiURL = '/api/videos/?extra=player_urls&video_url=' + encodeURIComponent(this.get('url'));
+                if(this.get('team')) {
+                    apiURL += '&team=' + encodeURIComponent(this.get('team'));
+                } else if(this.get('team') === null) {
+                    apiURL += '&team=null';
+                }
                 this.subtitles = new that.Subtitles();
                 // Make a call to the Amara API to get attributes like available languages,
                 // internal ID, description, etc.
                 _$.ajax({
-                    url: apiURL + encodeURIComponent(this.get('url')),
+                    url: apiURL,
                     success: function(resp) {
                         if (resp.objects.length) {
                             // The video exists on Amara.
                             video.set('is_on_amara', true);
-                            // There should only be one object.
-                            if (resp.objects.length === 1) {
-                                // Set all of the API attrs as attrs on the video model.
-                                video.set(resp.objects[0]);
-				sizeUpdated(video);
-				var visibleLanguages = _$.map(_$.grep(video.get('languages'), function(language) {return language.published;}),
-							  function(language) {return language.code;});
-				video.get('languages').forEach(function(lang) {
-				    video.languages_dir[lang.code] = lang.dir;
-				});
-                                // Set the initial language to either the one provided by the initial
-                                // options, or the original language from the API.
-                                video.set('initial_language',
-					  (video.get('initial_language') && (visibleLanguages.indexOf(video.get('initial_language')) > -1) && video.get('initial_language')) ||
-					  (video.get('original_language') && (visibleLanguages.indexOf(video.get('original_language')) > -1) && video.get('original_language')) ||
-					  ((visibleLanguages.indexOf('en') > -1) && 'en') ||
-					  ((visibleLanguages.length > 0) && visibleLanguages[0])
-                                );
-                            }
-
+                            // Set all of the API attrs as attrs on the video model.
+                            video.setFromResponseData(resp);
+                            sizeUpdated(video);
+                            var visibleLanguages = _$.map(_$.grep(video.get('languages'), function(language) {return language.published;}),
+                                                      function(language) {return language.code;});
+                            video.get('languages').forEach(function(lang) {
+                                video.languages_dir[lang.code] = lang.dir;
+                            });
+                            // Set the initial language to either the one provided by the initial
+                            // options, or the original language from the API.
+                            var from_amara = document.referrer.split('/')[2].match('amara.org$')!= null;
+                            var page_language = null;
+                            if (from_amara) page_language = document.referrer.split('/')[6];
+                            video.set('initial_language',
+                                      ((visibleLanguages.indexOf(page_language) > -1) && page_language) ||
+                                      (video.get('initial_language') && (visibleLanguages.indexOf(video.get('initial_language')) > -1) && video.get('initial_language')) ||
+                                      (video.get('original_language') && (visibleLanguages.indexOf(video.get('original_language')) > -1) && video.get('original_language')) ||
+                                      ((visibleLanguages.indexOf('en') > -1) && 'en') ||
+                                      ((visibleLanguages.length > 0) && visibleLanguages[0])
+                            );
                         } else {
                             // The video does not exist on Amara.
                             video.set('is_on_amara', false);
@@ -252,6 +257,21 @@
                         video.view.initThumbnail();
                     }
                 });
+            },
+            setFromResponseData: function(resp) {
+                // Try to find a non-team video
+                var videoData;
+                for(var i=0; i < resp.objects.length; i++) {
+                    if(!resp.objects[i].team) {
+                        videoData = resp.objects[i];
+                        break;
+                    }
+                }
+                // Fall back to the first video
+                if(!videoData) {
+                    videoData = resp.objects[0];
+                }
+                this.set(videoData);
             }
         });
 
@@ -1203,6 +1223,7 @@
                         'div': this,
                         'initial_language': $div.data('initial-language'),
                         'url': $div.data('url'),
+                        'team': $div.data('team'),
 			'show_subtitle_me': $div.data('hide-subtitle-me') ? false : true,
                         'show_logo': $div.data('hide-logo') ? false : true,
                         'show_order_subtitles': $div.data('hide-order') ? false : true,

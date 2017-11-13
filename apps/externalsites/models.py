@@ -407,15 +407,14 @@ class YouTubeAccountManager(ExternalAccountManager):
             type=ExternalAccount.TYPE_USER,
             channel_id=video_url.owner_username)
 
-    def get_accounts_for_user_and_team(self, user, team):
-        return self.filter(Q(type=ExternalAccount.TYPE_USER, owner_id=user.id) |
-                           Q(type=ExternalAccount.TYPE_TEAM, owner_id=team.id) |
-                           Q(type=ExternalAccount.TYPE_TEAM, import_team=team) |
-                           Q(type=ExternalAccount.TYPE_TEAM, sync_teams=team))
-
     def accounts_to_import(self):
         return self.filter(Q(type=ExternalAccount.TYPE_USER)|
                            Q(import_team__isnull=False))
+
+    def for_team_or_synced_with_team(self, team):
+        return (self
+                .filter(type=ExternalAccount.TYPE_TEAM)
+                .filter(Q(owner_id=team.id) | Q(sync_teams=team)))
 
     def create_or_update(self, channel_id, oauth_refresh_token, **data):
         """Create a new YouTubeAccount, if none exists for the channel_id

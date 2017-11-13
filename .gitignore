@@ -23,10 +23,5 @@ apps/webdriver_testing/Results/results.html
 apps/webdriver_testing/Screenshots/
 nosetests.xml
 .deploy_keys
-/babelsubs
-/unilangs
-/babelsubs-git/
-/unilangs-git/
-/amara-enterprise/
-/pykss
-/pykss-git/
+/codeship.aes
+/aws_creds

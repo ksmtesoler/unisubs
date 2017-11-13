@@ -27,6 +27,7 @@ unidecode
 isodate==0.5.4
 pyuca==1.1
 gdata==2.0.16
+raven==6.1.0
 django-simple-captcha==0.5.1
 django-registration
 pygal
