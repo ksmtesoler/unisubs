@@ -17,6 +17,7 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 import sys, os, re, signal
+from django.utils.http import urlquote
 from subprocess32 import Popen, PIPE, TimeoutExpired, CalledProcessError
 from videos.types.base import VideoType
 
@@ -84,7 +85,7 @@ class HtmlFiveVideoType(VideoType):
         return self.url
 
     def set_values(self, video, user, team, video_url):
-        cmd = """avprobe -v error -show_format -show_streams "{}" 2>&1 """.format(self.url)
+        cmd = """avprobe -v error -show_format -show_streams "{}" 2>&1 """.format(urlquote(self.url))
         try:
             with Popen(cmd, shell=True, stdout=PIPE, preexec_fn=os.setsid) as process:
                 try:

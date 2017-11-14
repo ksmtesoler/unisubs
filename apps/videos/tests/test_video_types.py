@@ -154,6 +154,12 @@ class HtmlFiveVideoTypeTest(TestCase):
         self.assertFalse(self.vt.matches_video_url('http://someurl.com/video.flv'))
         self.assertFalse(self.vt.matches_video_url('http://someurl.com/ogv.video'))
 
+    def test_add_video_unicode(self):
+        url = u'http://\u2018.mp4'
+        vt = self.vt(url)
+        video, video_url = Video.add(vt, UserFactory())
+        self.assertEqual(video.get_video_url(), url)
+
 class Mp3VideoTypeTest(TestCase):
     def setUp(self):
         self.vt = Mp3VideoType
