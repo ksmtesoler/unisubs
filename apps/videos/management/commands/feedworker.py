@@ -26,6 +26,7 @@ import time
 from django.core.management.base import BaseCommand
 from django.db import connection
 
+from externalsites.models import YouTubeAccount
 from videos.models import VideoFeed
 
 # Time we aim to update all feeds (in seconds)
@@ -49,13 +50,29 @@ class Command(BaseCommand):
 
     def loop(self):
         while not self.quitting:
-            feed_ids = VideoFeed.objects.values_list('id', flat=True)
-            seconds_per_feed = float(PASS_DURATION) / len(feed_ids)
-            for feed_id in feed_ids:
+            tasks = self.fetch_tasks()
+            seconds_per_task = float(PASS_DURATION) / len(tasks)
+            for task in tasks:
                 if self.quitting:
                     break
-                self.pool.apply_async(update_feed, args=(feed_id,))
-                time.sleep(seconds_per_feed)
+                task.schedule(self.pool)
+                time.sleep(seconds_per_task)
+
+    def fetch_tasks(self):
+        video_feeds = VideoFeed.objects.values_list('id', flat=True)
+        youtube_accounts = (YouTubeAccount.objects
+                            .accounts_to_import()
+                            .values_list('id', flat=True))
+        tasks = []
+        tasks.extend(
+            Task(update_video_feed, feed_id)
+            for feed_id in video_feeds
+        )
+        tasks.extend(
+            Task(update_youtube_account, account_id)
+            for account_id in youtube_accounts
+        )
+        return tasks
 
     def terminate(self, signum, frame):
         print '\nterminating'
@@ -64,10 +81,19 @@ class Command(BaseCommand):
         self.pool.close()
         self.pool.join()
 
+class Task(object):
+    """Container for a single task that we perform."""
+    def __init__(self, func, *args):
+        self.func = func
+        self.args = args
+
+    def schedule(self, pool):
+        pool.apply_async(self.func, args=self.args)
+
 def init_worker():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-def update_feed(feed_id):
+def update_video_feed(feed_id):
     try:
         video_feed = VideoFeed.objects.get(pk=feed_id)
         video_feed.update()
@@ -77,6 +103,16 @@ def update_feed(feed_id):
     else:
         print('Updated {}'.format(video_feed))
     sys.stdout.flush()
+
+def update_youtube_account(account_id):
+    try:
+        account = YouTubeAccount.objects.get(id=account_id)
+        account.import_videos()
+    except YouTubeAccount.DoesNotExist:
+        print("update_youtube_account: "
+              "YouTubeAccount.DoesNotExist ({})".format(account_id))
+    else:
+        print('Imported {}'.format(account))
 
 if __name__ == "__main__":
     main()

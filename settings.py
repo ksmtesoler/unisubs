@@ -778,6 +778,9 @@ LOGGING = {
         'celery': {
             'level': 'WARNING',
         },
+        'requests.packages.urllib3.connectionpool': {
+            'level': 'WARNING',
+        }
     },
 }
 if env_flag_set('DB_LOGGING'):
