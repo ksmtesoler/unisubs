@@ -87,6 +87,8 @@ VIDEO_META_TYPE_NAMES = {}
 VIDEO_META_TYPE_VARS = {}
 VIDEO_META_TYPE_IDS = {}
 
+MAX_VIDEO_SEARCH_TERMS = 10
+
 def url_hash(url):
     return hashlib.md5(url.encode("utf-8")).hexdigest()
 
@@ -171,6 +173,8 @@ EXISTS(
             return self.filter(index__text__search=query)
         else:
             terms = [t for t in get_terms(query) if len(t) > 2]
+            if len(terms) > MAX_VIDEO_SEARCH_TERMS:
+                terms = terms[:MAX_VIDEO_SEARCH_TERMS]
             query = u' '.join(u'+"{}"'.format(t) for t in terms)
             return self.filter(index__text__search=query)
 
