@@ -198,6 +198,7 @@ def members(request, team):
     filters_form = forms.MemberFiltersForm(request.GET)
     form_name = request.GET.get('form', None)
     is_team_admin = team.user_is_admin(request.user)
+    show_application_link = (is_team_admin and team.is_by_application())
     members = filters_form.update_qs(
         team.members.prefetch_related('user__userlanguage_set',
                           'projects_managed',
@@ -217,6 +218,7 @@ def members(request, team):
         'filters_form': filters_form,
         'show_invite_link': permissions.can_invite(team, request.user),
         'show_add_link': permissions.can_add_members(team, request.user),
+        'show_application_link': show_application_link,
     }
 
     if form_name and is_team_admin:
@@ -225,7 +227,7 @@ def members(request, team):
     if not form_name and request.is_ajax():
         response_renderer = AJAXResponseRenderer(request)
         response_renderer.replace(
-            '#application-list-all',
+            '#member-list-all',
             'future/teams/members/member-list.html',
             context
         )

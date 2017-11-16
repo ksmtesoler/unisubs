@@ -1478,6 +1478,7 @@ class ApproveApplicationForm(ManagementForm):
         for application in applications:
             try:
                 application.approve(self.user, "web UI")
+                self.approved_count += 1
             except ApplicationInvalidException:
                 self.invalid_count += 1
                 _(u'Application already processed.')
@@ -1527,6 +1528,7 @@ class DenyApplicationForm(ManagementForm):
         for application in applications:
             try:
                 application.deny(self.user, "web UI")
+                self.denied_count += 1
             except ApplicationInvalidException:
                 self.invalid_count += 1
                 _(u'Application already processed.')
@@ -1577,26 +1579,49 @@ class ChangeMemberRoleForm(ManagementForm):
 
     def perform_submit(self, members):
         self.error_count = 0
+        self.only_admin_count = 0
+        self.changed_count = 0
+
         if self.cleaned_data['role'] != '':
             for member in members:
-                try:
-                    member.role = self.cleaned_data['role']
-                    member.save()
-                except Exception as e:
-                    logger.error(e, exc_info=True)
-                    self.error_count += 1
+                # check if user is last admin on team
+                if self.would_remove_last_admin(member, self.cleaned_data['role']):
+                    self.only_admin_count += 1
+                else:
+                    try:
+                        member.role = self.cleaned_data['role']
+                        member.save()
+                        self.changed_count += 1
+                    except Exception as e:
+                        logger.error(e, exc_info=True)
+                        self.error_count += 1
+
+    def would_remove_last_admin(self, member, role):
+        if role in (TeamMember.ROLE_ADMIN, TeamMember.ROLE_OWNER):
+            return False
+        elif not member.is_admin():
+            return False
+        else:
+            team_admins = member.team.members.admins()
+            return (len(team_admins) <= 1)
 
     def message(self):
-        if self.count:
+        if self.changed_count:
             return fmt(self.ungettext('Member role has been updated',
                                       '%(count)s member role has been updated',
                                       '%(count)s member roles have been updated',
-                                      self.count), count=self.count)
+                                      self.changed_count), count=self.changed_count)
         else:
             return None
 
     def error_messages(self):
         errors = []
+        if self.only_admin_count:
+            errors.append(fmt(self.ungettext(
+            "Could not change the member role because there would be no admins left in the team",
+            "Could not change %(count)s member role because there would be no admins left in the team",
+            "Could not change %(count)s member roles because there would be no admins left in the team",
+            self.only_admin_count), count=self.only_admin_count))
         if self.error_count:
             errors.append(fmt(self.ungettext(
                 "Member could not be edited",
@@ -1617,24 +1642,38 @@ class RemoveMemberForm(ManagementForm):
 
     def perform_submit(self, members):
         self.error_count = 0
-        for member in members:
-            try:
-                member.delete()
-            except Exception as e:
-                logger.warn(e, exc_info=True)
-                self.error_count += 1
+        self.only_member_count = 0
+        self.removed_count = 0
+
+        # if there would be no more members left on the team
+        if len(member.team.users) - len(members) < 1:
+            self.only_member_count += len(members)
+        else:
+            for member in members:
+                try:
+                    member.delete()
+                    self.removed_count += 1
+                except Exception as e:
+                    logger.warn(e, exc_info=True)
+                    self.error_count += 1
 
     def message(self):
-        if self.count:
+        if self.removed_count:
             return fmt(self.ungettext('User has been removed',
                                       '%(count)s user has been removed',
                                       '%(count)s users have been removed',
-                                      self.count), count=self.count)
+                                      self.removed_count), count=self.removed_count)
         else:
             return None
 
     def error_messages(self):
         errors = []
+        if self.only_member_count:
+            errors.append(fmt(self.ungettext(
+            "Could not remove the user because there would be no members left in the team",
+            "Could not remove %(count)s user because there would be no members left in the team",
+            "Could not remove %(count)s users because there would be no members left in the team",
+            self.only_member_count), count=self.only_member_count))
         if self.error_count:
             errors.append(fmt(self.ungettext(
                 "Member could not be removed",

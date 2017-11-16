@@ -11,28 +11,37 @@
         <div class="content">
           <div class="row">
             <div class="col-sm-3">
+              <header><h1>{% trans "Filters" %}</h1></header><br>
               <form method="GET" action="" class="ajaxForm updateOnChange updateLocation">
                 {{ filters_form.q|render_filter_field }}
                 {{ filters_form.role|render_filter_field }}
                 {{ filters_form.language|render_filter_field }}
+                {{ filters_form.sort|render_filter_field }}
               </form>
             </div>
             <div class="col-sm-9">
-            {% if is_team_admin %}
             <nav class="nav-actions">
               <span class="pull-right">
+                {% if show_invite_link %}
+                <a href="{% url 'teams:invite' slug=team.slug %}" title="Invite Member">Invite Member</a>
+                {% endif %}
+                {% if show_add_link %}
+                <a href="{% url 'teams:add-members' slug=team.slug %}" title="Add Members">Add Members</a>
+                {% endif %}
+                {% if show_application_link %}
                 <a href="{% url 'teams:applications' slug=team.slug %}" title="Application Review">Application Review</a>
+                {% endif %}
               </span>
+              {% if is_team_admin %}
               <div class="checkbox">
                 <input id="select_all" type="checkbox" class="selectAll" data-target="#memberDirectory-selectList">
                 <label for="select_all" class="text-gray"><span></span>Select All</label>
               </div>
+              {% endif %}
             </nav>
-            {% endif %}
             <div id="member-list-all">
             {% include "future/teams/members/member-list.html" %}
             </div>
-            {% include "future/paginator.html" %}
             <div id="memberDirectory-actionBar" class="actionBar">
               <form class="ajaxForm copyQuery" method="GET" action="{{ request.path }}">
                 <input class="selectList-selection" type="hidden" name="selection">
