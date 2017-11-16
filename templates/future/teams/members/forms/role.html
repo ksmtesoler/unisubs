@@ -5,7 +5,7 @@
       <header class="dialogHeader">
         <h4 class="dialogTitle">
           {% blocktrans count count=selection_count %}
-          Editing {{ member }}
+          Editing {{ member }} ({{ member.user.username}})
           {% plural %}
           Editing {{ count }} users
           {% endblocktrans %}
