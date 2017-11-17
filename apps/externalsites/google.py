@@ -273,15 +273,19 @@ def video_get(access_token, video_id, part):
 
 def get_uploads_playlist_id(channel_id):
     response = channel_get(None, ['contentDetails'], channel_id)
-    content_details = response.json()['items'][0]['contentDetails']
+    try:
+        content_details = response.json()['items'][0]['contentDetails']
+    except IndexError:
+        return None
     return content_details['relatedPlaylists']['uploads']
 
 def get_uploaded_video_ids(channel_id):
     MAX_ITEMS = 1000
 
     playlist_id = get_uploads_playlist_id(channel_id)
-    results, next_page_token = _get_uploaded_video_ids(playlist_id,
-                                                               None)
+    if playlist_id is None:
+        return []
+    results, next_page_token = _get_uploaded_video_ids(playlist_id, None)
     while next_page_token and len(results) < MAX_ITEMS:
         more_results, next_page_token = _get_uploaded_video_ids(
             playlist_id, next_page_token)
