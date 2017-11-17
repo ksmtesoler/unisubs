@@ -51,6 +51,10 @@ class Command(BaseCommand):
     def loop(self):
         while not self.quitting:
             tasks = self.fetch_tasks()
+            while not tasks:
+                print('no tasks to run, sleeping for 30 seconds')
+                time.sleep(30)
+                tasks = self.fetch_tasks()
             seconds_per_task = float(PASS_DURATION) / len(tasks)
             for task in tasks:
                 if self.quitting:
