@@ -373,7 +373,6 @@ class VideoSerializer(serializers.Serializer):
     thumbnail = VideoThumbnailField(required=False, allow_blank=True)
     created = TimezoneAwareDateTimeField(read_only=True)
     team = TeamSerializer(required=False, allow_null=True)
-    team_type = TeamTypeSerializer(required=False, allow_null=True)
     project = ProjectSerializer(required=False, allow_null=True)
     all_urls = serializers.SerializerMethodField()
     metadata = VideoMetadataSerializer(required=False)
