@@ -23,14 +23,12 @@ import signal
 import sys
 import time
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
 
 from externalsites.models import YouTubeAccount
 from videos.models import VideoFeed
-
-# Time we aim to update all feeds (in seconds)
-PASS_DURATION = 3600
 
 class Command(BaseCommand):
     """
@@ -55,7 +53,8 @@ class Command(BaseCommand):
                 print('no tasks to run, sleeping for 30 seconds')
                 time.sleep(30)
                 tasks = self.fetch_tasks()
-            seconds_per_task = float(PASS_DURATION) / len(tasks)
+            seconds_per_task = (float(settings.FEEDWORKER_PASS_DURATION) /
+                                len(tasks))
             for task in tasks:
                 if self.quitting:
                     break
