@@ -508,28 +508,11 @@ def run_node(command):
         '-v', '{}:/mnt'.format(unisubs_root()),
         '-w', '/mnt/amara-assets',
     ]
-    js_extensions = find_js_extensions()
-    if js_extensions:
-        cmdline.extend([
-            '-e', 'JS_EXTENSIONS={}'.format(','.join(js_extensions))
-        ])
     cmdline.append(NODE_IMAGE)
     cmdline.extend(command)
     returncode = subprocess.call(cmdline)
     if returncode != 0:
         sys.exit(returncode)
-
-def find_js_extensions():
-    js_extensions = []
-    with open(os.path.join(unisubs_root(), '.gitmodules')) as f:
-        gitmodules = f.read()
-    paths = re.findall(r'path *= *(.*?) *\n', gitmodules)
-    for path in paths:
-        js_extensions.extend(glob(os.path.join(path, 'assets/js-extensions/*.js')))
-    # convert to paths inside the docker container
-    return [
-        os.path.join('/mnt/', path) for path in js_extensions
-    ]
 
 def ensure_node_modules():
     node_modules = os.path.join(unisubs_root(), 'amara-assets',
