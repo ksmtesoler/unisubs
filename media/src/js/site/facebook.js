@@ -3,7 +3,6 @@ function statusChangeCallback(response) {
     if (response.status === 'connected') {
 	if (document.getElementById('submit-proceed-to-create-facebook') != null) {
 	    FB.api('/me?fields=first_name,last_name,email,picture', function(response) {
-		console.log("Done");
 		document.getElementById('id_avatar').value = response.picture.data.url;
 		document.getElementById('id_first_name').value = response.first_name;
 		document.getElementById('id_last_name').value = response.last_name;
@@ -44,8 +43,15 @@ window.fbAsyncInit = function() {
 function doLogin() {
     FB.login(function(response) {
 	  if (response.status === 'connected') {
-	  FB.api('/me?fields=first_name,last_name,email,picture', function(response) {
-	      window.location = document.facebook_login_confirm + response.email + "/";
+	      FB.api('/me?fields=first_name,last_name,email,picture', function(response) {
+		  redirect_url = document.facebook_login_confirm + response.email + "/";
+		  var cookies = "; " + document.cookie;
+		  var cookie = cookies.split("; " + 'fbsr_' + document.facebook_app_public_id + "=");
+		  if (cookie.length == 2) {
+		      var cookie_value = cookie.pop().split(";").shift();
+		      redirect_url += '?cookie=' + cookie_value;
+		  }
+		  window.location = redirect_url;
 	  });
       }
     }, {scope: 'public_profile,email'});
