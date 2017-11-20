@@ -7,7 +7,7 @@
     {% if is_team_admin %}
     <div class="checkbox">
       {% if member.user == user %}
-      <input type="checkbox" class="selectList-checkbox disabled" disabled="disabled">
+      <input type="checkbox" class="disabled" disabled="disabled">
       <label><span></span></label>
       {% else %}
       <input id="member-{{member.id}}" type="checkbox" value="{{member.id}}" class="selectList-checkbox">

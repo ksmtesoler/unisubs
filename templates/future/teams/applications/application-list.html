@@ -7,7 +7,7 @@
   </div>
 </nav>
 {% if page %}
-<ul id="applicationReview-selectList" class="selectList selectList-applications" data-target="#applicationReview-actionBar">
+<ul id="applicationReview-selectList" class="selectList selectList-members" data-target="#applicationReview-actionBar">
   {% for application in page %}
   {% include "future/teams/applications/application-item.html" with application=application %}
   {% endfor %}

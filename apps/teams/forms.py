@@ -1373,7 +1373,7 @@ class MemberFiltersForm(forms.Form):
         ('any', _('Any language')),
     ] + get_language_choices()
 
-    q = forms.CharField(label=_('Search'), required=False)
+    q = SearchField(label=_('Search'), required=False)
 
     role = AmaraChoiceField(choices=[
         ('any', _('All roles')),
@@ -1384,7 +1384,7 @@ class MemberFiltersForm(forms.Form):
     language = AmaraChoiceField(choices=LANGUAGE_CHOICES,
                                  label=_('Language spoken'),
                                  initial='any', required=False)
-    sort = AmaraChoiceField(choices=[
+    sort = AmaraChoiceField(label="", border=True, choices=[
         ('recent', _('Date joined, most recent')),
         ('oldest', _('Date joined, oldest')),
     ], initial='recent', required=False)
@@ -1402,7 +1402,7 @@ class MemberFiltersForm(forms.Form):
 
     def update_qs(self, qs):
         if not (self.is_bound and self.is_valid()):
-            return qs
+            return qs.order_by('-created')
         else:
             data = self.cleaned_data
 
@@ -1645,17 +1645,21 @@ class RemoveMemberForm(ManagementForm):
         self.only_member_count = 0
         self.removed_count = 0
 
+        # make list from generator
+        members = list(members)
+
         # if there would be no more members left on the team
-        if len(member.team.users) - len(members) < 1:
+        if len(members[0].team.users.all()) - len(members) < 1:
             self.only_member_count += len(members)
-        else:
-            for member in members:
-                try:
-                    member.delete()
-                    self.removed_count += 1
-                except Exception as e:
-                    logger.warn(e, exc_info=True)
-                    self.error_count += 1
+            return
+
+        for member in members:
+            try:
+                member.delete()
+                self.removed_count += 1
+            except Exception as e:
+                logger.warn(e, exc_info=True)
+                self.error_count += 1
 
     def message(self):
         if self.removed_count:
