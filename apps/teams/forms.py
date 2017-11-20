@@ -797,12 +797,12 @@ class SettingsForm(forms.ModelForm):
     logo = forms.ImageField(
         validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)],
         help_text=_('Max 940 x 235'),
-        widget=AmaraFileInput,
+        widget=forms.FileInput,
         required=False)
     square_logo = forms.ImageField(
         validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)],
         help_text=_('Recommended size: 100 x 100'),
-        widget=AmaraFileInput,
+        widget=forms.FileInput,
         required=False)
 
     def __init__(self, *args, **kwargs):
