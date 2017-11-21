@@ -210,7 +210,11 @@
             initialize: function() {
 
                 var video = this;
-                var apiURL = '/api/videos/?extra=player_urls&video_url=' + encodeURIComponent(this.get('url'));
+                if(this.get('id')) {
+                    var apiURL = '/api/videos/?extra=player_urls&video_id=' + encodeURIComponent(this.get('id'));
+                } else {
+                    var apiURL = '/api/videos/?extra=player_urls&video_url=' + encodeURIComponent(this.get('url'));
+                }
                 if(this.get('team')) {
                     apiURL += '&team=' + encodeURIComponent(this.get('team'));
                 } else if(this.get('team') === null) {
@@ -1223,6 +1227,7 @@
                         'div': this,
                         'initial_language': $div.data('initial-language'),
                         'url': $div.data('url'),
+                        'id': $div.data('id'),
                         'team': $div.data('team'),
 			'show_subtitle_me': $div.data('hide-subtitle-me') ? false : true,
                         'show_logo': $div.data('hide-logo') ? false : true,

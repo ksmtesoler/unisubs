@@ -602,6 +602,8 @@ class VideoViewSet(mixins.CreateModelMixin,
         query_params = self.request.query_params
         if 'team' not in query_params and 'video_url' not in query_params:
             return Video.objects.public().order_by('-id')[:20]
+        if 'video_id' in query_params:
+            return self.get_video_for_embedder(query_params)
         if 'team' not in query_params:
             qs = self.get_videos_for_user()
         else:
@@ -614,24 +616,23 @@ class VideoViewSet(mixins.CreateModelMixin,
                 qs = qs.for_url(query_params['video_url'])
         return qs
 
+    def get_video_for_embedder(self, query_params):
+        # use filter instead of get since we need to return a queryset
+        video = Video.objects.filter(id=query_params['video_id'])
+        if video[0].get_workflow().user_can_view_video(self.request.user):
+            return video
+        else:
+            return Video.objects.none()
+
     def get_videos_for_user(self):
         visibility = Q(is_visible=True)
         if self.request.user.is_authenticated():
             members = self.request.user.team_members.all()
             visibility = visibility | Q(id__in=members.values_list('team_id'))
         user_visible_teams = Team.objects.filter(visibility)
-        try:
-            from collab.models import Collaboration
-            collabs = Collaboration.objects.get_query_set().user_in_any_team(self.request.user)
-            collab_videos = [c.video.id for c in collabs]
-        except:
-            logger.error("Exception while getting collaboration videos", exc_info=True)
-            collab_videos = []
-        videos = Video.objects.filter(
+        return Video.objects.filter(
                 Q(teamvideo__isnull=True) |
-                Q(teamvideo__team__in=user_visible_teams) |
-                Q(id__in=collab_videos))
-        return videos
+                Q(teamvideo__team__in=user_visible_teams))
 
     def get_videos_for_team(self, query_params):
         if query_params['team'] == 'null':
