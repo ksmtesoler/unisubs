@@ -23,6 +23,7 @@ from django.core.cache import cache
 from django.utils.translation import (
     ugettext_lazy as _
 )
+from django.utils.http import urlquote
 
 from videos.types import video_type_registrar
 from videos.types.base import VideoTypeError
@@ -118,7 +119,7 @@ def on_video_url_delete(sender, instance, **kwargs):
         invalidate_cache(instance.video.video_id)
 
 def _video_id_key(video_url):
-    return 'video_id_{0}'.format(hashlib.sha1(video_url).hexdigest())
+    return 'video_id_{0}'.format(hashlib.sha1(urlquote(video_url)).hexdigest())
 
 def _video_urls_key(video_id):
     return 'widget_video_urls_{0}'.format(video_id)
