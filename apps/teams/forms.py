@@ -1488,7 +1488,8 @@ class ApproveApplicationForm(ManagementForm):
 
     def message(self):
         if self.approved_count:
-            return fmt(self.ungettext('%(count)s application has been approved',
+            return fmt(self.ungettext('Application as been approved',
+                                      '%(count)s application has been approved',
                                       '%(count)s applications have been approved',
                                       self.approved_count), count=self.approved_count)
         else:
@@ -1538,7 +1539,8 @@ class DenyApplicationForm(ManagementForm):
 
     def message(self):
         if self.denied_count:
-            return fmt(self.ungettext('%(count)s application has been denied',
+            return fmt(self.ungettext('Application has been denied',
+                                      '%(count)s application has been denied',
                                       '%(count)s applications have been denied',
                                       self.denied_count), count=self.denied_count)
         else:

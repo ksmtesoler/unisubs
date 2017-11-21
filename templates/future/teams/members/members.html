@@ -41,24 +41,14 @@
                 {% endif %}
               </span>
               {% if is_team_admin %}
-              <div class="checkbox">
-                <input id="select_all" type="checkbox" class="selectAll" data-target="#memberDirectory-selectList">
-                <label for="select_all" class="text-gray"><span></span>Select All</label>
-              </div>
+              {% include "future/teams/members/members-select-all.html" %}
               {% endif %}
             </nav>
             <div id="member-list-all">
             {% include "future/teams/members/member-list.html" %}
             </div>
             {% if is_team_admin %}
-            <div id="memberDirectory-actionBar" class="actionBar">
-              <form class="ajaxForm copyQuery" method="GET" action="{{ request.path }}">
-                <input class="selectList-selection" type="hidden" name="selection">
-                <button class="button cta" type="submit" name="form" value="role">Change Role</button>
-                <button class="button cta" type="submit" name="form" value="remove">Remove</button>
-                <button class="button borderless deselectAll" data-target="#memberDirectory-selectList">Deselect</button>
-              </form>
-            </div>
+            {% include "future/teams/members/members-action-bar.html" %}
             {% endif %}
           </div>
         </div>
