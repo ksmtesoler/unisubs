@@ -52,46 +52,53 @@ def fetch_subs(video_url, user=None, team=None):
     else:
         logger.warn("fetch_subs() bad video type: %s" % video_url.type)
 
+def lookup_youtube_accounts(video_url, user, team):
+    """
+    Find the YouTubeAccount objects we should use to try in
+    fetch_subs_youtube()
+    """
+    if team:
+        return YouTubeAccount.objects.for_team_or_synced_with_team(team)
+    elif user:
+        return YouTubeAccount.objects.for_owner(user)
+    else:
+        return YouTubeAccount.objects.none()
+
 def fetch_subs_youtube(video_url, user, team):
     video_id = video_url.videoid
     channel_id = video_url.owner_username
-    accounts = set()
-    if team is not None and user is not None:
-        for account in YouTubeAccount.objects.get_accounts_for_user_and_team(user, team):
-            if account.fetch_initial_subtitles:
-                accounts.add(account)
-    if channel_id:
-        try:
-            account = YouTubeAccount.objects.get(channel_id=channel_id)
-            if account.fetch_initial_subtitles:
-                accounts.add(account)
-        except:
-            pass
-    if len(accounts) == 0:
+    possible_accounts = set()
+    for account in lookup_youtube_accounts(video_url, user, team):
+        if account.fetch_initial_subtitles:
+            possible_accounts.add(account)
+    account = find_youtube_account(video_id, possible_accounts)
+    if account is None:
         logger.warn("fetch_subs() no available credentials.")
         return
     existing_langs = set(
         l.language_code for l in
         video_url.video.newsubtitlelanguage_set.having_versions()
     )
-    for account in accounts:
-        access_token = google.get_new_access_token(account.oauth_refresh_token)
-        try:
-            captions_list = google.captions_list(access_token, video_id)
-        except APIError:
-            continue
-        versions = []
-        for caption_id, language_code, caption_name in captions_list:
-            language_code = convert_language_code(language_code)
-            if language_code and language_code not in existing_langs:
-                dfxp = google.captions_download(access_token, caption_id)
-                try:
-                    version = pipeline.add_subtitles(video_url.video, language_code, dfxp,
-                                                     note="From youtube", complete=True,
-                                                     origin=ORIGIN_IMPORTED)
-                    versions.append(version)
-                except Exception, e:
-                    logger.error("Exception while importing subtitles " + str(e))
-        if len(versions) > 0:
-            subtitles_imported.send(sender=versions[0].subtitle_language, versions=versions)
-            break
+    access_token = google.get_new_access_token(account.oauth_refresh_token)
+    captions_list = google.captions_list(access_token, video_id)
+    versions = []
+    for caption_id, language_code, caption_name in captions_list:
+        language_code = convert_language_code(language_code)
+        if language_code and language_code not in existing_langs:
+            dfxp = google.captions_download(access_token, caption_id)
+            try:
+                version = pipeline.add_subtitles(video_url.video, language_code, dfxp,
+                                                 note="From youtube", complete=True,
+                                                 origin=ORIGIN_IMPORTED)
+                versions.append(version)
+            except Exception, e:
+                logger.error("Exception while importing subtitles " + str(e))
+    if len(versions) > 0:
+        subtitles_imported.send(sender=versions[0].subtitle_language, versions=versions)
+
+def find_youtube_account(video_id, possible_accounts):
+    video_info = google.get_video_info(video_id, possible_accounts)
+    for account in possible_accounts:
+        if account.channel_id == video_info.channel_id:
+            return account
+    return None

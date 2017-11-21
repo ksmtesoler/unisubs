@@ -59,12 +59,14 @@ class MessagesApiClass(object):
             return {'error': _('You should be authenticated.')}
         if not isinstance(message_ids, list):
             message_ids = [message_ids]
+        user.cache.invalidate()
         Message.objects.filter(pk__in=message_ids, user=user).update(read=True)
         return {}
 
     def mark_all_read(self, user):
         if not user.is_authenticated():
             return {'error': _('You should be authenticated.')}
+        user.cache.invalidate()
 
         Message.objects.filter(user=user).update(read=True)
 

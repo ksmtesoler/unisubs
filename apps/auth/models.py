@@ -16,9 +16,12 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
+import binascii
+from collections import deque
 from datetime import datetime, timedelta
 import hashlib
 import hmac
+import os
 import random
 import string
 import urllib
@@ -28,24 +31,25 @@ from django.conf import settings
 from django.contrib.auth.models import UserManager, User as BaseUser
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.core.cache import cache
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db import models
 from django.db import transaction
+from django.db.models import Max
 from django.db.models.loading import get_model
 from django.db.models.signals import post_save
 from django.utils.http import urlquote
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _, ugettext
-from tastypie.models import ApiKey
 
 from auth import signals
 from caching import CacheGroup, ModelCacheManager
 from utils.amazon import S3EnabledImageField
+from utils import dates
 from utils import secureid
 from utils import translation
+from utils.memoize import memoize
 from utils.tasks import send_templated_email_async
 
 import logging
@@ -195,15 +199,39 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         self.start_tracking_profile_fields()
 
     def __unicode__(self):
-        if not self.is_active:
+        if self.is_amara_anonymous:
+            return settings.ANONYMOUS_FULL_NAME
+        elif not self.is_active:
             return ugettext('Retired user')
-
-        if self.first_name or self.last_name:
+        elif self.first_name or self.last_name:
             return self.get_full_name()
         elif self.full_name:
             return self.full_name
         else:
             return self.username
+
+    def sent_message(self):
+        """
+        Should be called each time a user sends a message.
+        This is used to control if a user is spamming.
+        """
+        if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
+           hasattr(settings, 'MESSAGES_SENT_LIMIT'):
+            SentMessageDate.objects.sent_message(self)
+            self._check_sent_messages()
+
+    def _check_sent_messages(self):
+        if hasattr(settings, 'MESSAGES_SENT_WINDOW_MINUTES') and \
+           hasattr(settings, 'MESSAGES_SENT_LIMIT'):
+            if SentMessageDate.objects.check_too_many_messages(self):
+                self.de_activate()
+
+    def de_activate(self):
+        if not self.is_superuser:
+            self.is_active = False
+            self.save()
+            import tasks
+            tasks.notify_blocked_user.delay(self)
 
     def has_fullname_set(self):
         return any([self.first_name, self.last_name, self.full_name])
@@ -257,21 +285,21 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         if '$' in self.username:
             raise ValidationError("usernames can't contain the '$' character")
 
-    def unread_messages(self, hidden_meassage_id=None):
+    def unread_messages(self, after_message_id=None):
         from messages.models import Message
-
         qs = Message.objects.for_user(self).filter(read=False)
-
-        try:
-            if hidden_meassage_id:
-                qs = qs.filter(pk__gt=hidden_meassage_id)
-        except (ValueError, TypeError):
-            pass
-
+        if after_message_id is not None:
+            qs = qs.filter(id__gt=after_message_id)
         return qs
 
-    def unread_messages_count(self, hidden_meassage_id=None):
-        return self.unread_messages(hidden_meassage_id).count()
+    @memoize
+    def unread_messages_count(self, after_message_id=None):
+        return self.unread_messages(after_message_id).count()
+
+    @memoize
+    def last_unread_message_id(self, after_message_id=None):
+        qs = self.unread_messages(after_message_id).aggregate(max_id=Max('id'))
+        return qs['max_id']
 
     def tutorial_was_shown(self):
         CustomUser.objects.filter(pk=self.id).update(show_tutorial=False)
@@ -412,7 +440,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         return Task.objects.incomplete().filter(assignee=self)
 
     def _get_gravatar(self, size, default='mm'):
-        url = "http://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
+        url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
         url += urllib.urlencode({'d': default, 's':str(size)})
         return url
 
@@ -429,7 +457,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def small_avatar(self):
         return self._get_avatar_by_size(50)
 
-    # future UI avatag
+    # future UI avatar
     def _get_avatar(self, size):
         if self.picture:
             return self.picture.thumb_url(size, size)
@@ -449,6 +477,10 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         avatar = self._get_avatar(50)
         return mark_safe('<span class="avatar avatar-md"><img src="{}"></span>'.format(avatar))
 
+    def avatar_tag_large(self):
+        avatar = self._get_avatar(100)
+        return mark_safe('<span class="avatar avatar-lg"><img src="{}"></span>'.format(avatar))
+
     def avatar_tag_extra_large(self):
         avatar = self._get_avatar(110)
         return mark_safe('<span class="avatar avatar-xl"><img src="{}"></span>'.format(avatar))
@@ -461,7 +493,8 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         url = '{}?user={}'.format(reverse('messages:new'),
                                   urlquote(self.username))
         if absolute_url:
-            url = "http://" + Site.objects.get_current().domain + url
+            url = "{}://{}{}".format(settings.DEFAULT_PROTOCOL,
+                                     Site.objects.get_current().domain, url)
         return url
 
     @property
@@ -498,7 +531,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def get_amara_anonymous(cls):
         user, created = cls.objects.get_or_create(
             pk=settings.ANONYMOUS_USER_ID,
-            defaults={'username': 'anonymous'})
+            defaults={'username': settings.ANONYMOUS_DEFAULT_USERNAME})
         return user
 
     @property
@@ -540,11 +573,17 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         except:
             pass
 
+    def check_api_key(self, key):
+        try:
+            return self.api_key.key == key
+        except AmaraApiKey.DoesNotExist:
+            return False
+
     def get_api_key(self):
-        return ApiKey.objects.get_or_create(user=self)[0].key
+        return AmaraApiKey.objects.get_or_create(user=self)[0].key
 
     def ensure_api_key_created(self):
-        ApiKey.objects.get_or_create(user=self)
+        AmaraApiKey.objects.get_or_create(user=self)
 
 def create_custom_user(sender, instance, created, **kwargs):
     if created:
@@ -720,7 +759,7 @@ class EmailConfirmationManager(models.Manager):
         except Site.DoesNotExist:
             return
         path = reverse("auth:confirm_email", args=[confirmation_key])
-        activate_url = u"http://%s%s" % (unicode(current_site.domain), path)
+        activate_url = u"{}://{}{}".format(settings.DEFAULT_PROTOCOL, unicode(current_site.domain), path)
         context = {
             "user": user,
             "activate_url": activate_url,
@@ -812,3 +851,29 @@ class LoginToken(models.Model):
 
     def __unicode__(self):
         return u"LoginToken for %s" %(self.user)
+
+class AmaraApiKey(models.Model):
+    user = models.OneToOneField(CustomUser, related_name="api_key")
+    created = models.DateTimeField(auto_now_add=True)
+    key = models.CharField(max_length=256, blank=True, default='')
+
+    def __unicode__(self):
+        return u"Api key for {}: {}".format(self.user, self.key)
+
+    def generate_key(self):
+        return binascii.b2a_hex(os.urandom(20))
+
+class SentMessageDateManager(models.Manager):
+    def sent_message(self, user):
+        self.create(user=user, created=dates.now())
+
+    def check_too_many_messages(self, user):
+        now = dates.now()
+        self.get_query_set().filter(created__lt=now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)).delete()
+        return self.get_query_set().filter(user=user,
+                                    created__gt=now - timedelta(minutes=settings.MESSAGES_SENT_WINDOW_MINUTES)).count() > settings.MESSAGES_SENT_LIMIT
+
+class SentMessageDate(models.Model):
+    user = models.ForeignKey(CustomUser)
+    created = models.DateTimeField()
+    objects = SentMessageDateManager()

@@ -1,0 +1,12 @@
+{% load i18n %}
+{% load url from future %}
+<nav>
+  <ul class="nav navbar-nav">
+    <li><a href="{% url "videos:watch_page" %}">{% trans "Videos" %}</a></li>
+    <li><a href="https://about.amara.org/">{% trans "Blog" %}</a></li>
+    <li><a href="https://support.amara.org/">{% trans "Help" %}</a></li>
+    <li><a href="https://support.amara.org/support/solutions/articles/35517--i-have-a-non-technical-question-about">{% trans "Contact" %}</a></li>
+    <li><a href="http://facebook.com/Amara.Community"><i class="icon-facebook"></i></a></li>
+    <li><a href="http://twitter.com/AmaraSubs"><i class="icon-twitter"></i></a></li>
+  </ul>
+</nav>

@@ -23,15 +23,18 @@ Branches / Repositories
 -----------------------
 
 The ``production`` branch is what gets deployed to our production server.
-It's what gets deployed to production server.  ``staging`` branch
-is what gets deployed to the staging server.
+It's what gets deployed to production server.  The ``staging`` branch
+is deployed just before the production as a test run.  It also is used by some
+of our partners to test with non-live data.  The ``dev`` branch is our main
+branch, and is continuously deployed whenever there's a new commit.
 
-Commits should *never* be made directly to production and only trivial commits
-should be made to staging.  Instead, Amara development tries to follow a "one
-branch per feature or bugfix" workflow (See :ref:`Workflow <workflow>`)
+Commits should almost never be made directly to ``production`` or ``staging``
+and only trivial commits should be made to ``dev``.  Instead, Amara development
+tries to follow a "one branch per feature or bugfix" workflow (See
+:ref:`Workflow <workflow>`)
 
 As you work on your topic branch, other branches may have been merged into
-``staging`` by other people.  Make sure you merge staging back to your branch
+``dev`` by other people.  Make sure you merge ``staging`` back to your branch
 as often as possible to keep it up-to-date.
 
 Other Git Repositories

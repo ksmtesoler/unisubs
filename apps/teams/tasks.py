@@ -220,14 +220,11 @@ def add_team_videos(team_pk, user_pk, videos):
 
             try:
                 video, video_url = Video.add(video_type, user, setup_video, team)
-            except Video.UrlAlreadyAdded, e:
-                if e.video.get_team_video() is not None:
-                    messages.append(fmt(_(u"Video is already part of a team: %(url)s\n"), url=video_url))
-                    continue
-                else:
-                    setup_video(e.video, e.video_url)
-                    e.video.save()
-                    video = e.video
+            except Video.DuplicateUrlError, e:
+                messages.append(fmt(
+                    _(u"Video is already added to team: %(url)s\n"),
+                    url=e.video_url))
+                continue
 
             if 'transcript' in video_item and len(video_item['transcript']) > 0 and video.primary_audio_language_code:
                 try:

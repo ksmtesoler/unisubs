@@ -393,14 +393,16 @@ def can_move_videos(team, user):
     role = get_role_for_target(user, team, None, None)
     return role in [ROLE_ADMIN, ROLE_OWNER]
 
-def can_move_videos_to(current_team, user):
-    if not can_move_videos(current_team, user):
-        return []
+def can_move_videos_to(user, exclude_teams=None):
     qs = (TeamMember.objects.admins()
           .filter(user=user)
-          .exclude(team=current_team)
           .select_related('team'))
+    if exclude_teams:
+        qs = qs.exclude(team__in=exclude_teams)
     return [m.team for m in qs]
+
+def can_move_videos_to_team(user, team):
+    return team.user_is_admin(user)
 
 def can_sort_by_primary_language(team, user):
     return team.slug != "ted"
@@ -557,7 +559,7 @@ def can_view_notifications(team, user):
     """Return whether a user can view notifications for a team.
     """
 
-    return user.is_superuser or team.user_is_member(user)
+    return user.is_superuser or team.user_is_admin(user)
 
 def can_view_activity(team, user):
     """Return whether a user can view activity for a team.

@@ -267,9 +267,10 @@ class AddTeamVideoForm(forms.ModelForm):
         # See if any error happen when we create our video
         try:
             Video.add(self.cleaned_data['video_url'], self.user,
-                      self.setup_video)
-        except Video.UrlAlreadyAdded, e:
-            self.setup_existing_video(e.video, e.video_url)
+                      self.setup_video, self.team)
+        except Video.DuplicateUrlError, e:
+            msg = ugettext('This video was already added to your team')
+            self._errors['video_url'] = self.error_class([msg])
         return self.cleaned_data
 
     def setup_video(self, video, video_url):
@@ -280,37 +281,12 @@ class AddTeamVideoForm(forms.ModelForm):
             added_by=self.user)
         self._success_message = ugettext('Video successfully added to team.')
 
-    def setup_existing_video(self, video, video_url):
-        team_video, created = TeamVideo.objects.get_or_create(
-            video=video, defaults={
-                'team': self.team, 'project': self.cleaned_data['project'],
-                'added_by': self.user
-            })
-
-        if created:
-            self.saved_team_video = team_video
-            self._success_message = ugettext(
-                'Video successfully added to team from the community videos.'
-            )
-            return
-
-        if team_video.team.user_can_view_videos(self.user):
-            msg = mark_safe(fmt(
-                _(u'This video already belongs to the %(team)s team '
-                  '(<a href="%(link)s">view video</a>)'),
-                team=unicode(team_video.team),
-                link=team_video.video.get_absolute_url()))
-        else:
-            msg = _(u'This video already belongs to another team.')
-        self._errors['video_url'] = self.error_class([msg])
-
     def success_message(self):
         return self._success_message
 
     def save(self):
         # TeamVideo was already created in clean()
         return self.saved_team_video
-
 
 class AddTeamVideosFromFeedForm(AddFromFeedForm):
     def __init__(self, team, user, *args, **kwargs):
@@ -338,7 +314,7 @@ class CreateTeamForm(forms.ModelForm):
         self.fields['workflow_type'].choices = TeamWorkflow.get_choices()
         self.fields['is_visible'].widget.attrs['class'] = 'checkbox'
         self.fields['sync_metadata'].widget.attrs['class'] = 'checkbox'
-        self.fields['slug'].label = _(u'Team URL: http://universalsubtitles.org/teams/')
+        self.fields['slug'].label = _(u'Team URL: https://amara.org/teams/')
 
     def clean_slug(self):
         slug = self.cleaned_data['slug']
@@ -1382,8 +1358,7 @@ class MoveTeamVideosForm(BulkTeamVideoForm):
                                 required=False)
 
     def setup_fields(self):
-        dest_teams = [self.team] + permissions.can_move_videos_to(
-            self.team, self.user)
+        dest_teams = permissions.can_move_videos_to(self.user)
         dest_teams.sort(key=lambda t: t.name)
         self.fields['new_team'].choices = [
             (dest.id, dest.name) for dest in dest_teams
@@ -1476,17 +1451,6 @@ class MoveTeamVideosForm(BulkTeamVideoForm):
             new_team)
         return fmt(msg, team_link=team_link, project=project.name,
                    count=self.count)
-
-class RemoveTeamVideosForm(BulkTeamVideoForm):
-    def perform_save(self, qs):
-        for team_video in qs:
-            team_video.remove(self.user)
-
-    def message(self):
-        msg = ungettext('Video removed from project',
-                        '%(count)s videos removed from projects',
-                        self.count)
-        return fmt(msg, count=self.count)
 
 class BulkEditTeamVideosForm(BulkTeamVideoForm):
     primary_audio_language = forms.ChoiceField(required=False, choices=[])
@@ -1663,47 +1627,6 @@ class ApplicationForm(forms.Form):
             if value:
                 languages.append({"language": value, "priority": i})
         self.application.user.set_languages(languages)
-
-class TeamVideoURLForm(forms.Form):
-    video_url = VideoURLField()
-
-    def save(self, team, user, project=None, thumbnail=None, language=None):
-        errors = ""
-        if not self.cleaned_data.get('video_url'):
-            return (False, "")
-
-        video_type = self.cleaned_data['video_url']
-        def setup_video(video, video_url):
-            video.is_public = team.is_visible
-            if language is not None:
-                video.primary_audio_language_code = language
-            if thumbnail:
-                video.s3_thumbnail.save(thumbnail.name, thumbnail)
-            team_video = TeamVideo.objects.create(video=video, team=team,
-                                                  project_id=project,
-                                                  added_by=user)
-
-        try:
-            Video.add(video_type, user, setup_video)
-        except Video.UrlAlreadyAdded, e:
-            if e.video.get_team_video() is not None:
-                return (False,
-                        self.video_in_team_msg(e.video, e.video_url, user))
-            else:
-                setup_video(e.video, e.video_url)
-                e.video.save()
-        return (True, "")
-
-    def video_in_team_msg(self, video, video_url, user):
-        team = video.get_team_video().team
-        if team.user_can_view_videos(user):
-            return fmt(_(u"Video %(url)s already in the %(team)s Team"),
-                       url=video_url.url, team=team)
-        else:
-            return fmt(_(u"Video %(url)s already in another team"),
-                       url=video_url.url)
-
-TeamVideoURLFormSet = formset_factory(TeamVideoURLForm)
 
 class TeamVideoCSVForm(forms.Form):
     csv_file = forms.FileField(label=_(u"CSV file"), required=True, allow_empty_file=False)

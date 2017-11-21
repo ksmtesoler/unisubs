@@ -32,6 +32,10 @@ elif [ "$ACTION" = "manage" ]; then
     source /usr/local/bin/config_env
     shift
     manage "$@"
+elif [ "$ACTION" = "test" ]; then
+    cd /var/run/amara/test-output/
+    source /usr/local/bin/config_env
+    manage test --settings=dev_settings_test --where=/opt/apps/amara
 elif [ "$ACTION" = "shell" ]; then
     echo "Running shell..."
     echo "Use the manage alias to run django management commands"

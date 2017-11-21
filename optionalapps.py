@@ -25,19 +25,8 @@ Amara.org uses several apps/packages that are stored in private github
 repositories that add extra functionality for paid partnerships.  These apps
 are optional -- the amara codebase runs fine without them.
 
-The coding issue is how to make amara work without these repositories, but
-automatically pull them in if they are present.  Here's how we do it:
-
-* For each repository we create a file inside the optional/ directory:
-
-  * The filename is the name of the repository
-  * The contents are the git commit ID that we want to use
-
-* To enable a repository, it must be checked out in the amara root directory,
-  using the same name as the git repository.
-
-* The optionalapps module handles figuring out which repositories are present
-  and how we should modify things at runtime
+This module handles adding functionality from those repositories, but only if
+they're present.
 
 .. autofunction:: setup_path
 .. autofunction:: get_repository_paths
@@ -54,9 +43,13 @@ from django.conf.urls import patterns, include, url
 
 project_root = os.path.abspath(os.path.dirname(__file__))
 
+POTENTIAL_REPOS = [
+    'amara-enterprise',
+]
+
 def _repositories_present():
     """Get a list of optional repositories that are present."""
-    for name in os.listdir(os.path.join(project_root, 'optional')):
+    for name in POTENTIAL_REPOS:
         # exclude names that don't look like repositories
         if name.startswith('.'):
             continue

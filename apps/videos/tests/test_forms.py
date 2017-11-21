@@ -31,7 +31,7 @@ from videos.models import Video, VideoFeed
 from videos.types import video_type_registrar
 from utils import test_utils
 from utils.factories import *
-from utils.translation import get_language_choices, choice_sort_key
+from utils.translation import get_language_choices
 
 class TestVideoForm(TestCase):
     def setUp(self):

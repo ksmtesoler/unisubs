@@ -23,6 +23,7 @@ import re
 
 from django import forms
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
@@ -32,6 +33,7 @@ from django.db import transaction
 from django.forms.formsets import formset_factory
 from django.forms.util import ErrorDict
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
@@ -40,6 +42,8 @@ from django.utils.translation import ungettext
 from auth.forms import UserField
 from auth.models import CustomUser as User
 from activity.models import ActivityRecord
+from messages.models import Message, SYSTEM_NOTIFICATION
+from messages.tasks import send_new_messages_notifications
 from subtitles.forms import SubtitlesUploadForm
 from teams.models import (
     Team, TeamMember, TeamVideo, Task, Project, Workflow, Invite,
@@ -56,8 +60,9 @@ from teams.permissions import (
 from teams.permissions_const import ROLE_NAMES
 from teams.workflows import TeamWorkflow
 from ui.forms import (FiltersForm, ManagementForm, AmaraChoiceField,
-                      AmaraRadioSelect, SearchField)
+                      AmaraRadioSelect, SearchField, AmaraClearableFileInput, AmaraFileInput)
 from ui.forms import LanguageField as NewLanguageField
+from utils import send_templated_email
 from utils.forms import (ErrorableModelForm, get_label_for_value,
                          UserAutocompleteField, LanguageField,
                          LanguageDropdown, Dropdown )
@@ -430,8 +435,9 @@ class AddTeamVideoForm(forms.ModelForm):
         try:
             Video.add(self.cleaned_data['video_url'], self.user,
                       self.setup_video, self.team)
-        except Video.UrlAlreadyAdded, e:
-            self.setup_existing_video(e.video, e.video_url)
+        except Video.DuplicateUrlError, e:
+            msg = _(u'This video already belongs to your team.')
+            self._errors['video_url'] = self.error_class([msg])
         return self.cleaned_data
 
     def setup_video(self, video, video_url):
@@ -441,30 +447,6 @@ class AddTeamVideoForm(forms.ModelForm):
             video=video, team=self.team, project=self.cleaned_data['project'],
             added_by=self.user)
         self._success_message = ugettext('Video successfully added to team.')
-
-    def setup_existing_video(self, video, video_url):
-        team_video, created = TeamVideo.objects.get_or_create(
-            video=video, defaults={
-                'team': self.team, 'project': self.cleaned_data['project'],
-                'added_by': self.user
-            })
-
-        if created:
-            self.saved_team_video = team_video
-            self._success_message = ugettext(
-                'Video successfully added to team from the community videos.'
-            )
-            return
-
-        if team_video.team.user_can_view_videos(self.user):
-            msg = mark_safe(fmt(
-                _(u'This video already belongs to the %(team)s team '
-                  '(<a href="%(link)s">view video</a>)'),
-                team=unicode(team_video.team),
-                link=team_video.video.get_absolute_url()))
-        else:
-            msg = _(u'This video already belongs to another team.')
-        self._errors['video_url'] = self.error_class([msg])
 
     def success_message(self):
         return self._success_message
@@ -501,8 +483,8 @@ class AddMultipleTeamVideoForm(forms.Form):
         self.user = user
         super(AddMultipleTeamVideoForm, self).__init__(*args, **kwargs)
         self.fields['project'].setup(team)
-        # [# of OK, # of existing, # of existing in other teams, # of errors]
-        self.summary = [0, 0, 0, 0]
+        # [# of OK, # of existing, # of errors]
+        self.summary = [0, 0, 0]
 
     def use_future_ui(self):
         self.fields['project'].help_text = None
@@ -521,12 +503,11 @@ class AddMultipleTeamVideoForm(forms.Form):
             if len(video_url.strip()) == 0:
                 continue
             try:
-                Video.add(video_url, self.user,
-                          self.setup_video)
-            except Video.UrlAlreadyAdded, e:
-                self.setup_existing_video(e.video, e.video_url)
+                Video.add(video_url, self.user, self.setup_video, self.team)
+            except Video.DuplicateUrlError, e:
+                self.summary[1] += 1
             except:
-                self.summary[3] += 1
+                self.summary[2] += 1
         return self.cleaned_data
 
     def setup_video(self, video, video_url):
@@ -537,38 +518,13 @@ class AddMultipleTeamVideoForm(forms.Form):
             added_by=self.user)
         self.summary[0] += 1
 
-    def setup_existing_video(self, video, video_url):
-        team_video, created = TeamVideo.objects.get_or_create(
-            video=video, defaults={
-                'team': self.team, 'project': self.cleaned_data['project'],
-                'added_by': self.user
-            })
-
-        if created:
-            self.saved_team_video = team_video
-            self.summary[1] += 1
-            return
-        self.summary[2] += 1
-        return
-        if team_video.team.user_can_view_videos(self.user):
-            msg = mark_safe(fmt(
-                _(u'This video already belongs to the %(team)s team '
-                  '(<a href="%(link)s">view video</a>)'),
-                team=unicode(team_video.team),
-                link=team_video.video.get_absolute_url()))
-        else:
-            msg = _(u'This video already belongs to another team.')
-        self._errors['video_url'] = self.error_class([msg])
-
     def success_message(self):
         message = ""
         if self.summary[0] > 0:
             message += "{} videos successfully added, ".format(self.summary[0])
         if self.summary[1] > 0:
-            message += "{} videos successfully added from community videos, ".format(self.summary[1])
+            message += "{} videos already added to your team, ".format(self.summary[1])
         if self.summary[2] > 0:
-            message += "{} videos belong to other teams, ".format(self.summary[2])
-        if self.summary[3] > 0:
             message += "{} videos URL are not valid, ".format(self.summary[3])
         if len(message) > 2:
             message = message[:len(message) - 2]
@@ -591,7 +547,8 @@ class AddTeamVideosFromFeedForm(AddFromFeedForm):
                                         url=url)
 
 class CreateTeamForm(forms.ModelForm):
-    logo = forms.ImageField(validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)], required=False)
+    logo = forms.ImageField(widget=AmaraClearableFileInput,
+                validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)], required=False)
     workflow_type = forms.ChoiceField(choices=(), initial="O")
 
     class Meta:
@@ -605,7 +562,7 @@ class CreateTeamForm(forms.ModelForm):
         self.fields['workflow_type'].choices = TeamWorkflow.get_choices()
         self.fields['is_visible'].widget.attrs['class'] = 'checkbox'
         self.fields['sync_metadata'].widget.attrs['class'] = 'checkbox'
-        self.fields['slug'].label = _(u'Team URL: http://universalsubtitles.org/teams/')
+        self.fields['slug'].label = _(u'Team URL: https://amara.org/teams/')
 
     def clean_slug(self):
         slug = self.cleaned_data['slug']
@@ -1480,6 +1437,132 @@ class MemberFiltersForm(forms.Form):
             qs = qs.order_by('-created')
         return qs
 
+class ApplicationFiltersForm(forms.Form):
+    LANGUAGE_CHOICES = [
+        ('any', _('Any language')),
+    ] + get_language_choices()
+
+    language = forms.ChoiceField(choices=LANGUAGE_CHOICES,
+                                 label=_('Language spoken'),
+                                 initial='any', required=False)
+
+    def __init__(self, get_data=None):
+        super(ApplicationFiltersForm, self).__init__(self.calc_data(get_data))
+
+    def calc_data(self, get_data):
+        if get_data is None:
+            return None
+        data = {k:v for k, v in get_data.items() if k != 'page'}
+        return data if data else None
+
+    def update_qs(self, qs):
+        if not (self.is_bound and self.is_valid()):
+            return qs
+        language = self.cleaned_data.get('language', 'any')
+        if language and language != 'any':
+            qs = qs.filter(user__userlanguage__language=language)
+
+        return qs
+
+class ApproveApplicationForm(ManagementForm):
+
+    name = "approve_application"
+    label = _("Approve Application")
+
+    def __init__(self, user, queryset, selection, all_selected,
+                 data=None, files=None):
+        self.user = user
+        super(ApproveApplicationForm, self).__init__(
+            queryset, selection, all_selected, data=data, files=files)
+
+    def perform_submit(self, applications):
+        self.approved_count = 0
+        self.invalid_count = 0
+        self.error_count = 0
+        for application in applications:
+            try:
+                application.approve(self.user, "web UI")
+            except ApplicationInvalidException:
+                self.invalid_count += 1
+                _(u'Application already processed.')
+            except Exception as e:
+                logger.warn(e, exc_info=True)
+                self.error_count += 1
+
+    def message(self):
+        if self.approved_count:
+            return fmt(self.ungettext('%(count)s application has been approved',
+                                      '%(count)s applications have been approved',
+                                      self.approved_count), count=self.approved_count)
+        else:
+            return None
+
+    def error_messages(self):
+        errors = []
+        if self.invalid_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be approved because it was already processed",
+                "%(count)s application could not be approved because it was already processed",
+                "%(count)s applications could not be approved because they were already processed",
+                self.invalid_count), count=self.invalid_count))
+        if self.error_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be processed",
+                "%(count)s application could not be processed",
+                "%(count)s applications could not be processed",
+                self.error_count), count=self.error_count))
+        return errors
+
+
+class DenyApplicationForm(ManagementForm):
+
+    name = "deny_application"
+    label = _("Deny Application")
+
+    def __init__(self, user, queryset, selection, all_selected,
+                 data=None, files=None):
+        self.user = user
+        super(DenyApplicationForm, self).__init__(
+            queryset, selection, all_selected, data=data, files=files)
+
+    def perform_submit(self, applications):
+        self.denied_count = 0
+        self.invalid_count = 0
+        self.error_count = 0
+        for application in applications:
+            try:
+                application.deny(self.user, "web UI")
+            except ApplicationInvalidException:
+                self.invalid_count += 1
+                _(u'Application already processed.')
+            except Exception as e:
+                logger.warn(e, exc_info=True)
+                self.error_count += 1
+
+    def message(self):
+        if self.denied_count:
+            return fmt(self.ungettext('%(count)s application has been denied',
+                                      '%(count)s applications have been denied',
+                                      self.denied_count), count=self.denied_count)
+        else:
+            return None
+
+    def error_messages(self):
+        errors = []
+        if self.invalid_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be denied because it was already processed",
+                "%(count)s application could not be denied because it was already processed",
+                "%(count)s applications could not be denied because they were already processed",
+                self.invalid_count), count=self.invalid_count))
+        if self.error_count:
+            errors.append(fmt(self.ungettext(
+                "Application could not be processed",
+                "%(count)s application could not be processed",
+                "%(count)s applications could not be processed",
+                self.error_count), count=self.error_count))
+        return errors
+
 class EditMembershipForm(forms.Form):
     member = forms.ChoiceField()
     remove = forms.BooleanField(required=False)
@@ -1557,6 +1640,31 @@ class ApplicationForm(forms.Form):
             field = self.fields['language{}'.format(i+1)]
             field.initial = language
 
+    def notify(self):
+        send_to = [tm.user for tm in self.application.team.members.admins()]
+        url_base = '{}://{}'.format(settings.DEFAULT_PROTOCOL, Site.objects.get_current().domain)
+        context = {
+            'application': self.application,
+            'applicant': self.application.user,
+            'team': self.application.team,
+            'note': self.application.note,
+            'url_base': url_base
+        }
+        subject = _(u"A user has requested to join your team")
+        ids = []
+
+        for user in send_to:
+            context['user'] = user
+            body = render_to_string("messages/application-sent.txt", context)
+            msg = Message(user=user, subject=subject, content=body,
+                          message_type=SYSTEM_NOTIFICATION)
+            msg.save()
+            ids.append(msg.pk)
+            if user.notify_by_email:
+                send_templated_email(user, subject,
+                        "messages/email/application-sent-email.html", context)
+        send_new_messages_notifications.delay(ids)
+
     def clean(self):
         try:
             self.application.check_can_submit()
@@ -1573,50 +1681,11 @@ class ApplicationForm(forms.Form):
             if value:
                 languages.append({"language": value, "priority": i})
         self.application.user.set_languages(languages)
-
-class TeamVideoURLForm(forms.Form):
-    video_url = VideoURLField()
-
-    def save(self, team, user, project=None, thumbnail=None, language=None):
-        errors = ""
-        if not self.cleaned_data.get('video_url'):
-            return (False, "")
-
-        video_type = self.cleaned_data['video_url']
-        def setup_video(video, video_url):
-            video.is_public = team.is_visible
-            if language is not None:
-                video.primary_audio_language_code = language
-            if thumbnail:
-                video.s3_thumbnail.save(thumbnail.name, thumbnail)
-            team_video = TeamVideo.objects.create(video=video, team=team,
-                                                  project_id=project,
-                                                  added_by=user)
-
-        try:
-            Video.add(video_type, user, setup_video, team)
-        except Video.UrlAlreadyAdded, e:
-            if e.video.get_team_video() is not None:
-                return (False,
-                        self.video_in_team_msg(e.video, e.video_url, user))
-            else:
-                setup_video(e.video, e.video_url)
-                e.video.save()
-        return (True, "")
-
-    def video_in_team_msg(self, video, video_url, user):
-        team = video.get_team_video().team
-        if team.user_can_view_videos(user):
-            return fmt(_(u"Video %(url)s already in the %(team)s Team"),
-                       url=video_url.url, team=team)
-        else:
-            return fmt(_(u"Video %(url)s already in another team"),
-                       url=video_url.url)
-
-TeamVideoURLFormSet = formset_factory(TeamVideoURLForm)
+        self.notify()
 
 class TeamVideoCSVForm(forms.Form):
-    csv_file = forms.FileField(label="", required=True, allow_empty_file=False)
+    csv_file = forms.FileField(widget=AmaraFileInput,
+            label="", required=True, allow_empty_file=False)
 
 class VideoManagementForm(ManagementForm):
     """Base class for forms on the video management page."""
@@ -1664,7 +1733,8 @@ class EditVideosForm(VideoManagementForm):
                                 placeholder=_('No change'))
     project = ProjectField(label=_('Project'), required=False,
                            null_label=_('No change'))
-    thumbnail = forms.ImageField(label=_('Change thumbnail'), required=False)
+    thumbnail = forms.ImageField(widget=AmaraClearableFileInput,
+                                 label=_('Change thumbnail'), required=False)
 
     def setup_fields(self):
         self.fields['project'].setup(self.team)
@@ -1736,23 +1806,66 @@ class DeleteVideosForm(VideoManagementForm):
 
     def perform_submit(self, qs):
         delete = self.cleaned_data.get('delete', False)
+        self.public_duplicate_url_errors = 0
+        self.other_team_duplicate_url_errors = 0
+        self.success_count = 0
 
         for video in qs:
             team_video = video.teamvideo
-            team_video.remove(self.user)
             if delete:
+                team_video.delete()
                 video.delete(self.user)
+            else:
+                try:
+                    team_video.remove(self.user)
+                except Video.DuplicateUrlError, e:
+                    if e.from_prevent_duplicate_public_videos:
+                        self.other_team_duplicate_url_errors += 1
+                    else:
+                        self.public_duplicate_url_errors += 1
+                    continue
+            self.success_count += 1
 
     def message(self):
+        if self.success_count == 0:
+            return None
         if self.cleaned_data.get('delete'):
-            msg = ungettext('Video has been deleted.',
-                            '%(count)s videos have been deleted.',
-                            self.count)
+            msg = self.ungettext(
+                'Video has been deleted.',
+                '%(count)s video has been deleted.',
+                '%(count)s videos have been deleted.',
+                self.success_count)
         else:
-            msg = ungettext('Video has been removed.',
-                            '%(count)s videos have been removed.',
-                            self.count)
-        return fmt(msg, count=self.count)
+            msg = self.ungettext(
+                'Video has been removed.',
+                '%(count)s video has been removed.',
+                '%(count)s videos have been removed.',
+                self.success_count)
+        return fmt(msg, count=self.success_count)
+
+    def error_messages(self):
+        messages = []
+        if self.public_duplicate_url_errors:
+            messages.append(fmt(self.ungettext(
+                'Video not removed because it already exists in the '
+                'public area',
+                '%(count)s video not removed because it already exists in the '
+                'public area',
+                '%(count)s videos not removed because they already exists in '
+                'the public area',
+                self.public_duplicate_url_errors),
+                                count=self.public_duplicate_url_errors))
+        if self.other_team_duplicate_url_errors:
+            messages.append(fmt(self.ungettext(
+                "Video not removed to avoid a conflict with another "
+                "team's video policy",
+                "%(count) video not removed to avoid a conflict with another "
+                "team's video policy",
+                "%(count) videso not removed to avoid a conflict with another "
+                "team's video policy",
+                self.other_team_duplicate_url_errors),
+                                count=self.other_team_duplicate_url_errors))
+        return messages
 
 class MoveVideosForm(VideoManagementForm):
     name = 'move'
@@ -1764,11 +1877,10 @@ class MoveVideosForm(VideoManagementForm):
 
     @staticmethod
     def permissions_check(team, user):
-        return len(permissions.can_move_videos_to(team, user)) > 0
+        return len(permissions.can_move_videos_to(user, [team])) > 0
 
     def setup_fields(self):
-        dest_teams = [self.team] + permissions.can_move_videos_to(
-            self.team, self.user)
+        dest_teams = permissions.can_move_videos_to(self.user)
         dest_teams.sort(key=lambda t: t.name)
         self.fields['new_team'].choices = [
             (dest.id, dest.name) for dest in dest_teams
@@ -1822,13 +1934,26 @@ class MoveVideosForm(VideoManagementForm):
         return Team.objects.get(id=self.cleaned_data['new_team'])
 
     def perform_submit(self, qs):
+        self.duplicate_url_errors = 0
+        self.video_policy_errors = 0
+        self.success_count = 0
         for video in qs:
             team_video = video.teamvideo
-            team_video.move_to(self.cleaned_data['new_team'],
-                               self.cleaned_data['project'],
-                               self.user)
+            try:
+                team_video.move_to(self.cleaned_data['new_team'],
+                                   self.cleaned_data['project'],
+                                   self.user)
+            except Video.DuplicateUrlError, e:
+                if e.from_prevent_duplicate_public_videos:
+                    self.video_policy_errors += 1
+                else:
+                    self.duplicate_url_errors += 1
+            else:
+                self.success_count += 1
 
     def message(self):
+        if not self.success_count:
+            return None
         new_team = self.cleaned_data['new_team']
         project = self.cleaned_data['project']
         if new_team == self.team:
@@ -1836,27 +1961,53 @@ class MoveVideosForm(VideoManagementForm):
                 msg = ungettext(
                     'Video has been removed from project',
                     '%(count)s videos have been removed from projects',
-                    self.count)
+                    self.success_count)
             else:
                 msg = ungettext(
                     'Video has been moved to project %(project)s',
                     '%(count)s videos have been moved to project %(project)s',
-                    self.count)
+                    self.success_count)
         else:
             if project.is_default_project:
                 msg = ungettext(
                     'Video has been moved to %(team_link)s',
                     '%(count)s videos have been moved to %(team_link)s',
-                    self.count)
+                    self.success_count)
             else:
                 msg = ungettext(
                     'Video has been moved to %(team_link)s, '
                     'project %(project)s',
                     '%(count)s videos have been moved to %(team_link)s, '
                     'project %(project)s',
-                    self.count)
+                    self.success_count)
         team_link = '<a href="{}">{}</a>'.format(
             reverse('teams:dashboard', args=(new_team.slug,)),
             new_team)
         return fmt(msg, team_link=team_link, project=project.name,
-                   count=self.count)
+                   count=self.success_count)
+
+    def error_messages(self):
+        """Error message(s) after the form is submitted."""
+        messages = []
+        if self.duplicate_url_errors:
+            messages.append(fmt(
+                self.ungettext(
+                    "Video already added to %(team)s",
+                    "1 video already added to %(team)s",
+                    "%(count)s videos already added to %(team)s",
+                    self.duplicate_url_errors),
+                count=self.duplicate_url_errors,
+                team=self.cleaned_data['new_team']))
+        if self.video_policy_errors:
+            messages.append(fmt(
+                self.ungettext(
+                    "Video not moved because it would conflict with the "
+                    "video policy for %(team)s",
+                    "1 video not moved because it would conflict with the "
+                    "video policy for %(team)s",
+                    "%(count)s videos not moved because they would conflict "
+                    "with the video policy for %(team)s",
+                    self.video_policy_errors),
+                count=self.video_policy_errors,
+                team=self.cleaned_data['new_team']))
+        return messages

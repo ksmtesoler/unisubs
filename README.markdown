@@ -16,22 +16,28 @@ Amara uses [Docker](http://docker.io).  For ease of development, we use the dock
 
    Now the entire project will be in the unisubs directory.
 
-2. Install docker-compose (http://docs.docker.com/compose/install/)
+2. Get submodules.  There are two cases here:
 
-3. Build the Amara docker image:
+   - For non-pcf employees, use the ./checkout-submodules public
+   - For PCF employees and others with access to our private repositories, use
+     the ./checkout-submodules all
+
+3. Install docker-compose (http://docs.docker.com/compose/install/)
+
+4. Build the Amara docker image:
 
         bin/dev build
 
-4. Configure Database:
+5. Configure Database:
 
         bin/dev dbreset
 
-5. Start Amara Containers:
+6. Start Amara Containers:
 
         bin/dev up
 
 
-6. Add `unisubs.example.com` to your hosts file, pointing at `127.0.0.1`.  This
+7. Add `unisubs.example.com` to your hosts file, pointing at `127.0.0.1`.  This
    is necessary for Twitter and Facebook oauth to work correctly.
 
    You can access the site at <http://unisubs.example.com:8000>.
@@ -71,4 +77,3 @@ To create an admin user:
 
 
 <a href="https://zenhub.com"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"></a>
-[![Build Status](https://travis-ci.org/pculture/unisubs.svg?branch=master)](https://travis-ci.org/pculture/unisubs)

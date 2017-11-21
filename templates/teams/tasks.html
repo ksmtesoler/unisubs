@@ -1,5 +1,5 @@
 {% extends "teams/base.html" %}
-{% load to_json i18n teams_tags paginator media_bundle verbatim_templatetag old_query_string utils_tags videos_tags %}
+{% load to_json i18n teams_tags paginator media_bundle old_query_string utils_tags videos_tags %}
 {% load url from future %}
 
 {% block html_attrs %}id="team_tasks"{% endblock %}
@@ -9,7 +9,6 @@
     {% media_bundle "teams.js" %}
     <script src="{% url "teams:rpc_api" %}" type="text/javascript"></script>
     <script type="text/javascript">
-        window.WIDGET_SETTINGS = {{ widget_settings|to_json|safe }};
         window.REQUEST_GET_LANG = '{{ request.GET.lang }}';
         window.REQUEST_GET_PROJECT = '{{ request.GET.project }}';
         window.ASSIGN_TASK_AJAX_URL = '{% url "teams:assign_task_ajax" slug=team.slug %}';

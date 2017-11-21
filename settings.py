@@ -130,6 +130,8 @@ USE_I18N = True
 STATIC_ROOT = rel('media')+'/'
 MEDIA_ROOT  = rel('user-data')+'/'
 CSS_ROOT = os.path.join(STATIC_ROOT, 'amara/css')
+LOGO_URL = "https://s3.amazonaws.com/amara/assets/LogoAndWordmark.svg"
+PCF_LOGO_URL = "https://s3.amazonaws.com/amara/assets/PCFLogo.png"
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -196,7 +198,6 @@ INSTALLED_APPS = (
     'djcelery',
     'south',
     'rest_framework',
-    'tastypie',
     # third party apps forked on our repo
     'localeurl',
     'openid_consumer',
@@ -229,6 +230,7 @@ INSTALLED_APPS = (
     'widget',
     'subtitles',
     'captcha',
+    'raven.contrib.django.raven_compat',
 )
 
 STARTUP_MODULES = [
@@ -357,6 +359,8 @@ PROJECT_VERSION = '0.5'
 EDIT_END_THRESHOLD = 120
 
 ANONYMOUS_USER_ID = 10000
+ANONYMOUS_DEFAULT_USERNAME = u"amara-bot"
+ANONYMOUS_FULL_NAME = u"Amara Bot"
 
 #Use on production
 GOOGLE_ANALYTICS_NUMBER = 'UA-163840-22'
@@ -373,7 +377,6 @@ GOOGLE_SERVICE_ACCOUNT_SECRET = None
 try:
     from commit import LAST_COMMIT_GUID
 except ImportError:
-    sys.stderr.write("deploy/create_commit_file must be ran before boostrapping django")
     LAST_COMMIT_GUID = "dev"
 
 AWS_ACCESS_KEY_ID = ''
@@ -428,6 +431,9 @@ MEDIA_BUNDLES = {
             "amara/bootstrap/bootstrap.min.css",
             "amara/css/main.scss",
         ],
+        "include_paths": [
+            "amara/css/",
+        ],
     },
     "amara.js": {
         "use_requirejs": True,
@@ -460,7 +466,6 @@ MEDIA_BUNDLES = {
             "css/background.css",
             "css/activity_stream.css",
             "css/settings.css",
-            "css/feedback.css",
             "css/messages.css",
             "css/global.css",
             "css/top_user_panel.css",
@@ -469,6 +474,15 @@ MEDIA_BUNDLES = {
             "css/watch.css",
             "css/v1.scss",
             "css/bootstrap.css",
+            # Hack to make the new headers/footers work
+            "amara/css/variables.scss",
+            "amara/css/mixins.scss",
+            "amara/css/global/dropdowns.scss",
+            "amara/css/elements/_navigation.scss",
+            "amara/css/elements/_page_header.scss",
+            "amara/css/elements/_consolidate-header.scss",
+            "amara/css/elements/page_footer.scss",
+            "css/marketing-integration.scss",
         ),
     },
     "new-base.css": {
@@ -510,6 +524,16 @@ MEDIA_BUNDLES = {
         "files": (
             "css/hands-static.css",
             "css/hands-main.css",
+            # Hack to make the new headers/footers work
+            "amara/css/variables.scss",
+            "amara/css/mixins.scss",
+            "amara/css/global/grid.scss",
+            "amara/css/global/dropdowns.scss",
+            "amara/css/elements/_navigation.scss",
+            "amara/css/elements/_page_header.scss",
+            "amara/css/elements/_consolidate-header.scss",
+            "amara/css/elements/page_footer.scss",
+            "css/marketing-integration.scss",
          )
     },
     "api.css": {
@@ -536,6 +560,7 @@ MEDIA_BUNDLES = {
             "js/jquery.input_replacement.min.js",
             "js/messages.js",
             "js/escape.js",
+            "js/dropdown-hack.js",
             "js/libs/chosen.jquery.min.js",
             "js/libs/chosen.ajax.jquery.js",
             "js/libs/jquery.cookie.js",

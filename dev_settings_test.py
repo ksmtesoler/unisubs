@@ -33,8 +33,15 @@ DATABASES = {
     }
 }
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
 CACHE_PREFIX = "testcache"
 CACHE_TIMEOUT = 60
+
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_PLUGINS = ['utils.test_utils.plugin.UnisubsTestPlugin']
 CELERY_ALWAYS_EAGER = True
@@ -61,6 +68,9 @@ NOSE_ARGS = ['--logging-clear-handlers',
              '--with-xunit', '--logging-level=WARN',
              '--xunit-file=nosetests.xml',
             ]
+
+MESSAGES_SENT_WINDOW_MINUTES = 1
+MESSAGES_SENT_LIMIT = 50
 
 try:
     from dev_settings_test_local import *

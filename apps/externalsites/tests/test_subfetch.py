@@ -23,7 +23,9 @@ from django.test import TestCase
 from nose.tools import *
 import mock
 
-from externalsites.subfetch import should_fetch_subs, fetch_subs
+from externalsites.google import VideoInfo
+from externalsites.subfetch import (should_fetch_subs, fetch_subs,
+                                    lookup_youtube_accounts)
 from subtitles import pipeline
 from subtitles.models import ORIGIN_IMPORTED
 from utils import test_utils
@@ -40,18 +42,80 @@ class ShouldFetchSubsTest(TestCase):
         assert_false(should_fetch_subs(video.get_primary_videourl_obj()))
 
 
+class TestLookupYoutubeAccounts(TestCase):
+    # Test the subfetch.lookup_youtube_accounts() function
+    def setUp(self):
+        self.user = UserFactory()
+        self.team = TeamFactory()
+        self.user_account = YouTubeAccountFactory(channel_id="user",
+                                                  user=self.user)
+        self.team_account = YouTubeAccountFactory(channel_id="team",
+                                                  team=self.team)
+        self.videourl_in_user_account = YouTubeVideoFactory(
+            channel_id=None).get_primary_videourl_obj()
+        self.videourl_in_team_account = YouTubeVideoFactory(
+            channel_id=None).get_primary_videourl_obj()
+
+    def test_public_video_added_by_owner(self):
+        assert_items_equal(
+            lookup_youtube_accounts(self.videourl_in_user_account,
+                                    self.user, None),
+            [self.user_account])
+
+    def test_public_video_added_by_other_user(self):
+        assert_items_equal(
+            lookup_youtube_accounts(self.videourl_in_user_account,
+                                    UserFactory(), None),
+            [])
+
+    def test_video_added_to_linked_team(self):
+        assert_items_equal(
+            lookup_youtube_accounts(self.videourl_in_team_account,
+                                    UserFactory(), self.team),
+            [self.team_account])
+
+    def test_video_added_to_other_team(self):
+        assert_items_equal(
+            lookup_youtube_accounts(self.videourl_in_team_account,
+                                    UserFactory(), TeamFactory()),
+            [])
+
+    def test_added_by_account_user_to_team(self):
+        # What happens when a user adds a video to a team, and both the user
+        # and team have accounts linked.  It's not clear what we should do,
+        # but for now, we just use the team account
+        assert_items_equal(
+            lookup_youtube_accounts(self.videourl_in_user_account,
+                                    self.user, self.team),
+            [self.team_account])
+
+    def test_multiple_team_accounts(self):
+        team_account2 = YouTubeAccountFactory(channel_id="team2",
+                                              team=self.team)
+
+        assert_items_equal(
+            lookup_youtube_accounts(self.videourl_in_team_account,
+                                    UserFactory(), self.team),
+            [self.team_account, team_account2])
+
 class SubFetchTestCase(TestCase):
+    @test_utils.patch_for_test("externalsites.google.get_video_info")
     @test_utils.patch_for_test("externalsites.google.get_new_access_token")
     @test_utils.patch_for_test("externalsites.google.captions_list")
     @test_utils.patch_for_test("externalsites.google.captions_download")
     def setUp(self, mock_captions_download, mock_captions_list,
-              mock_get_new_access_token):
+              mock_get_new_access_token, mock_get_video_info):
         self.mock_captions_download = mock_captions_download
         self.mock_captions_list = mock_captions_list
         self.mock_get_new_access_token = mock_get_new_access_token
+        self.mock_get_video_info = mock_get_video_info
         self.mock_get_new_access_token.return_value = 'test-access-token'
+        self.mock_get_video_info.return_value = VideoInfo(
+            'username', 'test-title', 'test-description', 60,
+            'http://example.com/youtube-thumb.png')
+        self.user = UserFactory()
         self.account = YouTubeAccountFactory(channel_id="username",
-                                             user=UserFactory())
+                                             user=self.user)
         self.video = YouTubeVideoFactory(channel_id="username")
         self.video_url = self.video.get_primary_videourl_obj()
         self.video_id = self.video_url.videoid
@@ -75,7 +139,7 @@ class SubFetchTestCase(TestCase):
                 raise ValueError(caption_id)
         self.mock_captions_download.side_effect = captions_download
 
-        fetch_subs(self.video_url)
+        fetch_subs(self.video_url, user=self.user)
         # check that we called the correct API methods
         assert_equal(self.mock_get_new_access_token.call_args,
                      mock.call(self.account.oauth_refresh_token))
@@ -130,7 +194,7 @@ class SubFetchTestCase(TestCase):
         subs.append_subtitle(100, 200, 'text')
         self.mock_captions_download.return_value = subs.to_xml()
 
-        fetch_subs(self.video_url)
+        fetch_subs(self.video_url, user=self.user)
         assert_equal(
             self.mock_captions_download.call_args,
             mock.call('test-access-token', 'caption-1'))

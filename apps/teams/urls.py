@@ -33,7 +33,6 @@ urlpatterns = patterns('teams.views',
     url(r'^highlight/(?P<slug>[-\w]+)/$', 'highlight', name='highlight'),
     url(r'^unhighlight/(?P<slug>[-\w]+)/$', 'highlight', {'highlight': False}, name='unhighlight'),
     url(r'^(?P<slug>[-\w]+)/approvals/$', 'approvals', name='approvals'),
-    url(r'^(?P<slug>[-\w]+)/applications/$', 'applications', name='applications'),
     url(r'^(?P<slug>[-\w]+)/application/approve/(?P<application_pk>\d+)/$', 'approve_application', name='approve_application'),
     url(r'^(?P<slug>[-\w]+)/application/deny/(?P<application_pk>\d+)/$', 'deny_application', name='deny_application'),
     url(r'^move/$', 'move_video', name='move_video'),
@@ -69,6 +68,7 @@ urlpatterns = patterns('teams.views',
 )
 
 urlpatterns += patterns('teams.new_views',
+    url(r'^(?P<slug>[-\w]+)/applications/$', 'applications', name='applications'),
     url(r'^(?P<slug>[-\w]+)/$', 'dashboard', name='dashboard'),
     url(r'^(?P<slug>[-\w]+)/join/$', 'join', name='join'),
     url(r'^(?P<slug>[-\w]+)/videos/$', 'videos', name='videos'),
@@ -104,11 +104,6 @@ urlpatterns += patterns('teams.new_views',
     url(r'^(?P<slug>[-\w]+)/settings/workflows/$', 'settings_workflows', name='settings_workflows'),
     url(r'^(?P<slug>[-\w]+)/video-durations/$', 'video_durations',
         name='video-durations'),
-)
-
-urlpatterns += patterns('',
-    (r'^t1$',
-     TemplateView.as_view(template_name='jsdemo/teams_profile.html')),
 )
 
 # settings views that are handled by other apps
