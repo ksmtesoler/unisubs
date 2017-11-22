@@ -77,7 +77,7 @@ def update_video_feed(video_feed_id):
         video_feed = VideoFeed.objects.get(pk=video_feed_id)
         video_feed.update()
     except VideoFeed.DoesNotExist:
-        logging.warn(
+        celery_logger.warn(
             '**update_video_feed**. VideoFeed does not exist. ID: %s',
             video_feed_id)
 
