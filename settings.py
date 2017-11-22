@@ -252,6 +252,9 @@ CELERY_SEND_TASK_ERROR_EMAILS = True
 CELERYD_HIJACK_ROOT_LOGGER = False
 BROKER_POOL_LIMIT = 10
 
+# feedworker management command setup
+FEEDWORKER_PASS_DURATION=3600
+
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
@@ -778,6 +781,9 @@ LOGGING = {
         'celery': {
             'level': 'WARNING',
         },
+        'requests.packages.urllib3.connectionpool': {
+            'level': 'WARNING',
+        }
     },
 }
 if env_flag_set('DB_LOGGING'):

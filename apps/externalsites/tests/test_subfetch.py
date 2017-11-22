@@ -57,25 +57,25 @@ class TestLookupYoutubeAccounts(TestCase):
             channel_id=None).get_primary_videourl_obj()
 
     def test_public_video_added_by_owner(self):
-        assert_equal(
+        assert_items_equal(
             lookup_youtube_accounts(self.videourl_in_user_account,
                                     self.user, None),
             [self.user_account])
 
     def test_public_video_added_by_other_user(self):
-        assert_equal(
+        assert_items_equal(
             lookup_youtube_accounts(self.videourl_in_user_account,
                                     UserFactory(), None),
             [])
 
     def test_video_added_to_linked_team(self):
-        assert_equal(
+        assert_items_equal(
             lookup_youtube_accounts(self.videourl_in_team_account,
                                     UserFactory(), self.team),
             [self.team_account])
 
     def test_video_added_to_other_team(self):
-        assert_equal(
+        assert_items_equal(
             lookup_youtube_accounts(self.videourl_in_team_account,
                                     UserFactory(), TeamFactory()),
             [])
@@ -84,7 +84,7 @@ class TestLookupYoutubeAccounts(TestCase):
         # What happens when a user adds a video to a team, and both the user
         # and team have accounts linked.  It's not clear what we should do,
         # but for now, we just use the team account
-        assert_equal(
+        assert_items_equal(
             lookup_youtube_accounts(self.videourl_in_user_account,
                                     self.user, self.team),
             [self.team_account])

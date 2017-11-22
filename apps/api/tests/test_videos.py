@@ -289,7 +289,6 @@ class VideoSerializerTest(TestCase):
             'thumbnail',
             'metadata',
             'team',
-            'team_type',
             'project',
         ])
 
@@ -308,7 +307,6 @@ class VideoSerializerTest(TestCase):
             'thumbnail',
             'metadata',
             'team',
-            'team_type',
             'project',
         ])
 

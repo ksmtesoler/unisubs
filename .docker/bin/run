@@ -9,7 +9,7 @@ cat << EOF > /var/run/amara/$APP_NAME.ini
 [uwsgi]
 master = true
 workers = ${WORKERS}
-harakiri = 30
+harakiri = 45
 max-requests = 5000
 memory-report
 http-socket = 0.0.0.0:8000
@@ -22,6 +22,9 @@ reload-on-as = 512
 no-orphans = true
 vacuum = true
 disable-logging
+ignore-sigpipe = true
+ignore-write-errors = true
+disable-write-exception = true
 wsgi-file = $APP_DIR/deploy/unisubs.wsgi
 static-map = /static=/usr/local/lib/python2.7/site-packages/django/contrib/admin/static
 pythonpath = /var/run/amara
