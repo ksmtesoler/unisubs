@@ -171,16 +171,12 @@ def parse_signed_request(signed_request, secret):
 def facebook_login(request, next=None, confirmed=False, email=None, form_data=None):
     logger.error("facebook_login")
     logger.error(request.COOKIES)
-    logger.error(request.GET)
     for cookie, value in request.COOKIES.items():
         logger.error(cookie)
         logger.error(value)
-    cookie = request.GET.get('cookie', None)
-    logger.error("COOKIE")
-    logger.error(cookie)
-    if cookie is None:
-        cookie = request.COOKIES['fbsr_' + settings.FACEBOOK_APP_ID]
-    data = parse_signed_request(cookie, settings.FACEBOOK_SECRET_KEY)
+    data = parse_signed_request(request.COOKIES['fbsr_' + settings.FACEBOOK_APP_ID], settings.FACEBOOK_SECRET_KEY)
+    logger.error("data")
+    logger.error(data)
     if data is None or \
        datetime.datetime.now() - datetime.datetime.fromtimestamp(data['issued_at']) > datetime.timedelta(minutes=2):
         return redirect('auth:login')
