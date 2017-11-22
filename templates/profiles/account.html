@@ -96,6 +96,16 @@
                                 </li>
                             {% endfor %}
                         {% endif %}
+                        {% if vimeos %}
+                            {% for vim in vimeos %}
+                                <li>
+                                    <h3>Vimeo - {{ vim.access_code }}</h3>
+                                    <ul class="actions">
+                                        <li><a href="{% url "profiles:remove-third-party" "vimeo" vim.pk %}" title="Unlink this account">{% trans "Remove" %}</a></li>
+                                    </ul>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
                     </ul>
                 </fieldset>
             </div>
@@ -155,6 +165,7 @@
                                 <option>Select...</option>
                                 <option value="twitter">Twitter</option>
                                 <option value="facebook">Facebook</option>
+                                <option value="vimeo">Vimeo</option>
                             </select>
                         </fieldset>
                     </div>

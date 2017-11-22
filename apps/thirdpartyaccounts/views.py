@@ -31,6 +31,7 @@ from auth.models import CustomUser as User
 from socialauth.lib import oauthtwitter2 as oauthtwitter
 from socialauth.views import get_url_host
 from thirdpartyaccounts.auth_backends import FacebookAccount, FacebookAuthBackend, TwitterAuthBackend, TwitterAccount
+from thirdpartyaccounts.models import VimeoExternalAccount
 
 import logging
 logger = logging.getLogger(__name__)
@@ -142,6 +143,26 @@ def twitter_login_done(request, confirmed=True):
     # authentication was successful, use is now logged in
     return HttpResponseRedirect(request.GET.get('next') or settings.LOGIN_REDIRECT_URL)
 
+# Vimeo ---------------------------------------------------------------------
+def vimeo_login(request, next=None, confirmed=True, email=''):
+    logger.error("vimeo_login")
+    callback_url = None
+    if next is not None:
+        next='/'
+    callback_view = "thirdpartyaccounts:vimeo_login_done"
+    callback_url = '%s%s' % \
+                   (get_url_host(request),
+                    reverse(callback_view))
+    VIMEO_API_KEY = getattr(settings, 'VIMEO_API_KEY')
+    auth_url = "https://api.vimeo.com/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&state={}".format(VIMEO_API_KEY, callback_url, request.user.username)
+    return HttpResponseRedirect(auth_url)
+
+def vimeo_login_done(request, confirmed=True):
+    username = request.GET.get('state')
+    code = request.GET.get('code')
+    if username == request.user.username and code is not None:
+        VimeoExternalAccount.objects.create(user=request.user, username=username, access_code=code)
+    return HttpResponseRedirect(reverse("profiles:account"))
 
 # Facebook --------------------------------------------------------------------
 
