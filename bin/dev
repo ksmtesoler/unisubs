@@ -204,7 +204,9 @@ class Up(Command):
             env['JSON_LOGGING'] = '1'
         if self.args.dblog:
             env['DB_LOGGING'] = '1'
-        subprocess.call(['docker-compose', 'up', 'app', 'worker'], env=env)
+        subprocess.run(
+            ['docker-compose', 'up', 'app', 'worker', 'feed-worker'],
+            env=env)
 
 class PrepDeploy(Command):
     """Start docker containers."""

@@ -15,7 +15,8 @@ elif [ "$ACTION" = "master_worker" ]; then
     exec /usr/local/bin/master-worker
 elif [ "$ACTION" = "feed_worker" ]; then
     echo "Running feed worker..."
-    exec /usr/local/bin/feed-worker
+    source /usr/local/bin/config_env
+    manage feedworker
 elif [ "$ACTION" = "worker" ]; then
     echo "Running worker..."
     exec /usr/local/bin/worker
