@@ -99,7 +99,7 @@
                         {% if vimeos %}
                             {% for vim in vimeos %}
                                 <li>
-                                    <h3>Vimeo - {{ vim.access_code }}</h3>
+                                    <h3>Vimeo - {{ vim.username }}</h3>
                                     <ul class="actions">
                                         <li><a href="{% url "profiles:remove-third-party" "vimeo" vim.pk %}" title="Unlink this account">{% trans "Remove" %}</a></li>
                                     </ul>

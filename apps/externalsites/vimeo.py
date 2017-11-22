@@ -17,12 +17,67 @@
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
 from django.conf import settings
-import base64, requests
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
+import base64, requests, logging
+
+logger = logging.getLogger(__name__)
 
 VIMEO_API_KEY = getattr(settings, 'VIMEO_API_KEY')
 VIMEO_API_SECRET = getattr(settings, 'VIMEO_API_SECRET')
 
 VIMEO_API_BASE_URL = "https://api.vimeo.com"
+
+
+def get_redirect_uri(host):
+    return host + reverse("thirdpartyaccounts:vimeo_login_done")
+
+def get_token(code):
+    headers = {"Authorization":
+               ("basic " + \
+                base64.b64encode(VIMEO_API_KEY + ":" + VIMEO_API_SECRET))}
+    protocol = getattr(settings, "DEFAULT_PROTOCOL", 'https')
+    host = protocol + '://' + Site.objects.get_current().domain
+    data = {"grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": get_redirect_uri(host)}
+    url = "/oauth/access_token"
+    response = requests.post(VIMEO_API_BASE_URL + url,
+                             data=data,
+                             headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        None
+
+def get_video(account, video_id):
+    headers = {"Authorization":
+               ("Bearer " + account.access_code)}
+    url = "/videos/" + video_id
+    response = requests.get(VIMEO_API_BASE_URL + url,
+                            headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+def get_text_tracks(account, video_id):
+    headers = {"Authorization":
+               ("Bearer " + account.access_code)}
+    url = "/videos/" + video_id + "/texttracks"
+    response = requests.get(VIMEO_API_BASE_URL + url,
+                            headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+def get_text_track(account, uri):
+    headers = {"Authorization":
+               ("Bearer " + account.access_code)}
+    response = requests.get(VIMEO_API_BASE_URL + uri,
+                            headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    return None
 
 def get_values(video_id):
     headers = {"Authorization":
