@@ -19,6 +19,7 @@
 from urlparse import urlparse
 
 from django.core.exceptions import ValidationError
+from django.utils.http import urlquote
 import subprocess, sys, uuid, os
 import requests
 from django.conf import settings
@@ -162,6 +163,7 @@ class VideoTypeRegistrar(dict):
         domain and self.domains.append(domain)
         
     def video_type_for_url(self, url):
+        url = urlquote(url)
         for video_type in self.type_list:
             if video_type.matches_video_url(url):
                 return video_type(url)
