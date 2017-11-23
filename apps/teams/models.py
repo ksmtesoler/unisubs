@@ -3619,6 +3619,10 @@ class BillingRecordManager(models.Manager):
             celery_logger.debug('not a team video')
             return
 
+        if tv.team.deleted:
+            celery_logger.debug('Cannot create billing record for deleted team')
+            return
+
         if not language.is_complete_and_synced(public=False):
             celery_logger.debug('language not complete')
             return
