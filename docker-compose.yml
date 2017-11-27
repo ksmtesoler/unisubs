@@ -26,7 +26,21 @@ services:
     command: worker
     environment:
       CELERY_OPTS: -B
-      CELERY_QUEUES: default,feeds,priority
+      CELERY_QUEUES: default,priority
+      DJANGO_SETTINGS_MODULE: dev_settings
+      LANG: en_US.UTF-8
+      JSON_LOGGING:
+    volumes:
+      - .:/opt/apps/amara:z
+    links:
+      - db
+      - queue
+      - cache
+
+  feed-worker:
+    image: amara-app
+    command: feed_worker
+    environment:
       DJANGO_SETTINGS_MODULE: dev_settings
       LANG: en_US.UTF-8
       JSON_LOGGING:

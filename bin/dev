@@ -209,7 +209,9 @@ class Up(Command):
             env['JSON_LOGGING'] = '1'
         if self.args.dblog:
             env['DB_LOGGING'] = '1'
-        subprocess.call(['docker-compose', 'up', 'app', 'worker'], env=env)
+        subprocess.run(
+            ['docker-compose', 'up', 'app', 'worker', 'feed-worker'],
+            env=env)
 
 class PrepDeploy(Command):
     """Start docker containers."""
@@ -346,7 +348,8 @@ class Switch(Command):
     def run(self):
         submodule_paths = get_submodule_paths()
 
-        self.check_repo_changes('unisubs', unisubs_root())
+        self.check_repo_changes('unisubs', unisubs_root(),
+                                [p[0] for p in submodule_paths])
         for name, path in submodule_paths:
             self.check_repo_changes(name, path)
 
@@ -362,14 +365,19 @@ class Switch(Command):
         for name, path in submodule_paths:
             self.print_branch_and_commit(name, path)
 
-    def check_repo_changes(self, name, path):
+    def check_repo_changes(self, name, path, allowed_changes=None):
+        if allowed_changes is None:
+            allowed_changes = []
         os.chdir(path)
-        result = run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
-                          check=False)
-        if result.returncode != 0:
+        result = run(['git', 'diff-index', '--name-only', 'HEAD', '--'],
+                     stdout=subprocess.PIPE, check=False)
+        changed_files = set(result.stdout.decode('utf-8').split('\n'))
+        changed_files.discard('')
+        uncommited_changes = changed_files.difference(allowed_changes)
+        if uncommited_changes:
             print_highlighted('Uncommited changes on {}'.format(name))
-            print()
-            run(['git', 'status'], stdout=None)
+            for filename in uncommited_changes:
+                print('* {}'.format(filename))
             sys.exit(1)
 
     def checkout_submodule(self, name, path, fallback_to_master=True):
