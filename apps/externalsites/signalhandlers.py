@@ -32,6 +32,9 @@ from videos.models import Video, VideoUrl
 import subtitles.signals
 import videos.signals
 
+import logging
+logger = logging.getLogger(__name__)
+
 def _update_subtitles_for_language(language):
     for account, video_url in get_sync_accounts(language.video):
         tasks.update_subtitles.delay(account.account_type, account.id,
@@ -71,4 +74,8 @@ def on_video_url_added(sender, video, **kwargs):
         user = kwargs.pop('user', None)
         if user is not None:
             user = user.pk
-        tasks.fetch_subs.delay(video_url.pk, user, team)
+        try:
+            tasks.fetch_subs.delay(video_url.pk, user, team)
+        except Exception, e:
+            logger.error("Exception")
+            logger.error(e)

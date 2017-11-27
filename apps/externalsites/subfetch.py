@@ -24,7 +24,7 @@ import logging, requests
 import unilangs
 from babelsubs import load_from
 from externalsites import google, vimeo
-from externalsites.models import YouTubeAccount
+from externalsites.models import YouTubeAccount, VimeoSyncAccount
 from subtitles.models import ORIGIN_IMPORTED
 from subtitles import pipeline
 from subtitles.signals import subtitles_imported
@@ -44,7 +44,8 @@ def convert_language_code(lc):
         return None
 
 def should_fetch_subs(video_url):
-    return video_url.type == VIDEO_TYPE_YOUTUBE or video_url.type == VIDEO_TYPE_VIMEO
+    return video_url.type == VIDEO_TYPE_YOUTUBE or \
+        video_url.type == VIDEO_TYPE_VIMEO
 
 def fetch_subs(video_url, user=None, team=None):
     if video_url.type == VIDEO_TYPE_YOUTUBE:
@@ -66,16 +67,33 @@ def lookup_youtube_accounts(video_url, user, team):
     else:
         return YouTubeAccount.objects.none()
 
+def lookup_vimeo_accounts(video_url, user, team):
+    """
+    Find the VimeoSyncAccount objects we should use to try in
+    fetch_subs_youtube()
+    """
+    if team:
+        return VimeoSyncAccount.objects.for_team_or_synced_with_team(team)
+    elif user:
+        return VimeoSyncAccount.objects.for_owner(user)
+    else:
+        return VimeoSyncAccount.objects.none()
+
 def fetch_subs_vimeo(video_url, user, team):
-    for vimeo_account in user.vimeoexternalaccount_set.all():
-        tracks = vimeo.get_text_tracks(vimeo_account, video_url.videoid)
+    video_id = video_url.videoid
+    possible_accounts = set()
+    for account in lookup_vimeo_accounts(video_url, user, team):
+        if account.fetch_initial_subtitles:
+            possible_accounts.add(account)
+    existing_langs = set(
+        l.language_code for l in
+        video_url.video.newsubtitlelanguage_set.having_versions()
+    )
+    for vimeo_account in possible_accounts:
+        tracks = vimeo.get_text_tracks(vimeo_account, video_id)
         versions = []
         if tracks is not None and \
            'data' in tracks:
-            existing_langs = set(
-                l.language_code for l in
-                video_url.video.newsubtitlelanguage_set.having_versions()
-            )
             for track in tracks['data']:
                 language_code = track['language']
                 if language_code and language_code not in existing_langs:

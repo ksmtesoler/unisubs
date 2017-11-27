@@ -55,7 +55,7 @@ rpc_router = RpcRouter('profiles:rpc_router', {
 })
 
 VIDEOS_ON_PAGE = getattr(settings, 'VIDEOS_ON_PAGE', 30)
-LINKABLE_ACCOUNTS = ['youtube', 'twitter', 'facebook', 'vimeo']
+LINKABLE_ACCOUNTS = ['youtube', 'twitter', 'facebook']
 
 
 class OptimizedQuerySet(LoadRelatedQuerySet):
@@ -241,7 +241,6 @@ def account(request):
         editnotificationsform = EditNotificationsForm(instance=request.user, label_suffix="", prefix='notifications')
         editaccountform = EditAccountForm(instance=request.user, label_suffix="", prefix='account')
     twitters = request.user.twitteraccount_set.all()
-    vimeos = request.user.vimeoexternalaccount_set.all()
     facebooks = request.user.facebookaccount_set.all()
 
     context = {
@@ -251,7 +250,8 @@ def account(request):
         'edit_profile_page': True,
         'youtube_accounts': (externalsites.models.YouTubeAccount
                              .objects.for_owner(request.user)),
-        'vimeos': vimeos,
+        'vimeo_accounts': (externalsites.models.VimeoSyncAccount
+                             .objects.for_owner(request.user)),
         'twitters': twitters,
         'facebooks': facebooks,
         'hide_prompt': True
@@ -339,23 +339,28 @@ def add_third_party(request):
 
 @login_required
 def remove_third_party(request, account_type, account_id):
-    from thirdpartyaccounts.models import TwitterAccount, FacebookAccount, VimeoExternalAccount
+    from thirdpartyaccounts.models import TwitterAccount, FacebookAccount
 
     if account_type == 'twitter':
         account = get_object_or_404(request.user.twitteraccount_set.all(),
                                     pk=account_id)
         account_type_name = _('Twitter account')
         account_owner = account.username
-    if account_type == 'vimeo':
-        account = get_object_or_404(request.user.vimeoexternalaccount_set.all(),
-                                    pk=account_id)
-        account_type_name = _('Vimeo account')
-        account_owner = account.username
     elif account_type == 'facebook':
         account = get_object_or_404(request.user.facebookaccount_set.all(),
                                     pk=account_id)
         account_type_name = _('Facebook account')
         account_owner = account.uid
+    elif account_type == 'vimeo':
+        # map the account type string from the URL to the externalsites
+        # model
+        account_type_map = {
+            'vimeo': externalsites.models.VimeoSyncAccount
+        }
+        qs = account_type_map[account_type].objects.for_owner(request.user)
+        account = get_object_or_404(qs, id=account_id)
+        account_type_name = account._meta.verbose_name
+        account_owner = account.get_owner_display()
     else:
         # map the account type string from the URL to the externalsites
         # model
