@@ -133,31 +133,50 @@ def delete_subtitles(account, video_id, language_code):
                 else:
                     raise APIError(response.text)
 
-def get_values(video_id):
-    headers = {"Authorization":
-               ("basic " + \
-                base64.b64encode(VIMEO_API_KEY + ":" + VIMEO_API_SECRET))}
-    data = {"grant_type": "client_credentials"}
-    url = "/oauth/authorize/client"
-    response = requests.post(VIMEO_API_BASE_URL + url,
-                             data=data,
-                             headers=headers)
-    if response.ok:
-        access_token = response.json()['access_token']
-        headers = {"Authorization": "Bearer " + access_token}
-        url = "/videos/" + video_id
-        response = requests.get(VIMEO_API_BASE_URL + url,
+def get_values(video_id, user=None, team=None):
+    from externalsites.models import VimeoSyncAccount
+    accounts = None
+    if team:
+        accounts = VimeoSyncAccount.objects.for_team_or_synced_with_team(team)
+    elif user:
+        accounts = VimeoSyncAccount.objects.for_owner(user)
+    else:
+        accounts = VimeoSyncAccount.objects.none()
+    video_url = "/videos/" + video_id
+    video_data = None
+    for account in accounts:
+        headers = {"Authorization":
+                   ("Bearer " + account.access_token)}
+        response = requests.get(VIMEO_API_BASE_URL + video_url,
                                 headers=headers)
-        if response.status_code == 200:
+        if response.ok:
             video_data = response.json()
-            small = large = None
-            for picture in sorted(video_data['pictures'], key=lambda x: x["width"]):
-                if picture['width'] < 120:
-                    small = picture['link']
-                if picture['width'] < 720:
-                    large = picture['link']
-            return (video_data["name"],
-                    video_data["description"],
-                    video_data['duration'],
-                    small, large)
+            break
+    if video_data is None:
+        headers = {"Authorization":
+                   ("basic " + \
+                    base64.b64encode(VIMEO_API_KEY + ":" + VIMEO_API_SECRET))}
+        data = {"grant_type": "client_credentials"}
+        url = "/oauth/authorize/client"
+        response = requests.post(VIMEO_API_BASE_URL + url,
+                                 data=data,
+                                 headers=headers)
+        if response.ok:
+            access_token = response.json()['access_token']
+            headers = {"Authorization": "Bearer " + access_token}
+            response = requests.get(VIMEO_API_BASE_URL + url,
+                                    headers=headers)
+            if response.ok:
+                video_data = response.json()
+    if video_data is not None:
+        small = large = None
+        for picture in sorted(video_data['pictures']['sizes'], key=lambda x: x["width"]):
+            if picture['width'] < 120:
+                small = picture['link']
+            if picture['width'] < 720:
+                large = picture['link']
+        return (video_data["name"],
+                video_data["description"],
+                video_data['duration'],
+                small, large)
     raise Exception("Vimeo API Error")

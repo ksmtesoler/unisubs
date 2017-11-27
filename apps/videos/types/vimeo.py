@@ -48,17 +48,15 @@ class VimeoVideoType(VideoType):
         return bool(VIMEO_REGEX.match(url))
 
     def set_values(self, video_obj, user, team, video_url):
-        if vimeo.VIMEO_API_KEY and vimeo.VIMEO_API_SECRET:
-            try:
-                values = vimeo.get_values(self.videoid)
-                video_obj.thumbnail = values[3]
-                video_obj.small_thumbnail = values[4]
-                video_obj.duration = values[2]
-                video_obj.title = values[0]
-                video_obj.description = values[1]
-            except Exception, e:
-                # in case the Vimeo video is private.
-                pass
+        try:
+            values = vimeo.get_values(self.videoid, user, team)
+            video_obj.thumbnail = values[3]
+            video_obj.small_thumbnail = values[4]
+            video_obj.duration = values[2]
+            video_obj.title = values[0]
+            video_obj.description = values[1]
+        except Exception, e:
+            pass
 
     def _get_vimeo_id(self, video_url):
         return VIMEO_REGEX.match(video_url).groupdict().get('video_id')
