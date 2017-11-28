@@ -428,6 +428,20 @@ class Team(models.Model):
             Team.INVITATION_BY_ADMIN,
         )
 
+    def set_legacy_visibility(self, is_visible):
+        """
+        Update team_visibility and video_visibility together
+
+        Call this in places where you want to emulate the legacy behavior,
+        where is_visible controls both team visibility and video_visibility.
+        """
+        if is_visible:
+            self.team_visibility = TeamVisibility.PUBLIC
+            self.video_visibility = VideoVisibility.PUBLIC
+        else:
+            self.team_visibility = TeamVisibility.PRIVATE
+            self.video_visibility = VideoVisibility.PRIVATE
+
     def get_workflow(self):
         """Return the workflow for the given team.
 

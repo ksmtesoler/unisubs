@@ -166,6 +166,14 @@ class EnumField(models.PositiveSmallIntegerField):
             return super(EnumField, self).get_default()
 
     @property
+    def choices(self):
+        return self.enum.choices()
+
+    def value_from_object(self, obj):
+        value = getattr(obj, self.attname)
+        return value.number if isinstance(value, EnumMember) else value
+
+    @property
     def raw_default(self):
         if isinstance(self.default, EnumMember):
             return self.default.number
