@@ -51,7 +51,6 @@ class VimeoVideoType(VideoType):
         try:
             values = vimeo.get_values(self.videoid, user, team)
             video_obj.thumbnail = values[3]
-            video_obj.small_thumbnail = values[4]
             video_obj.duration = values[2]
             video_obj.title = values[0]
             video_obj.description = values[1]

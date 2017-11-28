@@ -170,13 +170,9 @@ def get_values(video_id, user=None, team=None):
                 video_data = response.json()
     if video_data is not None:
         small = large = None
-        for picture in sorted(video_data['pictures']['sizes'], key=lambda x: x["width"]):
-            if picture['width'] < 120:
-                small = picture['link']
-            if picture['width'] < 720:
-                large = picture['link']
+        thumbnail = sorted(video_data['pictures']['sizes'], key=lambda x: -x["width"])[0]['link']
         return (video_data["name"],
                 video_data["description"],
                 video_data['duration'],
-                small, large)
+                thumbnail)
     raise Exception("Vimeo API Error")
