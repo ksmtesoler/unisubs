@@ -19,10 +19,11 @@ def copy_files(branch):
     subprocess.check_call(['git', 'checkout', branch, 'docs'])
     subprocess.check_call(['git', 'add', 'apps', 'docs'])
 
-def commit_changes():
+def has_changes():
     rv = subprocess.call(['git', 'diff-index', '--quiet', 'HEAD', '--'])
-    if rv == 0:
-        return
+    return rv != 0
+
+def commit_changes():
     subprocess.check_call([
         'git', 'commit',
         '--author', 'DeployBot <admin+pcf-deploy-bot@pculture.org>',
@@ -36,10 +37,11 @@ def main():
     args = parse_args()
     cd_to_project_root()
     copy_files(args.branch)
-    if args.commit or args.push:
-        commit_changes()
-    if args.push:
-        push_changes()
+    if has_changes():
+        if args.commit or args.push:
+            commit_changes()
+        if args.push:
+            push_changes()
 
 if __name__ == '__main__':
     main()
