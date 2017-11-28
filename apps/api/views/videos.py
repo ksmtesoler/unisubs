@@ -627,7 +627,7 @@ class VideoViewSet(mixins.CreateModelMixin,
             team = Team.objects.get(slug=query_params['team'])
         except Team.DoesNotExist:
             return Video.objects.none()
-        if not team.user_can_view_videos(self.request.user):
+        if not team.user_can_view_video_listing(self.request.user):
             return Video.objects.none()
 
         if 'project' in query_params:

@@ -189,7 +189,10 @@ class EnumField(models.PositiveSmallIntegerField):
 
     def to_python(self, value):
         if isinstance(value, basestring):
-            return self.enum.lookup_slug(value)
+            if value.isdigit():
+                return self.enum.lookup_number(int(value))
+            else:
+                return self.enum.lookup_slug(value)
         elif isinstance(value, (int, long)):
             return self.enum.lookup_number(value)
         else:
