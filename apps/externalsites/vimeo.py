@@ -31,7 +31,7 @@ VIMEO_API_SECRET = getattr(settings, 'VIMEO_API_SECRET')
 VIMEO_API_BASE_URL = "https://api.vimeo.com"
 
 def get_redirect_uri(host):
-    return host + reverse("externalsites:vimeo-login-done")
+    return host + "/externalsites/vimeo-login-done/"
 
 def get_texttracks_url(video_id):
     return "/videos/" + video_id + "/texttracks"
