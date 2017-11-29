@@ -1,3 +1,6 @@
+Caching
+=======
+
 Varnish
 -------
 We use Varnish (http://varnish-cache.org/) as a reverse proxy/caching server in
