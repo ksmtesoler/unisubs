@@ -1579,16 +1579,25 @@ class ChangeMemberRoleForm(ManagementForm):
         super(ChangeMemberRoleForm, self).__init__(
             queryset, selection, all_selected, data=data, files=files)
 
+    def would_remove_last_owner(self, member, role):
+        if role == TeamMember.ROLE_OWNER:
+            return False
+        elif not member.role == TeamMember.ROLE_OWNER:
+            return False
+        else:
+            team_owners = member.team.members.owners()
+            return (len(team_owners) <= 1)
+
     def perform_submit(self, members):
         self.error_count = 0
-        self.only_admin_count = 0
+        self.only_owner_count = 0
         self.changed_count = 0
 
         if self.cleaned_data['role'] != '':
             for member in members:
-                # check if user is last admin on team
-                if self.would_remove_last_admin(member, self.cleaned_data['role']):
-                    self.only_admin_count += 1
+                # check if user is last owner on team
+                if self.would_remove_last_owner(member, self.cleaned_data['role']):
+                    self.only_owner_count += 1
                 else:
                     try:
                         member.role = self.cleaned_data['role']
@@ -1597,15 +1606,6 @@ class ChangeMemberRoleForm(ManagementForm):
                     except Exception as e:
                         logger.error(e, exc_info=True)
                         self.error_count += 1
-
-    def would_remove_last_admin(self, member, role):
-        if role in (TeamMember.ROLE_ADMIN, TeamMember.ROLE_OWNER):
-            return False
-        elif not member.is_admin():
-            return False
-        else:
-            team_admins = member.team.members.admins()
-            return (len(team_admins) <= 1)
 
     def message(self):
         if self.changed_count:
@@ -1618,12 +1618,12 @@ class ChangeMemberRoleForm(ManagementForm):
 
     def error_messages(self):
         errors = []
-        if self.only_admin_count:
+        if self.only_owner_count:
             errors.append(fmt(self.ungettext(
-            "Could not change the member role because there would be no admins left in the team",
-            "Could not change %(count)s member role because there would be no admins left in the team",
-            "Could not change %(count)s member roles because there would be no admins left in the team",
-            self.only_admin_count), count=self.only_admin_count))
+            "Could not change the member role because there would be no owners left in the team",
+            "Could not change %(count)s member role because there would be no owners left in the team",
+            "Could not change %(count)s member roles because there would be no owners left in the team",
+            self.only_owner_count), count=self.only_owner_count))
         if self.error_count:
             errors.append(fmt(self.ungettext(
                 "Member could not be edited",
@@ -1642,17 +1642,26 @@ class RemoveMemberForm(ManagementForm):
         super(RemoveMemberForm, self).__init__(
             queryset, selection, all_selected, data=data, files=files)
 
+    def would_remove_last_owner(self, members):
+        # if no owners are going to be removed
+        selected_owners = [member for member in members if member.role == TeamMember.ROLE_OWNER]
+        if not selected_owners:
+            return False
+        else:
+            team_owners = members[0].team.members.owners()
+            return (len(team_owners) - len(selected_owners) <= 1)
+
     def perform_submit(self, members):
         self.error_count = 0
-        self.only_member_count = 0
+        self.only_owner_count = 0
         self.removed_count = 0
 
-        # make list from generator
+        # convert generator to list
         members = list(members)
 
         # if there would be no more members left on the team
-        if len(members[0].team.users.all()) - len(members) < 1:
-            self.only_member_count += len(members)
+        if self.would_remove_last_owner(members):
+            self.only_owner_count += len(members)
             return
 
         for member in members:
@@ -1674,12 +1683,12 @@ class RemoveMemberForm(ManagementForm):
 
     def error_messages(self):
         errors = []
-        if self.only_member_count:
+        if self.only_owner_count:
             errors.append(fmt(self.ungettext(
-            "Could not remove the user because there would be no members left in the team",
-            "Could not remove %(count)s user because there would be no members left in the team",
-            "Could not remove %(count)s users because there would be no members left in the team",
-            self.only_member_count), count=self.only_member_count))
+            "Could not remove the user because there would be no owners left in the team",
+            "Could not remove %(count)s user because there would be no owners left in the team",
+            "Could not remove %(count)s users because there would be no owners left in the team",
+            self.only_owner_count), count=self.only_owner_count))
         if self.error_count:
             errors.append(fmt(self.ungettext(
                 "Member could not be removed",
