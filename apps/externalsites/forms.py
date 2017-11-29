@@ -178,10 +178,9 @@ class YoutubeAccountForm(forms.Form):
         exclude_team_ids.append(self.account.owner_id)
         member_qs = (self.admin_user.team_members.admins()
                      .exclude(team_id__in=exclude_team_ids)
-                     .exclude(team_deleted=True)
                      .select_related('team'))
         choices.extend((member.team.id, member.team.name)
-                       for member in member_qs)
+                       for member in member_qs if not member.team.deleted)
         self['sync_teams'].field.choices = choices
         self['sync_teams'].field.initial = initial
 
