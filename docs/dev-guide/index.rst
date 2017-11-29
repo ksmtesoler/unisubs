@@ -19,3 +19,4 @@ codebase.
    optional-apps
    i18n
    behaviors
+   css
