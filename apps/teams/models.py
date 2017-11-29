@@ -229,8 +229,6 @@ class Team(models.Model):
                                       default='', blank=True,
                                       legacy_filenames=False,
                                       thumb_sizes=[(100, 100), (48, 48), (40, 40), (30, 30)])
-    # Legacy field, soon to be removed
-    is_visible = models.BooleanField(_(u'videos public?'), default=False)
     # New fields
     team_visibility = enum.EnumField(enum=TeamVisibility,
                                      default=TeamVisibility.PRIVATE)
@@ -524,8 +522,7 @@ class Team(models.Model):
                                             project=project, added_by=user)
     # Settings
     SETTINGS_ATTRIBUTES = set([
-        'description', 'is_visible', 'sync_metadata', 'membership_policy',
-        'video_policy',
+        'description', 'sync_metadata', 'membership_policy', 'video_policy',
     ])
     def get_settings(self):
         """Get the current settings for this team

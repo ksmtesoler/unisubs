@@ -37,7 +37,27 @@ Get a list of teams
         - ``collaboration`` -- collaboration team
 
     :>json string description: Team description
-    :>json boolean is_visible: Should this team's videos be publicly visible (True by default)?
+    :>json string team_visibility: Should non-team members be able to view the
+        team?  Possible values:
+
+        - ``private`` -- Only team members can view the team
+        - ``unlisted`` -- Team not listed in the directory, but publicly
+            accessible for users with a link
+        - ``public`` -- Anyone can view the team (default)
+
+    :>json string video_visibility: Should non-team members be able to view the
+        team's videos?  Possible values:
+
+        - ``private`` -- Only team members can view the team's videos
+        - ``unlisted`` -- The team's videos not searchable, or listed in the
+            directory, but publicly accessible for users with a link
+        - ``public`` -- Anyone can view the team's videos (default)
+
+    :>json boolean is_visible: Legacy field to set visibility.  If set to
+        True, this will set both ``team_visibility`` and ``video_visibility``
+        to ``public``.  If set to False, it will set them both to ``private`.
+        When reading this field, it is True if ``team_visibility`` is set to
+        ``public``
     :>json string membership_policy: Team membership policy. One of:
 
         - ``Open``
@@ -415,7 +435,7 @@ from rest_framework.views import APIView
 
 from api import userlookup
 from api.views.apiswitcher import APISwitcherMixin
-from api.fields import UserField, TimezoneAwareDateTimeField
+from api.fields import UserField, TimezoneAwareDateTimeField, EnumField
 from auth.models import CustomUser as User
 from notifications.models import TeamNotification
 from teams.models import (Team, TeamMember, Project, Task, TeamVideo,
@@ -455,6 +475,10 @@ class MappedChoiceField(serializers.ChoiceField):
         except KeyError:
             return 'unknown'
 
+class IsVisibleField(serializers.BooleanField):
+    def get_attribute(self, team):
+        return team.team_public()
+
 class TeamSerializer(serializers.ModelSerializer):
     type = MappedChoiceField(
         source='workflow_type', required=False, default='O',
@@ -479,6 +503,9 @@ class TeamSerializer(serializers.ModelSerializer):
     video_policy = MappedChoiceField(
         VIDEO_POLICY_CHOICES, required=False,
         default=Team._meta.get_field('video_policy').get_default())
+    team_visibility = EnumField(default='public')
+    video_visibility = EnumField(default='public')
+    is_visible = IsVisibleField(required=False)
 
     activity_uri = serializers.HyperlinkedIdentityField(
         view_name='api:team-activity',
@@ -490,7 +517,6 @@ class TeamSerializer(serializers.ModelSerializer):
     tasks_uri = serializers.SerializerMethodField()
     languages_uri = serializers.SerializerMethodField()
     resource_uri = serializers.SerializerMethodField()
-    is_visible = serializers.BooleanField(default=True)
 
     def get_members_uri(self, team):
         return reverse('api:team-members-list', kwargs={
@@ -529,18 +555,20 @@ class TeamSerializer(serializers.ModelSerializer):
         }, request=self.context['request'])
 
     def save(self):
+        is_visible = self.validated_data.pop('is_visible', None)
         team = super(TeamSerializer, self).save()
-        if 'is_visible' in self.validated_data:
-            team.set_legacy_visibility(self.validated_data['is_visible'])
+        if is_visible is not None:
+            team.set_legacy_visibility(is_visible)
             team.save()
         return team
 
     class Meta:
         model = Team
-        fields = ('name', 'slug', 'type', 'description', 'is_visible',
-                  'membership_policy', 'video_policy', 'activity_uri',
-                  'members_uri', 'projects_uri', 'applications_uri',
-                  'languages_uri', 'tasks_uri', 'resource_uri')
+        fields = ('name', 'slug', 'type', 'description', 'team_visibility',
+                  'video_visibility', 'is_visible', 'membership_policy',
+                  'video_policy', 'activity_uri', 'members_uri',
+                  'projects_uri', 'applications_uri', 'languages_uri',
+                  'tasks_uri', 'resource_uri')
 
 class TeamUpdateSerializer(TeamSerializer):
     name = serializers.CharField(required=False)

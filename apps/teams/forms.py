@@ -550,6 +550,7 @@ class CreateTeamForm(forms.ModelForm):
     logo = forms.ImageField(widget=AmaraClearableFileInput,
                 validators=[MaxFileSizeValidator(settings.AVATAR_MAX_SIZE)], required=False)
     workflow_type = forms.ChoiceField(choices=(), initial="O")
+    is_visible = forms.BooleanField(required=False)
 
     class Meta:
         model = Team
@@ -571,7 +572,8 @@ class CreateTeamForm(forms.ModelForm):
         return slug
 
     def save(self, user):
-        self.instance.set_legacy_visibility(self.instance.is_visible)
+        is_visible = self.cleaned_data.get('is_visible', False)
+        self.instance.set_legacy_visibility(is_visible)
         team = super(CreateTeamForm, self).save()
         TeamMember.objects.create_first_member(team=team, user=user)
         return team
@@ -805,20 +807,22 @@ class SettingsForm(forms.ModelForm):
         help_text=_('Recommended size: 100 x 100'),
         widget=forms.FileInput,
         required=False)
+    is_visible = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(SettingsForm, self).__init__(*args, **kwargs)
         self.initial_settings = self.instance.get_settings()
 
     def save(self, user):
+        is_visible = self.cleaned_data.get('is_visible', False)
         with transaction.atomic():
-            self.instance.set_legacy_visibility(self.instance.is_visible)
+            self.instance.set_legacy_visibility(is_visible)
             super(SettingsForm, self).save()
             self.instance.handle_settings_changes(user, self.initial_settings)
 
     class Meta:
         model = Team
-        fields = ('description', 'logo', 'square_logo', 'is_visible', 'sync_metadata')
+        fields = ('description', 'logo', 'square_logo', 'sync_metadata')
 
 class RenameableSettingsForm(SettingsForm):
     class Meta(SettingsForm.Meta):

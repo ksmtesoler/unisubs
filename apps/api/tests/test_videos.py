@@ -613,7 +613,7 @@ class VideoViewSetTest(TestCase):
         assert_items_equal([v1], self.viewset.get_queryset())
 
     def test_team_filter_user_is_not_member(self):
-        team = TeamFactory(is_visible=False)
+        team = TeamFactory()
         video = TeamVideoFactory(team=team).video
         self.query_params['team'] = team.slug
         assert_items_equal([], self.viewset.get_queryset())

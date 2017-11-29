@@ -62,6 +62,8 @@ class TeamSettingsChangeInfo(models.Model):
     changes = models.TextField()
 
     SETTINGS_CHANGE_LABELS = {
+        # is_visible is no longer a Team field, but we still need to suport
+        # activity records about it
         'is_visible': _('Videos Public'),
     }
 

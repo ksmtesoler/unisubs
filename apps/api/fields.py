@@ -89,3 +89,7 @@ class TimezoneAwareDateTimeField(serializers.DateTimeField):
     def to_representation(self, value):
         return super(TimezoneAwareDateTimeField, self).to_representation(
             self.tz.localize(value).astimezone(pytz.utc))
+
+class EnumField(CharField):
+    def to_representation(self, value):
+        return value.slug
