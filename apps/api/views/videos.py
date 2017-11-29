@@ -245,7 +245,7 @@ from api import extra
 from api.fields import LanguageCodeField, TimezoneAwareDateTimeField
 from api.views.apiswitcher import APISwitcherMixin
 from teams import permissions as team_perms
-from teams.models import Team, TeamVideo, Project
+from teams.models import Team, TeamVideo, Project, VideoVisibility
 from subtitles.models import SubtitleLanguage
 from videos import metadata
 from videos.models import Video
@@ -611,14 +611,11 @@ class VideoViewSet(mixins.CreateModelMixin,
         return qs
 
     def get_videos_for_user(self):
-        visibility = Q(is_visible=True)
+        query = Q(is_public=True)
         if self.request.user.is_authenticated():
-            members = self.request.user.team_members.all()
-            visibility = visibility | Q(id__in=members.values_list('team_id'))
-        user_visible_teams = Team.objects.filter(visibility)
-        return Video.objects.filter(
-            Q(teamvideo__isnull=True) |
-            Q(teamvideo__team__in=user_visible_teams))
+            teams = list(self.request.user.teams.all())
+            query = query | Q(teamvideo__team__in=teams)
+        return Video.objects.filter(query)
 
     def get_videos_for_team(self, query_params):
         if query_params['team'] == 'null':
