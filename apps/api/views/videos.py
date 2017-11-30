@@ -720,7 +720,7 @@ class VideoURLSerializer(serializers.Serializer):
         return vt.name
 
     def create(self, validated_data):
-        new_url = self.context['video'].add_url(self, validated_data['url'], self.context['user'])
+        new_url = self.context['video'].add_url(validated_data['url'], self.context['user'])
         if validated_data.get('primary'):
             new_url.make_primary(self.context['user'])
         return new_url
