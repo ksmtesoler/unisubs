@@ -503,8 +503,8 @@ class TeamSerializer(serializers.ModelSerializer):
     video_policy = MappedChoiceField(
         VIDEO_POLICY_CHOICES, required=False,
         default=Team._meta.get_field('video_policy').get_default())
-    team_visibility = EnumField(default='public')
-    video_visibility = EnumField(default='public')
+    team_visibility = EnumField(required=False)
+    video_visibility = EnumField(required=False)
     is_visible = IsVisibleField(required=False)
 
     activity_uri = serializers.HyperlinkedIdentityField(
@@ -561,6 +561,13 @@ class TeamSerializer(serializers.ModelSerializer):
             team.set_legacy_visibility(is_visible)
             team.save()
         return team
+
+    def create(self, validated_data):
+        if 'team_visibility' not in validated_data:
+            validated_data['team_visibility'] = 'public'
+        if 'video_visibility' not in validated_data:
+            validated_data['video_visibility'] = 'public'
+        return super(TeamSerializer, self).create(validated_data)
 
     class Meta:
         model = Team
