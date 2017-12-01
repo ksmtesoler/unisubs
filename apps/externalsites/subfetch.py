@@ -95,7 +95,7 @@ def fetch_subs_vimeo(video_url, user, team):
         if tracks is not None and \
            'data' in tracks:
             for track in tracks['data']:
-                language_code = track['language']
+                language_code = convert_language_code(track['language'])
                 if language_code and language_code not in existing_langs:
                     response = requests.get(track['link'])
                     try:

@@ -16,7 +16,7 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-import babelsubs
+import babelsubs, unilangs
 from google import APIError
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -29,6 +29,13 @@ VIMEO_API_KEY = getattr(settings, 'VIMEO_API_KEY')
 VIMEO_API_SECRET = getattr(settings, 'VIMEO_API_SECRET')
 
 VIMEO_API_BASE_URL = "https://api.vimeo.com"
+
+
+def convert_language_code(lc):
+    """
+    Convert an Amara language code to a YouTube/Vimeo one
+    """
+    return unilangs.LanguageCode(lc, 'internal').encode('youtube_with_mapping')
 
 def get_redirect_uri(host):
     return host + "/externalsites/vimeo-login-done/"
@@ -98,11 +105,11 @@ def update_subtitles(account, video_id, subtitle_version):
     text_tracks = get_text_tracks(account, video_id)
     subtitles = subtitle_version.get_subtitles()
     encoded_subtitles = babelsubs.to(subtitles, 'vtt').encode('utf-8')
-    language_code = subtitle_version.language_code
+    language_code = convert_language_code(subtitle_version.language_code)
     if text_tracks is not None and 'data' in text_tracks:
         for track in text_tracks['data']:
             if track['language'] == language_code:
-                delete_subtitles(account, video_id, language_code)
+                delete_subtitles(account, video_id, subtitle_version.language_code)
     url = get_texttracks_url(video_id)
     data = {"type": "subtitles",
             "language": language_code,
@@ -117,9 +124,10 @@ def update_subtitles(account, video_id, subtitle_version):
             if not response.ok:
                 raise APIError(response.text)
     else:
-        raise APIError(response.text)
+        raise APIError(response.json()['error'])
 
 def delete_subtitles(account, video_id, language_code):
+    language_code = convert_language_code(language_code)
     headers = {"Authorization":
                ("Bearer " + account.access_token)}
     text_tracks = get_text_tracks(account, video_id)
