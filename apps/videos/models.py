@@ -814,6 +814,12 @@ class Video(models.Model):
                 YoutubeVideoType.set_owner_username(self, video_url, video_info)
             except google.APIError:
                 pass
+        elif type(vt) is VimeoVideoType:
+            try:
+                video_info = vt.get_video_info(self, user, team, video_url)
+                VimeoVideoType.set_owner_username(video_url, video_info[4])
+            except google.APIError:
+                pass
 
         video_cache.invalidate_cache(self.video_id)
         self.cache.invalidate()

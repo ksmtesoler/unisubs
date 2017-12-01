@@ -389,7 +389,7 @@ class BrightcoveCMSAccount(ExternalAccount):
 
 class VimeoSyncAccountManager(ExternalAccountManager):
     def _get_sync_account_team_video(self, team_video, video_url):
-        query = self.filter(type=ExternalAccount.TYPE_TEAM)
+        query = self.filter(type=ExternalAccount.TYPE_TEAM, username=video_url.owner_username)
         where_sql = (
             '(owner_id = %s OR EXISTS ('
             'SELECT * '
@@ -403,7 +403,7 @@ class VimeoSyncAccountManager(ExternalAccountManager):
 
     def _get_sync_account_nonteam_video(self, video, video_url):
         return self.get(
-            type=ExternalAccount.TYPE_USER)
+            type=ExternalAccount.TYPE_USER, username=video_url.owner_username)
 
     def accounts_to_import(self):
         return self.filter(Q(type=ExternalAccount.TYPE_USER)|
@@ -491,7 +491,8 @@ class VimeoSyncAccount(ExternalAccount):
             return _('No username')
 
     def should_sync_video_url(self, video, video_url):
-        if not video_url.type in self.video_url_types:
+        if not (video_url.type in self.video_url_types and \
+                video_url.owner_username == self.username):
             return False
         if self.type == ExternalAccount.TYPE_USER:
             # for user accounts, match any video
@@ -507,7 +508,7 @@ class VimeoSyncAccount(ExternalAccount):
 
     def _get_sync_account_nonteam_video(self, video, video_url):
         return self.get(
-            type=ExternalAccount.TYPE_USER)
+            type=ExternalAccount.TYPE_USER, username=video_url.owner_username)
 
     def do_update_subtitles(self, video_url, language, version):
         """Do the work needed to update subtitles.

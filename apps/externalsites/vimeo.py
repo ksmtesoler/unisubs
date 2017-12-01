@@ -174,5 +174,6 @@ def get_values(video_id, user=None, team=None):
         return (video_data["name"],
                 video_data["description"],
                 video_data['duration'],
-                thumbnail)
+                thumbnail,
+                video_data['user']['name'])
     raise Exception("Vimeo API Error")

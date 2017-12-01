@@ -25,6 +25,8 @@ from django.utils.html import strip_tags
 vimeo.VIMEO_API_KEY = getattr(settings, 'VIMEO_API_KEY')
 vimeo.VIMEO_API_SECRET = getattr(settings, 'VIMEO_API_SECRET')
 VIMEO_REGEX = re.compile(r'https?://([^/]+\.)?vimeo.com/(channels/[\w]+[#|/])?(?P<video_id>\d+)')
+import logging
+logger = logging.getLogger(__name__)
 
 class VimeoVideoType(VideoType):
 
@@ -54,8 +56,16 @@ class VimeoVideoType(VideoType):
             video_obj.duration = values[2]
             video_obj.title = values[0]
             video_obj.description = values[1]
+            if video_url is not None:
+                self.set_owner_username(video_url, values[4])
         except Exception, e:
             pass
+
+    @classmethod
+    def set_owner_username(cls, video_url, username):
+        if video_url.owner_username is None:
+            video_url.owner_username = username
+            video_url.save()
 
     def _get_vimeo_id(self, video_url):
         return VIMEO_REGEX.match(video_url).groupdict().get('video_id')
