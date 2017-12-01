@@ -221,8 +221,6 @@ def members(request, team):
         'show_application_link': show_application_link,
     }
 
-    print("form:", form_name)
-
     if form_name and is_team_admin:
         return manage_members_form(request, team, form_name, members)
 
