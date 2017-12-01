@@ -221,6 +221,8 @@ def members(request, team):
         'show_application_link': show_application_link,
     }
 
+    print("form:", form_name)
+
     if form_name and is_team_admin:
         return manage_members_form(request, team, form_name, members)
 
@@ -229,16 +231,6 @@ def members(request, team):
         response_renderer.replace(
             '#member-list-all',
             'future/teams/members/member-list.html',
-            context
-        )
-        response_renderer.replace(
-            '#members-select-all',
-            'future/teams/members/members-select-all.html',
-            context
-        )
-        response_renderer.replace(
-            '#memberDirectory-actionBar',
-            'future/teams/members/members-action-bar.html',
             context
         )
         return response_renderer.render()
