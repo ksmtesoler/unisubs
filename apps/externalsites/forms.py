@@ -258,7 +258,6 @@ class VimeoAccountForm(forms.Form):
     sync_teams = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         required=False)
-    import_team = forms.ChoiceField(label='', required=False)
     sync_subtitles = forms.BooleanField(label=ugettext_lazy('Sync subtitles from Amara to Vimeo'), required=False)
     fetch_initial_subtitles = forms.BooleanField(label=ugettext_lazy('Fetch initial subtitles from Vimeo when videos are submitted to Amara'), required=False)
 
@@ -267,7 +266,6 @@ class VimeoAccountForm(forms.Form):
         self.account = account
         self.admin_user = admin_user
         self.setup_sync_team()
-        self.setup_import_team()
         self.setup_account_options()
 
     def setup_account_options(self):
@@ -293,30 +291,6 @@ class VimeoAccountForm(forms.Form):
         self['sync_teams'].field.choices = choices
         self['sync_teams'].field.initial = initial
 
-    def setup_import_team(self):
-        # Setup the import team field.  The choices are:
-        #   - None to disable import
-        #   - Any valid sync team
-        #   - The account team it self
-        #   - The current import_team
-        label_template = _('Import Videos into %(team)s')
-
-        choices = [('', _("Disable Video Import"))]
-        choices.append((self.account.team.id,
-                        fmt(label_template, team=self.account.team.name)))
-        choices.extend(
-            (team_id, fmt(label_template, team=team_name))
-            for team_id, team_name in self.fields['sync_teams'].choices
-        )
-        if (self.account.import_team_id and
-            self.account.import_team_id not in [c[0] for c in choices]):
-            choices.append((self.account.import_team_id,
-                            fmt(label_template,
-                                team=self.account.import_team.name)))
-
-        self.fields['import_team'].choices = choices
-        self.fields['import_team'].initial = self.account.import_team_id
-
     def save(self):
         if not self.is_valid():
             raise ValueError("Form not valid")
@@ -326,10 +300,6 @@ class VimeoAccountForm(forms.Form):
             self.account.sync_teams = Team.objects.filter(
                 id__in=self.cleaned_data['sync_teams']
             )
-            if self.cleaned_data['import_team'] == '':
-                self.account.import_team = None
-            else:
-                self.account.import_team_id = self.cleaned_data['import_team']
             self.account.sync_subtitles = self.cleaned_data['sync_subtitles']
             self.account.fetch_initial_subtitles = self.cleaned_data['fetch_initial_subtitles']
             self.account.save()

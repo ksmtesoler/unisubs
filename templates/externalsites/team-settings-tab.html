@@ -66,7 +66,6 @@
                         <h4>{% trans "Sync videos from these teams:" %}</h4>
                         {{ form.sync_teams }}
                     {% endif %}
-                    {% include "_form_field.html" with field=form.import_team %}
                 </div>
                 {% empty %}
                 <p class="no-accounts">{% trans 'No Vimeo accounts linked yet.' %}</p>

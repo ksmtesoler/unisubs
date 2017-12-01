@@ -99,7 +99,6 @@ class YouTubeAccountAdmin(admin.ModelAdmin):
         'username',
         'oauth_refresh_token',
         'sync_teams',
-        'import_team',
         'resync_subtitles',
         'enable_language_mapping',
         'sync_subtitles',
