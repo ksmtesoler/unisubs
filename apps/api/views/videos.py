@@ -720,9 +720,19 @@ class VideoURLSerializer(serializers.Serializer):
         return vt.name
 
     def create(self, validated_data):
-        new_url = self.context['video'].add_url(validated_data['url'], self.context['user'])
+        try:
+            new_url = self.context['video'].add_url(validated_data['url'], self.context['user'])
+        except Video.DuplicateUrlError as e:
+            return HttpBadRequest("DuplicateUrlError for url: {}".format(e.video_url))
+
         if validated_data.get('primary'):
             new_url.make_primary(self.context['user'])
+
+        if ('original' in validated_data and
+            validated_data['original'] != new_url.original):
+            new_url.original = validated_data['original']
+            new_url.save()
+
         return new_url
 
     def update(self, video_url, validated_data):
