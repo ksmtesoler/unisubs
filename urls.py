@@ -97,6 +97,9 @@ urlpatterns = patterns('',
         app_name='widget')),
     url(r'^search/',
         include('search.urls', 'search')),
+    url(r'^community$',
+        TemplateView.as_view(template_name='community.html'),
+        name='community'),
     url(r'^dfxp-wrapper-test/$',
         TemplateView.as_view(template_name='dfxp-wrapper-test.html'),
         name='dfxp-wrapper-test'),
@@ -172,6 +175,7 @@ urlpatterns += optionalapps.get_urlpatterns()
 
 urlpatterns += patterns('',
     url(r'^captcha/', include('captcha.urls')),
+    url(r'^api/', 'api.views.index.not_found', name='api-not-found'),
 )
 
 try:
