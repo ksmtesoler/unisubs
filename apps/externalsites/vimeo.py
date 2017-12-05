@@ -124,7 +124,15 @@ def update_subtitles(account, video_id, subtitle_version):
             if not response.ok:
                 raise APIError(response.text)
     else:
-        raise APIError(response.json()['error'])
+        error = response.json()
+        error_text = response.json()['error']
+        if 'invalid_parameters' in error:
+            for field in error['invalid_parameters']:
+                if 'field' in field and \
+                   field['field'] == 'language':
+                    error_text = "Language code not supported by Vimeo"
+                    break
+        raise APIError(error_text)
 
 def delete_subtitles(account, video_id, language_code):
     language_code = convert_language_code(language_code)
