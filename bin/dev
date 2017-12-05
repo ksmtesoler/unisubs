@@ -214,16 +214,16 @@ class Up(Command):
 
 class PrepDeploy(Command):
     """Start docker containers."""
+    def add_arguments(self):
+        parser.add_argument('branch')
 
     def run(self):
-        try:
-            if args[0] == 'staging':
-                return self.prep_staging()
-            elif args[0] == 'production':
-                return self.prep_production()
-        except IndexError:
-            pass
-        print("Must specify staging or production")
+        if self.args.branch == 'staging':
+            return self.prep_staging()
+        elif self.args.branch == 'production':
+            return self.prep_production()
+        else:
+            print("Must specify staging or production")
 
     def prep_staging(self):
         self.check_branch('staging')
