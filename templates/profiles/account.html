@@ -186,7 +186,6 @@
                                 <option>Select...</option>
                                 <option value="twitter">Twitter</option>
                                 <option value="facebook">Facebook</option>
-                                <option value="vimeo">Vimeo</option>
                             </select>
                         </fieldset>
                     </div>
@@ -277,7 +276,12 @@
                             <ul>
                                 <li>
                                     {% blocktrans %}
-                                        We <strong>send subtitles to Vimeo</strong> whenever they're completed on Amara.
+                                        When you add a video from your Vimeo account to Amara, we <strong>fetch the subtitles</strong> for this video from Vimeo.
+                                    {% endblocktrans %}
+                                </li>
+                                <li>
+                                    {% blocktrans %}
+                                        We <strong>send subtitles</strong> to your videos to Vimeo whenever they are completed on Amara.
                                     {% endblocktrans %}
                                 </li>
                             </ul>
