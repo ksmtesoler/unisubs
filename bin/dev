@@ -239,7 +239,8 @@ class PrepDeploy(Command):
         subprocess.check_call(['git'] + list(args))
 
     def get_git_output(self, *args, **kwargs):
-        return subprocess.check_output(['git'] + list(args), **kwargs).strip()
+        output = subprocess.check_output(['git'] + list(args), **kwargs).strip()
+        return output.decode('utf8')
 
     def check_value(self, label, value, correct_value):
         if value != correct_value:
