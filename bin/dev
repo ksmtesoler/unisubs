@@ -29,7 +29,6 @@ Run "dev" for a list of commands and "dev help <command>" for help on a
 specific command.
 """
 
-from glob import glob
 from datetime import date
 import argparse
 import os
