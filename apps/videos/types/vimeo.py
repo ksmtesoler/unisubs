@@ -61,6 +61,9 @@ class VimeoVideoType(VideoType):
         except Exception, e:
             pass
 
+    def get_video_info(self, user, team, video_url):
+        return vimeo.get_values(self.videoid, user, team)
+
     @classmethod
     def set_owner_username(cls, video_url, username):
         if video_url.owner_username is None:
