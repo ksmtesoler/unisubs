@@ -214,7 +214,7 @@ class Up(Command):
 
 class PrepDeploy(Command):
     """Start docker containers."""
-    def add_arguments(self):
+    def add_arguments(self, parser):
         parser.add_argument('branch')
 
     def run(self):
