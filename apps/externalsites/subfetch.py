@@ -25,7 +25,7 @@ import unilangs
 from babelsubs import load_from
 from externalsites import google, vimeo
 from externalsites.models import YouTubeAccount, VimeoSyncAccount
-from subtitles.models import ORIGIN_IMPORTED
+from subtitles.models import ORIGIN_IMPORTED_WITH_VIDEO
 from subtitles import pipeline
 from subtitles.signals import subtitles_imported
 from videos.models import VIDEO_TYPE_YOUTUBE, VIDEO_TYPE_VIMEO
@@ -102,7 +102,7 @@ def fetch_subs_vimeo(video_url, user, team):
                         subs  = load_from(response.content ,type='vtt').to_internal()
                         version = pipeline.add_subtitles(video_url.video, language_code, subs,
                                                          note="From Vimeo", complete=True,
-                                                         origin=ORIGIN_IMPORTED)
+                                                         origin=ORIGIN_IMPORTED_WITH_VIDEO)
                         versions.append(version)
                     except Exception, e:
                         logger.error("Exception while importing subtitles from Vimeo " + str(e))
@@ -135,7 +135,7 @@ def fetch_subs_youtube(video_url, user, team):
             try:
                 version = pipeline.add_subtitles(video_url.video, language_code, dfxp,
                                                  note="From youtube", complete=True,
-                                                 origin=ORIGIN_IMPORTED)
+                                                 origin=ORIGIN_IMPORTED_WITH_VIDEO)
                 versions.append(version)
             except Exception, e:
                 logger.error("Exception while importing subtitles " + str(e))
