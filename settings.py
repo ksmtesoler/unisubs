@@ -611,8 +611,6 @@ MEDIA_BUNDLES = {
             'src/js/third-party/popcorn.js',
             'src/js/third-party/Blob.js',
             'src/js/third-party/FileSaver.js',
-            'src/js/popcorn/popcorn.brightcove.js',
-            'src/js/popcorn/popcorn.googledrive.js',
             'src/js/popcorn/popcorn.amara.js',
             'src/js/third-party/modal-helper.js',
             'src/js/third-party/json2.min.js',
@@ -659,8 +657,6 @@ MEDIA_BUNDLES = {
             'src/js/third-party/jquery.mCustomScrollbar.concat.min.js',
             'src/js/popcorn/popcorn.amaratranscript.js',
             'src/js/popcorn/popcorn.amarasubtitle.js',
-            'src/js/popcorn/popcorn.brightcove.js',
-            'src/js/popcorn/popcorn.googledrive.js',
             'src/js/popcorn/popcorn.amara.js',
             'src/js/embedder/embedder.js'
         ),

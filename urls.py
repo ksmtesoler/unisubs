@@ -173,6 +173,10 @@ urlpatterns = patterns('',
 
 urlpatterns += optionalapps.get_urlpatterns()
 
+urlpatterns += patterns('',
+    url(r'^api/', 'api.views.index.not_found', name='api-not-found'),
+)
+
 try:
     import debug_toolbar
 except ImportError:
