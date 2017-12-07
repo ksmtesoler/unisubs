@@ -884,7 +884,7 @@ class Video(models.Model):
             video_url = qs[0:1][0]
         except IndexError:
             pass
-        else:
+        except:
             raise Video.DuplicateUrlError(
                 video_url, from_prevent_duplicate_public_videos=True)
 
