@@ -31,7 +31,7 @@ from django.utils.translation import ugettext as _
 
 from auth.models import CustomUser as User
 from externalsites import forms
-from externalsites import google, vimeo
+from externalsites import google, vimeo, tasks
 from externalsites.auth_backends import OpenIDConnectInfo, OpenIDConnectBackend
 from externalsites.exceptions import YouTubeAccountExistsError, VimeoSyncAccountExistsError
 from externalsites.models import get_sync_account, YouTubeAccount, SyncHistory, VimeoSyncAccount
@@ -313,6 +313,7 @@ def handle_add_account_callback(request, auth_info):
         messages.error(request,
                        already_linked_message(request.user, e.other_account))
 
+    tasks.import_video_from_youtube_account.delay(account.id)
     return HttpResponseRedirect(redirect_url)
 
 def google_callback(request):

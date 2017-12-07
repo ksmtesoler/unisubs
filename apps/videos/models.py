@@ -887,8 +887,8 @@ class Video(models.Model):
                 qs = qs.filter(
                     video__teamvideo__team__prevent_duplicate_public_videos=True
                 )
-            video_url = qs.get()
-        except VideoUrl.DoesNotExist:
+            video_url = qs[0:1][0]
+        except IndexError:
             pass
         else:
             raise Video.DuplicateUrlError(

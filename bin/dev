@@ -96,6 +96,7 @@ class Bash(Command):
                              help='Expose port 8000')
 
     def run(self):
+        ensure_node_modules()
         cmdline = ["docker-compose", "run", "--rm", '-u', 'root']
         if self.args.expose_port:
             cmdline.extend(['-p', '8000:8000'])
@@ -116,6 +117,7 @@ class Manage(Command):
         parser.add_argument('manage_args', nargs=argparse.REMAINDER)
 
     def run(self):
+        ensure_node_modules()
         run_manage(self.args.manage_args)
 
 class Test(Command):
@@ -125,6 +127,7 @@ class Test(Command):
         parser.add_argument('test_args', nargs=argparse.REMAINDER)
 
     def run(self):
+        ensure_node_modules()
         run_manage(['test', '--settings=dev_settings_test',
                     '--where=/opt/apps/amara'] + self.args.test_args)
 
@@ -199,25 +202,28 @@ class Up(Command):
                             help='Log DB queries'),
 
     def run(self):
+        ensure_node_modules()
         env = os.environ.copy()
         if self.args.jsonlog:
             env['JSON_LOGGING'] = '1'
         if self.args.dblog:
             env['DB_LOGGING'] = '1'
-        subprocess.call(['docker-compose', 'up', 'app', 'worker'], env=env)
+        subprocess.run(
+            ['docker-compose', 'up', 'app', 'worker', 'feed-worker'],
+            env=env)
 
 class PrepDeploy(Command):
     """Start docker containers."""
+    def add_arguments(self, parser):
+        parser.add_argument('branch')
 
     def run(self):
-        try:
-            if args[0] == 'staging':
-                return self.prep_staging()
-            elif args[0] == 'production':
-                return self.prep_production()
-        except IndexError:
-            pass
-        print("Must specify staging or production")
+        if self.args.branch == 'staging':
+            return self.prep_staging()
+        elif self.args.branch == 'production':
+            return self.prep_production()
+        else:
+            print("Must specify staging or production")
 
     def prep_staging(self):
         self.check_branch('staging')
@@ -233,7 +239,8 @@ class PrepDeploy(Command):
         subprocess.check_call(['git'] + list(args))
 
     def get_git_output(self, *args, **kwargs):
-        return subprocess.check_output(['git'] + list(args), **kwargs).strip()
+        output = subprocess.check_output(['git'] + list(args), **kwargs).strip()
+        return output.decode('utf8')
 
     def check_value(self, label, value, correct_value):
         if value != correct_value:
@@ -281,6 +288,31 @@ class VarnishLogs(Command):
     def run(self):
         subprocess.call(['docker-compose', 'exec', 'varnish', 'varnishlog'])
 
+class NPM(Command):
+    """Run npm for the amara-assets repo."""
+
+    # Use this command to manage the packages.json file in amara-assets.  For
+    # example:
+    #
+    #     - dev npm install [package] -- add a dependancy
+    #     - dev npm uninstall [package] -- remove a dependancy
+
+    def add_arguments(self, parser):
+        parser.add_argument('npm_args', nargs=argparse.REMAINDER)
+
+    def run(self):
+        run_node(['npm'] + list(self.args.npm_args))
+
+class Gulp(Command):
+    """Run gulp for the amara-assets repo."""
+
+    def add_arguments(self, parser):
+        parser.add_argument('gulp_args', nargs=argparse.REMAINDER)
+
+    def run(self):
+        run_node(['node', 'node_modules/gulp/bin/gulp.js'] +
+                 list(self.args.gulp_args))
+
 class Switch(Command):
     """
     Switch to a git branch
@@ -316,7 +348,8 @@ class Switch(Command):
     def run(self):
         submodule_paths = get_submodule_paths()
 
-        self.check_repo_changes('unisubs', unisubs_root())
+        self.check_repo_changes('unisubs', unisubs_root(),
+                                [p[0] for p in submodule_paths])
         for name, path in submodule_paths:
             self.check_repo_changes(name, path)
 
@@ -332,14 +365,19 @@ class Switch(Command):
         for name, path in submodule_paths:
             self.print_branch_and_commit(name, path)
 
-    def check_repo_changes(self, name, path):
+    def check_repo_changes(self, name, path, allowed_changes=None):
+        if allowed_changes is None:
+            allowed_changes = []
         os.chdir(path)
-        result = run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
-                          check=False)
-        if result.returncode != 0:
+        result = run(['git', 'diff-index', '--name-only', 'HEAD', '--'],
+                     stdout=subprocess.PIPE, check=False)
+        changed_files = set(result.stdout.decode('utf-8').split('\n'))
+        changed_files.discard('')
+        uncommited_changes = changed_files.difference(allowed_changes)
+        if uncommited_changes:
             print_highlighted('Uncommited changes on {}'.format(name))
-            print()
-            run(['git', 'status'], stdout=None)
+            for filename in uncommited_changes:
+                print('* {}'.format(filename))
             sys.exit(1)
 
     def checkout_submodule(self, name, path, fallback_to_master=True):
@@ -468,6 +506,34 @@ def run_manage(args, **kwargs):
         cmdline = ['docker-compose', 'run', '--rm', 'app', 'manage']
     subprocess.call(cmdline + args, **kwargs)
 
+NODE_IMAGE = 'node:9.0.0'
+def run_node(command):
+    """
+    Run the docker node container with the amara-assets repo
+    """
+    cmdline = [
+        'docker', 'run', '-it', '--rm',
+        '-v', '{}:/mnt'.format(unisubs_root()),
+        '-w', '/mnt/amara-assets',
+    ]
+    cmdline.append(NODE_IMAGE)
+    cmdline.extend(command)
+    returncode = subprocess.call(cmdline)
+    if returncode != 0:
+        sys.exit(returncode)
+
+def ensure_node_modules():
+    node_modules = os.path.join(unisubs_root(), 'amara-assets',
+                                'node_modules')
+    package_json = os.path.join(unisubs_root(), 'amara-assets',
+                                'package.json')
+    if (os.path.exists(node_modules) and
+            os.path.getmtime(node_modules) > os.path.getmtime(package_json)):
+        # node_modules up-to-date, no need to rebuild
+        return
+    print('Installing node modules...')
+    run_node(['npm', 'install', '-d'])
+
 class Dev(RootCommand):
     subcommands = [
         Bash,
@@ -485,6 +551,8 @@ class Dev(RootCommand):
         Test,
         Up,
         VarnishLogs,
+        NPM,
+        Gulp,
     ]
 
 if __name__ == '__main__':
