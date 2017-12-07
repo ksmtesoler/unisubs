@@ -69,7 +69,6 @@ from subtitles.models import (
     SubtitleVersion as NewSubtitleVersion,
     SubtitleLanguage as NewSubtitleLanguage,
     SubtitleNoteBase,
-    ORIGIN_IMPORTED
 )
 from subtitles import pipeline
 
