@@ -50,7 +50,7 @@ from videos import behaviors
 from videos import metadata
 from videos import signals
 from videos.types import (video_type_registrar, video_type_choices,
-                          VideoTypeError, YoutubeVideoType)
+                          VideoTypeError, YoutubeVideoType, VimeoVideoType)
 from videos.feed_parser import VideoImporter
 from comments.models import Comment
 from widget import video_cache
@@ -818,6 +818,12 @@ class Video(models.Model):
                 YoutubeVideoType.set_owner_username(self, video_url, video_info)
             except google.APIError:
                 pass
+        elif type(vt) is VimeoVideoType:
+            try:
+                video_info = vt.get_video_info(user, team, video_url)
+                VimeoVideoType.set_owner_username(video_url, video_info[4])
+            except Exception:
+                pass
 
         video_cache.invalidate_cache(self.video_id)
         self.cache.invalidate()
@@ -885,8 +891,8 @@ class Video(models.Model):
                 qs = qs.filter(
                     video__teamvideo__team__prevent_duplicate_public_videos=True
                 )
-            video_url = qs.get()
-        except VideoUrl.DoesNotExist:
+            video_url = qs[0:1][0]
+        except IndexError:
             pass
         else:
             raise Video.DuplicateUrlError(

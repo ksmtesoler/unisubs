@@ -57,7 +57,6 @@ urlpatterns = patterns('',
     url('^robots.txt$', TemplateView.as_view(template_name='robots.txt')),
     url(r'^crossdomain.xml$',
         'crossdomain_views.root_crossdomain'),
-    url(r'^$', 'views.home', name="home"),
     url(r'^comments/',
         include('comments.urls', namespace='comments')),
     url(r'^messages/',
@@ -97,6 +96,9 @@ urlpatterns = patterns('',
         app_name='widget')),
     url(r'^search/',
         include('search.urls', 'search')),
+    url(r'^community$',
+        TemplateView.as_view(template_name='community.html'),
+        name='community'),
     url(r'^dfxp-wrapper-test/$',
         TemplateView.as_view(template_name='dfxp-wrapper-test.html'),
         name='dfxp-wrapper-test'),
@@ -165,13 +167,14 @@ urlpatterns = patterns('',
     url(r'^v/(?P<encoded_pk>\w+)/$', 'videos.views.shortlink',
         name='shortlink'),
     # ESI includes
-    url(r'^esi/user-menu/$', 'views.user_menu_esi'),
+    url(r'^captcha/', include('captcha.urls')),
+    url(r'^$', settings.HOMEPAGE_VIEW, name="home"),
 )
 
 urlpatterns += optionalapps.get_urlpatterns()
 
 urlpatterns += patterns('',
-    url(r'^captcha/', include('captcha.urls')),
+    url(r'^api/', 'api.views.index.not_found', name='api-not-found'),
 )
 
 try:
