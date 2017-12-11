@@ -70,7 +70,6 @@ from subtitles.models import (
     SubtitleVersion as NewSubtitleVersion,
     SubtitleLanguage as NewSubtitleLanguage,
     SubtitleNoteBase,
-    ORIGIN_IMPORTED
 )
 from subtitles import pipeline
 
@@ -1540,6 +1539,9 @@ class TeamMemberManager(models.Manager):
 
     def admins(self):
         return self.filter(role__in=(ROLE_OWNER, ROLE_ADMIN))
+
+    def owners(self):
+        return self.filter(role=ROLE_OWNER)
 
     def members_from_users(self, team, users):
         return self.filter(team=team, user__in=users)
