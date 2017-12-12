@@ -231,16 +231,6 @@ def members(request, team):
             'future/teams/members/member-list.html',
             context
         )
-        response_renderer.replace(
-            '#members-select-all',
-            'future/teams/members/members-select-all.html',
-            context
-        )
-        response_renderer.replace(
-            '#memberDirectory-actionBar',
-            'future/teams/members/members-action-bar.html',
-            context
-        )
         return response_renderer.render()
 
     return render(request, 'future/teams/members/members.html', context)
