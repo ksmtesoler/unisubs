@@ -545,6 +545,10 @@ class Video(models.Model):
 
         if self.small_thumbnail:
             return self.small_thumbnail
+
+        if self.thumbnail:
+            return self.thumbnail
+
         return "%simages/video-no-thumbnail-small.png" % settings.STATIC_URL
 
     def get_medium_thumbnail(self):
