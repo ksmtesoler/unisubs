@@ -193,11 +193,10 @@ class YoutubeAccountForm(forms.Form):
         choices = []
         initial = []
         # allow the admin to uncheck any of the current sync teams
-        current_sync_teams = list(self.account.sync_teams.all())
+        current_sync_teams = list(self.account.sync_teams.get_query_set())
         for team in current_sync_teams:
-            if not team.deleted:
-                choices.append((team.id, team.name))
-                initial.append(team.id)
+            choices.append((team.id, team.name))
+            initial.append(team.id)
         # allow the admin to check any of the other teams they're an admin for
         exclude_team_ids = [t.id for t in current_sync_teams]
         exclude_team_ids.append(self.account.owner_id)

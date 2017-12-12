@@ -2019,9 +2019,7 @@ class MoveVideosForm(VideoManagementForm):
     def setup_fields(self):
         dest_teams = permissions.can_move_videos_to(self.user)
         dest_teams.sort(key=lambda t: t.name)
-        self.fields['new_team'].choices = [
-            (dest.id, dest.name) for dest in dest_teams if not dest.deleted
-        ]
+        self.fields['new_team'].choices = [(dest.id, dest.name) for dest in dest_teams]
         self.setup_project_field(dest_teams)
 
     def setup_project_field(self, dest_teams):
@@ -2029,7 +2027,7 @@ class MoveVideosForm(VideoManagementForm):
         # map team ids to project choices
         self.project_map = {
             team.id: ['']
-            for team in dest_teams if not team.deleted
+            for team in dest_teams
         }
 
         qs = (Project.objects
