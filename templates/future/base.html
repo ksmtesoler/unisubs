@@ -6,7 +6,25 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Amara - {% trans 'Caption, translate, subtitle and transcribe video.' %}{% endblock %}</title>
+    <title>{% block title %}{% trans 'Amara: Caption, Subtitle and Translate video' %}{% endblock %}</title>
+    <meta name="description" content="{% trans "Using Amara's award-winning technology, you can caption and subtitle any video for free. We also offer amazing solutions for organizing teams of volunteers or paid translators. Plus, you can purchase high-quality captions or translations from our passionate team of professional linguists. Amara can help make your videos accessible to the world!" %}">
+    <meta property="og:title" content="{% trans 'Amara: Caption, Subtitle and Translate video' %}">
+    <meta property="og:description" content="{% trans "Using Amara's award-winning technology, you can caption and subtitle any video for free. We also offer amazing solutions for organizing teams of volunteers or paid translators. Plus, you can purchase high-quality captions or translations from our passionate team of professional linguists. Amara can help make your videos accessible to the world!" %}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://amara.org/">
+    <meta property="og:image" content="{% asset "img/og-image.jpg" %}">
+    <meta property="og:image:width" content="1400">
+    <meta property="og:image:height" content="600">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@AmaraSubs">
+    <meta name="twitter:creator" content="@AmaraSubs">
+    <meta name="twitter:title" content="{% trans 'Amara: Caption, Subtitle and Translate video' %}">
+    <meta name="twitter:description" content="{% trans "Make video accessible to the world with Amara!" %}">
+    <meta name="twitter:image" content="{% asset "img/og-image.jpg" %}">
+    <meta name="twitter:image:alt" content="{% trans "Colorful Amara logo and the following text: Working to Build a More Open, Collaborative World" %}">
+
     <link rel="apple-touch-icon" sizes="180x180" href="{% asset "img/apple-touch-icon.png" %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% asset "img/favicon-16x16.png" %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% asset "img/favicon-32x32.png" %}">
@@ -17,6 +35,7 @@
     {% js_language_data %}
     {% block head-extra %}{% endblock %}
     <script>var userLanguages = [{% for language in user.get_languages %}"{{language }}"{% if not forloop.last %},{% endif %}{% endfor %}];</script>
+    <script>var _bftn_options = { theme: 'slow' };</script><script src="https://widget.battleforthenet.com/widget.js" async></script>
   </head>
   <body{% block body-extra %}{% endblock %}>
     {% block header %}{% include "future/header.html" %}{% endblock %}
@@ -63,5 +82,6 @@
 
     {% block main_js %}<script src="{% asset "js/application.js" %}"></script>{% endblock %}
     {% block bottom %}{% endblock %}
+    {% include "_analytics.html" %}
   </body>
 </html>
