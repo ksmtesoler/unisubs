@@ -72,10 +72,12 @@ class YoutubeVideoType(VideoType):
     def get_video_info(self, video, user, team, video_url):
         incomplete = False
         if not hasattr(self, '_video_info'):
-            if team is not None and user is not None:
-                accounts = externalsites.models.YouTubeAccount.objects.get_accounts_for_user_and_team(user, team)
+            if team:
+                accounts = externalsites.models.YouTubeAccount.objects.for_owner(team)
+            elif user:
+                accounts = externalsites.models.YouTubeAccount.objects.for_owner(user)
             else:
-                accounts = []
+                accounts = externalsites.models.YouTubeAccount.objects.none()
             try:
                 self._video_info = google.get_video_info(self.video_id, accounts[:YoutubeVideoType.MAX_ACCOUNTS_TO_TRY])
             except google.APIError:
@@ -98,11 +100,8 @@ class YoutubeVideoType(VideoType):
         video.duration = video_info.duration
         if not video.thumbnail:
             video.thumbnail = video_info.thumbnail_url
-        if video_url is not None and \
-           video_url.owner_username is None and \
-           video_info.channel_id is not None:
-            video_url.owner_username = video_info.channel_id
-            video_url.save()
+        if video_url is not None:
+            cls.set_owner_username(video, video_url, video_info)
 
     def set_values(self, video, user, team, video_url):
         try:
@@ -112,6 +111,12 @@ class YoutubeVideoType(VideoType):
         if not incomplete:
             self.complete_set_values(video, video_url, video_info)
         return incomplete
+
+    @classmethod
+    def set_owner_username(cls, video, video_url, video_info):
+        if video_url.owner_username is None and video_info.channel_id is not None:
+            video_url.owner_username = video_info.channel_id
+            video_url.save()
 
     @classmethod
     def url_from_id(cls, video_id):

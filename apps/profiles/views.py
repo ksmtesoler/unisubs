@@ -30,10 +30,9 @@ from django.http import Http404, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode
-from tastypie.models import ApiKey
 
 from activity.models import ActivityRecord
-from auth.models import CustomUser as User
+from auth.models import CustomUser as User, AmaraApiKey
 from profiles.forms import (EditUserForm, EditAccountForm, SendMessageForm,
                             EditAvatarForm, AdminProfileForm, EditNotificationsForm)
 from profiles.rpc import ProfileApiClass
@@ -241,7 +240,6 @@ def account(request):
     else:
         editnotificationsform = EditNotificationsForm(instance=request.user, label_suffix="", prefix='notifications')
         editaccountform = EditAccountForm(instance=request.user, label_suffix="", prefix='account')
-
     twitters = request.user.twitteraccount_set.all()
     facebooks = request.user.facebookaccount_set.all()
 
@@ -251,6 +249,8 @@ def account(request):
         'user_info': request.user,
         'edit_profile_page': True,
         'youtube_accounts': (externalsites.models.YouTubeAccount
+                             .objects.for_owner(request.user)),
+        'vimeo_accounts': (externalsites.models.VimeoSyncAccount
                              .objects.for_owner(request.user)),
         'twitters': twitters,
         'facebooks': facebooks,
@@ -274,10 +274,9 @@ def send_message(request):
 
 @login_required
 def generate_api_key(request):
-    key, created = ApiKey.objects.get_or_create(user=request.user)
-    if not created:
-        key.key = key.generate_key()
-        key.save()
+    key, created = AmaraApiKey.objects.get_or_create(user=request.user)
+    key.key = key.generate_key()
+    key.save()
     return HttpResponse(json.dumps({"key":key.key}))
 
 
@@ -327,6 +326,10 @@ def add_third_party(request):
         request.session['no-login'] = True
         url = reverse('thirdpartyaccounts:twitter_login')
 
+    if account_type == 'vimeo':
+        request.session['vimeo-no-login'] = True
+        url = reverse('thirdpartyaccounts:vimeo_login')
+
     if account_type == 'facebook':
         request.session['fb-no-login'] = True
         url = reverse('thirdpartyaccounts:facebook_login')
@@ -348,6 +351,16 @@ def remove_third_party(request, account_type, account_id):
                                     pk=account_id)
         account_type_name = _('Facebook account')
         account_owner = account.uid
+    elif account_type == 'vimeo':
+        # map the account type string from the URL to the externalsites
+        # model
+        account_type_map = {
+            'vimeo': externalsites.models.VimeoSyncAccount
+        }
+        qs = account_type_map[account_type].objects.for_owner(request.user)
+        account = get_object_or_404(qs, id=account_id)
+        account_type_name = account._meta.verbose_name
+        account_owner = account.get_owner_display()
     else:
         # map the account type string from the URL to the externalsites
         # model

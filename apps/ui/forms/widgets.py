@@ -20,7 +20,9 @@ from itertools import chain
 
 from django.forms import widgets
 from django.forms.util import flatatt
-from django.utils.encoding import force_unicode
+from django.template.loader import render_to_string
+from django.utils.encoding import force_unicode, force_text
+from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 
 class AmaraLanguageSelectMixin(object):
@@ -89,6 +91,41 @@ class SearchBar(widgets.TextInput):
                          '{}'
                          '</div>'.format(input))
 
+class AmaraFileInput(widgets.FileInput):
+    template_name = "widget/file_input.html"
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        if value != '':
+            final_attrs['value'] = force_text(self._format_value(value))
+        return mark_safe(render_to_string(self.template_name, dictionary=final_attrs))
+
+class AmaraClearableFileInput(widgets.ClearableFileInput):
+    template_name = "widget/clearable_file_input.html"
+    def render(self, name, value, attrs=None):
+        context = {
+                'initial_text': self.initial_text,
+                'input_text': self.input_text,
+                'clear_checkbox_label': self.clear_checkbox_label,
+        }
+        if value is None:
+            value = ''
+        context.update(self.build_attrs(attrs, type=self.input_type, name=name))
+        if value != '':
+            context['value'] = force_text(self._format_value(value))
+
+        # if is_initial
+        if bool(value and hasattr(value, 'url')):
+            context.update(self.get_template_substitution_values(value))
+            if not self.is_required:
+                checkbox_name = self.clear_checkbox_name(name)
+                checkbox_id = self.clear_checkbox_id(checkbox_name)
+                context['checkbox_name'] = conditional_escape(checkbox_name)
+                context['checkbox_id'] = conditional_escape(checkbox_id)
+
+        return mark_safe(render_to_string(self.template_name, dictionary=context))
+
 __all__ = [
-    'AmaraRadioSelect', 'SearchBar',
+    'AmaraRadioSelect', 'SearchBar', 'AmaraFileInput', 'AmaraClearableFileInput',
 ]

@@ -16,10 +16,12 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
+import binascii
 from collections import deque
 from datetime import datetime, timedelta
 import hashlib
 import hmac
+import os
 import random
 import string
 import urllib
@@ -40,7 +42,6 @@ from django.db.models.signals import post_save
 from django.utils.http import urlquote
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _, ugettext
-from tastypie.models import ApiKey
 
 from auth import signals
 from caching import CacheGroup, ModelCacheManager
@@ -198,10 +199,11 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         self.start_tracking_profile_fields()
 
     def __unicode__(self):
-        if not self.is_active:
+        if self.is_amara_anonymous:
+            return settings.ANONYMOUS_FULL_NAME
+        elif not self.is_active:
             return ugettext('Retired user')
-
-        if self.first_name or self.last_name:
+        elif self.first_name or self.last_name:
             return self.get_full_name()
         elif self.full_name:
             return self.full_name
@@ -438,7 +440,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         return Task.objects.incomplete().filter(assignee=self)
 
     def _get_gravatar(self, size, default='mm'):
-        url = "http://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
+        url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email.lower().encode('utf-8')).hexdigest() + "?"
         url += urllib.urlencode({'d': default, 's':str(size)})
         return url
 
@@ -455,7 +457,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def small_avatar(self):
         return self._get_avatar_by_size(50)
 
-    # future UI avatag
+    # future UI avatar
     def _get_avatar(self, size):
         if self.picture:
             return self.picture.thumb_url(size, size)
@@ -474,6 +476,10 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def avatar_tag_medium(self):
         avatar = self._get_avatar(50)
         return mark_safe('<span class="avatar avatar-md"><img src="{}"></span>'.format(avatar))
+
+    def avatar_tag_large(self):
+        avatar = self._get_avatar(100)
+        return mark_safe('<span class="avatar avatar-lg"><img src="{}"></span>'.format(avatar))
 
     def avatar_tag_extra_large(self):
         avatar = self._get_avatar(110)
@@ -525,7 +531,7 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
     def get_amara_anonymous(cls):
         user, created = cls.objects.get_or_create(
             pk=settings.ANONYMOUS_USER_ID,
-            defaults={'username': 'anonymous'})
+            defaults={'username': settings.ANONYMOUS_DEFAULT_USERNAME})
         return user
 
     @property
@@ -567,11 +573,17 @@ class CustomUser(BaseUser, secureid.SecureIDMixin):
         except:
             pass
 
+    def check_api_key(self, key):
+        try:
+            return self.api_key.key == key
+        except AmaraApiKey.DoesNotExist:
+            return False
+
     def get_api_key(self):
-        return ApiKey.objects.get_or_create(user=self)[0].key
+        return AmaraApiKey.objects.get_or_create(user=self)[0].key
 
     def ensure_api_key_created(self):
-        ApiKey.objects.get_or_create(user=self)
+        AmaraApiKey.objects.get_or_create(user=self)
 
 def create_custom_user(sender, instance, created, **kwargs):
     if created:
@@ -839,6 +851,17 @@ class LoginToken(models.Model):
 
     def __unicode__(self):
         return u"LoginToken for %s" %(self.user)
+
+class AmaraApiKey(models.Model):
+    user = models.OneToOneField(CustomUser, related_name="api_key")
+    created = models.DateTimeField(auto_now_add=True)
+    key = models.CharField(max_length=256, blank=True, default='')
+
+    def __unicode__(self):
+        return u"Api key for {}: {}".format(self.user, self.key)
+
+    def generate_key(self):
+        return binascii.b2a_hex(os.urandom(20))
 
 class SentMessageDateManager(models.Manager):
     def sent_message(self, user):

@@ -294,7 +294,6 @@ class ApplicationAdmin(admin.ModelAdmin):
     user_link.allow_tags = True
 
     def save_model(self, request, obj, form, change):
-        obj.user = request.user
         try:
             if form.cleaned_data['status'] == Application.STATUS_APPROVED:
                 obj.approve()

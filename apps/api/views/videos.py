@@ -34,7 +34,8 @@ Listing Videos
     List results are paginated.
 
     :queryparam url video_url: Filter by video URL
-    :queryparam slug team: Filter by team
+    :queryparam slug team: Filter by team.  Passing in `null` will return only
+        videos that are in the public area.
     :queryparam slug project: Filter by team project.  Passing in `null` will
         return only videos that don't belong to a project
     :queryparam string order_by: Change the list ordering.  Possible values:
@@ -372,7 +373,6 @@ class VideoSerializer(serializers.Serializer):
     thumbnail = VideoThumbnailField(required=False, allow_blank=True)
     created = TimezoneAwareDateTimeField(read_only=True)
     team = TeamSerializer(required=False, allow_null=True)
-    team_type = TeamTypeSerializer(required=False, allow_null=True)
     project = ProjectSerializer(required=False, allow_null=True)
     all_urls = serializers.SerializerMethodField()
     metadata = VideoMetadataSerializer(required=False)
@@ -397,7 +397,9 @@ class VideoSerializer(serializers.Serializer):
     default_error_messages = {
         'project-without-team': "Can't specify project without team",
         'unknown-project': 'Unknown project: {project}',
-        'video-exists': 'Video already exists for {url}',
+        'video-exists': 'Video already added for {url}',
+        'video-policy-error': ('Video for {url} not moved because it would '
+                               'conflict with the video policy for {team}'),
         'invalid-url': 'Invalid URL: {url}',
     }
 
@@ -432,8 +434,8 @@ class VideoSerializer(serializers.Serializer):
 
     def will_add_video_to_team(self):
         if not self.team_video:
-            return 'team' in self.validated_data
-        if 'team' in self.validated_data:
+            return self.validated_data.get('team')
+        if self.validated_data.get('team'):
             if self.validated_data['team'] != self.team_video.team:
                 return True
             if 'project' in self.validated_data:
@@ -490,17 +492,22 @@ class VideoSerializer(serializers.Serializer):
             if validated_data.get('metadata'):
                 video.update_metadata(validated_data['metadata'],
                                       commit=False)
-            self._update_team(video, validated_data)
         try:
-            if 'team' in validated_data:
-                team = validated_data['team']
+            team = validated_data.get('team')
+            if team:
+                video, video_url =  team.add_video(
+                    validated_data['video_url'],
+                    self.context['user'],
+                    self.calc_project(validated_data),
+                    setup_video)
             else:
-                team = None
-            return Video.add(validated_data['video_url'],
-                             self.context['user'], setup_video, team)[0]
+                video, video_url = Video.add(validated_data['video_url'],
+                                             self.context['user'],
+                                             setup_video)
+            return video
         except VideoTypeError:
             self.fail('invalid-url', url=validated_data['video_url'])
-        except Video.UrlAlreadyAdded:
+        except Video.DuplicateUrlError:
             self.fail('video-exists', url=validated_data['video_url'])
 
     def update(self, video, validated_data):
@@ -517,21 +524,36 @@ class VideoSerializer(serializers.Serializer):
                     setattr(video, field_name, validated_data[field_name])
         if validated_data.get('metadata'):
             video.update_metadata(validated_data['metadata'], commit=True)
-        self._update_team(video, validated_data)
+        try:
+            self._update_team(video, validated_data)
+        except Video.DuplicateUrlError, e:
+            if e.from_prevent_duplicate_public_videos:
+                self.fail('video-policy-error', url=e.video_url.url,
+                          team=validated_data['team'])
+            else:
+                self.fail('video-exists', url=e.video_url.url)
         video.save()
         if validated_data.get('thumbnail'):
             videos.tasks.save_thumbnail_in_s3.delay(video.id)
         return video
 
+    def calc_project(self, validated_data):
+        team = validated_data.get('team')
+        project = validated_data.get('project')
+        if team:
+            return project if project is not None else team.default_project
+        else:
+            return None
+
     def _update_team(self, video, validated_data):
         if 'team' not in validated_data:
             return
         team = validated_data['team']
-        project = validated_data.get('project')
+        project = self.calc_project(validated_data)
         team_video = video.get_team_video()
         if team is None:
             if team_video:
-                team_video.delete()
+                team_video.remove(self.context['user'])
             video.is_public = True
         else:
             if project is None:
@@ -539,10 +561,7 @@ class VideoSerializer(serializers.Serializer):
             if team_video:
                 team_video.move_to(team, project, self.context['user'])
             else:
-                TeamVideo.objects.create(video=video, team=team,
-                                         project=project,
-                                         added_by=self.context['user'])
-                video.is_public = team.is_visible
+                team.add_existing_video(video, self.context['user'], project)
 
         video.clear_team_video_cache()
 
@@ -602,6 +621,8 @@ class VideoViewSet(mixins.CreateModelMixin,
             Q(teamvideo__team__in=user_visible_teams))
 
     def get_videos_for_team(self, query_params):
+        if query_params['team'] == 'null':
+            return Video.objects.filter(teamvideo__team__isnull=True)
         try:
             team = Team.objects.get(slug=query_params['team'])
         except Team.DoesNotExist:

@@ -150,12 +150,6 @@ def retry_failed_sync():
     account = sh.get_account()
     account.update_subtitles(sh.video_url, sh.language)
 
-@task()
-def import_videos_from_accounts():
-    for account in YouTubeAccount.objects.accounts_to_import():
-        import_video_from_youtube_account.apply_async(
-            args=(account.id,), queue='feeds')
-
 @task
 def import_video_from_youtube_account(account_id):
     try:

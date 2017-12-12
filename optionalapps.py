@@ -25,19 +25,8 @@ Amara.org uses several apps/packages that are stored in private github
 repositories that add extra functionality for paid partnerships.  These apps
 are optional -- the amara codebase runs fine without them.
 
-The coding issue is how to make amara work without these repositories, but
-automatically pull them in if they are present.  Here's how we do it:
-
-* For each repository we create a file inside the optional/ directory:
-
-  * The filename is the name of the repository
-  * The contents are the git commit ID that we want to use
-
-* To enable a repository, it must be checked out in the amara root directory,
-  using the same name as the git repository.
-
-* The optionalapps module handles figuring out which repositories are present
-  and how we should modify things at runtime
+This module handles adding functionality from those repositories, but only if
+they're present.
 
 .. autofunction:: setup_path
 .. autofunction:: get_repository_paths
@@ -54,13 +43,17 @@ from django.conf.urls import patterns, include, url
 
 project_root = os.path.abspath(os.path.dirname(__file__))
 
-def _repositories_present():
-    """Get a list of optional repositories that are present."""
-    for name in os.listdir(os.path.join(project_root, 'optional')):
-        # exclude names that don't look like repositories
-        if name.startswith('.'):
-            continue
-        if os.path.exists(os.path.join(project_root, name)):
+# These are git submodules that can extend the amara code
+AMARA_EXTENSIONS = [
+    'amara-assets',
+    'amara-enterprise',
+]
+
+def _extensions_present():
+    """Get the amara extensions that are present."""
+    for name in AMARA_EXTENSIONS:
+        repo_path = os.path.join(project_root, name)
+        if os.path.exists(repo_path) and os.listdir(repo_path):
             yield name
 
 def setup_path():
@@ -77,7 +70,7 @@ def get_repository_paths():
         sys.path so that we can import the apps.
     """
     return [os.path.join(project_root, repo)
-            for repo in _repositories_present()]
+            for repo in _extensions_present()]
 
 def get_apps():
     """Get a list of optional apps

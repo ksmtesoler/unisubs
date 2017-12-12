@@ -132,6 +132,10 @@ MEDIA_ROOT  = rel('user-data')+'/'
 CSS_ROOT = os.path.join(STATIC_ROOT, 'amara/css')
 LOGO_URL = "https://s3.amazonaws.com/amara/assets/LogoAndWordmark.svg"
 PCF_LOGO_URL = "https://s3.amazonaws.com/amara/assets/PCFLogo.png"
+# Prefix for assets from the amara-assets repo.  This is currently needed to
+# keep them separate from ones from the staticmedia app.  Once everything is
+# using futureui, we can get rid of this.
+ASSETS_S3_PREFIX = 'assets/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -159,6 +163,7 @@ MIDDLEWARE_CLASSES = (
     'api.middleware.CORSMiddleware',
 )
 
+HOMEPAGE_VIEW = 'views.home'
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
@@ -198,7 +203,6 @@ INSTALLED_APPS = (
     'djcelery',
     'south',
     'rest_framework',
-    'tastypie',
     # third party apps forked on our repo
     'localeurl',
     'openid_consumer',
@@ -231,6 +235,7 @@ INSTALLED_APPS = (
     'widget',
     'subtitles',
     'captcha',
+    'raven.contrib.django.raven_compat',
 )
 
 STARTUP_MODULES = [
@@ -251,6 +256,9 @@ CELERY_SEND_EVENTS = False
 CELERY_SEND_TASK_ERROR_EMAILS = True
 CELERYD_HIJACK_ROOT_LOGGER = False
 BROKER_POOL_LIMIT = 10
+
+# feedworker management command setup
+FEEDWORKER_PASS_DURATION=3600
 
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
@@ -288,6 +296,7 @@ REST_FRAMEWORK = {
 import re
 LOCALE_INDEPENDENT_PATHS = [
     re.compile('^/media/'),
+    re.compile('^/assets/'),
     re.compile('^/widget/'),
     re.compile('^/api/'),
     re.compile('^/api2/'),
@@ -359,6 +368,8 @@ PROJECT_VERSION = '0.5'
 EDIT_END_THRESHOLD = 120
 
 ANONYMOUS_USER_ID = 10000
+ANONYMOUS_DEFAULT_USERNAME = u"amara-bot"
+ANONYMOUS_FULL_NAME = u"Amara Bot"
 
 #Use on production
 GOOGLE_ANALYTICS_NUMBER = 'UA-163840-22'
@@ -375,7 +386,6 @@ GOOGLE_SERVICE_ACCOUNT_SECRET = None
 try:
     from commit import LAST_COMMIT_GUID
 except ImportError:
-    sys.stderr.write("deploy/create_commit_file must be ran before boostrapping django")
     LAST_COMMIT_GUID = "dev"
 
 AWS_ACCESS_KEY_ID = ''
@@ -422,27 +432,6 @@ API_DOCS_MODULES = [
 ]
 
 MEDIA_BUNDLES = {
-    "amara.css": {
-        "files": [
-            "bower/chartist/dist/chartist.css",
-            "bower/select2/dist/css/select2.css",
-            "amara/bootstrap/bootstrap-theme.min.css",
-            "amara/bootstrap/bootstrap.min.css",
-            "amara/css/main.scss",
-        ],
-        "include_paths": [
-            "amara/css/",
-        ],
-    },
-    "amara.js": {
-        "use_requirejs": True,
-        "root_dir": "amara/js",
-        "sub_dirs": {
-            'lib': 'bower',
-        },
-        # extension_modules gets filled in by our optional repositories
-        "extension_modules": [],
-    },
     "base.css": {
         "files": (
             "css/jquery.jgrowl.css",
@@ -622,8 +611,6 @@ MEDIA_BUNDLES = {
             'src/js/third-party/popcorn.js',
             'src/js/third-party/Blob.js',
             'src/js/third-party/FileSaver.js',
-            'src/js/popcorn/popcorn.brightcove.js',
-            'src/js/popcorn/popcorn.googledrive.js',
             'src/js/popcorn/popcorn.amara.js',
             'src/js/third-party/modal-helper.js',
             'src/js/third-party/json2.min.js',
@@ -670,8 +657,6 @@ MEDIA_BUNDLES = {
             'src/js/third-party/jquery.mCustomScrollbar.concat.min.js',
             'src/js/popcorn/popcorn.amaratranscript.js',
             'src/js/popcorn/popcorn.amarasubtitle.js',
-            'src/js/popcorn/popcorn.brightcove.js',
-            'src/js/popcorn/popcorn.googledrive.js',
             'src/js/popcorn/popcorn.amara.js',
             'src/js/embedder/embedder.js'
         ),
@@ -777,6 +762,9 @@ LOGGING = {
         'celery': {
             'level': 'WARNING',
         },
+        'requests.packages.urllib3.connectionpool': {
+            'level': 'WARNING',
+        }
     },
 }
 if env_flag_set('DB_LOGGING'):

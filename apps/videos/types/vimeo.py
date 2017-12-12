@@ -16,15 +16,17 @@
 # along with this program.  If not, see 
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-import requests
-from vidscraper.sites import vimeo
-from vidscraper.errors import Error as VidscraperError
+import requests, re
+from externalsites import vimeo
 from base import VideoType, VideoTypeError
 from django.conf import settings
 from django.utils.html import strip_tags
 
 vimeo.VIMEO_API_KEY = getattr(settings, 'VIMEO_API_KEY')
 vimeo.VIMEO_API_SECRET = getattr(settings, 'VIMEO_API_SECRET')
+VIMEO_REGEX = re.compile(r'https?://([^/]+\.)?vimeo.com/(channels/[\w]+[#|/])?(?P<video_id>\d+)')
+import logging
+logger = logging.getLogger(__name__)
 
 class VimeoVideoType(VideoType):
 
@@ -35,13 +37,6 @@ class VimeoVideoType(VideoType):
     def __init__(self, url):
         self.url = url
         self.videoid = self._get_vimeo_id(url)
-        if vimeo.VIMEO_API_KEY and vimeo.VIMEO_API_SECRET:
-            try:
-                self.shortmem = vimeo.get_shortmem(url)
-            except VidscraperError, e:
-                # we're not raising an error here because it 
-                # disallows us from adding private Vimeo videos.
-                pass
         
     @property
     def video_id(self):
@@ -52,27 +47,31 @@ class VimeoVideoType(VideoType):
 
     @classmethod
     def matches_video_url(cls, url):
-        return bool(vimeo.VIMEO_REGEX.match(url))
+        return bool(VIMEO_REGEX.match(url))
 
     def set_values(self, video_obj, user, team, video_url):
-        if vimeo.VIMEO_API_KEY and vimeo.VIMEO_API_SECRET:
-            try:
-                video_obj.thumbnail = vimeo.get_thumbnail_url(self.url, self.shortmem) or ''
-                video_obj.small_thumbnail = vimeo.get_small_thumbnail_url(self.url, self.shortmem) or ''
-                video_obj.title = vimeo.scrape_title(self.url, self.shortmem)
-                video_obj.description = strip_tags(vimeo.scrape_description(self.url, self.shortmem))
-            except Exception:
-                # in case the Vimeo video is private.
-                pass
-        r = requests.get("https://player.vimeo.com/video/{}/config".format(self.video_id))
-        if r.status_code == requests.codes.ok:
-            try:
-                video_obj.duration = r.json()[u"video"]["duration"]
-            except:
-                pass
-    
+        try:
+            values = vimeo.get_values(self.videoid, user, team)
+            video_obj.thumbnail = values[3]
+            video_obj.duration = values[2]
+            video_obj.title = values[0]
+            video_obj.description = values[1]
+            if video_url is not None:
+                self.set_owner_username(video_url, values[4])
+        except Exception, e:
+            pass
+
+    def get_video_info(self, user, team, video_url):
+        return vimeo.get_values(self.videoid, user, team)
+
+    @classmethod
+    def set_owner_username(cls, video_url, username):
+        if video_url.owner_username is None:
+            video_url.owner_username = username
+            video_url.save()
+
     def _get_vimeo_id(self, video_url):
-        return vimeo.VIMEO_REGEX.match(video_url).groupdict().get('video_id') 
+        return VIMEO_REGEX.match(video_url).groupdict().get('video_id')
 
     def get_direct_url(self, prefer_audio=False):
         r = requests.get("https://player.vimeo.com/video/{}/config".format(self.video_id))

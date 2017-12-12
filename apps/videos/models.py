@@ -45,11 +45,12 @@ from django.forms.forms import NON_FIELD_ERRORS
 
 from auth.models import CustomUser as User, Awards
 from caching import ModelCacheManager
+from externalsites import google
 from videos import behaviors
 from videos import metadata
 from videos import signals
 from videos.types import (video_type_registrar, video_type_choices,
-                          VideoTypeError)
+                          VideoTypeError, YoutubeVideoType, VimeoVideoType)
 from videos.feed_parser import VideoImporter
 from comments.models import Comment
 from widget import video_cache
@@ -406,20 +407,26 @@ class Video(models.Model):
 
     objects = VideoManager()
 
-    class UrlAlreadyAdded(Exception):
+    class DuplicateUrlError(Exception):
         """
-        Video.add() was called with a URL that already exists in amara
+        Raised where a video URL would be added twice to videos on the same
+        team or two non-team videos.
 
         Attributes:
           video: Video for the URL
           video_url: VideoUrl for the URL
+          from_prevent_duplicate_public_videos: Was this caused be a team
+              with the prevent_duplicate_public_videos flag set?
         """
-        def __init__(self, video_url):
+        def __init__(self, video_url,
+                     from_prevent_duplicate_public_videos=False):
             self.video_url = video_url
             self.video = video_url.video
+            self.from_prevent_duplicate_public_videos = \
+                from_prevent_duplicate_public_videos
 
         def __unicode__(self):
-            return 'Video.UrlAlreadyAdded: {}'.format(self.url)
+            return 'Video.DuplicateUrlError: {}'.format(self.video_url.url)
 
     def __init__(self, *args, **kwargs):
         super(Video, self).__init__(*args, **kwargs)
@@ -573,6 +580,11 @@ class Video(models.Model):
         self._cached_teamvideo = rv
         return rv
 
+    def get_team(self):
+        """Return the Team for this video or None."""
+        team_video = self.get_team_video()
+        return team_video.team if team_video else None
+
     def clear_team_video_cache(self):
         if hasattr(self, '_cached_teamvideo'):
             del self._cached_teamvideo
@@ -629,6 +641,8 @@ class Video(models.Model):
     get_absolute_url = _get_absolute_url
 
     def get_language_url(self, language_code):
+        if language_code in (None, ''):
+            return ''
         return reverse('videos:translation_history_legacy', kwargs={
             'video_id': self.video_id,
             'lang': language_code,
@@ -679,8 +693,8 @@ class Video(models.Model):
     def _calc_url_count(self):
         return self.videourl_set.count()
 
-    @staticmethod
-    def add(url, user, setup_callback=None, team=None):
+    @classmethod
+    def add(cls, url, user, setup_callback=None, team=None):
         """
         Add a new Video
 
@@ -700,33 +714,20 @@ class Video(models.Model):
               It will be passed 2 args: a Video and VideoUrl.  Video.save()
               will be called after, so there's no need to call it in
               setup_callback().
+            team: Team that the video will be added to
 
         Raises:
             VideoTypeError: The video URL is invalid
-            Video.UrlAlreadyAdded: The video URL has already been added
+            Video.DuplicateUrlError: The video URL has already been added for
+                the team
 
         Returns:
             (video, video_url) tuple
         """
         with transaction.atomic():
-            # We need to be a little careful when creating the VideoUrl
-            # because it has a foreign key to Video.  We want to call
-            # get_or_create(), and we need to pass the Video to that.
-            # However, we don't want to fully set up the video since that's
-            # wasted work if the VideoUrl already exists.
-            #
-            # To work around this, we create an video without the setup code,
-            # pass that to get_or_create(), and only run the setup code if we
-            # end up creating a VideoUrl.
-            video = Video.objects.create()
-            vt, video_url = video._add_video_url(url, user, True)
-            # okay, we can now run the setup
-            incomplete = video.set_values(vt, video_url, user, team)
-            video.user = user
+            video, video_url = cls._get_video_for_add(url, user, team)
             if setup_callback:
                 setup_callback(video, video_url)
-            if not (incomplete or video.title):
-                video.title = make_title_from_url(video_url.url)
             video.update_search_index()
             video.save()
             if user and user.notify_by_message:
@@ -739,17 +740,63 @@ class Video(models.Model):
                                      new_video=True, user=user, team=team)
         return (video, video_url)
 
+    @classmethod
+    def _get_video_for_add(cls, url, user, team):
+        """Get a video for Video.add()
+
+        Normally this means creating a new video, but if
+        team.prevent_duplicate_public_videos is set, then sometimes we'll use
+        an existing public video and move it to the team.
+        """
+        vt, url = cls._coerce_url_param(url)
+        # handle the prevent_duplicate_public_videos flag
+        if team and team.prevent_duplicate_public_videos:
+            try:
+                public_video_url = (
+                    VideoUrl.objects
+                    .filter(url=url, team_id=0)
+                    .select_related('video').get())
+                public_video_url.team_id = team.id
+                public_video_url.save()
+                return public_video_url.video, public_video_url
+            except VideoUrl.DoesNotExist:
+                pass
+        elif not team:
+            cls._check_prevent_duplicate_public_videos(url)
+        # We need to be a little careful when creating the VideoUrl.
+        # We want to call VideoUrl.get_or_create() and we need to pass a Video
+        # objects to that.  However, we don't want to fully set up the video
+        # since that's wasted work if the VideoUrl already exists.
+        #
+        # To work around this, we create an video without the setup code,
+        # and use that for video._add_video_url().  If that works, then we can
+        # run the setup code.
+        video = Video.objects.create()
+        video_url = video._add_video_url(vt, user, True, team)
+        # okay, we can now run the setup
+        incomplete = video.set_values(vt, video_url, user, team)
+        video.user = user
+        if not (incomplete or video.title):
+            video.title = make_title_from_url(video_url.url)
+        return video, video_url
+
     def set_values(self, video_type, video_url, user, team):
         incomplete = video_type.set_values(self, user, team, video_url)
         if not incomplete:
-            self.title = self.re_unicode.sub(u'\uFFFD', self.title)
-            self.description = self.re_unicode.sub(u'\uFFFD', self.description)
+            if self.title is None:
+                self.title = ""
+            else:
+                self.title = self.re_unicode.sub(u'\uFFFD', self.title)
+            if self.description is None:
+                self.description = ""
+            else:
+                self.description = self.re_unicode.sub(u'\uFFFD', self.description)
         return incomplete
 
     def add_url(self, url, user):
         """
         Add an extra URL to an existing video
-        
+
         Args:
             url: URL of the video to add (either a string or a VideoType)
             user: User adding the URL
@@ -758,9 +805,25 @@ class Video(models.Model):
             VideoUrl object that was added
 
         Raises:
-            Video.UrlAlreadyAdded: The URL was already added to a different video
+            Video.DuplicateUrlError: The URL was already added to a
+                                     different video
         """
-        vt, video_url = self._add_video_url(url, user, False)
+        team = self.get_team()
+        vt, url = self._coerce_url_param(url)
+        self._check_prevent_duplicate_public_videos(url, team)
+        video_url = self._add_video_url(vt, user, False, team)
+        if type(vt) is YoutubeVideoType:
+            try:
+                video_info, incomplete = vt.get_video_info(self, user, team, video_url)
+                YoutubeVideoType.set_owner_username(self, video_url, video_info)
+            except google.APIError:
+                pass
+        elif type(vt) is VimeoVideoType:
+            try:
+                video_info = vt.get_video_info(user, team, video_url)
+                VimeoVideoType.set_owner_username(video_url, video_info[4])
+            except Exception:
+                pass
 
         video_cache.invalidate_cache(self.video_id)
         self.cache.invalidate()
@@ -769,16 +832,13 @@ class Video(models.Model):
 
         return video_url
 
-    def _add_video_url(self, url, user, primary):
+    def _add_video_url(self, vt, user, primary, team):
         # Low-level video URL adding code for add() and add_url()
-        if isinstance(url, basestring):
-            vt = video_type_registrar.video_type_for_url(url)
-            if vt is None:
-                raise VideoTypeError(url)
-        else:
-            vt = url
+        team_id = team.id if team else 0
         video_url, created = VideoUrl.objects.get_or_create(
-            url=vt.convert_to_video_url(), type=vt.abbreviation, defaults={
+            url=vt.convert_to_video_url(), team_id=team_id,
+                type=vt.abbreviation,
+            defaults={
                 'video': self,
                 'added_by': user,
                 'primary': primary,
@@ -786,8 +846,88 @@ class Video(models.Model):
                 'videoid': vt.video_id if vt.video_id else '',
             })
         if not created:
-            raise Video.UrlAlreadyAdded(video_url)
-        return vt, video_url
+            raise Video.DuplicateUrlError(video_url)
+        return video_url
+
+    @staticmethod
+    def _coerce_url_param(url):
+        """Get a VideoType object for an url param
+
+        Several of our methods input a url param that can be either a string,
+        or a VideoType object.  This method handles standardizing the
+        paramaters
+
+        returns: (VideoType, str) tuple with the VideoType and the URL as a
+        string
+        raises VideoTypeError: can't find a VideoType for a URL
+        """
+        if isinstance(url, basestring):
+            vt = video_type_registrar.video_type_for_url(url)
+            if vt is None:
+                raise VideoTypeError(url)
+        else:
+            vt = url
+        return vt, vt.convert_to_video_url()
+
+    @classmethod
+    def _check_prevent_duplicate_public_videos(cls, url, team=None):
+        """Check if there are any duplicate video URLs on teams with
+        prevent_duplicate_public_videos set
+
+        Call this whenever a URL is being added to amara, or moved to a team
+
+        Args:
+            url(str): url being added
+            team(Team): team the URL is being added to, or None if it's being
+                added to the public area
+        """
+        if team and not team.prevent_duplicate_public_videos:
+            return
+        try:
+            qs = VideoUrl.objects.filter(url=url)
+            if team:
+                qs = qs.filter(video__teamvideo__isnull=True)
+            else:
+                qs = qs.filter(
+                    video__teamvideo__team__prevent_duplicate_public_videos=True
+                )
+            video_url = qs[0:1][0]
+        except IndexError:
+            pass
+        else:
+            raise Video.DuplicateUrlError(
+                video_url, from_prevent_duplicate_public_videos=True)
+
+    def update_team(self, team):
+        """Update the team for this video
+
+        This method must be called whenever the video changes teams.  For
+        example:
+
+            - Being added to a team from the public area (new TeamVideo object
+              created)
+            - Being moved from team to team (TeamVideo object changed)
+            - Being moved from a team back to the public area (TeamVideo
+              object deleted)
+
+        Raises:
+            DuplicateUrlError: One of the video URLs for this video was
+                already added to the team
+        """
+        for vurl in self.get_video_urls():
+            self._check_prevent_duplicate_public_videos(vurl.url, team)
+        new_team_id = team.id if team else 0
+        try:
+            self.videourl_set.update(team_id=new_team_id)
+        except IntegrityError:
+            for vurl in self.get_video_urls():
+                try:
+                    dup_vurl = VideoUrl.objects.get(
+                        url=vurl.url, type=vurl.type, team_id=new_team_id)
+                    raise Video.DuplicateUrlError(vurl)
+                except VideoUrl.DoesNotExist:
+                    pass
+            raise
 
     @property
     def language(self):
@@ -2060,12 +2200,20 @@ class VideoUrl(models.Model):
     # this is the owner if the video is from a third party website
     # shuch as Youtube or Vimeo username
     owner_username = models.CharField(max_length=255, blank=True, null=True)
+    # Team.id value copied from TeamVideo.team.  It's only here because we
+    # need to use it in our unique constraint.
+    #
+    # We use an IntegerField instead of a ForeignKey because this makes the
+    # unique constraint work properly with non-team videos.  If it was a NULL
+    # valued ForeignKey, then mysql would not enforce the constraint.  So
+    # instead, we use an IntegerField set equal to 0.
+    team_id = models.IntegerField(blank=True, default=0)
 
     objects = VideoUrlManager()
 
     class Meta:
         ordering = ("video", "-primary",)
-        unique_together = ("url_hash", "type",)
+        unique_together = ("url_hash", "team_id", "type")
 
     def __unicode__(self):
         return self.url

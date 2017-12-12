@@ -163,21 +163,18 @@ class CreateVideoUrlForm(forms.Form):
             self.video_url = self.cleaned_data['video'].add_url(
                 self.cleaned_data['url'],
                 self.user)
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             raise forms.ValidationError(self.already_added_message(e.video))
 
     def already_added_message(self, video):
         if video == self.cleaned_data.get('video'):
             return _('Video URL already added to this video')
 
-        if video.can_user_see(self.user):
-            link = '<a href="{}">{}</a>'.format(
-                video.get_absolute_url(), ugettext('view video'))
-            return mark_safe(fmt(
-                _('Video URL already added to a different video (%(link)s)'),
-                link=link))
-        else:
-            return _('Video URL already added to a different video')
+        link = '<a href="{}">{}</a>'.format(
+            video.get_absolute_url(), ugettext('view video'))
+        return mark_safe(fmt(
+            _('Video URL already added to a different video (%(link)s)'),
+            link=link))
 
     def save(self):
         return self.video_url
@@ -210,7 +207,7 @@ class NewCreateVideoUrlForm(forms.Form):
         try:
             self.video_url = self.video.add_url( self.cleaned_data['url'],
                 self.user)
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             self._errors['url'] = self.error_class([
                 self.already_added_message(e.video)
             ])
@@ -219,14 +216,11 @@ class NewCreateVideoUrlForm(forms.Form):
         if video == self.video:
             return _('Video URL already added to this video')
 
-        if video.can_user_see(self.user):
-            link = '<a href="{}">{}</a>'.format(
-                video.get_absolute_url(), ugettext('view video'))
-            return mark_safe(fmt(
-                _('Video URL already added to a different video (%(link)s)'),
-                link=link))
-        else:
-            return _('Video URL already added to a different video')
+        link = '<a href="{}">{}</a>'.format(
+            video.get_absolute_url(), ugettext('view video'))
+        return mark_safe(fmt(
+            _('Video URL already added to a different video (%(link)s)'),
+            link=link))
 
     def save(self):
         return self.video_url
@@ -251,7 +245,7 @@ class VideoForm(forms.Form):
             self.video, video_url = Video.add(
                 self.cleaned_data['video_url'], self.user)
             self.created = True
-        except Video.UrlAlreadyAdded, e:
+        except Video.DuplicateUrlError, e:
             self.video = e.video
             self.created = False
         return self.cleaned_data

@@ -30,6 +30,7 @@ from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.db import connection
 from django.db import models
+from django.db import transaction
 from django.db.models import query, Q, Count, Sum
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.http import Http404
@@ -68,7 +69,6 @@ from subtitles.models import (
     SubtitleVersion as NewSubtitleVersion,
     SubtitleLanguage as NewSubtitleLanguage,
     SubtitleNoteBase,
-    ORIGIN_IMPORTED
 )
 from subtitles import pipeline
 
@@ -242,6 +242,7 @@ class Team(models.Model):
     notify_interval = models.CharField(max_length=1,
                                        choices=NOTIFY_INTERVAL_CHOICES,
                                        default=NOTIFY_DAILY)
+    prevent_duplicate_public_videos = models.BooleanField(default=False)
 
     auth_provider_code = models.CharField(_(u'authentication provider code'),
                                           max_length=24, blank=True, default="")
@@ -432,6 +433,52 @@ class Team(models.Model):
         else:
             return get_authentication_provider(self.auth_provider_code)
 
+    def add_video(self, url, user, project=None, setup_video=None):
+        """Create a video and add it to a team
+
+        Use this to add a video that was not added to amara yet
+
+        Args:
+            url: Video url
+            user: User that's adding the video
+            project: Project to add the video to.
+            setup_video: callback function to setup the video.
+
+        Returns: (Video, VideoUrl) tuple
+        """
+        if project is None:
+            project = self.default_project
+        def setup_team_video(video, video_url):
+            TeamVideo.objects.create(video=video, team=self,
+                                     project=project,
+                                     added_by=user)
+            video.is_public = self.is_visible
+            if setup_video:
+                setup_video(video, video_url)
+
+        return Video.add(url, user, setup_team_video, team=self)
+
+    def add_existing_video(self, video, user, project=None):
+        """Add an existing video to this team
+
+        Use this to add a video that was added in in the past to the public
+        area.
+
+        Args:
+            video: Video to add.  This cannot already be in a team
+            user: User that's adding the video
+            project: Project to add the video to.
+
+        Returns: TeamVideo object
+        """
+        if project is None:
+            project = self.default_project
+        with transaction.atomic():
+            video.is_public = self.is_visible
+            video.update_team(self)
+            video.save()
+            return TeamVideo.objects.create(team=self, video=video,
+                                            project=project, added_by=user)
     # Settings
     SETTINGS_ATTRIBUTES = set([
         'description', 'is_visible', 'sync_metadata', 'membership_policy',
@@ -1124,6 +1171,8 @@ class TeamVideo(models.Model):
         return getattr(self, 'original_language_code')
 
     def save(self, *args, **kwargs):
+        # FIXME: this code is a bit crazy, we should move it to higher-level
+        # methods like Team.add_video() and TeamVideo.move_to()
         if 'user' in kwargs:
             user = kwargs.pop('user')
         else:
@@ -1160,6 +1209,7 @@ class TeamVideo(models.Model):
                     "%s: Team (%s) is not equal to project's (%s) team (%s)"\
                          % (self, self.team, self.project, self.project.team)
         super(TeamVideo, self).save(*args, **kwargs)
+
         if within_team:
             if __old_project is not None and self.project != __old_project:
                 video_moved_from_project_to_project.send(sender=self,
@@ -1238,7 +1288,9 @@ class TeamVideo(models.Model):
     def remove(self, user):
         team = self.team
         video = self.video
-        self.delete()
+        with transaction.atomic():
+            self.delete()
+            video.update_team(None)
         video_removed_from_team.send(sender=video, team=team, user=user)
 
     def move_to(self, new_team, project=None, user=None):
@@ -1250,7 +1302,9 @@ class TeamVideo(models.Model):
             self.team = new_team
             if project is not None:
                 self.project = project
-            self.save(user=user)
+            with transaction.atomic():
+                self.video.update_team(new_team)
+                self.save(user=user)
             video_changed_tasks.delay(self.video_id)
 
     def get_task_for_editor(self, language_code):
@@ -1439,6 +1493,9 @@ class TeamMemberManager(models.Manager):
 
     def admins(self):
         return self.filter(role__in=(ROLE_OWNER, ROLE_ADMIN))
+
+    def owners(self):
+        return self.filter(role=ROLE_OWNER)
 
     def members_from_users(self, team, users):
         return self.filter(team=team, user__in=users)

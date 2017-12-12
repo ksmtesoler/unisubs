@@ -26,7 +26,7 @@ def to_localized_display(language_code):
     try:
         return get_language_label(language_code)
     except KeyError:
-        logger.error('Uknown language code to be translated', extra={
+        logger.error('Unknown language code to be translated', extra={
             'language_code': unicode(language_code),
         })
     return '?'
@@ -34,3 +34,10 @@ def to_localized_display(language_code):
 @register.filter()
 def to_language_display(language_code):
     return  LANGUAGE_NAMES[language_code]
+
+@register.filter()
+def to_localized_display_list(language_codes):
+    display = []
+    for lc in language_codes:
+        display.append(to_localized_display(lc))
+    return ', '.join(display)

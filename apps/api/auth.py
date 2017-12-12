@@ -19,11 +19,7 @@ from __future__ import absolute_import
 
 from rest_framework import authentication
 from rest_framework import exceptions
-# Need to use tastypie's ApiKey, since that's what the apiv2 app uses.  Once
-# we move all the code from there to here, we can should replace it with our
-# own ApiKey model.
-from tastypie.models import ApiKey
-
+from auth.models import AmaraApiKey
 from auth.models import CustomUser as User
 
 class TokenAuthentication(authentication.BaseAuthentication):
@@ -45,7 +41,7 @@ class TokenAuthentication(authentication.BaseAuthentication):
         if not user.is_active:
             raise exceptions.AuthenticationFailed('User disabled')
 
-        if not ApiKey.objects.filter(user=user, key=api_key).exists():
+        if not AmaraApiKey.objects.filter(user=user, key=api_key).exists():
             raise exceptions.AuthenticationFailed('Invalid API Key')
 
         return (user, None)

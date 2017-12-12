@@ -36,6 +36,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from videos.templatetags.paginator import paginate
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django.db import transaction
 from django.db.models import Sum
 from django.http import (HttpResponse, Http404, HttpResponseRedirect,
                          HttpResponseForbidden)
@@ -57,14 +58,15 @@ from comments.models import Comment
 from comments.forms import CommentForm
 from subtitles.models import SubtitleLanguage, SubtitleVersion
 from subtitles.permissions import (user_can_view_private_subtitles,
-                                   user_can_edit_subtitles)
+                                   user_can_edit_subtitles,
+                                   user_can_change_subtitle_language)
 from subtitles.forms import (SubtitlesUploadForm, DeleteSubtitlesForm,
                              RollbackSubtitlesForm, SubtitlesNotesForm,
-                             ResyncSubtitlesForm)
+                             ResyncSubtitlesForm, ChangeSubtitleLanguageForm)
 from subtitles.pipeline import rollback_to
 from subtitles.types import SubtitleFormatList
 from subtitles.permissions import user_can_access_subtitles_format
-from teams.models import Task
+from teams.models import Task, Team
 from ui.ajax import AJAXResponseRenderer
 from utils.behaviors import behavior
 from utils.decorators import staff_member_required
@@ -84,6 +86,7 @@ from videos import oldviews
 from videos.rpc import VideosApiClass
 from videos import share_utils
 from videos.tasks import video_changed_tasks
+from videos.types import video_type_registrar
 from widget.views import base_widget_params
 from externalsites.models import can_sync_videourl, get_sync_account, SyncHistory
 from utils import send_templated_email
@@ -98,6 +101,7 @@ from utils.translation import (get_user_languages_from_request,
 
 from teams.permissions import can_edit_video, can_add_version, can_resync
 from . import video_size
+import teams.permissions
 
 VIDEO_IN_ROW = 6
 ACTIVITY_PER_PAGE = 8
@@ -312,9 +316,13 @@ def video(request, video_id, video_url=None, title=None):
 
     activity = all_activities[:ACTIVITY_PER_PAGE]
     show_all = False if len(activity) >= len(all_activities) else True
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/video.html', {
         'video': video,
         'player_url': video_url.url,
+        'team': video.get_team(),
         'team_video': video.get_team_video(),
         'tab': request.GET.get('tab', 'info'),
         'allow_delete': allow_delete,
@@ -428,6 +436,17 @@ def urls_tab_replacement_data(request, video):
             'create_url_form': NewCreateVideoUrlForm(video, request.user),
         })
 
+def sanity_check_video_urls(request, video):
+    team = video.get_team()
+    team_id = team.id if team else 0
+    for video_url in video.get_video_urls():
+        if video_url.team_id != team_id:
+            video_url.team_id = team_id
+            video_url.save()
+            if request.user.is_staff:
+                messages.warning(request, "Updated team for {} to {}".format(
+                                     video_url.url, team))
+
 def _get_related_task(request):
     """
     Checks if request has t=[task-id], and if so checks if the current
@@ -461,27 +480,7 @@ def activity(request, video_id):
                        extra_context=extra_context)
 
 def check_upload_subtitles_permissions(request):
-    # check authorization...  This is pretty hacky.  We should implement
-    # #1830.
-    if request.user.is_authenticated():
-        return True
-    username = request.META.get('HTTP_X_API_USERNAME', None)
-    api_key = request.META.get( 'HTTP_X_APIKEY', None)
-    if not username or not api_key:
-        return False
-    try:
-        import apiv2
-        from tastypie.models import ApiKey
-    except ImportError:
-        return False
-    try:
-        api_user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return False
-    if not ApiKey.objects.filter(user=api_user, key=api_key).exists():
-        return False
-    request.user = api_user
-    return True
+    return request.user.is_authenticated()
 
 def upload_subtitles(request):
     if not check_upload_subtitles_permissions(request):
@@ -597,6 +596,7 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
         'subtitle_version': version,
         'enable_delete_subtitles': workflow.user_can_delete_subtitles(
                 request.user, subtitle_language.language_code),
+        'enable_change_language': user_can_change_subtitle_language(request.user, video),
         'show_rollback': version and not version.is_tip(public=False),
         'all_subtitle_versions': all_subtitle_versions,
         'enabled_compare': len(all_subtitle_versions) >= 2,
@@ -635,6 +635,9 @@ def subtitles(request, video_id, lang, lang_id, version_id=None):
     else:
         context['show_sync_history'] = False
         context['can_resync'] = False
+
+    sanity_check_video_urls(request, video)
+
     return render(request, 'future/videos/subtitles.html', context)
 
 def get_objects_for_subtitles_page(user, video_id, language_code, lang_id,
@@ -700,6 +703,7 @@ def downloadable_formats(user):
 
 subtitles_form_map = {
     'delete': DeleteSubtitlesForm,
+    'language': ChangeSubtitleLanguageForm,
     'rollback': RollbackSubtitlesForm,
     'notes': SubtitlesNotesForm,
     'resync': ResyncSubtitlesForm,
@@ -718,7 +722,11 @@ def subtitles_ajax_form(request, video, subtitle_language, version):
     if not form.check_permissions():
         raise PermissionDenied()
 
-    if request.is_ajax():
+    if form.is_bound and form.is_valid() and form_name == 'language':
+        form.submit(request)
+        redirect_url = subtitle_language.get_absolute_url() + '?team=' + request.GET['team']
+        return redirect(redirect_url)
+    elif request.is_ajax():
         if form.is_bound and form.is_valid():
             form.submit(request)
             return handle_subtitles_ajax_form_success(
@@ -1031,3 +1039,68 @@ def set_original_language(request, video_id):
         'form': form
     }, context_instance=RequestContext(request)
     )
+
+@staff_member_required
+def url_search(request):
+    if request.POST:
+        return url_search_move(request)
+    if 'urls' in request.GET:
+        return url_search_results(request)
+    return render(request, "future/videos/url-search.html")
+
+def url_search_results(request):
+    urls = []
+    for url in request.GET['urls'].split():
+        if not url:
+            continue
+        vt = video_type_registrar.video_type_for_url(url)
+        if vt:
+            urls.append(vt.convert_to_video_url())
+    video_urls = list(
+        VideoUrl.objects
+        .filter(url__in=urls)
+        .select_related('video', 'video__teamvideo')
+    )
+    found_urls = set(vurl.url for vurl in video_urls)
+    not_found = [
+        url for url in urls
+        if url not in found_urls
+    ]
+    video_urls.sort(key=lambda vurl: urls.index(vurl.url))
+    videos = [vurl.video for vurl in video_urls]
+    return render(request, "future/videos/url-search-results.html", {
+        'videos': videos,
+        'not_found': not_found,
+        'move_to_options': teams.permissions.can_move_videos_to(request.user),
+    })
+
+def url_search_move(request):
+    team = Team.objects.get(slug=request.POST['team'])
+    if not teams.permissions.can_move_videos_to_team(request.user, team):
+        raise PermissionDenied()
+    videos = Video.objects.filter(video_id__in=request.POST.getlist('videos'))
+    moved_a_video = False
+    with transaction.atomic():
+        for video in videos:
+            try:
+                team_video = video.get_team_video()
+                if team_video:
+                    team_video.move_to(team, user=request.user)
+                else:
+                    team.add_existing_video(video, request.user)
+            except Video.DuplicateUrlError, e:
+                if e.from_prevent_duplicate_public_videos:
+                    msg = ugettext(
+                        u"%(video)s not moved to %(team)s because it "
+                        "would conflict with the team policy")
+                else:
+                    msg = ugettext(u"%(video)s already added to %(team)s")
+
+                msg = fmt(msg, team=team, video=video.title_display())
+                messages.error(request, msg)
+            else:
+                moved_a_video = True
+    if moved_a_video:
+        messages.success(request, fmt(ugettext(u'Videos moved to %(team)s'),
+                                      team=team))
+    return redirect(request.get_full_path())
