@@ -1248,6 +1248,9 @@ class VideoFiltersForm(FiltersForm):
 
         qs = Video.objects.filter(teamvideo__team=self.team)
 
+        if not (self.is_bound and self.is_valid()):
+            return qs.order_by('-created')
+
         if q:
             qs = qs.search(q)
         if project:
