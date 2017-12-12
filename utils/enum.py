@@ -160,7 +160,7 @@ class EnumField(models.PositiveSmallIntegerField):
         self.enum = enum
 
     def get_default(self):
-        if self.has_default() and isinstance(self.default.EnumMember):
+        if self.has_default() and isinstance(self.default, EnumMember):
             return self.default.number
         else:
             return super(EnumField, self).get_default()
