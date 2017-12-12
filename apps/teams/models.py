@@ -69,7 +69,6 @@ from subtitles.models import (
     SubtitleVersion as NewSubtitleVersion,
     SubtitleLanguage as NewSubtitleLanguage,
     SubtitleNoteBase,
-    ORIGIN_IMPORTED
 )
 from subtitles import pipeline
 
@@ -1494,6 +1493,9 @@ class TeamMemberManager(models.Manager):
 
     def admins(self):
         return self.filter(role__in=(ROLE_OWNER, ROLE_ADMIN))
+
+    def owners(self):
+        return self.filter(role=ROLE_OWNER)
 
     def members_from_users(self, team, users):
         return self.filter(team=team, user__in=users)
@@ -3617,6 +3619,10 @@ class BillingRecordManager(models.Manager):
 
         if not tv:
             celery_logger.debug('not a team video')
+            return
+
+        if tv.team.deleted:
+            celery_logger.debug('Cannot create billing record for deleted team')
             return
 
         if not language.is_complete_and_synced(public=False):
