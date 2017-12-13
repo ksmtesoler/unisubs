@@ -855,13 +855,14 @@ class LoginToken(models.Model):
 class AmaraApiKey(models.Model):
     user = models.OneToOneField(CustomUser, related_name="api_key")
     created = models.DateTimeField(auto_now_add=True)
-    key = models.CharField(max_length=256, blank=True, default='')
+    key = models.CharField(max_length=256, blank=True, default=binascii.b2a_hex(os.urandom(20)))
 
     def __unicode__(self):
         return u"Api key for {}: {}".format(self.user, self.key)
 
-    def generate_key(self):
-        return binascii.b2a_hex(os.urandom(20))
+    def generate_new_key(self):
+        self.key = binascii.b2a_hex(os.urandom(20))
+        return self.key
 
 class SentMessageDateManager(models.Manager):
     def sent_message(self, user):
