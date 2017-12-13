@@ -858,7 +858,7 @@ class LoginToken(models.Model):
 class AmaraApiKey(models.Model):
     user = models.OneToOneField(CustomUser, related_name="api_key")
     created = models.DateTimeField(auto_now_add=True)
-    key = models.CharField(max_length=256, blank=True, default=lambda: generate_api_key())
+    key = models.CharField(max_length=256, blank=True, default=generate_api_key)
 
     def __unicode__(self):
         return u"Api key for {}: {}".format(self.user, self.key)
