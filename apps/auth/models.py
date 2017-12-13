@@ -62,6 +62,9 @@ DEFAULT_AVATAR_URL = ('https://s3.amazonaws.com/'
                       's3.www.universalsubtitles.org/'
                       'gravatar/avatar-default-{size}.png')
 
+def generate_api_key():
+        return binascii.b2a_hex(os.urandom(20))
+
 class AnonymousUserCacheGroup(CacheGroup):
     def __init__(self):
         super(AnonymousUserCacheGroup, self).__init__('user:anon',
@@ -855,13 +858,13 @@ class LoginToken(models.Model):
 class AmaraApiKey(models.Model):
     user = models.OneToOneField(CustomUser, related_name="api_key")
     created = models.DateTimeField(auto_now_add=True)
-    key = models.CharField(max_length=256, blank=True, default=binascii.b2a_hex(os.urandom(20)))
+    key = models.CharField(max_length=256, blank=True, default=lambda: generate_api_key())
 
     def __unicode__(self):
         return u"Api key for {}: {}".format(self.user, self.key)
 
     def generate_new_key(self):
-        self.key = binascii.b2a_hex(os.urandom(20))
+        self.key = generate_api_key()
         return self.key
 
 class SentMessageDateManager(models.Manager):
