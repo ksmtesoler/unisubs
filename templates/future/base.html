@@ -35,7 +35,6 @@
     {% js_language_data %}
     {% block head-extra %}{% endblock %}
     <script>var userLanguages = [{% for language in user.get_languages %}"{{language }}"{% if not forloop.last %},{% endif %}{% endfor %}];</script>
-    <script>var _bftn_options = { theme: 'slow' };</script><script src="https://widget.battleforthenet.com/widget.js" async></script>
   </head>
   <body{% block body-extra %}{% endblock %}>
     {% block header %}{% include "future/header.html" %}{% endblock %}
