@@ -209,7 +209,7 @@ class Up(Command):
         if self.args.dblog:
             env['DB_LOGGING'] = '1'
         subprocess.run(
-            ['docker-compose', 'up', 'app', 'worker', 'feed-worker'],
+            ['docker-compose', 'up', 'app', 'worker', 'feed-worker', 'asset-builder'],
             env=env)
 
 class PrepDeploy(Command):
