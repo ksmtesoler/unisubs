@@ -1670,6 +1670,8 @@ class RemoveMemberForm(ManagementForm):
         for member in members:
             try:
                 member.delete()
+                for app in member.team.applications.filter(user=member.user):
+                    app.on_member_removed(member.user, "web UI")
                 self.removed_count += 1
             except Exception as e:
                 logger.warn(e, exc_info=True)
