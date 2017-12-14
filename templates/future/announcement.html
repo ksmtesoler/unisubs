@@ -1,0 +1,7 @@
+{% load i18n %}
+{% if announcement %}
+<div class="announcement" data-id="{{ announcement.id }}">
+  <a href="#" class="announcement-hide pull-right">{% trans "hide" %}</a>
+  {{ announcement.content|safe }}
+</div>
+{% endif %}
