@@ -39,6 +39,7 @@
   <body{% block body-extra %}{% endblock %}>
     {% block header %}{% include "future/header.html" %}{% endblock %}
     {% futureui_announcement %}
+    {% futureui_messages %}
     <main id="page-content">
       {% if messages %}
       <div id="messages" class="container">
