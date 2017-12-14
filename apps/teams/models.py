@@ -1205,6 +1205,8 @@ class TeamVideo(models.Model):
         self.video.clear_team_video_cache()
         Team.cache.invalidate_by_pk(self.team_id)
 
+        self.video.teamvideo = self
+
         assert self.project.team == self.team, \
                     "%s: Team (%s) is not equal to project's (%s) team (%s)"\
                          % (self, self.team, self.project, self.project.team)

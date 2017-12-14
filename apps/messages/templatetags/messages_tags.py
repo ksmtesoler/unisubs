@@ -30,7 +30,7 @@ def messages(context):
     user = context['user']
     request = context['request']
     hidden_message_id = request.COOKIES.get(Message.hide_cookie_name)
-    if not user.is_authenticated():
+    if not user.is_authenticated() or not hidden_message_id:
         return ''
 
     cache_key = 'messages-{}'.format(get_language())
