@@ -58,6 +58,7 @@ from teams.permissions import (
     can_add_video_somewhere
 )
 from teams.permissions_const import ROLE_NAMES
+from teams.signals import member_remove
 from teams.workflows import TeamWorkflow
 from ui.forms import (FiltersForm, ManagementForm, AmaraChoiceField,
                       AmaraRadioSelect, SearchField, AmaraClearableFileInput, AmaraFileInput)
@@ -1670,6 +1671,7 @@ class RemoveMemberForm(ManagementForm):
         for member in members:
             try:
                 member.delete()
+                member_remove.send(sender=member)
                 for app in member.team.applications.filter(user=member.user):
                     app.on_member_removed(member.user, "web UI")
                 self.removed_count += 1
