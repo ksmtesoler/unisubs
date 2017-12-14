@@ -62,6 +62,7 @@ from utils.panslugify import pan_slugify
 from utils.searching import get_terms
 from utils.subtitles import create_new_subtitles, dfxp_merge
 from utils.text import fmt
+from utils.url_escape import url_escape
 from teams.moderation_const import MODERATION_STATUSES, UNMODERATED
 
 logger = logging.getLogger("videos-models")
@@ -729,6 +730,7 @@ class Video(models.Model):
             (video, video_url) tuple
         """
         with transaction.atomic():
+            url = url_escape(url)
             video, video_url = cls._get_video_for_add(url, user, team)
             if setup_callback:
                 setup_callback(video, video_url)
@@ -2177,12 +2179,14 @@ class VideoUrlManager(models.Manager):
 class VideoUrlQueryset(query.QuerySet):
     def get(self, **kwargs):
         if 'url' in kwargs:
-            kwargs['url_hash'] = url_hash(kwargs.pop('url'))
+            url = url_escape(kwargs.pop('url'))
+            kwargs['url_hash'] = url_hash(url)
         return super(VideoUrlQueryset, self).get(**kwargs)
 
     def filter(self, **kwargs):
         if 'url' in kwargs:
-            kwargs['url_hash'] = url_hash(kwargs.pop('url'))
+            url = url_escape(kwargs.pop('url'))
+            kwargs['url_hash'] = url_hash(url)
         return super(VideoUrlQueryset, self).filter(**kwargs)
 
 # VideoUrl
@@ -2308,6 +2312,7 @@ class VideoUrl(models.Model):
         assert self.type != '', "Can't set an empty type"
         if updates_timestamp:
             self.created = datetime.now()
+        self.url = url_escape(self.url)
         self.url_hash = url_hash(self.url)
         super(VideoUrl, self).save(*args, **kwargs)
 
