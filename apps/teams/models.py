@@ -992,7 +992,7 @@ class ProjectManager(models.Manager):
         """
         if hasattr(team_identifier, "pk"):
             team = team_identifier
-        elif isinstance(team_identifier, int):
+        elif isinstance(team_identifier, (int, long)):
             team = Team.objects.get(pk=team_identifier)
         elif isinstance(team_identifier, str):
             team = Team.objects.get(slug=team_identifier)
