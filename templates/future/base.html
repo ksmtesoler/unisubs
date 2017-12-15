@@ -38,6 +38,25 @@
   </head>
   <body{% block body-extra %}{% endblock %}>
     {% block header %}{% include "future/header.html" %}{% endblock %}
+<script type="text/javascript">
+function createCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+function hideAnnouncement() {
+  document.getElementById('announcement-hack').className = 'hide';
+  createCookie('lastHiddenAnnouncement', '169', 365);
+}
+// Only show announcement if the lastHiddenAnnouncement cookie is not set
+if(!('; ' + document.cookie + '; ').match(/; *lastHiddenAnnouncement=169;/)) {
+  document.write('<div id="announcement-hack" style="padding: 20px 30px; margin: 0; background-color: #5a2747; color: #fff; text-align: center; font-size: 16px;"><a style="color: #f3254d; font-weight: 600;" class="pull-right" onclick="return hideAnnouncement();">hide</a>Dear users, Amara will be offline for a nap (or database upgrade) from 8:00-8:10pm ET on Friday, December 15th. Thanks!</div>');
+}
+</script>
     <main id="page-content">
       {% if messages %}
       <div id="messages" class="container">
