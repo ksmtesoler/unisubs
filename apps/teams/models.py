@@ -133,6 +133,8 @@ class TeamManager(models.Manager):
 
     def for_user(self, user):
         """Return the teams visible for the given user.  """
+        if user.is_superuser:
+            return self.all()
         q = models.Q(team_visibility=TeamVisibility.PUBLIC)
         if user.is_authenticated():
             user_teams = TeamMember.objects.filter(user=user)
