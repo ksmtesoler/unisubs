@@ -249,8 +249,8 @@ def manage_members_form(request, team, form_name, members):
     else:
         raise Http404()
 
-    all_selected = len(selection) >= MEMBERS_PER_PAGE
-    response_renderer = AJAXResponseRenderer(request)
+    # we don't count the current user since they cannot select their own entry
+    all_selected = len(selection) >= MEMBERS_PER_PAGE - 1
 
     if request.method == 'POST':
         try:
