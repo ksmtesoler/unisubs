@@ -227,7 +227,7 @@ from urlparse import urljoin
 
 from django import http
 from django.db.models import Q
-from django.db.models.query import QuerySet
+from django.db.models.query import QuerySet, EmptyQuerySet
 from rest_framework import filters
 from rest_framework import generics
 from rest_framework import mixins
@@ -602,6 +602,10 @@ class VideoViewSet(mixins.CreateModelMixin,
             qs = self.get_videos_for_user()
         else:
             qs = self.get_videos_for_team(query_params)
+        if isinstance(qs, EmptyQuerySet):
+            # If the method returned Videos.none(), then stop now rather than
+            # call for_url() (#3049)
+            return qs
         if 'video_url' in query_params:
             vt = video_type_registrar.video_type_for_url(query_params['video_url'])
             if vt:
@@ -717,16 +721,19 @@ class VideoURLSerializer(serializers.Serializer):
         return vt.name
 
     def create(self, validated_data):
-        vt = video_type_registrar.video_type_for_url(validated_data['url'])
+        try:
+            new_url = self.context['video'].add_url(validated_data['url'], self.context['user'])
+        except Video.DuplicateUrlError as e:
+            raise serializers.ValidationError("DuplicateUrlError for url: {}".format(e.video_url))
 
-        new_url = self.context['video'].videourl_set.create(
-            url=validated_data['url'],
-            original=validated_data.get('original', False),
-            type=vt.abbreviation,
-            added_by=self.context['user'],
-        )
         if validated_data.get('primary'):
             new_url.make_primary(self.context['user'])
+
+        if ('original' in validated_data and
+            validated_data['original'] != new_url.original):
+            new_url.original = validated_data['original']
+            new_url.save()
+
         return new_url
 
     def update(self, video_url, validated_data):
