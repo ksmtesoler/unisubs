@@ -227,7 +227,7 @@ from urlparse import urljoin
 
 from django import http
 from django.db.models import Q
-from django.db.models.query import QuerySet
+from django.db.models.query import QuerySet, EmptyQuerySet
 from rest_framework import filters
 from rest_framework import generics
 from rest_framework import mixins
@@ -602,6 +602,10 @@ class VideoViewSet(mixins.CreateModelMixin,
             qs = self.get_videos_for_user()
         else:
             qs = self.get_videos_for_team(query_params)
+        if isinstance(qs, EmptyQuerySet):
+            # If the method returned Videos.none(), then stop now rather than
+            # call for_url() (#3049)
+            return qs
         if 'video_url' in query_params:
             vt = video_type_registrar.video_type_for_url(query_params['video_url'])
             if vt:
