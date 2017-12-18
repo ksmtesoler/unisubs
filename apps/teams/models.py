@@ -131,11 +131,14 @@ class TeamManager(models.Manager):
         """Return a QS of all non-deleted teams."""
         return TeamQuerySet(Team).filter(deleted=False)
 
-    def for_user(self, user):
+    def for_user(self, user, allow_unlisted=False):
         """Return the teams visible for the given user.  """
         if user.is_superuser:
             return self.all()
-        q = models.Q(team_visibility=TeamVisibility.PUBLIC)
+        if allow_unlisted:
+            q = ~models.Q(team_visibility=TeamVisibility.PRIVATE)
+        else:
+            q = models.Q(team_visibility=TeamVisibility.PUBLIC)
         if user.is_authenticated():
             user_teams = TeamMember.objects.filter(user=user)
             q |= models.Q(id__in=user_teams.values('team_id'))

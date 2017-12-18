@@ -734,7 +734,7 @@ def statistics(request, team, tab):
 
 def dashboard(request, slug):
     team = get_object_or_404(
-        Team.objects.for_user(request.user), slug=slug)
+        Team.objects.for_user(request.user, allow_unlisted=True), slug=slug)
     if not team.is_old_style() and not team.user_is_member(request.user):
         return welcome(request, team)
     else:
