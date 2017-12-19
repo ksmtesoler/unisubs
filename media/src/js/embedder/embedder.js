@@ -262,12 +262,13 @@
                 }
             },
             setFromVideoData: function(videoData) {
+                var that = this;
                 this.set(videoData);
                 sizeUpdated(this);
                 var visibleLanguages = _$.map(_$.grep(this.get('languages'), function(language) {return language.published;}),
                         function(language) {return language.code;});
                 this.get('languages').forEach(function(lang) {
-                    this.languages_dir[lang.code] = lang.dir;
+                    that.languages_dir[lang.code] = lang.dir;
                 });
                 // Set the initial language to either the one provided by the initial
                 // options, or the original language from the API.
