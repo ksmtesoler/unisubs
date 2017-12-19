@@ -40,6 +40,16 @@ class EnumMember(object):
     def __repr__(self):
         return "{}.{}".format(self.enum_name, self.name)
 
+    def __eq__(self, other):
+        if isinstance(other, EnumMember):
+            return self.number == other.number
+        elif isinstance(other, basestring):
+            return self.slug == other
+        elif isinstance(other, (int, long)):
+            return self.number == other
+        else:
+            return False
+
     def choice(self):
         return (self.number, self.label)
 
