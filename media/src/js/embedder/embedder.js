@@ -1227,8 +1227,6 @@
 
                     var $div = _$(this);
 
-                    console.log(
-                            $div.data());
                     // Call embedVideo with this div and URL.
                     that.push(['embedVideo', {
                         'div': this,
