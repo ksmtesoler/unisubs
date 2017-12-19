@@ -67,6 +67,8 @@ from teams.moderation_const import MODERATION_STATUSES, UNMODERATED
 
 logger = logging.getLogger("videos-models")
 
+URL_MAX_LENGTH = 2048
+
 NO_SUBTITLES, SUBTITLES_FINISHED = range(2)
 VIDEO_TYPE_HTML5 = 'H'
 VIDEO_TYPE_YOUTUBE = 'Y'
@@ -2198,7 +2200,7 @@ class VideoUrl(models.Model):
     # type should be 2 chars long with the first char being unique for the
     # app.
     type = models.CharField(max_length=2)
-    url = models.URLField(max_length=2048)
+    url = models.URLField(max_length=URL_MAX_LENGTH)
     url_hash = models.CharField(max_length=32)
     videoid = models.CharField(max_length=50, blank=True)
     primary = models.BooleanField(default=False)
