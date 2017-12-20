@@ -1492,7 +1492,7 @@ class ApproveApplicationForm(ManagementForm):
 
     def message(self):
         if self.approved_count:
-            return fmt(self.ungettext('Application as been approved',
+            return fmt(self.ungettext('Application has been approved',
                                       '%(count)s application has been approved',
                                       '%(count)s applications have been approved',
                                       self.approved_count), count=self.approved_count)
@@ -1673,7 +1673,7 @@ class RemoveMemberForm(ManagementForm):
                 member.delete()
                 member_remove.send(sender=member)
                 for app in member.team.applications.filter(user=member.user):
-                    app.on_member_removed(member.user, "web UI")
+                    app.on_member_removed(self.user, "web UI")
                 self.removed_count += 1
             except Exception as e:
                 logger.warn(e, exc_info=True)
