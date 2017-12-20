@@ -992,7 +992,7 @@ class ProjectManager(models.Manager):
         """
         if hasattr(team_identifier, "pk"):
             team = team_identifier
-        elif isinstance(team_identifier, int):
+        elif isinstance(team_identifier, (int, long)):
             team = Team.objects.get(pk=team_identifier)
         elif isinstance(team_identifier, str):
             team = Team.objects.get(slug=team_identifier)
@@ -1204,6 +1204,8 @@ class TeamVideo(models.Model):
         self.video.cache.invalidate()
         self.video.clear_team_video_cache()
         Team.cache.invalidate_by_pk(self.team_id)
+
+        self.video.teamvideo = self
 
         assert self.project.team == self.team, \
                     "%s: Team (%s) is not equal to project's (%s) team (%s)"\

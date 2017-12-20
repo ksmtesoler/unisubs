@@ -863,8 +863,10 @@ class AmaraApiKey(models.Model):
     def __unicode__(self):
         return u"Api key for {}: {}".format(self.user, self.key)
 
-    def generate_new_key(self):
+    def generate_new_key(self, commit=True):
         self.key = generate_api_key()
+        if commit:
+            self.save()
         return self.key
 
 class SentMessageDateManager(models.Manager):
