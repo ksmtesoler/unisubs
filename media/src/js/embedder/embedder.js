@@ -272,11 +272,8 @@
                 });
                 // Set the initial language to either the one provided by the initial
                 // options, or the original language from the API.
-                var from_amara = document.referrer.split('/')[2].match('amara.org$')!= null;
-                var page_language = null;
-                if (from_amara) page_language = document.referrer.split('/')[6];
+                console.log(this.get('initial_language'));
                 this.set('initial_language',
-                        ((visibleLanguages.indexOf(page_language) > -1) && page_language) ||
                         (this.get('initial_language') && (visibleLanguages.indexOf(this.get('initial_language')) > -1) && this.get('initial_language')) ||
                         (this.get('original_language') && (visibleLanguages.indexOf(this.get('original_language')) > -1) && this.get('original_language')) ||
                         ((visibleLanguages.indexOf('en') > -1) && 'en') ||
