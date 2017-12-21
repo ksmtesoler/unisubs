@@ -500,7 +500,8 @@ class AddMultipleTeamVideoForm(forms.Form):
         video_urls = self.cleaned_data['video_urls'].split("\n")
         # See if any error happen when we create our videos
         for video_url in video_urls:
-            if len(video_url.strip()) == 0:
+            video_url = video_url.strip()
+            if len(video_url) == 0:
                 continue
             try:
                 Video.add(video_url, self.user, self.setup_video, self.team)
