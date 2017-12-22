@@ -38,7 +38,7 @@
     }
     function resizeInside(e) {
 	if (e && e.data && e.data.resize) {
-	    window._amara.amaraInstances[0].resize_(e.data.width, e.data.height);
+	    window._amara.amaraInstances[0].resize_();
 	}
     }
     // Should be triggered whenever the size of the content of the widget changes
@@ -346,7 +346,10 @@
 	    hideThumbnail: function() {
 		this.$thumbnailContainer.hide();
 	    },
-	    resize_: function(width, height) {
+	    resize_: function() {
+                var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                height -= _$('.amara-tools').height();
                 this.$popContainer.width(width);
                 this.$popContainer.height(height);
                 if (this.$amaraTools !== undefined)
@@ -355,6 +358,7 @@
                 this.$thumbnailContainer.height(height);
                 this.$videoDivContainer.width(width);
                 this.$videoDivContainer.height(height);
+                this.$thumbnailButton.css('margin-top', ((height - 35) / 2) + "px");
                 this.model.set('height', height);
                 this.model.set('width', width);
 	    },
@@ -366,6 +370,8 @@
                 this.currentSearchIndex = 0;
                 this.currentSearchMatches = 0;
 
+                var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
                 // If jQuery exists on the page, Backbone tries to use it and there's an odd
                 // bug if we don't convert it to a local Zepto object.
                 this.$el = _$(this.$el.get(0));
@@ -377,20 +383,11 @@
                                  '    <div class="thumbnail-button medium"><button class="play"></button></div>' +
                                  '  </div>' +
                                  '</div>');
-                _$('div.thumbnail-button', this.$el).css("margin-top", ((this.$el.height() - 70)/ 2) + "px"); 
-
                 this.$popContainer = _$('div.amara-popcorn', this.$el);
                 this.$thumbnailContainer = _$('div.video-thumbnail', this.$el);
                 this.$videoDivContainer = _$('div.video-div', this.$el);
-                // Copy the width and height to the new Popcorn container.
-                this.$popContainer.width(this.$el.width());
-                this.$popContainer.height(this.$el.height());
-                this.$thumbnailContainer.width(this.$el.width());
-                this.$thumbnailContainer.height(this.$el.height());
-                this.$videoDivContainer.width(this.$el.width());
-                this.$videoDivContainer.height(this.$el.height());
-                this.model.set('height', this.$popContainer.height());
-                this.model.set('width', this.$popContainer.width());
+                this.$thumbnailButton = _$('div.thumbnail-button', this.$el);
+                this.resize_();
 
                 this.$el.append(this.template({
                     video_url: apiDomain(this.model.get('embed_on_amara')) + '/en/videos/create/?initial_url=' + this.model.get('url'),
