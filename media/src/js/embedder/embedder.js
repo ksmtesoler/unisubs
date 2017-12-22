@@ -123,6 +123,49 @@
         return timeParts.join(":");
     }
 
+    function requestFullscreen() {
+        var docElm = document.documentElement;
+        if (docElm.requestFullscreen) {
+            docElm.requestFullscreen();
+        }
+        else if (docElm.mozRequestFullScreen) {
+            docElm.mozRequestFullScreen();
+        }
+        else if (docElm.webkitRequestFullScreen) {
+            docElm.webkitRequestFullScreen();
+        }
+        else if (docElm.msRequestFullscreen) {
+            docElm.msRequestFullscreen();
+        }
+    }
+
+    function cancelFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+        else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        }
+        else if (document.webkitCancelFullScreen) {
+            document.webkitCancelFullScreen();
+        }
+        else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+
+    function isFullscreen() {
+        if(document.fullscreen !== undefined) {
+            return document.fullscreen;
+        } else if(document.mozFullScreen !== undefined) {
+            return document.mozFullScreen;
+        } else if(document.webkitIsFullScreen !== undefined) {
+            return document.webkitIsFullScreen;
+        } else if(document.msFullscreenElement !== undefined) {
+            return document.msFullscreenElement;
+        }
+    }
+
     var Amara = function(Amara) {
 
         // For reference in inner functions.
@@ -312,18 +355,24 @@
                     autoScrollPaused: false,
                     contextMenuActive: false
                 };
+                // Fullscreen requires several different events since it's not yet standardized
+                document.addEventListener("fullscreenchange", this.onFullscreenChange, false);
+                document.addEventListener("mozfullscreenchange", this.onFullscreenChange, false);
+                document.addEventListener("webkitfullscreenchange", this.onFullscreenChange, false);
+                document.addEventListener("msfullscreenchange", this.onFullscreenChange, false);
             },
             events: {
 
                 // Global
                 'click':                                 'mouseClicked',
                 'mousemove':                             'mouseMoved',
-		'click div.video-thumbnail':              'thumbnailClicked',
+		'click div.video-thumbnail':             'thumbnailClicked',
                 // Toolbar
                 'click a.amara-share-button':            'shareButtonClicked',
                 'click a.amara-subtitles-button':        'toggleSubtitlesDisplay',
                 'click ul.amara-languages-list a.language-item':       'changeLanguage',
                 'click a.amara-transcript-button':       'toggleTranscriptDisplay',
+                'click a.amara-fullscreen-button':       'toggleFullscreen',
                 'keyup input.amara-transcript-search':   'updateSearch',
                 'change input.amara-transcript-search':  'updateSearch',
 
@@ -675,6 +724,7 @@
                 this.$amaraDisplays      = _$('ul.amara-displays',         this.$amaraTools);
                 this.$transcriptButton   = _$('a.amara-transcript-button', this.$amaraDisplays);
                 this.$subtitlesButton    = _$('a.amara-subtitles-button',  this.$amaraDisplays);
+                this.$fullscreenButton   = _$('a.amara-fullscreen-button', this.$amaraDisplays);
                 this.$transcriptHeaderRight = _$('div.amara-transcript-header-right', this.$amaraTranscript);
                 this.$search              = _$('input.amara-transcript-search', this.$transcriptHeaderRight);
                 this.$searchNext          = _$('a.amara-transcript-search-next', this.$transcriptHeaderRight);
@@ -971,6 +1021,17 @@
                 sizeUpdated(this.model);
                 return false;
             },
+            toggleFullscreen: function() {
+                if(isFullscreen()) {
+                    cancelFullscreen();
+                } else {
+                    requestFullscreen();
+                }
+                return false;
+            },
+            onFullscreenChange: function() {
+                sizeUpdated(this.model);
+            },
             setSubtitlesDisplay: function(show) {
 		if (show) {
                     this.$popSubtitlesContainer.show();
@@ -1106,7 +1167,10 @@
                 '            <li><a href="#" class="amara-transcript-button amara-button" title="Toggle transcript viewer"></a></li>' +
                 '            <li><a href="#" class="amara-subtitles-button amara-button" title="Toggle subtitles"></a></li>' +
                 '        </ul>' +
-		'        <div class="dropdown amara-languages">' +
+                '        <ul class="amara-displays amara-displays-right amara-group">' +
+                '            <li><a href="#" class="amara-fullscreen-button amara-button" title="Toggle fullscreen"></a></li>' +
+                '        </ul>' +
+                '        <div class="dropdown amara-languages">' +
                 '            <a class="amara-current-language" id="dropdownMenu1" role="button" data-toggle="dropdown" data-target="#" href="">Loading&hellip;' +
                 '            </a>'+
                 '            <ul id="languages-dropdown" class="dropdown-menu amara-languages-list" role="menu" aria-labelledby="dropdownMenu1"></ul>' +

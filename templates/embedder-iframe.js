@@ -104,6 +104,7 @@ var THIS_JS_FILE = scriptFiles[scriptFiles.length-1].src;
 		iframe.style.overflow = "hidden";
 		iframe.scrolling = "no";
 		iframe.style.opacity = 0;
+                iframe.setAttribute("allowfullscreen", true);
 		currentDiv.appendChild(iframe);
 		loadingDivs.push(loadingDiv);
 		iframes.push(iframe);

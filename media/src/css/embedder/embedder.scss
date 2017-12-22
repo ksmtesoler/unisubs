@@ -139,6 +139,9 @@ div.amara-embed {
             a.amara-subtitles-button {
                 background: transparent url('../images/cc-icon-amara-18px.png') 10px 11px no-repeat;
             }
+            a.amara-fullscreen-button {
+                background: transparent url('../images/fullscreen.svg') 0px 4px no-repeat;
+            }
             a.amara-button {
                 display: inline-block;
                 height: 36px;
@@ -177,6 +180,10 @@ div.amara-embed {
                 height: 36px;
                 margin: 0;
                 padding: 0 10px;
+
+                &.amara-displays-right {
+                    float: right;
+                }
 
                 li {
                     display: inline-block;
