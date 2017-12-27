@@ -346,7 +346,11 @@ class TeamActivityView(generics.ListAPIView):
     def get_queryset(self):
         team = get_object_or_404(Team, slug=self.kwargs['slug'])
         if not teams.permissions.can_view_activity(team, self.request.user):
-            raise Http404()
+            if team.team_private():
+                # raise a 404 here to not give away if the slug exists or not
+                raise Http404()
+            else:
+                raise PermissionDenied()
         return ActivityRecord.objects.for_team(team)
 
 class UserActivityView(generics.ListAPIView):
