@@ -109,12 +109,16 @@ div.amara-embed {
             div {
                 background: rgba(0, 0, 0, .8);
                 color: #FFF;
-                font: bold 16px/22px;
                 margin: 0;
                 padding: 6px 20px;
                 text-align: center;
                 @include border-radius(5px);
+                body.fullscreen & {
+                        font-size: 18px;
+                        line-height: 22px;
+                }
             }
+
         }
     }
     div.amara-tools {

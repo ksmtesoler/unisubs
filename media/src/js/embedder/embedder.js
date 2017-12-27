@@ -1030,6 +1030,11 @@
                 return false;
             },
             onFullscreenChange: function() {
+                if(isFullscreen()) {
+                    _$('body').addClass('fullscreen');
+                } else {
+                    _$('body').removeClass('fullscreen');
+                }
                 sizeUpdated(this.model);
             },
             setSubtitlesDisplay: function(show) {
