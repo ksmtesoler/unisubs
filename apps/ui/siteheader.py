@@ -1,6 +1,6 @@
 # Amara, universalsubtitles.org
 #
-# Copyright (C) 2013 Participatory Culture Foundation
+# Copyright (C) 2017 Participatory Culture Foundation
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,28 +16,20 @@
 # along with this program.  If not, see
 # http://www.gnu.org/licenses/agpl-3.0.html.
 
-from django import template
+"""
+ui.siteheader -- navlinks in the site header
+"""
+from __future__ import absolute_import
 
-from auth.models import Announcement
+from utils.behaviors import behavior
 
-register = template.Library()
+@behavior
+def navlinks():
+    """Get a list of navlinks for the site header
 
-@register.inclusion_tag('auth/_announcement.html', takes_context=True)
-def announcement(context):
-    return {
-        'announcement': Announcement.last(),
-        'add_content_class': False,
-    }
+    By default, we don't show any links.  An extension app can override this
+    and return a custom list of links for the site.
 
-@register.inclusion_tag('auth/_announcement.html', takes_context=True)
-def new_announcement(context):
-    return {
-        'announcement': Announcement.last(),
-        'add_content_class': True,
-    }
-
-@register.inclusion_tag('future/announcement.html')
-def futureui_announcement():
-    return {
-        'announcement': Announcement.last(),
-    }
+    Returns: List of ui.Tab objects.
+    """
+    return []
