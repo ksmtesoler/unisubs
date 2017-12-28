@@ -16,6 +16,7 @@ def cd_to_project_root():
 
 def copy_files(branch):
     subprocess.check_call(['git', 'checkout', branch, 'apps'])
+    subprocess.check_call(['git', 'checkout', branch, 'utils'])
     subprocess.check_call(['git', 'checkout', branch, 'docs'])
     subprocess.check_call(['git', 'add', 'apps', 'docs'])
 
