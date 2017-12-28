@@ -811,6 +811,7 @@ class LegacySettingsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(LegacySettingsForm, self).__init__(*args, **kwargs)
+        self.fields['is_visible'].initial = self.instance.team_public()
         self.initial_settings = self.instance.get_settings()
 
     def use_future_ui(self):
