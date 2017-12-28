@@ -1976,14 +1976,19 @@ class SubtitleVersion(models.Model):
             self._set_video_data()
 
     def _set_video_data(self):
+        changed = False
         if self.title:
+            changed = True
             self.video.title = self.title
         if self.description:
+            changed = True
             self.video.description = self.description
         if self.duration and not self.video.duration:
+            changed = True
             self.video.duration = self.duration
-        self.video.update_metadata(self.get_metadata(), commit=False)
-        self.video.save()
+        if changed:
+            self.video.update_metadata(self.get_metadata(), commit=False)
+            self.video.save()
 
     def unpublish(self, delete=False, signal=True):
         """Unpublish this version.
