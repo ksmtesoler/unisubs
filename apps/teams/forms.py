@@ -1604,8 +1604,7 @@ class ChangeMemberRoleForm(ManagementForm):
                     self.only_owner_count += 1
                 else:
                     try:
-                        member.role = self.cleaned_data['role']
-                        member.save()
+                        member.change_role(self.cleaned_data['role'])
                         self.changed_count += 1
                     except Exception as e:
                         logger.error(e, exc_info=True)
