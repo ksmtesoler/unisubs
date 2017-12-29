@@ -500,7 +500,8 @@ class AddMultipleTeamVideoForm(forms.Form):
         video_urls = self.cleaned_data['video_urls'].split("\n")
         # See if any error happen when we create our videos
         for video_url in video_urls:
-            if len(video_url.strip()) == 0:
+            video_url = video_url.strip()
+            if len(video_url) == 0:
                 continue
             try:
                 Video.add(video_url, self.user, self.setup_video, self.team)
@@ -1603,8 +1604,7 @@ class ChangeMemberRoleForm(ManagementForm):
                     self.only_owner_count += 1
                 else:
                     try:
-                        member.role = self.cleaned_data['role']
-                        member.save()
+                        member.change_role(self.cleaned_data['role'])
                         self.changed_count += 1
                     except Exception as e:
                         logger.error(e, exc_info=True)
