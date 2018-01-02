@@ -11,3 +11,10 @@
   image_tag: "{{.CommitID}}"
   registry: https://241878618260.dkr.ecr.us-east-1.amazonaws.com
   dockercfg_service: aws_generator
+- name: Push to ECR
+  service: amara
+  type: push
+  image_name: 241878618260.dkr.ecr.us-east-1.amazonaws.com/amara
+  image_tag: "{{.Branch}}"
+  registry: https://241878618260.dkr.ecr.us-east-1.amazonaws.com
+  dockercfg_service: aws_generator
