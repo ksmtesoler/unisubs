@@ -27,8 +27,8 @@ function manage() {
 if [ $DJANGO_SETTINGS_MODULE = "unisubs_settings" ] ; then
     if [ ! -z "$AWS_ID" ] && [ ! -z "$AWS_SECRET_KEY" ] ; then
         # This is how we used to setup AWS auth.  On kubernetes, we use a instance profile instead
-        AWS_ACCESS_KEY_ID=$AWS_ID
-        AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+        export AWS_ACCESS_KEY_ID=$AWS_ID
+        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
     fi
     aws s3 cp s3://amara/settings/${SETTINGS_REV}/server_local_settings.py server_local_settings.py
 fi
