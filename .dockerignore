@@ -3,3 +3,5 @@
 codeship.aes
 aws_creds
 user-data
+amara-assets
+!amara-assets/dist
