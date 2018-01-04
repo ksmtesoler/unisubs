@@ -24,3 +24,7 @@
   image_tag: "{{.Branch}}"
   registry: https://241878618260.dkr.ecr.us-east-1.amazonaws.com
   dockercfg_service: aws_generator
+- name: Deploy
+  service: deploy-agent
+  tag: dev
+  command: "amara $CI_BRANCH $CI_COMMIT_ID"
