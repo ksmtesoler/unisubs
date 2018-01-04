@@ -105,6 +105,7 @@ div.amara-embed {
             left: 0;
             position: absolute;
             text-align: center;
+            line-height: 1.2;
 
             div {
                 background: rgba(0, 0, 0, .8);
@@ -113,10 +114,6 @@ div.amara-embed {
                 padding: 6px 20px;
                 text-align: center;
                 @include border-radius(5px);
-                body.fullscreen & {
-                        font-size: 18px;
-                        line-height: 22px;
-                }
             }
 
         }

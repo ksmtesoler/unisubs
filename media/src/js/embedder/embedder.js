@@ -50,6 +50,9 @@
 	    else
 		width = _$(".amara-tools").width();
 	    var height = _$(".amara-popcorn").height() + _$(".amara-tools").height();
+            var documentHeight = _$(document).height();
+            var fontSize = Math.max(documentHeight / 25.0, 14);
+            _$(".amara-popcorn").css('font-size', fontSize + 'px');
 	    hostPage.source.postMessage({resize: true, index: hostPage.index,
 					 width: width,
 					 height: height,
@@ -356,10 +359,14 @@
                     contextMenuActive: false
                 };
                 // Fullscreen requires several different events since it's not yet standardized
-                document.addEventListener("fullscreenchange", this.onFullscreenChange, false);
-                document.addEventListener("mozfullscreenchange", this.onFullscreenChange, false);
-                document.addEventListener("webkitfullscreenchange", this.onFullscreenChange, false);
-                document.addEventListener("msfullscreenchange", this.onFullscreenChange, false);
+                var that = this;
+                function onFullscreenChange() {
+                    sizeUpdated(that.model);
+                }
+                document.addEventListener("fullscreenchange", onFullscreenChange, false);
+                document.addEventListener("mozfullscreenchange", onFullscreenChange, false);
+                document.addEventListener("webkitfullscreenchange", onFullscreenChange, false);
+                document.addEventListener("msfullscreenchange", onFullscreenChange, false);
             },
             events: {
 
@@ -1029,14 +1036,6 @@
                 }
                 return false;
             },
-            onFullscreenChange: function() {
-                if(isFullscreen()) {
-                    _$('body').addClass('fullscreen');
-                } else {
-                    _$('body').removeClass('fullscreen');
-                }
-                sizeUpdated(this.model);
-            },
             setSubtitlesDisplay: function(show) {
 		if (show) {
                     this.$popSubtitlesContainer.show();
@@ -1173,7 +1172,7 @@
                 '            <li><a href="#" class="amara-subtitles-button amara-button" title="Toggle subtitles"></a></li>' +
                 '        </ul>' +
                 '        <ul class="amara-displays amara-displays-right amara-group">' +
-                '            <li><a href="#" class="amara-fullscreen-button amara-button" title="Toggle fullscreen"></a></li>' +
+                '            <li><a href="#" class="amara-fullscreen-button amara-button amara-button-enabled" title="Toggle fullscreen"></a></li>' +
                 '        </ul>' +
                 '        <div class="dropdown amara-languages">' +
                 '            <a class="amara-current-language" id="dropdownMenu1" role="button" data-toggle="dropdown" data-target="#" href="">Loading&hellip;' +
