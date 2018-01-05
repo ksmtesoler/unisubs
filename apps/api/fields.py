@@ -91,5 +91,15 @@ class TimezoneAwareDateTimeField(serializers.DateTimeField):
             self.tz.localize(value).astimezone(pytz.utc))
 
 class EnumField(CharField):
+    def __init__(self, enum, *args, **kwargs):
+        self.enum = enum
+        super(EnumField, self).__init__(*args, **kwargs)
+
+    def to_internal_value(self, slug):
+        try:
+            return self.enum.lookup_slug(slug)
+        except KeyError:
+            raise serializers.ValidationError("invalid slug: {}".format(slug))
+
     def to_representation(self, value):
         return value.slug
