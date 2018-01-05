@@ -474,7 +474,8 @@ from api.fields import UserField, TimezoneAwareDateTimeField, EnumField
 from auth.models import CustomUser as User
 from notifications.models import TeamNotification
 from teams.models import (Team, TeamMember, Project, Task, TeamVideo,
-                          Application, TeamLanguagePreference)
+                          Application, TeamLanguagePreference, TeamVisibility,
+                          VideoVisibility)
 from teams.workflows import TeamWorkflow
 from utils.translation import ALL_LANGUAGE_CODES
 import messages.tasks
@@ -538,8 +539,8 @@ class TeamSerializer(serializers.ModelSerializer):
     video_policy = MappedChoiceField(
         VIDEO_POLICY_CHOICES, required=False,
         default=Team._meta.get_field('video_policy').get_default())
-    team_visibility = EnumField(required=False)
-    video_visibility = EnumField(required=False)
+    team_visibility = EnumField(TeamVisibility, required=False)
+    video_visibility = EnumField(VideoVisibility, required=False)
     is_visible = IsVisibleField(required=False)
 
     activity_uri = serializers.HyperlinkedIdentityField(
