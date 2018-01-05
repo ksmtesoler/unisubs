@@ -47,7 +47,8 @@ from messages.tasks import send_new_messages_notifications
 from subtitles.forms import SubtitlesUploadForm
 from teams.models import (
     Team, TeamMember, TeamVideo, Task, Project, Workflow, Invite,
-    BillingReport, MembershipNarrowing, Application
+    BillingReport, MembershipNarrowing, Application, TeamVisibility,
+    VideoVisibility,
 )
 from teams import behaviors, permissions, tasks
 from teams.exceptions import ApplicationInvalidException
@@ -845,6 +846,14 @@ class GeneralSettingsForm(forms.ModelForm):
         widget=AmaraClearableFileInput,
         required=False)
     is_visible = forms.BooleanField(required=False)
+    team_visibility = forms.ChoiceField(
+        choices=TeamVisibility.choices(),
+        label=_('Team visibility'),
+        help_text=_("Can non-members view your team?"))
+    video_visibility = forms.ChoiceField(
+        choices=VideoVisibility.choices(),
+        label=_('Video visibility'),
+        help_text=_("Can non-members view your team videos?"))
 
     def __init__(self, allow_rename, *args, **kwargs):
         super(GeneralSettingsForm, self).__init__(*args, **kwargs)
